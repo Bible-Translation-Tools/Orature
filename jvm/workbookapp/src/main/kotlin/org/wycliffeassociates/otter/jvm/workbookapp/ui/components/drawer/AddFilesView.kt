@@ -165,7 +165,6 @@ class AddFilesView : View() {
 
         initSuccessDialog()
         initErrorDialog()
-        createSnackBar()
 
         subscribe<DrawerEvent<UIComponent>> {
             if (it.action == DrawerEventAction.OPEN) {
@@ -305,23 +304,6 @@ class AddFilesView : View() {
                 } else if (progressStatus.titleKey != null) {
                     dialog.progressMessageProperty.set(messages[progressStatus.titleKey!!])
                 }
-            }
-    }
-
-    private fun createSnackBar() {
-        viewModel
-            .snackBarObservable
-            .doOnError { e ->
-                logger.error("Error in creating add files snackbar", e)
-            }
-            .subscribe { pluginErrorMessage ->
-                SnackbarHandler.enqueue(
-                    JFXSnackbar.SnackbarEvent(
-                        JFXSnackbarLayout(pluginErrorMessage),
-                        Duration.millis(5000.0),
-                        null
-                    )
-                )
             }
     }
 

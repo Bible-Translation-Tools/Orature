@@ -33,17 +33,21 @@ import java.util.concurrent.Callable
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
+import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
-import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 
 const val MOVE_MARKER_INTERVAL = 0.001
 const val MARKER_COUNT = 500
 
 open class MarkerTrackControl : Region() {
 
-    val markers = observableListOf<ChunkMarkerModel>()
+    val markers = observableListOf<MarkerItem>()
     val canMoveMarkerProperty = SimpleBooleanProperty(true)
     val canDeleteMarkerProperty = SimpleBooleanProperty(true)
     val onPositionChangedProperty = SimpleObjectProperty<(Int, Double) -> Unit>()
@@ -60,11 +64,6 @@ open class MarkerTrackControl : Region() {
         onLocationRequestProperty.set(op)
     }
 
-    init {
-        // Makes the the region mouse transparent but not children
-        pickOnBoundsProperty().set(false)
-    }
-
     protected val _markers = mutableListOf<MarkerControl>()
     protected val highlights = mutableListOf<Rectangle>()
 
@@ -72,6 +71,23 @@ open class MarkerTrackControl : Region() {
     var dragStart: Array<Point2D?> = Array(markers.size) { null }
 
     private val focusedMarkerProperty = SimpleObjectProperty<MarkerControl>()
+    private val listeners = mutableListOf<ListenerDisposer>()
+
+    fun initialize() {
+        resetState()
+        preallocateMarkers()
+
+        highlights.forEach { add(it) }
+        _markers.forEach { add(it) }
+        refreshMarkers()
+        refreshHighlights()
+
+        markers.onChangeAndDoNowWithDisposer {
+            it.sortedBy { it.frame }
+            refreshMarkers()
+            refreshHighlights()
+        }.also(listeners::add)
+    }
 
     fun refreshMarkers() {
         markers.forEachIndexed { index, chunkMarker ->
@@ -83,7 +99,7 @@ open class MarkerTrackControl : Region() {
                     chunkMarker.frame
                 ).toDouble()
             )
-            marker.markerNumberProperty.set(chunkMarker.label)
+            marker.markerNumberProperty.set(markerDisplayLabel(chunkMarker))
             highlights[index].apply {
                 styleClass.clear()
                 when (index % 2 == 1) {
@@ -110,11 +126,20 @@ open class MarkerTrackControl : Region() {
         highlights.clear()
         preDragThumbPos = DoubleArray(MARKER_COUNT)
         dragStart = Array(MARKER_COUNT) { null }
+        getChildList()?.clear()
+        listeners.forEach(ListenerDisposer::dispose)
+        listeners.clear()
     }
 
     open fun createMarker(): MarkerControl = ChunkMarker()
+    private fun markerDisplayLabel(chunkMarker: MarkerItem): String {
+        return when (chunkMarker.marker) {
+            is ChapterMarker -> "c${chunkMarker.label}"
+            else -> chunkMarker.label
+        }
+    }
 
-    protected fun createMarker(i: Int, mk: ChunkMarkerModel): MarkerControl {
+    protected fun createMarker(i: Int, mk: MarkerItem): MarkerControl {
         val container = this
         var startPos = 0.0
         return createMarker().apply {
@@ -124,7 +149,7 @@ open class MarkerTrackControl : Region() {
 
             isPlacedProperty.set(mk.placed)
             markerIndexProperty.set(i)
-            markerNumberProperty.set(mk.label)
+            markerNumberProperty.set(markerDisplayLabel(mk))
             canBeMovedProperty.bind(canMoveMarkerProperty)
             canBeDeletedProperty.bind(canDeleteMarkerProperty)
             markerPositionProperty.set(pixel)
@@ -198,7 +223,7 @@ open class MarkerTrackControl : Region() {
         }
     }
 
-    protected fun createHighlight(i: Int, mk: ChunkMarkerModel): Rectangle {
+    protected fun createHighlight(i: Int, mk: MarkerItem): Rectangle {
         return Rectangle().apply {
             when (i % 2 == 0) {
                 true -> styleClass.setAll("scrolling-waveform__highlight--primary")
@@ -212,7 +237,7 @@ open class MarkerTrackControl : Region() {
 
     protected open fun preallocateMarkers() {
         for (i in 0 until MARKER_COUNT) {
-            val mk = ChunkMarkerModel(0, i.toString(), false)
+            val mk = MarkerItem(VerseMarker(i, i, 0), false)
             val marker = createMarker(i, mk)
             val rect = createHighlight(i, mk)
             rect.heightProperty().bind(heightProperty().minus(40.0))
@@ -255,19 +280,10 @@ open class MarkerTrackControl : Region() {
     }
 
     init {
-        resetState()
-        preallocateMarkers()
-        getChildList()?.clear()
-        highlights.forEach { add(it) }
-        _markers.forEach { add(it) }
-        refreshMarkers()
-        refreshHighlights()
+        initialize()
 
-        markers.onChangeAndDoNow {
-            it.sortedBy { it.frame }
-            refreshMarkers()
-            refreshHighlights()
-        }
+        // Makes the region mouse transparent but not children
+        pickOnBoundsProperty().set(false)
 
         setOnKeyPressed { e ->
             when (e.code) {

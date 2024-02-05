@@ -22,10 +22,6 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.animation.AnimationTimer
-import javafx.scene.Parent
-import javafx.scene.input.KeyCode
-import javafx.scene.input.KeyCodeCombination
-import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.shape.Rectangle
@@ -55,7 +51,6 @@ class Consume : View() {
         viewModel::seek
     )
 
-    private var cleanUpWaveform: () -> Unit = {}
     private var timer: AnimationTimer? = null
 
     override fun onDock() {
@@ -64,6 +59,7 @@ class Consume : View() {
         timer = startAnimationTimer { viewModel.calculatePosition() }
         viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
         viewModel.onDockConsume()
+        waveform.initializeMarkers()
         waveform.markers.bind(viewModel.markers) { it }
         addShortcut()
     }
@@ -72,7 +68,7 @@ class Consume : View() {
         super.onUndock()
         logger.info("Consume undocked")
         timer?.stop()
-        cleanUpWaveform()
+        waveform.cleanup()
         viewModel.onUndockConsume()
         removeShortcut()
     }
@@ -105,7 +101,6 @@ class Consume : View() {
                     canDeleteMarkerProperty.set(false)
 
                     setUpWaveformActionHandlers()
-                    cleanUpWaveform = ::freeImages
 
                     // Marker stuff
                     this.markers.bind(viewModel.markers) { it }

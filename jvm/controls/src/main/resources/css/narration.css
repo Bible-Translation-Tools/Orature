@@ -122,6 +122,10 @@
     -fx-padding: 0 5px 0 0;
 }
 
+.narration-list__verse-item-text:highlighted {
+    -fx-text-fill: -wa-highlight-text;
+}
+
 .narration-list__buttons {
     -fx-spacing: 20px;
     -fx-padding: 10px;

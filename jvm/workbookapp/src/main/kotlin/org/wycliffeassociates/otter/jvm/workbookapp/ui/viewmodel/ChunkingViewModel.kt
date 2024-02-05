@@ -31,7 +31,6 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
-import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
@@ -39,12 +38,14 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.translation.ChunkAudioUseCase
 import org.wycliffeassociates.otter.common.domain.content.CreateChunks
 import org.wycliffeassociates.otter.common.domain.content.ResetChunks
+import org.wycliffeassociates.otter.common.domain.model.DEFAULT_CHUNK_MARKER_TOTAL
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
-import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
@@ -78,8 +79,8 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     @Inject
     lateinit var resetChunks: ResetChunks
 
-    override var markerModel: VerseMarkerModel? = null
-    override val markers = observableListOf<ChunkMarkerModel>()
+    override var markerModel: MarkerPlacementModel? = null
+    override val markers = observableListOf<MarkerItem>()
 
     override val markerCountProperty = markers.sizeProperty
     override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
@@ -203,16 +204,16 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     private fun loadChunkMarkers(audio: OratureAudioFile) {
         markers.clear()
-        val totalMarkers = 500
+        val totalMarkers = DEFAULT_CHUNK_MARKER_TOTAL
         audio.clearCues()
         val chunkMarkers = audio.getMarker<ChunkMarker>().map {
-            ChunkMarkerModel(AudioCue(it.location, it.label))
+            MarkerItem(it, true)
         }
         markers.setAll(chunkMarkers)
-        markerModel = VerseMarkerModel(
+        markerModel = MarkerPlacementModel(
+            MarkerPlacementType.CHUNK,
             audio,
-            totalMarkers,
-            (1..totalMarkers).map { it.toString() }
+            (1..totalMarkers).map { ChunkMarker(it, 0) }
         ).apply {
             loadMarkers(chunkMarkers)
         }
@@ -246,7 +247,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
                 completable.onComplete()
             }
-            .subscribe()
+            .blockingAwait() // ensures chunks are written before going to next step
     }
 
     fun pause() {

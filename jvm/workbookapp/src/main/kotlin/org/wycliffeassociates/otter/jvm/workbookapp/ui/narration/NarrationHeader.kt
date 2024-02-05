@@ -80,7 +80,7 @@ class NarrationHeader : View() {
                 setOnAction {
                     FX.eventbus.fire(NarrationUndoEvent())
                 }
-                enableWhen(viewModel.hasUndoProperty.and(viewModel.chapterTakeBusyProperty.not()))
+                enableWhen(viewModel.hasUndoProperty.and(viewModel.isRecordingProperty.not()))
             }
             button {
                 tooltip = tooltip(messages["redoAction"])
@@ -89,13 +89,14 @@ class NarrationHeader : View() {
                 setOnAction {
                     FX.eventbus.fire(NarrationRedoEvent())
                 }
-                enableWhen(viewModel.hasRedoProperty.and(viewModel.chapterTakeBusyProperty.not()))
+                enableWhen(viewModel.hasRedoProperty.and(viewModel.isRecordingProperty.not()))
             }
             narrationMenuButton(
                 viewModel.hasChapterTakeProperty,
-                viewModel.hasVersesProperty
+                viewModel.hasVersesProperty,
+                viewModel.hasAllVersesRecordedProperty
             ) {
-                enableWhen(viewModel.chapterTakeBusyProperty.not())
+                enableWhen(viewModel.chapterTakeBusyProperty.not().and(viewModel.isRecordingProperty.not()))
             }
             chapterSelector {
                 chapterTitleProperty.bind(viewModel.chapterTitleProperty)
@@ -122,8 +123,6 @@ class NarrationHeader : View() {
                 setOnNextChapter {
                     viewModel.selectNextChapter()
                 }
-
-                enableWhen(viewModel.chapterTakeBusyProperty.not())
             }
         }
     }
@@ -150,13 +149,14 @@ class NarrationHeaderViewModel : ViewModel() {
     val hasNextChapter = SimpleBooleanProperty()
     val hasPreviousChapter = SimpleBooleanProperty()
     val hasVersesProperty = SimpleBooleanProperty()
-
+    val hasAllVersesRecordedProperty = SimpleBooleanProperty()
     val chapterTakeProperty = SimpleObjectProperty<Take>()
     val hasChapterTakeProperty = chapterTakeProperty.isNotNull
     val chapterTakeBusyProperty = SimpleBooleanProperty()
 
     val hasUndoProperty = SimpleBooleanProperty()
     val hasRedoProperty = SimpleBooleanProperty()
+    val isRecordingProperty = narrationViewModel.isRecordingProperty.or(narrationViewModel.isRecordingAgainProperty)
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
 
@@ -177,11 +177,12 @@ class NarrationHeaderViewModel : ViewModel() {
         chapterTitleProperty.bind(narrationViewModel.chapterTitleProperty)
         hasNextChapter.bind(narrationViewModel.hasNextChapter)
         hasPreviousChapter.bind(narrationViewModel.hasPreviousChapter)
-        chapterTakeBusyProperty.bind(narrationViewModel.chapterTakeBusyProperty)
+        chapterTakeBusyProperty.bind(narrationViewModel.isModifyingTakeAudioProperty)
 
         hasUndoProperty.bind(narrationViewModel.hasUndoProperty)
         hasRedoProperty.bind(narrationViewModel.hasRedoProperty)
         hasVersesProperty.bind(narrationViewModel.hasVersesProperty)
+        hasAllVersesRecordedProperty.bind(narrationViewModel.hasAllVersesRecordedProperty)
     }
 
     private enum class StepDirection {

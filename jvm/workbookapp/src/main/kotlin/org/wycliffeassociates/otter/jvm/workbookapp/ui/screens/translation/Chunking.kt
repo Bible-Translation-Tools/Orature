@@ -57,7 +57,6 @@ class Chunking : View() {
     )
     private val eventSubscriptions = mutableListOf<EventRegistration>()
 
-    private var cleanUpWaveform: () -> Unit = {}
     private var timer: AnimationTimer? = null
 
     override val root = vbox {
@@ -79,7 +78,6 @@ class Chunking : View() {
                     canDeleteMarkerProperty.set(true)
 
                     setUpWaveformActionHandlers()
-                    cleanUpWaveform = ::freeImages
 
                     // Marker stuff
                     this.markers.bind(viewModel.markers) { it }
@@ -143,6 +141,7 @@ class Chunking : View() {
         logger.info("Chunking docked")
         subscribeEvents()
         timer = startAnimationTimer { viewModel.calculatePosition() }
+        waveform.initializeMarkers()
         viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
         viewModel.dock()
     }
@@ -151,8 +150,8 @@ class Chunking : View() {
         super.onUndock()
         logger.info("Chunking undocked")
         timer?.stop()
+        waveform.cleanup()
         unsubscribeEvents()
-        cleanUpWaveform()
         viewModel.undock()
     }
 

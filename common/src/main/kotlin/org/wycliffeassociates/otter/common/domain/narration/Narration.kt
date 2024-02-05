@@ -31,8 +31,6 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
-import org.wycliffeassociates.otter.common.audio.wav.WavFile
-import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -40,7 +38,6 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
-import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import java.io.File
@@ -110,6 +107,8 @@ class Narration @AssistedInject constructor(
 
     private var lockedVerseIndex: Int? = null
 
+    private var takeToModify: Take?
+
     init {
         val writer = initializeWavWriter()
 
@@ -122,6 +121,8 @@ class Narration @AssistedInject constructor(
             resetUncommittedFramesOnUpdatedVerses(),
         )
         loadChapterIntoPlayer()
+        takeToModify = chapter.getSelectedTake()
+
     }
 
     fun lockToVerse(verseIndex: Int?) {
@@ -188,6 +189,12 @@ class Narration @AssistedInject constructor(
         seek(getLocationInChapter(), true)
         history.undo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
+
+        NarrationTakeModifier.modifyAudioData(
+            takeToModify,
+            chapterRepresentation.getAudioFileReader(),
+            activeVerses
+        )
     }
 
     fun redo() {
@@ -195,6 +202,12 @@ class Narration @AssistedInject constructor(
         seek(getLocationInChapter(), true)
         history.redo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
+
+        NarrationTakeModifier.modifyAudioData(
+            takeToModify,
+            chapterRepresentation.getAudioFileReader(),
+            activeVerses
+        )
     }
 
     fun finalizeVerse(verseIndex: Int) {
@@ -242,11 +255,19 @@ class Narration @AssistedInject constructor(
         writer?.pause()
         uncommittedRecordedFrames.set(0)
         isRecording.set(false)
+
+        NarrationTakeModifier.modifyAudioData(
+            takeToModify,
+            chapterRepresentation.getAudioFileReader(),
+            activeVerses
+        )
     }
 
     fun onVerseMarkerMoved(verseIndex: Int, delta: Int) {
         val action = MoveMarkerAction(verseIndex, delta)
         execute(action)
+
+        NarrationTakeModifier.modifyMetadata(takeToModify, activeVerses)
     }
 
     fun onEditVerse(verseIndex: Int, editedFile: File) {
@@ -257,6 +278,12 @@ class Narration @AssistedInject constructor(
 
         val action = EditVerseAction(verseIndex, start, end)
         execute(action)
+
+        NarrationTakeModifier.modifyAudioData(
+            takeToModify,
+            chapterRepresentation.getAudioFileReader(),
+            activeVerses
+        )
     }
 
     fun onResetAll() {
@@ -265,9 +292,14 @@ class Narration @AssistedInject constructor(
     }
 
     private fun onChapterEdited(newVerses: List<VerseNode>) {
-        // TODO adjust for not having an end location
         val action = ChapterEditedAction(newVerses)
         execute(action)
+
+        NarrationTakeModifier.modifyAudioData(
+            takeToModify,
+            chapterRepresentation.getAudioFileReader(),
+            activeVerses
+        )
     }
 
     fun pauseRecording() {
@@ -428,35 +460,17 @@ class Narration @AssistedInject constructor(
                 take
             }
             .map { take ->
-                bounceAudio(take.file)
                 take
             }
-    }
+            .doAfterSuccess {
+                takeToModify = it
 
-    private fun bounceAudio(boundedAudio: File) {
-        val bytes = ByteArray(DEFAULT_BUFFER_SIZE)
-
-        chapterRepresentation.getAudioFileReader().use { reader ->
-            reader.open()
-            reader.seek(0)
-
-            if (boundedAudio.exists() && boundedAudio.length() > 0) {
-                boundedAudio.delete()
+                NarrationTakeModifier.modifyAudioData(
+                    takeToModify,
+                    chapterRepresentation.getAudioFileReader(),
+                    activeVerses
+                )
             }
-            val wav = WavFile(boundedAudio, 1, 44100, 16)
-            WavOutputStream(wav).use { out ->
-                while (reader.hasRemaining()) {
-                    val read = reader.getPcmBuffer(bytes)
-                    out.write(bytes, 0, read)
-                }
-            }
-            wav.update()
-            val oaf = OratureAudioFile(boundedAudio)
-            for (verse in activeVerses) {
-                oaf.addMarker<AudioMarker>(verse.clone())
-            }
-            oaf.update()
-        }
     }
 
     fun scrollAudio(delta: Int) {
@@ -545,6 +559,11 @@ class Narration @AssistedInject constructor(
                     seek(lastFrame)
                 }
             }
+    }
+
+    fun findMarkerAtPosition(position: Int): AudioMarker? {
+        val frame = chapterRepresentation.relativeChapterToAbsolute(position)
+        return chapterRepresentation.findVerse(frame)?.marker
     }
 }
 

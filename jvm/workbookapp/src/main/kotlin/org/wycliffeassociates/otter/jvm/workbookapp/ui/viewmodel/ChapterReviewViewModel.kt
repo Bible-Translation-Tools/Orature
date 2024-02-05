@@ -34,8 +34,8 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
+import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
@@ -45,8 +45,9 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.ChapterTranslationBuilder
-import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
-import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerItem
+import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
@@ -78,8 +79,8 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     val audioDataStore: AudioDataStore by inject()
     val translationViewModel: TranslationViewModel2 by inject()
 
-    override var markerModel: VerseMarkerModel? = null
-    override val markers = observableListOf<ChunkMarkerModel>()
+    override var markerModel: MarkerPlacementModel? = null
+    override val markers = observableListOf<MarkerItem>()
 
     override val markerCountProperty = markers.sizeProperty
     override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
@@ -242,26 +243,17 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
     private fun loadVerseMarkers(audio: OratureAudioFile) {
         markers.clear()
+        val sourceAudio = OratureAudioFile(sourceAudio.file)
+        val sourceMarkers = sourceAudio.getMarker<VerseMarker>()
         val markerList = audio.getMarker<VerseMarker>().map {
-            ChunkMarkerModel(AudioCue(it.location, it.label))
-        }
-        val wb = workbookDataStore.workbook
-        val verseLabels = wb.projectFilesAccessor.getChapterContent(
-            wb.target.slug,
-            workbookDataStore.chapter.sort
-        ).map { content ->
-            if (content.start != content.end) {
-                "${content.start}-${content.end}"
-            } else {
-                "${content.start}"
-            }
+            MarkerItem(it, true)
         }
 
-        totalMarkersProperty.set(verseLabels.size)
-        markerModel = VerseMarkerModel(
+        totalMarkersProperty.set(sourceMarkers.size)
+        markerModel = MarkerPlacementModel(
+            MarkerPlacementType.CHUNK,
             audio,
-            verseLabels.size,
-            verseLabels
+            sourceMarkers.map { ChunkMarker(it.start, it.location) }
         ).also {
             it.loadMarkers(markerList)
         }

@@ -25,14 +25,11 @@ import javafx.event.EventHandler
 import javafx.scene.control.ListCell
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
-import org.wycliffeassociates.otter.common.data.audio.VerseMarker
-import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
 import org.wycliffeassociates.otter.jvm.controls.event.*
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
-import tornadofx.FX
-import tornadofx.addClass
+import tornadofx.*
 
 class NarrationTextItemData(
     val chunk: Chunk,
@@ -53,12 +50,17 @@ class NarrationTextCell(
     private val isRecordingAgainProperty: ObservableValue<Boolean>,
     private val isPlayingProperty: ObservableValue<Boolean>,
     private val recordingIndexProperty: IntegerProperty,
-    private val playingVerseProperty: IntegerProperty
+    private val playingVerseProperty: IntegerProperty,
+    private val highlightedVerseProperty: IntegerProperty
 ) : ListCell<NarrationTextItemData>() {
 
     private val logger = LoggerFactory.getLogger(NarrationTextCell::class.java)
 
     private val view = NarrationTextItem()
+
+    private val shouldHighlight = booleanBinding(highlightedVerseProperty, indexProperty()) {
+        highlightedVerseProperty.value == index
+    }
 
     init {
         addClass("narration-list__verse-cell")
@@ -91,6 +93,8 @@ class NarrationTextCell(
             isRecordingAgainProperty.bind(this@NarrationTextCell.isRecordingAgainProperty)
             isPlayingProperty.bind(this@NarrationTextCell.isPlayingProperty)
             playingVerseIndexProperty.bind(this@NarrationTextCell.playingVerseProperty)
+            isHighlightedProperty.bind(shouldHighlight)
+
             indexProperty.set(index)
             nextChunkTextProperty.set(nextChunkText)
 

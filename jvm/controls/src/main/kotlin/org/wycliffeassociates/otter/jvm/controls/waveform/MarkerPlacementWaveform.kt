@@ -29,14 +29,14 @@ import javafx.scene.layout.StackPane
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.marker.MarkerTrackControl
-import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import tornadofx.*
 
 class MarkerPlacementWaveform : StackPane() {
 
     val themeProperty = SimpleObjectProperty(ColorTheme.LIGHT)
 
-    val markers = observableListOf<ChunkMarkerModel>()
+    val markers = observableListOf<MarkerItem>()
     val imageWidthProperty = SimpleDoubleProperty()
     val positionProperty = SimpleDoubleProperty(0.0)
     val canMoveMarkerProperty = SimpleBooleanProperty(true)

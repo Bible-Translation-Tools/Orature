@@ -25,6 +25,7 @@ import io.reactivex.Maybe
 import io.reactivex.Single
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Take
@@ -99,9 +100,12 @@ class AudioPluginViewModel : ViewModel() {
 
         val verseLabels = workbookDataStore.getSourceChapter()
             .map { it.getDraft() }.blockingGet()
+            .filter { it.contentType == ContentType.TEXT }
             .map { it.title }.toList()
             .blockingGet()
+
         val verseTotal =  workbookDataStore.getSourceChapter().flatMapSingle { it.chunkCount }.blockingGet()
+
         val chunkLabel = workbookDataStore.activeChunkProperty.value?.let {
             messages[workbookDataStore.activeChunkProperty.value.label]
         }
@@ -118,6 +122,7 @@ class AudioPluginViewModel : ViewModel() {
 
         return PluginParameters(
             languageName = workbook.target.language.name,
+            bookSlug = workbook.target.slug,
             bookTitle = workbook.target.title,
             chapterLabel = chapterLabel,
             chapterNumber = chapterNumber,

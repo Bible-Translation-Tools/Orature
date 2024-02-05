@@ -22,6 +22,7 @@ import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
+import org.wycliffeassociates.otter.jvm.controls.dialog.LoadingModal
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
@@ -41,6 +42,8 @@ import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.NarrationMarkerChangedEvent
@@ -63,6 +66,7 @@ class NarrationPage : View() {
     private val pluginOpenedPage: PluginOpenedPage
 
     private val eventSubscriptions = mutableListOf<EventRegistration>()
+    private val disposableListeners = mutableListOf<ListenerDisposer>()
 
     private lateinit var narrationHeader: NarrationHeader
     private lateinit var audioWorkspaceView: AudioWorkspaceView
@@ -105,11 +109,13 @@ class NarrationPage : View() {
     override fun onDock() {
         super.onDock()
         subscribeToEvents()
+        setUpLoadingModal()
         // avoid resetting ViewModel states & action history when coming back from plugin
         when (viewModel.pluginOpenedProperty.value) {
             true -> { // navigate back from plugin
                 viewModel.pluginOpenedProperty.set(false)
             }
+
             false -> { // regular navigation
                 viewModel.onDock()
                 narrationHeader.onDock()
@@ -122,11 +128,13 @@ class NarrationPage : View() {
     override fun onUndock() {
         super.onUndock()
         unsubscribeFromEvents()
+        disposableListeners.forEach { it.dispose() }
         // avoid resetting ViewModel states & action history when opening plugin
         when (viewModel.pluginOpenedProperty.value) {
             true -> {
                 /* no-op, opening plugin */
             }
+
             false -> { // regular navigation
                 viewModel.onUndock()
                 narrationHeader.onUndock()
@@ -221,7 +229,7 @@ class NarrationPage : View() {
         }.let { eventSubscriptions.add(it) }
 
         subscribe<NavigateChapterEvent> {
-            viewModel.navigateChapter(it.chapterNumber)
+            viewModel.deferNavigateChapterWhileModifyingTake(it.chapterNumber)
         }.let { eventSubscriptions.add(it) }
     }
 
@@ -246,8 +254,28 @@ class NarrationPage : View() {
                 ) {
                     audioPluginViewModel.addPlugin(record = true, edit = false)
                 }
-                SnackbarHandler.enqueue(notification)
+                SnackbarHandler.showNotification(notification, root)
             }
+    }
+
+    private fun setUpLoadingModal() {
+        find<LoadingModal>().apply {
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
+            messageProperty.set(messages["savingProjectWait"])
+
+            viewModel.openLoadingModalProperty.onChangeWithDisposer {
+                it?.let {
+                    runLater {
+                        if (it) {
+                            open()
+                        } else {
+                            close()
+                        }
+                    }
+                }
+            }.apply { disposableListeners.add(this) }
+        }
     }
 
     private fun createPluginOpenedPage(): PluginOpenedPage {

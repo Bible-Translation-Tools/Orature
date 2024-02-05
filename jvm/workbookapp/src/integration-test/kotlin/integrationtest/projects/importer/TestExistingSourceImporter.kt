@@ -115,7 +115,7 @@ class TestExistingSourceImporter {
                 Assert.assertEquals(ImportResult.SUCCESS, it)
             }
 
-        verify(spyImporter, never()).mergeMedia(any(), any(), anyOrNull())
+        verify(spyImporter, never()).mergeMedia(any(), any())
 
         spyImporter.import(getSourceFile("resource-containers/en_ulb_media_merge_test.zip"))
             .blockingGet()
@@ -123,12 +123,12 @@ class TestExistingSourceImporter {
                 Assert.assertEquals(ImportResult.SUCCESS, it)
             }
 
-        verify(spyImporter).mergeMedia(any(), any(), anyOrNull())
+        verify(spyImporter).mergeMedia(any(), any())
         verify(spyDeleteUseCase, never()).deleteSync(any())
     }
 
     @Test
-    fun replaceExistingSourceWhenVersionDifferent() {
+    fun updateExistingSourceWhenVersionDifferent() {
         importer.import(getSourceFile("resource-containers/en_ulb.zip"))
             .blockingGet()
             .let {
@@ -191,7 +191,7 @@ class TestExistingSourceImporter {
     }
 
     @Test
-    fun `test text is updated in database when version is different`() {
+    fun `test text is updated in database when different version or versification`() {
         val base = ResourceContainerBuilder()
             .setVersion(1)
             .setTargetLanguage(Language("aa", "Afar", "aa", "ltr", false, "Africa"))
@@ -321,9 +321,8 @@ class TestExistingSourceImporter {
             .fetchAll()
             .firstOrNull { it.collectionFk == startingBook?.id && it.type_fk == 1 && it.sort == 2 }
 
-        // Text should not be updated after importing an RC with different versification
-        assertEquals("Overwritten.", startingContent?.text)
+        assertEquals("Different Versification", startingContent?.text)
         assertNotNull(secondContent)
-        assertEquals("Text added.", secondContent?.text)
+        assertEquals("Different Versification", secondContent?.text)
     }
 }
