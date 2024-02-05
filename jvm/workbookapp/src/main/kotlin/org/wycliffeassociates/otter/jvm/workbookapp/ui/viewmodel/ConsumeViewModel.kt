@@ -167,14 +167,6 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
         subscribeOnWaveformImagesProperty.value.invoke()
     }
 
-    fun cleanupWaveform() {
-        cleanupWaveformProperty.value.invoke()
-    }
-
-    fun subscribeOnWaveformImages() {
-        subscribeOnWaveformImagesProperty.value.invoke()
-    }
-
     private fun loadAudio(audioFile: File): OratureAudioFile {
         val player = audioConnectionFactory.getPlayer()
         val audio = OratureAudioFile(audioFile)
