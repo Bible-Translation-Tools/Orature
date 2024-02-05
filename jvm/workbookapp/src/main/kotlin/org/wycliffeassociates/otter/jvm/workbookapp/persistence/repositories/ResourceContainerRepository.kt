@@ -203,7 +203,11 @@ class ResourceContainerRepository @Inject constructor(
             val databaseContent = databaseMap[matchingCollection]!!
 
             textMapContent!!.forEach { content ->
-                val match = databaseContent.find { it.start == content.start && it.type == content.type }
+                val match = databaseContent.find {
+                    it.start == content.start &&
+                    it.type == content.type &&
+                    it.sort == content.sort
+                }
                 match?.let {
                     match.text = content.text ?: ""
                     toUpdate.add(match)

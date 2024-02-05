@@ -140,7 +140,8 @@ class TestExistingSourceImporter {
                 collections = 1256,
                 contents = mapOf(
                     ContentType.META to 1189,
-                    ContentType.TEXT to 31104
+                    ContentType.TEXT to 31104,
+                    ContentType.TITLE to 1255
                 )
             )
         )

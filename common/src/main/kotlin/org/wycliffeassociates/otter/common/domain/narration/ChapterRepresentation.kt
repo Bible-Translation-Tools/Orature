@@ -103,26 +103,20 @@ internal class ChapterRepresentation(
             .chunks
             .take(1)
             .map { chunks ->
-                chunks.map { chunk -> VerseMarker(chunk.start, chunk.end, 0) }
+                chunks.map { chunk ->
+                    when (chunk.sort) {
+                        -2 -> BookMarker(workbook.source.slug, 0)
+                        -1 -> ChapterMarker(chapter.sort, 0)
+                        else -> VerseMarker(chunk.start, chunk.end, 0)
+                    }
+                }
             }
-            .map { insertTitles(it) }
             .flatMap { it.toObservable() }
             .map { marker ->
                 VerseNode(false, marker)
             }
             .toList()
             .blockingGet()
-    }
-
-    private fun insertTitles(verseMarkers: List<AudioMarker>): List<AudioMarker> {
-        val versesAndTitles = verseMarkers.toMutableList()
-        versesAndTitles.add(0, ChapterMarker(chapter.sort, 0))
-
-        val addBookTitle = chapter.sort == 1
-        if (addBookTitle) {
-            versesAndTitles.add(0, BookMarker(workbook.source.slug, 0))
-        }
-        return versesAndTitles
     }
 
     fun loadFromSerializedVerses() {
