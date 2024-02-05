@@ -274,6 +274,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         builder.cancel()
         compositeDisposable.clear()
         markerModel = null
+        cleanupWaveform()
     }
 
     private fun createWaveformImages(audio: OratureAudioFile) {
