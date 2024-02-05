@@ -31,10 +31,11 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
-import org.wycliffeassociates.otter.jvm.controls.event.BeforeNavigationEvent
+import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
@@ -207,7 +208,11 @@ class ChapterReview : View() {
             viewModel.redoMarker()
         }.also { eventSubscriptions.add(it) }
 
-        subscribe<BeforeNavigationEvent> {
+        subscribe<TranslationNavigationEvent> {
+            waveform.cleanup()
+        }.also { eventSubscriptions.add(it) }
+
+        subscribe<NavigationRequestEvent> { // navigate Home
             waveform.cleanup()
         }.also { eventSubscriptions.add(it) }
     }
