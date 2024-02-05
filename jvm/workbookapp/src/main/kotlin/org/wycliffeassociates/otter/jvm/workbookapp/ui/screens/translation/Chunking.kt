@@ -34,7 +34,6 @@ import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
 import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
-import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
@@ -177,10 +176,6 @@ class Chunking : View() {
         }.also { eventSubscriptions.add(it) }
 
         subscribe<TranslationNavigationEvent> {
-            viewModel.cleanupWaveform()
-        }.also { eventSubscriptions.add(it) }
-
-        subscribe<NavigationRequestEvent> { // navigate Home
             viewModel.cleanupWaveform()
         }.also { eventSubscriptions.add(it) }
     }

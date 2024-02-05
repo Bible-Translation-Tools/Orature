@@ -35,7 +35,6 @@ import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEven
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
-import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
@@ -210,10 +209,6 @@ class ChapterReview : View() {
         }.also { eventSubscriptions.add(it) }
 
         subscribe<TranslationNavigationEvent> {
-            viewModel.cleanupWaveform()
-        }.also { eventSubscriptions.add(it) }
-
-        subscribe<NavigationRequestEvent> { // navigate Home
             viewModel.cleanupWaveform()
         }.also { eventSubscriptions.add(it) }
     }
