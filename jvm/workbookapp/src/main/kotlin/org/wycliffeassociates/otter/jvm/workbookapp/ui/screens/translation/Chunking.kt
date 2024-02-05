@@ -31,8 +31,10 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
+import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
@@ -142,7 +144,8 @@ class Chunking : View() {
         subscribeEvents()
         timer = startAnimationTimer { viewModel.calculatePosition() }
         waveform.initializeMarkers()
-        viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
+        viewModel.subscribeOnWaveformImagesProperty.set(::subscribeOnWaveformImages)
+        viewModel.cleanupWaveformProperty.set(waveform::cleanup)
         viewModel.dock()
     }
 
@@ -150,7 +153,6 @@ class Chunking : View() {
         super.onUndock()
         logger.info("Chunking undocked")
         timer?.stop()
-        waveform.cleanup()
         unsubscribeEvents()
         viewModel.undock()
     }
@@ -172,6 +174,14 @@ class Chunking : View() {
 
         subscribe<RedoChunkingPageEvent> {
             viewModel.redoMarker()
+        }.also { eventSubscriptions.add(it) }
+
+        subscribe<TranslationNavigationEvent> {
+            viewModel.cleanupWaveform()
+        }.also { eventSubscriptions.add(it) }
+
+        subscribe<NavigationRequestEvent> { // navigate Home
+            viewModel.cleanupWaveform()
         }.also { eventSubscriptions.add(it) }
     }
 

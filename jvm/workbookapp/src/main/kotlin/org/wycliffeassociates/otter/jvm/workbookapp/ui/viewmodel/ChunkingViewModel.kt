@@ -101,7 +101,8 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     private val height = Integer.min(Screen.getMainScreen().platformHeight, WAVEFORM_MAX_HEIGHT.toInt())
     private val builder = ObservableWaveformBuilder()
 
-    var subscribeOnWaveformImages: () -> Unit = {}
+    var subscribeOnWaveformImagesProperty = SimpleObjectProperty {}
+    val cleanupWaveformProperty = SimpleObjectProperty {}
 
     val isPlayingProperty = SimpleBooleanProperty(false)
     val compositeDisposable = CompositeDisposable()
@@ -252,6 +253,14 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     fun pause() {
         audioController?.pause()
+    }
+
+    fun cleanupWaveform() {
+        cleanupWaveformProperty.value.invoke()
+    }
+
+    fun subscribeOnWaveformImages() {
+        subscribeOnWaveformImagesProperty.value.invoke()
     }
 
     private fun createWaveformImages(audio: OratureAudioFile) {

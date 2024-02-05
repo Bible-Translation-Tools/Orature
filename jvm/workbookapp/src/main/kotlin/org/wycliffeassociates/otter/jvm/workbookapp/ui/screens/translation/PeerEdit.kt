@@ -33,6 +33,8 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
+import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
@@ -170,8 +172,6 @@ open class PeerEdit : View() {
             setOnFastForward(viewModel::fastForward)
             setOnToggleMedia(viewModel::toggleAudio)
 
-            viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
-            viewModel.cleanUpWaveform = ::cleanup
             minWidth = 0.0
         }
     }
@@ -205,6 +205,8 @@ open class PeerEdit : View() {
         recorderViewModel.volumeCanvas = recordingView.volumeCanvas
         mainSectionProperty.set(playbackView)
         timer = startAnimationTimer { viewModel.calculatePosition() }
+        viewModel.subscribeOnWaveformImagesProperty.set(::subscribeOnWaveformImages)
+        viewModel.cleanupWaveformProperty.set(waveform::cleanup)
         viewModel.dock()
         subscribeEvents()
     }
@@ -214,7 +216,6 @@ open class PeerEdit : View() {
         logger.info("Checking undocked.")
         timer?.stop()
         unsubscribeEvents()
-        waveform.cleanup()
         viewModel.undock()
         if (mainSectionProperty.value == recordingView) {
             recorderViewModel.cancel()
@@ -238,6 +239,14 @@ open class PeerEdit : View() {
 
         subscribe<RedoChunkingPageEvent> {
             viewModel.redo()
+        }.also { eventSubscriptions.add(it) }
+
+        subscribe<TranslationNavigationEvent> {
+            viewModel.cleanupWaveform()
+        }.also { eventSubscriptions.add(it) }
+
+        subscribe<NavigationRequestEvent> { // navigate Home
+            viewModel.cleanupWaveform()
         }.also { eventSubscriptions.add(it) }
     }
 

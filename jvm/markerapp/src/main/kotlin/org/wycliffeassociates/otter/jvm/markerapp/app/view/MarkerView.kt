@@ -53,13 +53,15 @@ class MarkerView : PluginEntrypoint() {
         slider?.let {
             viewModel.initializeAudioController(it)
         }
-        waveform.markers.bind(viewModel.markers, { it })
+        waveform.markers.bind(viewModel.markers) { it }
+        waveform.initializeMarkers()
+        viewModel.cleanupWaveform = waveform::cleanup
     }
 
     init {
-        tryImportStylesheet(resources.get("/css/verse-marker-app.css"))
-        tryImportStylesheet(resources.get("/css/scrolling-waveform.css"))
-        tryImportStylesheet(resources.get("/css/chunk-marker.css"))
+        tryImportStylesheet(resources["/css/verse-marker-app.css"])
+        tryImportStylesheet(resources["/css/scrolling-waveform.css"])
+        tryImportStylesheet(resources["/css/chunk-marker.css"])
 
         subscribe<PluginCloseRequestEvent> {
             unsubscribe()
