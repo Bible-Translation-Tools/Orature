@@ -260,9 +260,9 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
         totalMarkersProperty.set(sourceMarkers.size)
         markerModel = MarkerPlacementModel(
-            MarkerPlacementType.CHUNK,
+            MarkerPlacementType.VERSE,
             audio,
-            sourceMarkers.map { ChunkMarker(it.start, it.location) }
+            sourceMarkers.map { VerseMarker(it.start, it.end, 0) }
         ).also {
             it.loadMarkers(markerList)
         }
