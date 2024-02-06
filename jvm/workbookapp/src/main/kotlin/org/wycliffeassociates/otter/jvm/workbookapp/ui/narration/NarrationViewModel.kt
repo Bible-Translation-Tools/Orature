@@ -88,6 +88,7 @@ class NarrationViewModel : ViewModel() {
 
     @Inject
     lateinit var narrationFactory: NarrationFactory
+
     @Inject
     lateinit var appPreferencesRepo: IAppPreferencesRepository
 
@@ -142,10 +143,8 @@ class NarrationViewModel : ViewModel() {
     private var onTaskRunnerIdle: () -> Unit = { }
 
     //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
-    val numberOfTitlesProperty = SimpleIntegerProperty(0)
-    val hasAllVersesRecordedProperty = chunkTotalProperty
-        .eq(recordedVerses.sizeProperty.minus(numberOfTitlesProperty))
-    val potentiallyFinishedProperty = hasAllVersesRecordedProperty
+    val hasAllChunksRecordedProperty = SimpleBooleanProperty()
+    val potentiallyFinishedProperty = hasAllChunksRecordedProperty
         .and(isRecordingProperty.not())
         .and(isRecordingAgainProperty.not())
         .and(chapterTakeProperty.isNull)
@@ -164,6 +163,9 @@ class NarrationViewModel : ViewModel() {
 
         hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
         lastRecordedVerseProperty.bind(recordedVerses.sizeProperty)
+        hasAllChunksRecordedProperty.bind(recordedVerses.booleanBinding {
+            !narration.versesWithRecordings().contains(false)
+        })
 
         subscribe<AppCloseRequestEvent> {
             logger.info("Received close event request")

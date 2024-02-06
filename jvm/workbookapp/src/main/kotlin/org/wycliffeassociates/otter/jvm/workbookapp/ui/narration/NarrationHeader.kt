@@ -94,7 +94,7 @@ class NarrationHeader : View() {
             narrationMenuButton(
                 viewModel.hasChapterTakeProperty,
                 viewModel.hasVersesProperty,
-                viewModel.hasAllVersesRecordedProperty
+                viewModel.hasAllChunksRecordedProperty
             ) {
                 enableWhen(viewModel.chapterTakeBusyProperty.not().and(viewModel.isRecordingProperty.not()))
             }
@@ -149,7 +149,7 @@ class NarrationHeaderViewModel : ViewModel() {
     val hasNextChapter = SimpleBooleanProperty()
     val hasPreviousChapter = SimpleBooleanProperty()
     val hasVersesProperty = SimpleBooleanProperty()
-    val hasAllVersesRecordedProperty = SimpleBooleanProperty()
+    val hasAllChunksRecordedProperty = SimpleBooleanProperty()
     val chapterTakeProperty = SimpleObjectProperty<Take>()
     val hasChapterTakeProperty = chapterTakeProperty.isNotNull
     val chapterTakeBusyProperty = SimpleBooleanProperty()
@@ -182,7 +182,7 @@ class NarrationHeaderViewModel : ViewModel() {
         hasUndoProperty.bind(narrationViewModel.hasUndoProperty)
         hasRedoProperty.bind(narrationViewModel.hasRedoProperty)
         hasVersesProperty.bind(narrationViewModel.hasVersesProperty)
-        hasAllVersesRecordedProperty.bind(narrationViewModel.hasAllVersesRecordedProperty)
+        hasAllChunksRecordedProperty.bind(narrationViewModel.hasAllChunksRecordedProperty)
     }
 
     private enum class StepDirection {

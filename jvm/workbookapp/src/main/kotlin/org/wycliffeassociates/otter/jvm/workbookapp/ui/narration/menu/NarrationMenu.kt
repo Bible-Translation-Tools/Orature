@@ -34,7 +34,7 @@ class NarrationMenu : ContextMenu() {
 
     val hasChapterTakeProperty = SimpleBooleanProperty()
     val hasVersesProperty = SimpleBooleanProperty()
-    val hasAllVersesRecordedProperty = SimpleBooleanProperty()
+    val hasAllChunksRecordedProperty = SimpleBooleanProperty()
 
     init {
         addClass("wa-context-menu")
@@ -58,7 +58,7 @@ class NarrationMenu : ContextMenu() {
             action {
                 FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.MARKER))
             }
-            enableWhen(hasChapterTakeProperty.and(hasAllVersesRecordedProperty))
+            enableWhen(hasChapterTakeProperty.and(hasAllChunksRecordedProperty))
         }
         val restartChapterOpt = MenuItem().apply {
             graphic = label(messages["restartChapter"]) {
@@ -78,7 +78,7 @@ class NarrationMenu : ContextMenu() {
 fun EventTarget.narrationMenuButton(
     hasChapterTakeBinding: ObservableBooleanValue,
     hasVersesBinding: ObservableBooleanValue,
-    hasAllVersesRecordedProperty: ObservableBooleanValue,
+    hasAllChunksRecordedProperty: ObservableBooleanValue,
     op: Button.() -> Unit = {}
 ): Button {
     return Button().attachTo(this).apply {
@@ -89,7 +89,7 @@ fun EventTarget.narrationMenuButton(
         val menu = NarrationMenu().apply {
             this.hasChapterTakeProperty.bind(hasChapterTakeBinding)
             this.hasVersesProperty.bind(hasVersesBinding)
-            this.hasAllVersesRecordedProperty.bind(hasAllVersesRecordedProperty)
+            this.hasAllChunksRecordedProperty.bind(hasAllChunksRecordedProperty)
         }
 
         menu.setOnShowing { addPseudoClass("active") }
