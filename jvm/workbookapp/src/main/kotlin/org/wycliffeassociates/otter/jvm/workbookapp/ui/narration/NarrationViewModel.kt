@@ -88,6 +88,7 @@ class NarrationViewModel : ViewModel() {
 
     @Inject
     lateinit var narrationFactory: NarrationFactory
+
     @Inject
     lateinit var appPreferencesRepo: IAppPreferencesRepository
 
@@ -496,6 +497,7 @@ class NarrationViewModel : ViewModel() {
             chunk.state = TeleprompterItemState.RECORD_DISABLED
         }
         narratableList[0].state = TeleprompterItemState.RECORD
+        narratableList.setAll(narratableList.map { it })
         refreshTeleprompter()
         FX.eventbus.fire(TeleprompterSeekEvent(0))
     }
