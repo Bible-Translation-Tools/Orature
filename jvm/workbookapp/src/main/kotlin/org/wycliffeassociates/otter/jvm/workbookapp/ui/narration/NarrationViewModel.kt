@@ -142,8 +142,8 @@ class NarrationViewModel : ViewModel() {
     val totalAudioSizeProperty = SimpleIntegerProperty()
     private var onTaskRunnerIdle: () -> Unit = { }
 
-    val hasEverythingRecordedProperty = SimpleBooleanProperty()
-    val potentiallyFinishedProperty = hasEverythingRecordedProperty
+    val hasAllItemsRecordedProperty = SimpleBooleanProperty()
+    val potentiallyFinishedProperty = hasAllItemsRecordedProperty
         .and(isRecordingProperty.not())
         .and(isRecordingAgainProperty.not())
         .and(chapterTakeProperty.isNull)
@@ -162,7 +162,7 @@ class NarrationViewModel : ViewModel() {
 
         hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
         lastRecordedVerseProperty.bind(recordedVerses.sizeProperty)
-        hasEverythingRecordedProperty.bind(recordedVerses.booleanBinding {
+        hasAllItemsRecordedProperty.bind(recordedVerses.booleanBinding {
             narration.versesWithRecordings().all { true }
         })
 
