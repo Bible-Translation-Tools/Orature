@@ -865,7 +865,9 @@ class NarrationViewModel : ViewModel() {
 
     fun drawVolumebar(context: GraphicsContext, canvas: Canvas) {
         if (::renderer.isInitialized) {
-            volumeBar.draw(context, canvas)
+            runLater {
+                volumeBar.draw(context, canvas)
+            }
         }
     }
 
