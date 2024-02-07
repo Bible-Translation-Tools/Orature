@@ -80,6 +80,7 @@ class ChunkingTranslationPage : View() {
             canRedoProperty.bind(viewModel.canRedoProperty)
             canGoNextProperty.bind(viewModel.isLastChapterProperty.not())
             canGoPreviousProperty.bind(viewModel.isFirstChapterProperty.not())
+            canOpenInProperty.bind(viewModel.selectedStepProperty.booleanBinding { it == ChunkingStep.FINAL_REVIEW })
             Bindings.bindContent(chapterList, viewModel.chapterList)
         }
 

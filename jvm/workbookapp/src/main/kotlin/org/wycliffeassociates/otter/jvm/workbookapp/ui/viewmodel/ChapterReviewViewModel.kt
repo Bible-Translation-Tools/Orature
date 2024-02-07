@@ -35,7 +35,6 @@ import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
-import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
@@ -45,9 +44,11 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.ChapterTranslationBuilder
+import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
@@ -55,6 +56,9 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuil
 import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.SnackBarEvent
 import tornadofx.*
 import java.text.MessageFormat
 import javax.inject.Inject
@@ -77,7 +81,8 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
-    val translationViewModel: TranslationViewModel2 by inject()
+    private val translationViewModel: TranslationViewModel2 by inject()
+    private val audioPluginViewModel: AudioPluginViewModel by inject()
 
     override var markerModel: MarkerPlacementModel? = null
     override val markers = observableListOf<MarkerItem>()
@@ -115,9 +120,13 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     val isPlayingProperty = SimpleBooleanProperty(false)
     val compositeDisposable = CompositeDisposable()
 
+    private val pluginOpenedProperty = SimpleBooleanProperty(false)
+
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+
+        translationViewModel.pluginOpenedProperty.bind(pluginOpenedProperty)
     }
 
     fun dock() {
@@ -150,7 +159,9 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     fun undock() {
         pauseAudio()
         audioDataStore.stopPlayers()
-        audioDataStore.closePlayers()
+        if (!pluginOpenedProperty.value) {
+            audioDataStore.closePlayers()
+        }
         waveformAudioPlayerProperty.value?.stop()
         waveformAudioPlayerProperty.value?.close()
         markerModel
@@ -208,6 +219,43 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
     fun subscribeOnWaveformImages() {
         subscribeOnWaveformImagesProperty.value.invoke()
+    }
+
+    fun processWithPlugin() {
+        workbookDataStore.chapter.getSelectedTake()?.let { take ->
+            workbookDataStore.activeChapterProperty.value?.audio?.let { audio ->
+                val pluginType = PluginType.EDITOR
+                workbookDataStore.activeTakeNumberProperty.set(take.number)
+                audioPluginViewModel
+                    .getPlugin(pluginType)
+                    .doOnError { e ->
+                        logger.error("Error in processing take with plugin type: $pluginType, ${e.message}")
+                        e.printStackTrace()
+                    }
+                    .flatMapSingle { plugin ->
+                        pluginOpenedProperty.set(true)
+                        fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
+                        audioPluginViewModel.edit(audio, take)
+                    }
+                    .observeOnFx()
+                    .doOnError { e ->
+                        logger.error("Error in processing take with plugin type: $pluginType - $e")
+                        e.printStackTrace()
+                    }
+                    .onErrorReturn { PluginActions.Result.NO_PLUGIN }
+                    .subscribe { result: PluginActions.Result ->
+                        logger.info("Returned from plugin with result: $result")
+                        FX.eventbus.fire(PluginClosedEvent(pluginType))
+
+                        when (result) {
+                            PluginActions.Result.NO_PLUGIN -> FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
+                            else -> {
+                                // noop }
+                            }
+                        }
+                    }
+            }
+        }
     }
 
     private fun loadChapterTake() {
