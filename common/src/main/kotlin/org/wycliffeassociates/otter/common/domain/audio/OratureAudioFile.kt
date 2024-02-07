@@ -232,3 +232,9 @@ internal class OratureMarkers {
         }
     }
 }
+
+fun OratureAudioFile.getVerseAndTitleMarkers(): List<AudioMarker> {
+    return getMarker<BookMarker>()
+        .plus(getMarker<ChapterMarker>())
+        .plus(getMarker<VerseMarker>())
+}

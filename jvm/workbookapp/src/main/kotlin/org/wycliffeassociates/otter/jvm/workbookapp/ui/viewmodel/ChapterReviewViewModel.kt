@@ -36,8 +36,6 @@ import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
-import org.wycliffeassociates.otter.common.data.audio.BookMarker
-import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
@@ -46,6 +44,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.getVerseAndTitleMarkers
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.ChapterTranslationBuilder
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
@@ -259,9 +258,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     private fun loadVerseMarkers(audio: OratureAudioFile, sourceAudio: OratureAudioFile?) {
         markers.clear()
         val sourceMarkers = getSourceMarkers(sourceAudio)
-        val placedMarkers = audio.getMarker<BookMarker>()
-                .plus(audio.getMarker<ChapterMarker>())
-                .plus(audio.getMarker<VerseMarker>())
+        val placedMarkers = audio.getVerseAndTitleMarkers()
                 .map { MarkerItem(it, true) }
 
         totalMarkersProperty.set(sourceMarkers.size)
@@ -279,9 +276,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     private fun getSourceMarkers(sourceAudio: OratureAudioFile?): List<AudioMarker> {
         return when {
             sourceAudio != null && hasUserDefinedChunks() -> {
-                sourceAudio.getMarker<BookMarker>()
-                    .plus(sourceAudio.getMarker<ChapterMarker>())
-                    .plus(sourceAudio.getMarker<VerseMarker>())
+                sourceAudio.getVerseAndTitleMarkers()
             }
 
             /* no user-defined chunks found, this means project was migrated from Ot1, only have verse markers */
