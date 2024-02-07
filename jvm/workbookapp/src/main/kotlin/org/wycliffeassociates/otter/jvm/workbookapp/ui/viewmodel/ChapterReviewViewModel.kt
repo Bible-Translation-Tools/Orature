@@ -35,6 +35,10 @@ import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
+import org.wycliffeassociates.otter.common.data.audio.AudioMarker
+import org.wycliffeassociates.otter.common.data.audio.BookMarker
+import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
+import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
@@ -254,7 +258,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
     private fun loadVerseMarkers(audio: OratureAudioFile, sourceAudio: OratureAudioFile?) {
         markers.clear()
-        val sourceMarkers = sourceAudio?.getMarker<VerseMarker>() ?: getMarkersFromText()
+        val sourceMarkers = getSourceMarkers(sourceAudio)
         val placedMarkers = audio.getMarker<VerseMarker>().map {
             MarkerItem(it, true)
         }
@@ -263,12 +267,40 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         markerModel = MarkerPlacementModel(
             MarkerPlacementType.VERSE,
             audio,
-            sourceMarkers.map { VerseMarker(it.start, it.end, 0) }
+            sourceMarkers.map { it.clone(0) }
         ).also {
             it.loadMarkers(placedMarkers)
         }
         markers.setAll(placedMarkers)
         markers.sortBy { it.frame }
+    }
+
+    private fun getSourceMarkers(sourceAudio: OratureAudioFile?): List<AudioMarker> {
+        return when {
+            sourceAudio != null && hasUserDefinedChunks() -> {
+                sourceAudio.getMarker<BookMarker>()
+                    .plus(sourceAudio.getMarker<ChapterMarker>())
+                    .plus(sourceAudio.getMarker<VerseMarker>())
+            }
+
+            /* no user-defined chunks found, this means project was migrated from Ot1, only have verse markers */
+            sourceAudio != null -> sourceAudio.getMarker<VerseMarker>()
+
+            else -> getMarkersFromText() // no source audio, create markers from text
+        }
+    }
+
+    private fun hasUserDefinedChunks(): Boolean {
+        val workbook = workbookDataStore.workbook
+        val chapter = workbookDataStore.chapter
+        val chunkedAudio = workbook.sourceAudioAccessor
+            .getUserMarkedChapter(chapter.sort, workbook.target)
+            ?: return false
+
+        val chunkMarkers = OratureAudioFile(chunkedAudio.file)
+            .getMarker<ChunkMarker>()
+
+        return chunkMarkers.isNotEmpty()
     }
 
     private fun getMarkersFromText(): List<VerseMarker> {
