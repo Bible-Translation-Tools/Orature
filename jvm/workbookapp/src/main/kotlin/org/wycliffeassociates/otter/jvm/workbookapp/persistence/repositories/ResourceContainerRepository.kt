@@ -228,7 +228,11 @@ class ResourceContainerRepository @Inject constructor(
             val databaseContent = databaseMap[matchingCollection]!!
 
             textMapContent!!.forEach { content ->
-                val match = databaseContent.find { it.start == content.start && it.type == content.type }
+                val match = databaseContent.find {
+                    it.start == content.start &&
+                    it.type == content.type &&
+                    it.type != ContentType.TITLE
+                }
                 match?.let {
                     if (match.end != content.end && match.type != ContentType.META) {
                         match.end = content.end
