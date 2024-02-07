@@ -141,11 +141,8 @@ class NarrationViewModel : ViewModel() {
     val totalAudioSizeProperty = SimpleIntegerProperty()
     private var onTaskRunnerIdle: () -> Unit = { }
 
-    //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
-    val numberOfTitlesProperty = SimpleIntegerProperty(0)
-    val hasAllVersesRecordedProperty = chunkTotalProperty
-        .eq(recordedVerses.sizeProperty.minus(numberOfTitlesProperty))
-    val potentiallyFinishedProperty = hasAllVersesRecordedProperty
+    val hasAllItemsRecordedProperty = SimpleBooleanProperty()
+    val potentiallyFinishedProperty = hasAllItemsRecordedProperty
         .and(isRecordingProperty.not())
         .and(isRecordingAgainProperty.not())
         .and(chapterTakeProperty.isNull)
@@ -164,6 +161,9 @@ class NarrationViewModel : ViewModel() {
 
         hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
         lastRecordedVerseProperty.bind(recordedVerses.sizeProperty)
+        hasAllItemsRecordedProperty.bind(recordedVerses.booleanBinding {
+            narration.versesWithRecordings().all { true }
+        })
 
         subscribe<AppCloseRequestEvent> {
             logger.info("Received close event request")
