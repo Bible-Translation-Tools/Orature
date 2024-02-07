@@ -163,7 +163,7 @@ class NarrationViewModel : ViewModel() {
         hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
         lastRecordedVerseProperty.bind(recordedVerses.sizeProperty)
         hasEverythingRecordedProperty.bind(recordedVerses.booleanBinding {
-            !narration.versesWithRecordings().contains(false)
+            narration.versesWithRecordings().all { true }
         })
 
         subscribe<AppCloseRequestEvent> {
