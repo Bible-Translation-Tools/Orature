@@ -143,8 +143,8 @@ class NarrationViewModel : ViewModel() {
     private var onTaskRunnerIdle: () -> Unit = { }
 
     //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
-    val hasAllChunksRecordedProperty = SimpleBooleanProperty()
-    val potentiallyFinishedProperty = hasAllChunksRecordedProperty
+    val hasEverythingRecordedProperty = SimpleBooleanProperty()
+    val potentiallyFinishedProperty = hasEverythingRecordedProperty
         .and(isRecordingProperty.not())
         .and(isRecordingAgainProperty.not())
         .and(chapterTakeProperty.isNull)
@@ -163,7 +163,7 @@ class NarrationViewModel : ViewModel() {
 
         hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
         lastRecordedVerseProperty.bind(recordedVerses.sizeProperty)
-        hasAllChunksRecordedProperty.bind(recordedVerses.booleanBinding {
+        hasEverythingRecordedProperty.bind(recordedVerses.booleanBinding {
             !narration.versesWithRecordings().contains(false)
         })
 
