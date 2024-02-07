@@ -422,14 +422,6 @@ class NarrationViewModel : ViewModel() {
             )
         )
 
-        chapter
-            .chunkCount
-            .toObservable()
-            .observeOnFx()
-            .subscribe {
-                chunkTotalProperty.set(it)
-            }
-
         workbookDataStore.activeChapterProperty.set(chapter)
         initializeNarration(chapter)
 
@@ -457,7 +449,10 @@ class NarrationViewModel : ViewModel() {
             .map { injectChapterTitleText(chapter, it) }
             .observeOnFx()
             .subscribe(
-                { chunksList.setAll(it) },
+                { chunks ->
+                    chunksList.setAll(chunks)
+                    chunkTotalProperty.set(chunks.size)
+                },
                 {},
                 { resetTeleprompter() }
             )
@@ -872,7 +867,9 @@ class NarrationViewModel : ViewModel() {
 
     fun drawVolumebar(context: GraphicsContext, canvas: Canvas) {
         if (::renderer.isInitialized) {
-            volumeBar.draw(context, canvas)
+            runLater {
+                volumeBar.draw(context, canvas)
+            }
         }
     }
 
