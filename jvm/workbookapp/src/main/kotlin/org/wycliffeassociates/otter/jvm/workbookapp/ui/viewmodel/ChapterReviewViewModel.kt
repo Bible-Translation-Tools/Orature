@@ -35,7 +35,6 @@ import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
-import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
@@ -225,7 +224,10 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                 translationViewModel.loadingStepProperty.set(false)
             }
             .subscribe { audio ->
-                loadVerseMarkers(audio)
+                val sourceAudio = audioDataStore.sourceAudioProperty.value
+                    ?.let { OratureAudioFile(it.file) }
+
+                loadVerseMarkers(audio, sourceAudio)
                 createWaveformImages(audio)
                 subscribeOnWaveformImages()
             }
@@ -250,23 +252,10 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             .subscribeOn(Schedulers.io())
     }
 
-    private fun loadVerseMarkers(audio: OratureAudioFile) {
+    private fun loadVerseMarkers(audio: OratureAudioFile, sourceAudio: OratureAudioFile?) {
         markers.clear()
-        val sourceMarkers = if (audioDataStore.sourceAudioProperty.value != null) {
-            val sourceAudio = OratureAudioFile(sourceAudio.file)
-            sourceAudio.getMarker<VerseMarker>()
-        } else {
-            // source audio doesn't exist, create verse markers from text
-            workbookDataStore.workbook.projectFilesAccessor
-                .getChapterContent(
-                    workbookDataStore.workbook.target.slug,
-                    workbookDataStore.chapter.sort
-                ).map { content ->
-                    VerseMarker(content.start, content.end, 0)
-                }
-        }
-
-        val markerList = audio.getMarker<VerseMarker>().map {
+        val sourceMarkers = sourceAudio?.getMarker<VerseMarker>() ?: getMarkersFromText()
+        val placedMarkers = audio.getMarker<VerseMarker>().map {
             MarkerItem(it, true)
         }
 
@@ -276,10 +265,20 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             audio,
             sourceMarkers.map { VerseMarker(it.start, it.end, 0) }
         ).also {
-            it.loadMarkers(markerList)
+            it.loadMarkers(placedMarkers)
         }
-        markers.setAll(markerList)
+        markers.setAll(placedMarkers)
         markers.sortBy { it.frame }
+    }
+
+    private fun getMarkersFromText(): List<VerseMarker> {
+        return workbookDataStore.workbook.projectFilesAccessor
+            .getChapterContent(
+                workbookDataStore.workbook.target.slug,
+                workbookDataStore.chapter.sort
+            ).map { content ->
+                VerseMarker(content.start, content.end, 0)
+            }
     }
 
     private fun cleanup() {
