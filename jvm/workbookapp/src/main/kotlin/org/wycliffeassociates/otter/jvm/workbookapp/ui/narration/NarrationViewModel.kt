@@ -497,7 +497,7 @@ class NarrationViewModel : ViewModel() {
             chunk.state = TeleprompterItemState.RECORD_DISABLED
         }
         narratableList[0].state = TeleprompterItemState.RECORD
-        narratableList.setAll(narratableList.map { it })
+        narratableList.setAll(narratableList.toList())
         refreshTeleprompter()
         FX.eventbus.fire(TeleprompterSeekEvent(0))
     }
@@ -518,7 +518,7 @@ class NarrationViewModel : ViewModel() {
             scrollToVerse = lastIndex
         }
 
-        narratableList.setAll(narratableList.map { it })
+        narratableList.setAll(narratableList.toList())
 
         refreshTeleprompter()
         FX.eventbus.fire(TeleprompterSeekEvent(scrollToVerse))
