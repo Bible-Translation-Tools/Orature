@@ -252,8 +252,20 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
     private fun loadVerseMarkers(audio: OratureAudioFile) {
         markers.clear()
-        val sourceAudio = OratureAudioFile(sourceAudio.file)
-        val sourceMarkers = sourceAudio.getMarker<VerseMarker>()
+        val sourceMarkers = if (audioDataStore.sourceAudioProperty.value != null) {
+            val sourceAudio = OratureAudioFile(sourceAudio.file)
+            sourceAudio.getMarker<VerseMarker>()
+        } else {
+            // source audio doesn't exist, create verse markers from text
+            workbookDataStore.workbook.projectFilesAccessor
+                .getChapterContent(
+                    workbookDataStore.workbook.target.slug,
+                    workbookDataStore.chapter.sort
+                ).map { content ->
+                    VerseMarker(content.start, content.end, 0)
+                }
+        }
+
         val markerList = audio.getMarker<VerseMarker>().map {
             MarkerItem(it, true)
         }
