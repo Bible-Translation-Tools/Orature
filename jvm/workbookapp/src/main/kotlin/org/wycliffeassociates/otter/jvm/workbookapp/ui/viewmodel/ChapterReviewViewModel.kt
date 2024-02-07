@@ -259,9 +259,10 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     private fun loadVerseMarkers(audio: OratureAudioFile, sourceAudio: OratureAudioFile?) {
         markers.clear()
         val sourceMarkers = getSourceMarkers(sourceAudio)
-        val placedMarkers = audio.getMarker<VerseMarker>().map {
-            MarkerItem(it, true)
-        }
+        val placedMarkers = audio.getMarker<BookMarker>()
+                .plus(audio.getMarker<ChapterMarker>())
+                .plus(audio.getMarker<VerseMarker>())
+                .map { MarkerItem(it, true) }
 
         totalMarkersProperty.set(sourceMarkers.size)
         markerModel = MarkerPlacementModel(
