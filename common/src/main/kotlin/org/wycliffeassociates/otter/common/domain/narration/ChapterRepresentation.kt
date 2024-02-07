@@ -31,6 +31,8 @@ import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.BookMarker
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.data.primitives.BOOK_TITLE_SORT
+import org.wycliffeassociates.otter.common.data.primitives.CHAPTER_TITLE_SORT
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.AudioFileReaderProvider
@@ -105,8 +107,8 @@ internal class ChapterRepresentation(
             .map { chunks ->
                 chunks.map { chunk ->
                     when (chunk.sort) {
-                        -2 -> BookMarker(workbook.source.slug, 0)
-                        -1 -> ChapterMarker(chapter.sort, 0)
+                        BOOK_TITLE_SORT -> BookMarker(workbook.source.slug, 0)
+                        CHAPTER_TITLE_SORT -> ChapterMarker(chapter.sort, 0)
                         else -> VerseMarker(chunk.start, chunk.end, 0)
                     }
                 }

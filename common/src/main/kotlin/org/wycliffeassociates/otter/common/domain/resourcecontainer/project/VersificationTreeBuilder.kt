@@ -96,7 +96,7 @@ class VersificationTreeBuilder @Inject constructor(
                     draftNumber = 1
                 )
                 val chapTitle = Content(
-                    sort = -1,
+                    sort = CHAPTER_TITLE_SORT,
                     labelKey = ContentLabel.CHAPTER.value,
                     start = 1,
                     end = verses,
@@ -108,7 +108,7 @@ class VersificationTreeBuilder @Inject constructor(
                 )
                 if (i == 1) {
                     val bookContent = Content(
-                        sort = -2,
+                        sort = BOOK_TITLE_SORT,
                         labelKey = "book",
                         start = 1,
                         end = verses,

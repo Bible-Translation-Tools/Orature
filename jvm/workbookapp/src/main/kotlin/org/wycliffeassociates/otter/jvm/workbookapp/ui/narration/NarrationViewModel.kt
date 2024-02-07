@@ -41,6 +41,8 @@ import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.BookMarker
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.data.primitives.BOOK_TITLE_SORT
+import org.wycliffeassociates.otter.common.data.primitives.CHAPTER_TITLE_SORT
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.*
@@ -74,9 +76,6 @@ import java.text.MessageFormat
 import javax.inject.Inject
 import kotlin.math.floor
 import kotlin.math.max
-
-private const val BOOK_TITLE_SORT = -2
-private const val CHAPTER_TITLE_SORT = -1
 
 class NarrationViewModel : ViewModel() {
     private lateinit var rendererAudioReader: AudioFileReader
@@ -182,7 +181,6 @@ class NarrationViewModel : ViewModel() {
 
         narratableList.bind(chunksList) { chunk ->
 
-            //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
             val marker = when (chunk.sort) {
                 BOOK_TITLE_SORT -> recordedVerses.firstOrNull { it is BookMarker }
                 CHAPTER_TITLE_SORT -> recordedVerses.firstOrNull { it is ChapterMarker }
@@ -209,7 +207,6 @@ class NarrationViewModel : ViewModel() {
         recordedVerses.onChange {
             narratableList.forEachIndexed { idx, chunk ->
 
-                //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
                 val hasRecording = when (chunk.chunk.sort) {
                     BOOK_TITLE_SORT -> recordedVerses.any { it is BookMarker }
                     CHAPTER_TITLE_SORT -> recordedVerses.any { it is ChapterMarker }
