@@ -59,3 +59,6 @@ val primaryContentTypes: Set<ContentType> = EnumSet.of(ContentType.TEXT)
  * [ContentType.TITLE] and [ContentType.BODY].
  */
 val helpContentTypes: Set<ContentType> = EnumSet.of(ContentType.TITLE, ContentType.BODY)
+
+const val BOOK_TITLE_SORT = -2
+const val CHAPTER_TITLE_SORT = -1
