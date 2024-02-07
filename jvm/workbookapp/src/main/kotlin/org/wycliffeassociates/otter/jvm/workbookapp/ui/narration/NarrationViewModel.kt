@@ -142,7 +142,6 @@ class NarrationViewModel : ViewModel() {
     val totalAudioSizeProperty = SimpleIntegerProperty()
     private var onTaskRunnerIdle: () -> Unit = { }
 
-    //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
     val hasEverythingRecordedProperty = SimpleBooleanProperty()
     val potentiallyFinishedProperty = hasEverythingRecordedProperty
         .and(isRecordingProperty.not())
