@@ -128,6 +128,7 @@ class ChunkingTranslationPage : View() {
         tryImportStylesheet("/css/marker-node.css")
         tryImportStylesheet("/css/scrolling-waveform.css")
         tryImportStylesheet("/css/source-audio-missing.css")
+        tryImportStylesheet("/css/add-plugin-dialog.css")
 
         subscribe<ChunkingStepSelectedEvent> {
             viewModel.navigateStep(it.step)
