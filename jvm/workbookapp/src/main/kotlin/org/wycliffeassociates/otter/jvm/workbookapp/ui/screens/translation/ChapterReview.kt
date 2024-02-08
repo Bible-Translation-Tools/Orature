@@ -41,10 +41,14 @@ import org.wycliffeassociates.otter.jvm.controls.event.OpenInPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
+import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
+import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
+import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.SnackBarEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterReviewViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -83,6 +87,8 @@ class ChapterReview : View() {
             }
         }
         center = vbox {
+            createSnackBar()
+
             val container = this
             waveform = MarkerWaveform().apply {
                 addClass("waveform--focusable")
@@ -229,6 +235,10 @@ class ChapterReview : View() {
                 workspace.dock(pluginOpenedPage)
             }
         }.let { eventSubscriptions.add(it) }
+
+        subscribe<SnackBarEvent> {
+            viewModel.snackBarMessage(it.message)
+        }.let { eventSubscriptions.add(it) }
     }
 
     private fun unsubscribeEvents() {
@@ -283,5 +293,25 @@ class ChapterReview : View() {
 
             playerProperty.bind(viewModel.sourcePlayerProperty)
         }
+    }
+
+    private fun createSnackBar() {
+        viewModel
+            .snackBarObservable
+            .doOnError { e ->
+                logger.error("Error in creating no plugin snackbar", e)
+            }
+            .subscribe { pluginErrorMessage ->
+                val notification = NotificationViewData(
+                    title = messages["noPlugins"],
+                    message = pluginErrorMessage,
+                    statusType = NotificationStatusType.WARNING,
+                    actionIcon = MaterialDesign.MDI_PLUS,
+                    actionText = messages["addApp"]
+                ) {
+                    viewModel.audioPluginViewModel.addPlugin(record = true, edit = false)
+                }
+                SnackbarHandler.showNotification(notification, root)
+            }
     }
 }

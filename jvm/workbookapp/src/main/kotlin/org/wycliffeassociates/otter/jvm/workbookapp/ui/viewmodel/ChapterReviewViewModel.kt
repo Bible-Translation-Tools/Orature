@@ -25,6 +25,7 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.PublishSubject
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
@@ -81,8 +82,8 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
+    val audioPluginViewModel: AudioPluginViewModel by inject()
     private val translationViewModel: TranslationViewModel2 by inject()
-    private val audioPluginViewModel: AudioPluginViewModel by inject()
 
     override var markerModel: MarkerPlacementModel? = null
     override val markers = observableListOf<MarkerItem>()
@@ -119,9 +120,9 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     )
     val isPlayingProperty = SimpleBooleanProperty(false)
     val compositeDisposable = CompositeDisposable()
+    val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
     private val pluginOpenedProperty = SimpleBooleanProperty(false)
-
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -256,6 +257,10 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                     }
             }
         }
+    }
+
+    fun snackBarMessage(message: String) {
+        snackBarObservable.onNext(message)
     }
 
     private fun loadChapterTake() {
