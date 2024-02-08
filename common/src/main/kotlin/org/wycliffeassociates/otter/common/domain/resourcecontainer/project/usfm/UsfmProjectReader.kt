@@ -22,6 +22,8 @@ import java.io.File
 import java.io.Reader
 import org.wycliffeassociates.otter.common.collections.OtterTree
 import org.wycliffeassociates.otter.common.collections.OtterTreeNode
+import org.wycliffeassociates.otter.common.data.primitives.BOOK_TITLE_SORT
+import org.wycliffeassociates.otter.common.data.primitives.CHAPTER_TITLE_SORT
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.CollectionOrContent
 import org.wycliffeassociates.otter.common.data.primitives.Content
@@ -166,7 +168,7 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
             draftNumber = 1
         )
         val chapTitle = Content(
-            sort = -1,
+            sort = CHAPTER_TITLE_SORT,
             labelKey = ContentLabel.CHAPTER.value,
             start = startVerse,
             end = endVerse,
@@ -178,7 +180,7 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
         )
         if (chapter.number == 1) {
             val bookContent = Content(
-                sort = -2,
+                sort = BOOK_TITLE_SORT,
                 labelKey = "book",
                 start = startVerse,
                 end = endVerse,
