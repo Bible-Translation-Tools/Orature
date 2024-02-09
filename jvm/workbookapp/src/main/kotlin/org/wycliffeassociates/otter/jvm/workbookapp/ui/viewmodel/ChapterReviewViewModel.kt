@@ -122,6 +122,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     fun dock() {
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
         workbookDataStore.activeChunkProperty.set(null)
+        translationViewModel.currentMarkerProperty.bind(currentMarkerNumberProperty)
 
         Completable
             .fromAction {
@@ -156,6 +157,8 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             ?.writeMarkers()
             ?.blockingAwait()
 
+        translationViewModel.currentMarkerProperty.unbind()
+        translationViewModel.currentMarkerProperty.set(-1)
         cleanup()
     }
 

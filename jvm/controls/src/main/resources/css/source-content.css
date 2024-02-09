@@ -105,7 +105,6 @@
 .source-content__text {
     -fx-text-fill: -wa-regular-text;
     -fx-wrap-text: true;
-    -fx-padding: 10px 0 0 0;
 }
 
 .source-content__chunk:highlighted .label {
@@ -133,9 +132,9 @@
 }
 
 .source-content__verse-number {
-    -fx-font-size: 0.8em;
+    -fx-padding: 0 4 0 0;
+    -fx-font-size: 0.7em;
     -fx-text-fill: -wa-regular-text-80;
-    -fx-baseline-shift: -0.5em;
 }
 
 .source-content__text-popup__container {

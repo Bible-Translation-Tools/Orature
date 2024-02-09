@@ -18,9 +18,11 @@
  */
 package org.wycliffeassociates.otter.jvm.controls
 
+import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.StringProperty
 import javafx.event.EventTarget
 import javafx.geometry.NodeOrientation
 import javafx.scene.Node
@@ -42,7 +44,8 @@ class RollingSourceText : VBox() {
     val orientationProperty = SimpleObjectProperty<NodeOrientation>()
     val zoomRateProperty = SimpleIntegerProperty(100)
 
-    private lateinit var sourceTextChunksContainer: ListView<Node>
+    private val sourceTextList = observableListOf<TextCellData>()
+    private lateinit var sourceTextListView: ListView<TextCellData>
 
     init {
         addClass("source-content__top")
@@ -52,32 +55,14 @@ class RollingSourceText : VBox() {
             addClass("source-content__text-container")
             vgrow = Priority.ALWAYS
 
-            listview<Node> {
-                sourceTextChunksContainer = this
+            listview(sourceTextList) {
+                sourceTextListView = this
                 addClass("wa-list-view", "source-content__chunk-list")
                 vgrow = Priority.ALWAYS
                 enableScrollByKey()
 
                 setCellFactory {
-                    object : ListCell<Node>() {
-                        override fun updateItem(item: Node?, empty: Boolean) {
-                            super.updateItem(item, empty)
-
-                            /*
-                            allows the list cell width to be overridden to listview.width - insets,
-                            without this the cell width will extend beyond the listview boundary causing
-                            a horizontal scroll bar and no word wrapping on the label elements.
-                            */
-                            prefWidthProperty().set(0.0)
-
-                            if (item == null) {
-                                graphic = null
-                                text = null
-                            } else {
-                                graphic = item
-                            }
-                        }
-                    }
+                    SourceTextCell(sourceTitleProperty, licenseTextProperty, orientationProperty)
                 }
 
                 runLater { customizeScrollbarSkin() }
@@ -89,56 +74,88 @@ class RollingSourceText : VBox() {
 
     private fun setUpListeners() {
         sourceTextProperty.onChangeAndDoNowWithDisposer { txt ->
-            if (txt == null) {
-                sourceTextChunksContainer.items.clear()
-                return@onChangeAndDoNowWithDisposer
+            if (txt != null) {
+                sourceTextList.setAll(convertText(txt))
             }
-            val nodes = buildTextNodes(txt)
-            sourceTextChunksContainer.items.setAll(nodes)
         }
 
         zoomRateProperty.onChangeAndDoNowWithDisposer { rate ->
-            sourceTextChunksContainer.apply {
+            sourceTextListView.apply {
                 styleClass.removeAll { it.startsWith("text-zoom") }
                 addClass("text-zoom-$rate")
             }
         }
     }
 
-    private fun buildTextNodes(txt: String): List<Node> {
-        val markerRegex = Regex("""\d{1,3}(-\d*)?\.""")
-        val matches = markerRegex.findAll(txt)
+    private fun convertText(txt: String): List<TextCellData> {
+        val verses = txt.split("\n")
+            .filter { it.isNotEmpty() }
+            .map { TextCellData(it, TextCellType.TEXT) }
 
-        val markerLabels = matches.map { it.value.removeSuffix(".") }.toList()
-        val chunks = markerRegex.split(txt).filter { it.isNotBlank() }.map { it.trim() }.toList()
-
-        val nodes = mutableListOf<Node>()
-        val sourceTitle = buildSourceTitle()
-        val licenseText = buildLicenseText()
-
-        nodes.add(sourceTitle)
-        for (i in 0 until markerLabels.size) {
-            nodes.add(
-                buildChunkText(chunks[i], markerLabels[i])
-            )
-        }
-        nodes.add(licenseText)
-        return nodes
+        return listOf(
+            TextCellData(sourceTitleProperty.value, TextCellType.TITLE),
+            *verses.toTypedArray(),
+            TextCellData(licenseTextProperty.value, TextCellType.LICENSE)
+        )
     }
 
-    private fun buildSourceTitle(): HBox {
-        return HBox().apply {
-            label {
-                addClass("h4", "h4--80", "source-content__info-text")
-                textProperty().bind(sourceTitleProperty)
-            }
+
+}
+
+enum class TextCellType {
+    TEXT,
+    TITLE,
+    LICENSE
+}
+
+data class TextCellData(val content: String, val type: TextCellType)
+
+class SourceTextCell(
+    private val sourceTitleProperty: StringProperty,
+    private val licenseProperty: StringProperty,
+    private val orientationProperty: ObjectProperty<NodeOrientation>
+) : ListCell<TextCellData>() {
+    override fun updateItem(item: TextCellData?, empty: Boolean) {
+        super.updateItem(item, empty)
+
+        /*
+        allows the list cell width to be overridden to listview.width - insets,
+        without this the cell width will extend beyond the listview boundary causing
+        a horizontal scroll bar and no word wrapping on the label elements.
+        */
+        prefWidthProperty().set(0.0)
+
+        if (item == null) {
+            graphic = null
+            text = null
+        } else {
+            graphic = renderTextNode(item)
         }
     }
 
-    private fun buildChunkText(textContent: String, chunkLabel: String): HBox {
+    private fun renderTextNode(textItem: TextCellData): Node {
+        return when (textItem.type) {
+            TextCellType.TITLE -> buildSourceTitle()
+            TextCellType.LICENSE -> buildLicenseText()
+            TextCellType.TEXT -> buildChunkText(textItem.content)
+        }
+    }
+
+    private fun buildSourceTitle(): Label {
+        return Label().apply {
+            addClass("h4", "h4--80", "source-content__info-text")
+            textProperty().bind(sourceTitleProperty)
+        }
+    }
+
+    private fun buildChunkText(text: String): HBox {
+        val markerTitleRegex = Regex("""^\d{1,3}(-\d*)?\.""")
+        val markerLabel = markerTitleRegex.find(text)?.value ?: ""
+        val textContent = text.substringAfter(markerLabel).trim()
+
         return HBox().apply {
             addClass("source-content__chunk")
-            label(chunkLabel) {
+            label(markerLabel.removeSuffix(".")) {
                 addClass("source-content__verse-number")
                 minWidth = USE_PREF_SIZE
             }
@@ -153,7 +170,7 @@ class RollingSourceText : VBox() {
         return Label().apply {
             addClass("source-content__license-text")
 
-            textProperty().bind(licenseTextProperty)
+            textProperty().bind(licenseProperty)
             styleProperty().bind(orientationProperty.objectBinding {
                 when (it) {
                     NodeOrientation.LEFT_TO_RIGHT -> "-fx-font-style: italic;"
