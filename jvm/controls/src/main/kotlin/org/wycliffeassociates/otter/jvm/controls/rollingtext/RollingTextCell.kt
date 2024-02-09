@@ -27,7 +27,7 @@ class RollingTextCell(
 ) : ListCell<TextCellData>() {
 
     private val shouldHighlight = booleanBinding(highlightedVerseProperty, indexProperty()) {
-        highlightedVerseProperty.value == index - 1
+        highlightedVerseProperty.value == index - 1 // offset the first item which is the source title
     }
 
     override fun updateItem(item: TextCellData?, empty: Boolean) {
@@ -48,6 +48,11 @@ class RollingTextCell(
         }
     }
 
+    /**
+     * Convert input text to appropriate data structure for rendering inside
+     * the ListView. This always injects the source title and license footer
+     * at the beginning and the end of the list, respectively.
+     */
     private fun renderTextNode(textItem: TextCellData): Node {
         return when (textItem.type) {
             TextCellType.TITLE -> buildSourceTitle()

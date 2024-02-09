@@ -146,6 +146,11 @@ interface IMarkerViewModel : IWaveformViewModel {
         audioController?.toggle()
     }
 
+    override fun calculatePosition() {
+        super.calculatePosition()
+        updateCurrentPlaybackMarker(audioPositionProperty.value ?: 0)
+    }
+
     private fun isPlaying(): Boolean {
         return audioController?.isPlayingProperty?.value ?: false
     }

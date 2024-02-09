@@ -66,6 +66,10 @@ class RollingSourceText : VBox() {
                     )
                 }
 
+                highlightedIndexProperty.onChange {
+                    if (it in items.indices) scrollTo(it)
+                }
+
                 runLater { customizeScrollbarSkin() }
             }
         }
