@@ -16,22 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.controls
+package org.wycliffeassociates.otter.jvm.controls.rollingtext
 
-import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.beans.property.StringProperty
 import javafx.event.EventTarget
 import javafx.geometry.NodeOrientation
-import javafx.scene.Node
-import javafx.scene.control.Label
-import javafx.scene.control.ListCell
 import javafx.scene.control.ListView
-import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.utils.enableScrollByKey
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import tornadofx.*
@@ -42,6 +37,7 @@ class RollingSourceText : VBox() {
     val sourceTextProperty = SimpleStringProperty()
     val licenseTextProperty = SimpleStringProperty()
     val orientationProperty = SimpleObjectProperty<NodeOrientation>()
+    val highlightedIndexProperty = SimpleIntegerProperty()
     val zoomRateProperty = SimpleIntegerProperty(100)
 
     private val sourceTextList = observableListOf<TextCellData>()
@@ -62,7 +58,12 @@ class RollingSourceText : VBox() {
                 enableScrollByKey()
 
                 setCellFactory {
-                    SourceTextCell(sourceTitleProperty, licenseTextProperty, orientationProperty)
+                    RollingTextCell(
+                        sourceTitleProperty,
+                        licenseTextProperty,
+                        orientationProperty,
+                        highlightedIndexProperty
+                    )
                 }
 
                 runLater { customizeScrollbarSkin() }
@@ -75,7 +76,7 @@ class RollingSourceText : VBox() {
     private fun setUpListeners() {
         sourceTextProperty.onChangeAndDoNowWithDisposer { txt ->
             if (txt != null) {
-                sourceTextList.setAll(convertText(txt))
+                sourceTextList.setAll(convertTextData(txt))
             }
         }
 
@@ -87,7 +88,7 @@ class RollingSourceText : VBox() {
         }
     }
 
-    private fun convertText(txt: String): List<TextCellData> {
+    private fun convertTextData(txt: String): List<TextCellData> {
         val verses = txt.split("\n")
             .filter { it.isNotEmpty() }
             .map { TextCellData(it, TextCellType.TEXT) }
@@ -100,85 +101,6 @@ class RollingSourceText : VBox() {
     }
 
 
-}
-
-enum class TextCellType {
-    TEXT,
-    TITLE,
-    LICENSE
-}
-
-data class TextCellData(val content: String, val type: TextCellType)
-
-class SourceTextCell(
-    private val sourceTitleProperty: StringProperty,
-    private val licenseProperty: StringProperty,
-    private val orientationProperty: ObjectProperty<NodeOrientation>
-) : ListCell<TextCellData>() {
-    override fun updateItem(item: TextCellData?, empty: Boolean) {
-        super.updateItem(item, empty)
-
-        /*
-        allows the list cell width to be overridden to listview.width - insets,
-        without this the cell width will extend beyond the listview boundary causing
-        a horizontal scroll bar and no word wrapping on the label elements.
-        */
-        prefWidthProperty().set(0.0)
-
-        if (item == null) {
-            graphic = null
-            text = null
-        } else {
-            graphic = renderTextNode(item)
-        }
-    }
-
-    private fun renderTextNode(textItem: TextCellData): Node {
-        return when (textItem.type) {
-            TextCellType.TITLE -> buildSourceTitle()
-            TextCellType.LICENSE -> buildLicenseText()
-            TextCellType.TEXT -> buildChunkText(textItem.content)
-        }
-    }
-
-    private fun buildSourceTitle(): Label {
-        return Label().apply {
-            addClass("h4", "h4--80", "source-content__info-text")
-            textProperty().bind(sourceTitleProperty)
-        }
-    }
-
-    private fun buildChunkText(text: String): HBox {
-        val markerTitleRegex = Regex("""^\d{1,3}(-\d*)?\.""")
-        val markerLabel = markerTitleRegex.find(text)?.value ?: ""
-        val textContent = text.substringAfter(markerLabel).trim()
-
-        return HBox().apply {
-            addClass("source-content__chunk")
-            label(markerLabel.removeSuffix(".")) {
-                addClass("source-content__verse-number")
-                minWidth = USE_PREF_SIZE
-            }
-            label(textContent) {
-                addClass("source-content__text")
-                minHeight = USE_PREF_SIZE // avoid ellipsis
-            }
-        }
-    }
-
-    private fun buildLicenseText(): Label {
-        return Label().apply {
-            addClass("source-content__license-text")
-
-            textProperty().bind(licenseProperty)
-            styleProperty().bind(orientationProperty.objectBinding {
-                when (it) {
-                    NodeOrientation.LEFT_TO_RIGHT -> "-fx-font-style: italic;"
-                    else -> ""
-                }
-            })
-        }
-    }
 }
 
 fun EventTarget.rollingSourceText(op: RollingSourceText.() -> Unit = {}) = RollingSourceText().attachTo(this, op)
