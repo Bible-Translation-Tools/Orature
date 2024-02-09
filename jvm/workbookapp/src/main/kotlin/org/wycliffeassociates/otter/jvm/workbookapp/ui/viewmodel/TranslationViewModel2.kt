@@ -73,6 +73,7 @@ class TranslationViewModel2 : ViewModel() {
     val chunkListProperty = SimpleListProperty<ChunkViewData>(chunkList)
     val selectedChunkBinding = workbookDataStore.activeChunkProperty.integerBinding { it?.sort ?: -1 }
     val loadingStepProperty = SimpleBooleanProperty(false)
+    val pluginOpenedProperty = SimpleBooleanProperty(false)
 
     private val compositeDisposable = CompositeDisposable()
 
@@ -90,9 +91,11 @@ class TranslationViewModel2 : ViewModel() {
 
     fun undockPage() {
         selectedStepProperty.set(null)
-        workbookDataStore.activeChapterProperty.set(null)
+        if (!pluginOpenedProperty.value) {
+            workbookDataStore.activeChapterProperty.set(null)
+            audioDataStore.closePlayers()
+        }
         compositeDisposable.clear()
-        audioDataStore.closePlayers()
         resetUndoRedo()
     }
 

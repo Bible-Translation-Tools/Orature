@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.animation.AnimationTimer
@@ -31,18 +32,26 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
+import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.OpenInPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
+import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
+import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
+import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.SnackBarEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterReviewViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
 class ChapterReview : View() {
@@ -50,6 +59,7 @@ class ChapterReview : View() {
 
     val viewModel: ChapterReviewViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
 
     private lateinit var waveform: MarkerWaveform
     private val audioScrollBar = createAudioScrollBar(
@@ -61,6 +71,8 @@ class ChapterReview : View() {
     private var timer: AnimationTimer? = null
 
     private val eventSubscriptions = mutableListOf<EventRegistration>()
+
+    private val pluginOpenedPage = createPluginOpenedPage()
 
     override val root = borderpane {
         top = vbox {
@@ -75,6 +87,8 @@ class ChapterReview : View() {
             }
         }
         center = vbox {
+            createSnackBar()
+
             val container = this
             waveform = MarkerWaveform().apply {
                 addClass("waveform--focusable")
@@ -211,6 +225,20 @@ class ChapterReview : View() {
         subscribe<TranslationNavigationEvent> {
             viewModel.cleanupWaveform()
         }.also { eventSubscriptions.add(it) }
+
+        subscribe<OpenInPluginEvent> {
+            viewModel.processWithPlugin()
+        }.also { eventSubscriptions.add(it) }
+
+        subscribe<PluginOpenedEvent> { pluginInfo ->
+            if (!pluginInfo.isNative) {
+                workspace.dock(pluginOpenedPage)
+            }
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<SnackBarEvent> {
+            viewModel.snackBarMessage(it.message)
+        }.let { eventSubscriptions.add(it) }
     }
 
     private fun unsubscribeEvents() {
@@ -240,5 +268,50 @@ class ChapterReview : View() {
                 waveform.addWaveformImage(it)
             }
             .addTo(viewModel.compositeDisposable)
+    }
+
+    private fun createPluginOpenedPage(): PluginOpenedPage {
+        // Plugin active cover
+        return find<PluginOpenedPage>().apply {
+            licenseProperty.bind(workbookDataStore.sourceLicenseProperty)
+            sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
+            sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
+            orientationProperty.bind(settingsViewModel.orientationProperty)
+            sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
+
+            sourceSpeedRateProperty.bind(
+                workbookDataStore.activeWorkbookProperty.select {
+                    it.translation.sourceRate.toLazyBinding()
+                }
+            )
+
+            targetSpeedRateProperty.bind(
+                workbookDataStore.activeWorkbookProperty.select {
+                    it.translation.targetRate.toLazyBinding()
+                }
+            )
+
+            playerProperty.bind(viewModel.sourcePlayerProperty)
+        }
+    }
+
+    private fun createSnackBar() {
+        viewModel
+            .snackBarObservable
+            .doOnError { e ->
+                logger.error("Error in creating no plugin snackbar", e)
+            }
+            .subscribe { pluginErrorMessage ->
+                val notification = NotificationViewData(
+                    title = messages["noPlugins"],
+                    message = pluginErrorMessage,
+                    statusType = NotificationStatusType.WARNING,
+                    actionIcon = MaterialDesign.MDI_PLUS,
+                    actionText = messages["addApp"]
+                ) {
+                    viewModel.audioPluginViewModel.addPlugin(record = true, edit = false)
+                }
+                SnackbarHandler.showNotification(notification, root)
+            }
     }
 }

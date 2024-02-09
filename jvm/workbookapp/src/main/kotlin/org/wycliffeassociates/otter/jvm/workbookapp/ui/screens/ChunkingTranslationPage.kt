@@ -80,6 +80,7 @@ class ChunkingTranslationPage : View() {
             canRedoProperty.bind(viewModel.canRedoProperty)
             canGoNextProperty.bind(viewModel.isLastChapterProperty.not())
             canGoPreviousProperty.bind(viewModel.isFirstChapterProperty.not())
+            canOpenInProperty.bind(viewModel.selectedStepProperty.booleanBinding { it == ChunkingStep.FINAL_REVIEW })
             Bindings.bindContent(chapterList, viewModel.chapterList)
         }
 
@@ -127,6 +128,7 @@ class ChunkingTranslationPage : View() {
         tryImportStylesheet("/css/marker-node.css")
         tryImportStylesheet("/css/scrolling-waveform.css")
         tryImportStylesheet("/css/source-audio-missing.css")
+        tryImportStylesheet("/css/add-plugin-dialog.css")
 
         subscribe<ChunkingStepSelectedEvent> {
             viewModel.navigateStep(it.step)
