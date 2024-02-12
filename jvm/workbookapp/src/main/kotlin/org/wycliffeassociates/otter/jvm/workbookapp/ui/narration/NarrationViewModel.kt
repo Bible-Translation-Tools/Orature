@@ -161,9 +161,11 @@ class NarrationViewModel : ViewModel() {
 
         hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
         lastRecordedVerseProperty.bind(recordedVerses.sizeProperty)
-        hasAllItemsRecordedProperty.bind(recordedVerses.booleanBinding {
-            narration.versesWithRecordings().all { true }
-        })
+        hasAllItemsRecordedProperty.bind(
+            booleanBinding(recordedVerses, narratableList) {
+                recordedVerses.isNotEmpty() && recordedVerses.size == narratableList.size
+            }
+        )
 
         subscribe<AppCloseRequestEvent> {
             logger.info("Received close event request")
