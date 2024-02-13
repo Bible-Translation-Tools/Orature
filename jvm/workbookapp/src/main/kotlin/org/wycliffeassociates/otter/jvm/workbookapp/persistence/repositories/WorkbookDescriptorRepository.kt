@@ -117,30 +117,41 @@ class WorkbookDescriptorRepository @Inject constructor(
     ): Double {
         return when (mode) {
             ProjectMode.TRANSLATION -> {
-                val chapters = collectionRepository.getChildren(target)
-                    .flattenAsObservable { it }
-                    .flatMapSingle { chapter ->
-                        contentRepository.getCollectionMetaContent(chapter)
-                    }
-                    .blockingIterable().toList()
-
-                chapters.count { it.selectedTake != null }.toDouble() / chapters.size
+                calculateTranslationProgress(target)
             }
-            else -> {
-                val workbook = workbookRepository.get(source, target)
-                if (workbook.projectFilesAccessor.isInitialized()) {
-                    val chapterProgress = workbook.target.chapters
-                        .toList()
-                        .blockingGet()
-                        .map {
-                            projectCompletionStatus.getChapterNarrationProgress(workbook, it)
-                        }
+            ProjectMode.NARRATION, ProjectMode.DIALECT -> {
+                calculateNarrationProgress(source, target)
+            }
+        }
+    }
 
-                    chapterProgress.count { it == 1.0 }.toDouble() / chapterProgress.size
-                } else {
-                    0.0
+    private fun calculateTranslationProgress(target: Collection): Double {
+        val chapters = collectionRepository.getChildren(target)
+            .flattenAsObservable { it }
+            .flatMapSingle { chapter ->
+                contentRepository.getCollectionMetaContent(chapter)
+            }
+            .blockingIterable().toList()
+
+        return chapters.count { it.selectedTake != null }.toDouble() / chapters.size
+    }
+
+    private fun calculateNarrationProgress(
+        source: Collection,
+        target: Collection
+    ): Double {
+        val workbook = workbookRepository.get(source, target)
+        return if (workbook.projectFilesAccessor.isInitialized()) {
+            val chapterProgress = workbook.target.chapters
+                .toList()
+                .blockingGet()
+                .map {
+                    projectCompletionStatus.getChapterNarrationProgress(workbook, it)
                 }
-            }
+
+            chapterProgress.count { it == 1.0 }.toDouble() / chapterProgress.size
+        } else {
+            0.0
         }
     }
 
