@@ -114,8 +114,8 @@ class NarrationHeader : View() {
                     popupMenu.y = screenBound.maxY - 25
                 }
 
-                prevDisabledProperty.bind(viewModel.hasPreviousChapter.not())
-                nextDisabledProperty.bind(viewModel.hasNextChapter.not())
+                prevDisabledProperty.bind(viewModel.hasPreviousChapter.not().or(viewModel.isRecordingProperty))
+                nextDisabledProperty.bind(viewModel.hasNextChapter.not().or(viewModel.isRecordingProperty))
 
                 setOnPreviousChapter {
                     viewModel.selectPreviousChapter()
