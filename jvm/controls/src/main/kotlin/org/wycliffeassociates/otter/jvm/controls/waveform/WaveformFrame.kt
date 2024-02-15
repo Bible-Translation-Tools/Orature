@@ -27,7 +27,6 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.effect.ColorAdjust
 import javafx.scene.image.Image
-import javafx.scene.image.ImageView
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Region

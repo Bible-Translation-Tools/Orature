@@ -30,10 +30,12 @@ import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
+import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
@@ -71,6 +73,7 @@ class TranslationViewModel2 : ViewModel() {
     val chunkListProperty = SimpleListProperty<ChunkViewData>(chunkList)
     val selectedChunkBinding = workbookDataStore.activeChunkProperty.integerBinding { it?.sort ?: -1 }
     val loadingStepProperty = SimpleBooleanProperty(false)
+    val pluginOpenedProperty = SimpleBooleanProperty(false)
 
     private val compositeDisposable = CompositeDisposable()
 
@@ -88,9 +91,11 @@ class TranslationViewModel2 : ViewModel() {
 
     fun undockPage() {
         selectedStepProperty.set(null)
-        workbookDataStore.activeChapterProperty.set(null)
+        if (!pluginOpenedProperty.value) {
+            workbookDataStore.activeChapterProperty.set(null)
+            audioDataStore.closePlayers()
+        }
         compositeDisposable.clear()
-        audioDataStore.closePlayers()
         resetUndoRedo()
     }
 
@@ -103,6 +108,8 @@ class TranslationViewModel2 : ViewModel() {
     }
 
     fun navigateChapter(chapter: Int) {
+        FX.eventbus.fire(TranslationNavigationEvent())
+
         selectedStepProperty.set(null)
         noSourceAudioProperty.set(false)
         showAudioMissingViewProperty.set(false)
@@ -120,6 +127,8 @@ class TranslationViewModel2 : ViewModel() {
     }
 
     fun navigateStep(target: ChunkingStep) {
+        FX.eventbus.fire(TranslationNavigationEvent())
+
         if (!loadingStepProperty.value) {
             loadingStepProperty.set(true)
             runLater {
@@ -174,23 +183,24 @@ class TranslationViewModel2 : ViewModel() {
             .chunks
             .observeOnFx()
             .subscribe { list ->
+                val chunkList = list.filter { it.contentType == ContentType.TEXT }
                 when {
-                    list.isEmpty() -> {
+                    chunkList.isEmpty() -> {
                         reachableStepProperty.set(ChunkingStep.CHUNKING)
                     }
-                    list.all { it.checkingStatus() == CheckingStatus.VERSE } -> {
+                    chunkList.all { it.checkingStatus() == CheckingStatus.VERSE } -> {
                         reachableStepProperty.set(ChunkingStep.FINAL_REVIEW)
                     }
-                    list.all { it.checkingStatus().ordinal >= CheckingStatus.KEYWORD.ordinal } -> {
+                    chunkList.all { it.checkingStatus().ordinal >= CheckingStatus.KEYWORD.ordinal } -> {
                         reachableStepProperty.set(ChunkingStep.VERSE_CHECK)
                     }
-                    list.all { it.checkingStatus().ordinal >= CheckingStatus.PEER_EDIT.ordinal } -> {
+                    chunkList.all { it.checkingStatus().ordinal >= CheckingStatus.PEER_EDIT.ordinal } -> {
                         reachableStepProperty.set(ChunkingStep.KEYWORD_CHECK)
                     }
-                    list.all { it.hasSelectedAudio() } -> {
+                    chunkList.all { it.hasSelectedAudio() } -> {
                         reachableStepProperty.set(ChunkingStep.PEER_EDIT)
                     }
-                    list.isNotEmpty() -> {
+                    chunkList.isNotEmpty() -> {
                         reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
                     }
                 }
@@ -266,6 +276,7 @@ class TranslationViewModel2 : ViewModel() {
         val chapterHasChunks = chapter
             .chunks
             .take(1)
+            .map { chunks -> chunks.filter { it.contentType == ContentType.TEXT } }
             .blockingFirst()
             .isNotEmpty()
 

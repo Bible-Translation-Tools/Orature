@@ -29,6 +29,7 @@ import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
+import org.wycliffeassociates.otter.common.data.primitives.ContentType.TITLE
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.META
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.TEXT
 import org.wycliffeassociates.otter.common.data.primitives.Language
@@ -139,10 +140,11 @@ class TestProjectImport {
                 RowCount(
                     contents = mapOf(
                         META to 2378,
-                        TEXT to 31124
+                        TEXT to 31124,
+                        TITLE to 2445
                     ),
                     collections = 2511,
-                    links = 0
+                    links = 1255
                 )
             )
 
@@ -163,10 +165,11 @@ class TestProjectImport {
                 RowCount(
                     contents = mapOf(
                         META to 2378,
-                        TEXT to 31124
+                        TEXT to 31124,
+                        TITLE to 2445
                     ),
                     collections = 2511,
-                    links = 0
+                    links = 1255
                 )
             )
 

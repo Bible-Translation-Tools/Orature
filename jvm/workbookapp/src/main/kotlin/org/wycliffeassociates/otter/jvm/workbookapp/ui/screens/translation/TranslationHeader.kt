@@ -28,7 +28,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.chapterselector.chapterSelector
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToPreviousChapterEvent
-import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.OpenInPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
@@ -44,6 +44,7 @@ class TranslationHeader : HBox() {
     val canRedoProperty = SimpleBooleanProperty(false)
     val canGoNextProperty = SimpleBooleanProperty(false)
     val canGoPreviousProperty = SimpleBooleanProperty(false)
+    val canOpenInProperty = SimpleBooleanProperty(false)
     val chapterList = observableListOf<ChapterGridItemData>()
     private val popupMenu = ChapterSelectorPopup()
 
@@ -79,6 +80,18 @@ class TranslationHeader : HBox() {
                 setOnAction {
                     FX.eventbus.fire(RedoChunkingPageEvent())
                 }
+            }
+            button {
+                addClass("btn", "btn--secondary")
+                tooltip = tooltip(messages["openIn"])
+                graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
+
+                setOnAction {
+                    FX.eventbus.fire(OpenInPluginEvent())
+                }
+
+                visibleProperty().bind(canOpenInProperty)
+                managedProperty().bind(visibleProperty())
             }
             chapterSelector {
                 chapterTitleProperty.bind(this@TranslationHeader.chapterTitleProperty)

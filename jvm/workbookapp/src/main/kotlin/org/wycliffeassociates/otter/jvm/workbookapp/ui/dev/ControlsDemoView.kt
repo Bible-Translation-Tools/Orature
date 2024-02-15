@@ -18,7 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.dev
 
-import org.wycliffeassociates.otter.jvm.controls.RollingSourceText
+import org.wycliffeassociates.otter.jvm.controls.rollingtext.RollingSourceText
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 

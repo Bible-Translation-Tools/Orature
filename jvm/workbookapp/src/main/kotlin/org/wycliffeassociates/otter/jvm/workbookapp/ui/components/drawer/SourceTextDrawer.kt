@@ -28,8 +28,8 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.jvm.controls.RollingSourceText
-import org.wycliffeassociates.otter.jvm.controls.rollingSourceText
+import org.wycliffeassociates.otter.jvm.controls.rollingtext.RollingSourceText
+import org.wycliffeassociates.otter.jvm.controls.rollingtext.rollingSourceText
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 import java.text.MessageFormat
@@ -89,6 +89,7 @@ class SourceTextDrawer : VBox() {
                     MessageFormat.format(messages["licenseStatement"], it)
                 } ?: ""
             })
+            highlightedIndexProperty.bind(highlightedChunk)
             this.orientationProperty.bind(this@SourceTextDrawer.orientationProperty)
 
             visibleWhen { isCollapsedProperty.not() }

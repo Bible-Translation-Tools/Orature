@@ -95,6 +95,33 @@ class VersificationTreeBuilder @Inject constructor(
                     type = ContentType.META,
                     draftNumber = 1
                 )
+                val chapTitle = Content(
+                    sort = CHAPTER_TITLE_SORT,
+                    labelKey = ContentLabel.CHAPTER.value,
+                    start = 1,
+                    end = verses,
+                    selectedTake = null,
+                    text = null,
+                    format = FORMAT,
+                    type = ContentType.TITLE,
+                    draftNumber = 1
+                )
+                if (i == 1) {
+                    val bookContent = Content(
+                        sort = BOOK_TITLE_SORT,
+                        labelKey = "book",
+                        start = 1,
+                        end = verses,
+                        selectedTake = null,
+                        text = null,
+                        format = FORMAT,
+                        type = ContentType.TITLE,
+                        draftNumber = 1
+                    )
+                    chapterTree.addChild(OtterTreeNode(bookContent))
+                }
+
+                chapterTree.addChild(OtterTreeNode(chapTitle))
                 chapterTree.addChild(OtterTreeNode(chapChunk))
 
                 for (j in 1..verses) {

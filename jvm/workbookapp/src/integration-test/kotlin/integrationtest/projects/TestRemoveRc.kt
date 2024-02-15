@@ -24,6 +24,7 @@ import org.junit.Test
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.META
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.TEXT
+import org.wycliffeassociates.otter.common.data.primitives.ContentType.TITLE
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.DeleteResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.DeleteResult
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
@@ -60,9 +61,10 @@ class TestRemoveRc {
                     collections = 1257,
                     contents = mapOf(
                         META to 1189,
-                        TEXT to 31104
+                        TEXT to 31104,
+                        TITLE to 1255
                     ),
-                    links = 0
+                    links = 1255
                 ),
                 "Row count before delete doesn't match."
             )
@@ -97,9 +99,10 @@ class TestRemoveRc {
                     collections = 1257,
                     contents = mapOf(
                         META to 1189,
-                        TEXT to 31104
+                        TEXT to 31104,
+                        TITLE to 1255
                     ),
-                    links = 0
+                    links = 1255
                 ),
                 "Row count before delete doesn't match."
             )
@@ -125,9 +128,10 @@ class TestRemoveRc {
                     collections = 1324,
                     contents = mapOf(
                         META to 1189,
-                        TEXT to 31104
+                        TEXT to 31104,
+                        TITLE to 1255
                     ),
-                    links = 0
+                    links = 1255
                 )
             )
     }

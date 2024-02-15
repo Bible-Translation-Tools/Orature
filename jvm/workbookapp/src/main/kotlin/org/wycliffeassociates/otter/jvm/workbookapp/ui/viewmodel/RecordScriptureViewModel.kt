@@ -52,7 +52,8 @@ import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.controls.model.StepDirection
-import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -197,9 +198,9 @@ class RecordScriptureViewModel : ViewModel() {
                         takeProperty.set(takeCardModel.take)
                         audioPlayerProperty.set(takeCardModel.audioPlayer)
                         markerModelProperty.set(
-                            VerseMarkerModel(
+                            MarkerPlacementModel(
+                                MarkerPlacementType.VERSE,
                                 OratureAudioFile(takeCardModel.take.file),
-                                verseCountProperty.value,
                                 listOf()
                             )
                         )

@@ -22,9 +22,6 @@ import io.reactivex.Single
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
-import org.wycliffeassociates.otter.common.data.audio.BookMarker
-import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
-import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
@@ -37,9 +34,7 @@ class SplitAudioOnCues @Inject constructor(private val directoryProvider: IDirec
     fun execute(file: File, initialMarker: AudioMarker): VerseSegments {
         val sourceAudio = OratureAudioFile(file)
         val cues = sourceAudio
-            .getMarker<BookMarker>()
-            .plus(sourceAudio.getMarker<ChapterMarker>())
-            .plus(sourceAudio.getMarker<VerseMarker>())
+            .getVerseAndTitleMarkers()
             .ifEmpty {
                 listOf(initialMarker)
             }

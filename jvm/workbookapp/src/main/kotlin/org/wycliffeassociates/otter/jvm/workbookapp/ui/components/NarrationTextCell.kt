@@ -51,7 +51,7 @@ class NarrationTextCell(
     private val isPlayingProperty: ObservableValue<Boolean>,
     private val recordingIndexProperty: IntegerProperty,
     private val playingVerseProperty: IntegerProperty,
-    private val highlightedVerseProperty: IntegerProperty
+    highlightedVerseProperty: IntegerProperty
 ) : ListCell<NarrationTextItemData>() {
 
     private val logger = LoggerFactory.getLogger(NarrationTextCell::class.java)

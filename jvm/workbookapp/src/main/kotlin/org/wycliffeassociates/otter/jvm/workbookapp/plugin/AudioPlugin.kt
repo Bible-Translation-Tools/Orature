@@ -128,6 +128,7 @@ class AudioPlugin(
                 listOf(
                     "--wav=$audioFilePath",
                     "--language=${pluginParameters.languageName}",
+                    "--book_slug=${pluginParameters.bookSlug}",
                     "--book=${pluginParameters.bookTitle}",
                     "--chapter=${pluginParameters.chapterLabel}",
                     "--chapter_number=${pluginParameters.chapterNumber}",

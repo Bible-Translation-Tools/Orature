@@ -41,6 +41,8 @@ import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.BookMarker
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.data.primitives.BOOK_TITLE_SORT
+import org.wycliffeassociates.otter.common.data.primitives.CHAPTER_TITLE_SORT
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.*
@@ -75,9 +77,6 @@ import javax.inject.Inject
 import kotlin.math.floor
 import kotlin.math.max
 
-private const val BOOK_TITLE_SORT = -2
-private const val CHAPTER_TITLE_SORT = -1
-
 class NarrationViewModel : ViewModel() {
     private lateinit var rendererAudioReader: AudioFileReader
     private val logger = LoggerFactory.getLogger(NarrationViewModel::class.java)
@@ -88,6 +87,7 @@ class NarrationViewModel : ViewModel() {
 
     @Inject
     lateinit var narrationFactory: NarrationFactory
+
     @Inject
     lateinit var appPreferencesRepo: IAppPreferencesRepository
 
@@ -141,11 +141,8 @@ class NarrationViewModel : ViewModel() {
     val totalAudioSizeProperty = SimpleIntegerProperty()
     private var onTaskRunnerIdle: () -> Unit = { }
 
-    //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
-    val numberOfTitlesProperty = SimpleIntegerProperty(0)
-    val hasAllVersesRecordedProperty = chunkTotalProperty
-        .eq(recordedVerses.sizeProperty.minus(numberOfTitlesProperty))
-    val potentiallyFinishedProperty = hasAllVersesRecordedProperty
+    val hasAllItemsRecordedProperty = SimpleBooleanProperty()
+    val potentiallyFinishedProperty = hasAllItemsRecordedProperty
         .and(isRecordingProperty.not())
         .and(isRecordingAgainProperty.not())
         .and(chapterTakeProperty.isNull)
@@ -164,6 +161,11 @@ class NarrationViewModel : ViewModel() {
 
         hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
         lastRecordedVerseProperty.bind(recordedVerses.sizeProperty)
+        hasAllItemsRecordedProperty.bind(
+            booleanBinding(recordedVerses, narratableList) {
+                recordedVerses.isNotEmpty() && recordedVerses.size == narratableList.size
+            }
+        )
 
         subscribe<AppCloseRequestEvent> {
             logger.info("Received close event request")
@@ -181,7 +183,6 @@ class NarrationViewModel : ViewModel() {
 
         narratableList.bind(chunksList) { chunk ->
 
-            //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
             val marker = when (chunk.sort) {
                 BOOK_TITLE_SORT -> recordedVerses.firstOrNull { it is BookMarker }
                 CHAPTER_TITLE_SORT -> recordedVerses.firstOrNull { it is ChapterMarker }
@@ -208,7 +209,6 @@ class NarrationViewModel : ViewModel() {
         recordedVerses.onChange {
             narratableList.forEachIndexed { idx, chunk ->
 
-                //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
                 val hasRecording = when (chunk.chunk.sort) {
                     BOOK_TITLE_SORT -> recordedVerses.any { it is BookMarker }
                     CHAPTER_TITLE_SORT -> recordedVerses.any { it is ChapterMarker }
@@ -421,14 +421,6 @@ class NarrationViewModel : ViewModel() {
             )
         )
 
-        chapter
-            .chunkCount
-            .toObservable()
-            .observeOnFx()
-            .subscribe {
-                chunkTotalProperty.set(it)
-            }
-
         workbookDataStore.activeChapterProperty.set(chapter)
         initializeNarration(chapter)
 
@@ -453,27 +445,29 @@ class NarrationViewModel : ViewModel() {
                 chapter.chunks.take(1)
             }
             .flatMap { it }
-            .map { insertTitles(chapter, it) }
+            .map { injectChapterTitleText(chapter, it) }
             .observeOnFx()
             .subscribe(
-                { chunksList.setAll(it) },
+                { chunks ->
+                    chunksList.setAll(chunks)
+                    chunkTotalProperty.set(chunks.size)
+                },
                 {},
                 { resetTeleprompter() }
             )
     }
 
     /**
-     * //FIXME remove this if and when titles are added to the database/workbook
-     *
-     * Inserts a Chunk for the Book and Chapter titles since the database and workbook do not have this data
+     * Injects chapter title text since the source may not have it.
      */
-    private fun insertTitles(chapter: Chapter, chunks: List<Chunk>): List<Chunk> {
-        val chunksWithTitles = chunks.toMutableList()
-        val chapterTitle = chapterTitleProperty.value
-        var numberOfTitles = 1
-        chunksWithTitles.add(
-            0,
-            Chunk(
+    private fun injectChapterTitleText(chapter: Chapter, chunks: List<Chunk>): List<Chunk> {
+        val indexOfChapterTitle = chunks.indexOfFirst {
+            it.sort == -1 && it.contentType == ContentType.TITLE && it.textItem.text == ""
+        }
+        if (indexOfChapterTitle >= 0) {
+            val updatedChunks = chunks.toMutableList()
+            val chapterTitle = chapterTitleProperty.value
+            val updatedChapterTitle = Chunk(
                 CHAPTER_TITLE_SORT,
                 chapter.label,
                 AssociatedAudio(ReplayRelay.create()),
@@ -485,29 +479,11 @@ class NarrationViewModel : ViewModel() {
                 1,
                 ContentType.TITLE
             )
-        )
-        val addBookTitle = chapter.sort == 1
-        if (addBookTitle) {
-            val book = workbookDataStore.workbook.source
-            chunksWithTitles.add(
-                0,
-                Chunk(
-                    BOOK_TITLE_SORT,
-                    book.label,
-                    AssociatedAudio(ReplayRelay.create()),
-                    listOf(),
-                    TextItem(book.title, MimeType.USFM),
-                    1,
-                    chunks.size,
-                    false,
-                    1,
-                    ContentType.TITLE
-                )
-            )
-            numberOfTitles = 2
+            updatedChunks[indexOfChapterTitle] = updatedChapterTitle
+            return updatedChunks
+        } else {
+            return chunks
         }
-        numberOfTitlesProperty.set(numberOfTitles)
-        return chunksWithTitles
     }
 
     private fun clearTeleprompter() {
@@ -515,6 +491,7 @@ class NarrationViewModel : ViewModel() {
             chunk.state = TeleprompterItemState.RECORD_DISABLED
         }
         narratableList[0].state = TeleprompterItemState.RECORD
+        narratableList.setAll(narratableList.toList())
         refreshTeleprompter()
         FX.eventbus.fire(TeleprompterSeekEvent(0))
     }
@@ -535,7 +512,7 @@ class NarrationViewModel : ViewModel() {
             scrollToVerse = lastIndex
         }
 
-        narratableList.setAll(narratableList.map { it })
+        narratableList.setAll(narratableList.toList())
 
         refreshTeleprompter()
         FX.eventbus.fire(TeleprompterSeekEvent(scrollToVerse))
@@ -889,7 +866,9 @@ class NarrationViewModel : ViewModel() {
 
     fun drawVolumebar(context: GraphicsContext, canvas: Canvas) {
         if (::renderer.isInitialized) {
-            volumeBar.draw(context, canvas)
+            runLater {
+                volumeBar.draw(context, canvas)
+            }
         }
     }
 

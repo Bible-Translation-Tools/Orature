@@ -94,7 +94,7 @@ class NarrationHeader : View() {
             narrationMenuButton(
                 viewModel.hasChapterTakeProperty,
                 viewModel.hasVersesProperty,
-                viewModel.hasAllVersesRecordedProperty
+                viewModel.hasAllItemsRecordedProperty
             ) {
                 enableWhen(viewModel.chapterTakeBusyProperty.not().and(viewModel.isRecordingProperty.not()))
             }
@@ -114,8 +114,8 @@ class NarrationHeader : View() {
                     popupMenu.y = screenBound.maxY - 25
                 }
 
-                prevDisabledProperty.bind(viewModel.hasPreviousChapter.not())
-                nextDisabledProperty.bind(viewModel.hasNextChapter.not())
+                prevDisabledProperty.bind(viewModel.hasPreviousChapter.not().or(viewModel.isRecordingProperty))
+                nextDisabledProperty.bind(viewModel.hasNextChapter.not().or(viewModel.isRecordingProperty))
 
                 setOnPreviousChapter {
                     viewModel.selectPreviousChapter()
@@ -149,7 +149,7 @@ class NarrationHeaderViewModel : ViewModel() {
     val hasNextChapter = SimpleBooleanProperty()
     val hasPreviousChapter = SimpleBooleanProperty()
     val hasVersesProperty = SimpleBooleanProperty()
-    val hasAllVersesRecordedProperty = SimpleBooleanProperty()
+    val hasAllItemsRecordedProperty = SimpleBooleanProperty()
     val chapterTakeProperty = SimpleObjectProperty<Take>()
     val hasChapterTakeProperty = chapterTakeProperty.isNotNull
     val chapterTakeBusyProperty = SimpleBooleanProperty()
@@ -182,7 +182,7 @@ class NarrationHeaderViewModel : ViewModel() {
         hasUndoProperty.bind(narrationViewModel.hasUndoProperty)
         hasRedoProperty.bind(narrationViewModel.hasRedoProperty)
         hasVersesProperty.bind(narrationViewModel.hasVersesProperty)
-        hasAllVersesRecordedProperty.bind(narrationViewModel.hasAllVersesRecordedProperty)
+        hasAllItemsRecordedProperty.bind(narrationViewModel.hasAllItemsRecordedProperty)
     }
 
     private enum class StepDirection {

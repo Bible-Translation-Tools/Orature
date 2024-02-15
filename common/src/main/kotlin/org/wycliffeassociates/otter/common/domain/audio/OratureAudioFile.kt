@@ -96,6 +96,12 @@ class OratureAudioFile : AudioFile {
         }
     }
 
+    fun getVerseAndTitleMarkers(): List<AudioMarker> {
+        return getMarker<BookMarker>()
+            .plus(getMarker<ChapterMarker>())
+            .plus(getMarker<VerseMarker>())
+    }
+
     inline fun <reified T: AudioMarker> getMarker(): List<T> {
         val type = T::class
         val enum = getMarkerTypeFromClass(type)

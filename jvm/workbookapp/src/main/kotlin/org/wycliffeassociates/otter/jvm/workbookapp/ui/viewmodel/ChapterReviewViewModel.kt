@@ -25,6 +25,7 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.PublishSubject
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
@@ -34,8 +35,9 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
+import org.wycliffeassociates.otter.common.data.audio.AudioMarker
+import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
@@ -45,8 +47,11 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.ChapterTranslationBuilder
-import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
-import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
+import org.wycliffeassociates.otter.common.domain.content.PluginActions
+import org.wycliffeassociates.otter.common.domain.model.MarkerItem
+import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
@@ -54,6 +59,9 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuil
 import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.SnackBarEvent
 import tornadofx.*
 import java.text.MessageFormat
 import javax.inject.Inject
@@ -76,10 +84,11 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
-    val translationViewModel: TranslationViewModel2 by inject()
+    val audioPluginViewModel: AudioPluginViewModel by inject()
+    private val translationViewModel: TranslationViewModel2 by inject()
 
-    override var markerModel: VerseMarkerModel? = null
-    override val markers = observableListOf<ChunkMarkerModel>()
+    override var markerModel: MarkerPlacementModel? = null
+    override val markers = observableListOf<MarkerItem>()
 
     override val markerCountProperty = markers.sizeProperty
     override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
@@ -100,7 +109,8 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     private val height = Integer.min(Screen.getMainScreen().platformHeight, WAVEFORM_MAX_HEIGHT.toInt())
     private val builder = ObservableWaveformBuilder()
 
-    var subscribeOnWaveformImages: () -> Unit = {}
+    var subscribeOnWaveformImagesProperty = SimpleObjectProperty {}
+    val cleanupWaveformProperty = SimpleObjectProperty {}
 
     val chapterTitleProperty = workbookDataStore.activeChapterTitleBinding()
     val sourcePlayerProperty = SimpleObjectProperty<IAudioPlayer>()
@@ -112,15 +122,20 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     )
     val isPlayingProperty = SimpleBooleanProperty(false)
     val compositeDisposable = CompositeDisposable()
+    val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
+    private val pluginOpenedProperty = SimpleBooleanProperty(false)
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+
+        translationViewModel.pluginOpenedProperty.bind(pluginOpenedProperty)
     }
 
     fun dock() {
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
         workbookDataStore.activeChunkProperty.set(null)
+        translationViewModel.currentMarkerProperty.bind(currentMarkerNumberProperty)
 
         Completable
             .fromAction {
@@ -148,13 +163,17 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     fun undock() {
         pauseAudio()
         audioDataStore.stopPlayers()
-        audioDataStore.closePlayers()
+        if (!pluginOpenedProperty.value) {
+            audioDataStore.closePlayers()
+        }
         waveformAudioPlayerProperty.value?.stop()
         waveformAudioPlayerProperty.value?.close()
         markerModel
             ?.writeMarkers()
             ?.blockingAwait()
 
+        translationViewModel.currentMarkerProperty.unbind()
+        translationViewModel.currentMarkerProperty.set(-1)
         cleanup()
     }
 
@@ -200,6 +219,55 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             }
     }
 
+    fun cleanupWaveform() {
+        cleanupWaveformProperty.value.invoke()
+    }
+
+    fun subscribeOnWaveformImages() {
+        subscribeOnWaveformImagesProperty.value.invoke()
+    }
+
+    fun processWithPlugin() {
+        workbookDataStore.chapter.getSelectedTake()?.let { take ->
+            workbookDataStore.activeChapterProperty.value?.audio?.let { audio ->
+                val pluginType = PluginType.EDITOR
+                workbookDataStore.activeTakeNumberProperty.set(take.number)
+                audioPluginViewModel
+                    .getPlugin(pluginType)
+                    .doOnError { e ->
+                        logger.error("Error in processing take with plugin type: $pluginType, ${e.message}")
+                        e.printStackTrace()
+                    }
+                    .flatMapSingle { plugin ->
+                        pluginOpenedProperty.set(true)
+                        fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
+                        audioPluginViewModel.edit(audio, take)
+                    }
+                    .observeOnFx()
+                    .doOnError { e ->
+                        logger.error("Error in processing take with plugin type: $pluginType - $e")
+                        e.printStackTrace()
+                    }
+                    .onErrorReturn { PluginActions.Result.NO_PLUGIN }
+                    .subscribe { result: PluginActions.Result ->
+                        logger.info("Returned from plugin with result: $result")
+                        FX.eventbus.fire(PluginClosedEvent(pluginType))
+
+                        when (result) {
+                            PluginActions.Result.NO_PLUGIN -> FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
+                            else -> {
+                                // noop }
+                            }
+                        }
+                    }
+            }
+        }
+    }
+
+    fun snackBarMessage(message: String) {
+        snackBarObservable.onNext(message)
+    }
+
     private fun loadChapterTake() {
         chapterTranslationBuilder
             .getOrCompile(
@@ -215,7 +283,10 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                 translationViewModel.loadingStepProperty.set(false)
             }
             .subscribe { audio ->
-                loadVerseMarkers(audio)
+                val sourceAudio = audioDataStore.sourceAudioProperty.value
+                    ?.let { OratureAudioFile(it.file) }
+
+                loadVerseMarkers(audio, sourceAudio)
                 createWaveformImages(audio)
                 subscribeOnWaveformImages()
             }
@@ -240,39 +311,65 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             .subscribeOn(Schedulers.io())
     }
 
-    private fun loadVerseMarkers(audio: OratureAudioFile) {
+    private fun loadVerseMarkers(audio: OratureAudioFile, sourceAudio: OratureAudioFile?) {
         markers.clear()
-        val markerList = audio.getMarker<VerseMarker>().map {
-            ChunkMarkerModel(AudioCue(it.location, it.label))
-        }
-        val wb = workbookDataStore.workbook
-        val verseLabels = wb.projectFilesAccessor.getChapterContent(
-            wb.target.slug,
-            workbookDataStore.chapter.sort
-        ).map { content ->
-            if (content.start != content.end) {
-                "${content.start}-${content.end}"
-            } else {
-                "${content.start}"
-            }
-        }
+        val sourceMarkers = getSourceMarkers(sourceAudio)
+        val placedMarkers = audio.getVerseAndTitleMarkers()
+                .map { MarkerItem(it, true) }
 
-        totalMarkersProperty.set(verseLabels.size)
-        markerModel = VerseMarkerModel(
+        totalMarkersProperty.set(sourceMarkers.size)
+        markerModel = MarkerPlacementModel(
+            MarkerPlacementType.VERSE,
             audio,
-            verseLabels.size,
-            verseLabels
+            sourceMarkers.map { it.clone(0) }
         ).also {
-            it.loadMarkers(markerList)
+            it.loadMarkers(placedMarkers)
         }
-        markers.setAll(markerList)
+        markers.setAll(placedMarkers)
         markers.sortBy { it.frame }
+    }
+
+    private fun getSourceMarkers(sourceAudio: OratureAudioFile?): List<AudioMarker> {
+        return when {
+            sourceAudio != null && hasUserDefinedChunks() -> {
+                sourceAudio.getVerseAndTitleMarkers()
+            }
+
+            /* no user-defined chunks found, this means project was migrated from Ot1, only have verse markers */
+            sourceAudio != null -> sourceAudio.getMarker<VerseMarker>()
+
+            else -> getMarkersFromText() // no source audio, create markers from text
+        }
+    }
+
+    private fun hasUserDefinedChunks(): Boolean {
+        val workbook = workbookDataStore.workbook
+        val chapter = workbookDataStore.chapter
+        val chunkedAudio = workbook.sourceAudioAccessor
+            .getUserMarkedChapter(chapter.sort, workbook.target)
+            ?: return false
+
+        val chunkMarkers = OratureAudioFile(chunkedAudio.file)
+            .getMarker<ChunkMarker>()
+
+        return chunkMarkers.isNotEmpty()
+    }
+
+    private fun getMarkersFromText(): List<VerseMarker> {
+        return workbookDataStore.workbook.projectFilesAccessor
+            .getChapterContent(
+                workbookDataStore.workbook.target.slug,
+                workbookDataStore.chapter.sort
+            ).map { content ->
+                VerseMarker(content.start, content.end, 0)
+            }
     }
 
     private fun cleanup() {
         builder.cancel()
         compositeDisposable.clear()
         markerModel = null
+        cleanupWaveform()
     }
 
     private fun createWaveformImages(audio: OratureAudioFile) {

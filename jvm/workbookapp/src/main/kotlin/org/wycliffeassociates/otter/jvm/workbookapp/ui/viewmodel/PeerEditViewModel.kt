@@ -30,6 +30,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -74,8 +75,8 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     val disposable = CompositeDisposable()
 
     lateinit var waveform: Observable<Image>
-    var subscribeOnWaveformImages: () -> Unit = {}
-    var cleanUpWaveform: () -> Unit = {}
+    var subscribeOnWaveformImagesProperty = SimpleObjectProperty {}
+    val cleanupWaveformProperty = SimpleObjectProperty {}
     private var audioController: AudioPlayerController? = null
 
     override var sampleRate: Int = 0 // beware of divided by 0
@@ -125,12 +126,15 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         disposableListeners.forEach { it.dispose() }
         disposableListeners.clear()
         actionHistory.clear()
+        cleanupWaveform()
     }
 
     fun refreshChunkList() {
         workbookDataStore.activeChapterProperty.value?.let { chapter ->
             chapter.chunks.value?.let { chunks ->
-                translationViewModel.loadChunks(chunks)
+                translationViewModel.loadChunks(
+                    chunks.filter { it.contentType == ContentType.TEXT }
+                )
             }
         }
     }
@@ -218,9 +222,20 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         }
     }
 
+    fun cleanupWaveform() {
+        cleanupWaveformProperty.value.invoke()
+    }
+
+    fun subscribeOnWaveformImages() {
+        subscribeOnWaveformImagesProperty.value.invoke()
+    }
+
     private fun subscribeToChunks() {
         workbookDataStore.chapter
             .chunks
+            .map { contents ->
+                contents.filter { it.contentType == ContentType.TEXT } // omit titles
+            }
             .observeOnFx()
             .subscribe { chunks ->
                 translationViewModel.loadChunks(chunks)
@@ -259,7 +274,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     }
 
     private fun createWaveformImages(audio: OratureAudioFile) {
-        cleanUpWaveform()
+        cleanupWaveform()
         imageWidthProperty.set(computeImageWidth(width))
 
         builder.cancel()

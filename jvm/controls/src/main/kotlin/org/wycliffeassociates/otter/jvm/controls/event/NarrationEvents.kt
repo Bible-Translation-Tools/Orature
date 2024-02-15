@@ -19,8 +19,6 @@
 package org.wycliffeassociates.otter.jvm.controls.event
 
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
-import org.wycliffeassociates.otter.common.data.audio.VerseMarker
-import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import tornadofx.FXEvent
 

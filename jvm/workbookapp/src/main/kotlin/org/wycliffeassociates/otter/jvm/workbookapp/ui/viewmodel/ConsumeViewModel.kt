@@ -34,9 +34,10 @@ import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
-import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
@@ -60,10 +61,11 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
 
     lateinit var waveform: Observable<Image>
 
-    var subscribeOnWaveformImages: () -> Unit = {}
+    var subscribeOnWaveformImagesProperty = SimpleObjectProperty {}
+    val cleanupWaveformProperty = SimpleObjectProperty {}
 
-    override var markerModel: VerseMarkerModel? = null
-    override val markers = observableListOf<ChunkMarkerModel>()
+    override var markerModel: MarkerPlacementModel? = null
+    override val markers = observableListOf<MarkerItem>()
     override val markerCountProperty = markers.sizeProperty
     override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
     override var resumeAfterScroll: Boolean = false
@@ -126,9 +128,13 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     private fun loadSourceMarkers(audio: OratureAudioFile) {
         audio.clearCues()
         val verseMarkers = audio.getMarker<VerseMarker>()
-        markerModel = VerseMarkerModel(audio, verseMarkers.size, verseMarkers.map { it.label })
+        markerModel = MarkerPlacementModel(
+            MarkerPlacementType.VERSE,
+            audio,
+            verseMarkers.map { it }
+        )
         markerModel?.let { markerModel ->
-            markers.setAll(markerModel.markers)
+            markers.setAll(markerModel.markerItems)
         }
     }
 
@@ -150,6 +156,15 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
         builder.cancel()
         compositeDisposable.clear()
         markerModel = null
+        cleanupWaveform()
+    }
+
+    fun cleanupWaveform() {
+        cleanupWaveformProperty.value.invoke()
+    }
+
+    fun subscribeOnWaveformImages() {
+        subscribeOnWaveformImagesProperty.value.invoke()
     }
 
     private fun loadAudio(audioFile: File): OratureAudioFile {

@@ -32,7 +32,7 @@ import tornadofx.*
 class ChapterSelector : Control() {
     val chapterTitleProperty = SimpleStringProperty()
     val onChapterSelectorOpenedProperty =
-        SimpleObjectProperty<EventHandler<ActionEvent>>() // TODO: change this to a button so I get the ActionEvent
+        SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onPrevChapterActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onNextChapterActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val prevDisabledProperty = SimpleBooleanProperty()
