@@ -21,9 +21,7 @@ package org.wycliffeassociates.otter.jvm.controls.button
 import javafx.animation.Animation
 import javafx.animation.PauseTransition
 import javafx.event.EventTarget
-import javafx.scene.Node
 import javafx.scene.control.Button
-import javafx.scene.control.ButtonBase
 import javafx.util.Duration
 import tornadofx.*
 
@@ -37,7 +35,7 @@ private const val DEFAULT_COOL_DOWN_MILLIS = 500.0
  * Example use case: when double-clicking or multi-clicking is not desirable.
  */
 class DebouncedButton : Button {
-    private val pauseTransition = PauseTransition(Duration.millis(DEFAULT_COOL_DOWN_MILLIS))
+    private val coolDownTransition = PauseTransition(Duration.millis(DEFAULT_COOL_DOWN_MILLIS))
 
     constructor(text: String) : super(text)
 
@@ -48,20 +46,20 @@ class DebouncedButton : Button {
         setCoolDownDuration(coolDownMillis)
     }
 
+    fun setCoolDownDuration(millis: Double) {
+        coolDownTransition.duration = Duration.millis(millis)
+    }
+
     fun setOnAction(op: () -> Unit) {
         super.setOnAction {
-            if (pauseTransition.status != Animation.Status.RUNNING) {
+            if (coolDownTransition.status != Animation.Status.RUNNING) {
                 op()
-                pauseTransition.playFromStart()
+                coolDownTransition.playFromStart()
             }
         }
     }
 
     fun action(op: () -> Unit) = this.setOnAction(op)
-
-    fun setCoolDownDuration(millis: Double) {
-        pauseTransition.duration = Duration.millis(millis)
-    }
 }
 
 /**
