@@ -216,4 +216,9 @@ class WorkbookDataStore : Component(), ScopedInstance {
                     }
             }
     }
+
+    fun updateLastSelectedChapter(chapterNumber: Int) {
+        val workbookHash = workbook.hashCode()
+        workbookRecentChapterMap[workbookHash] = chapterNumber
+    }
 }

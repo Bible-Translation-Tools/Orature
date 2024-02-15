@@ -310,8 +310,13 @@ class NarrationViewModel : ViewModel() {
                 logger.error("Error in getting the chapter list", e)
             }
             .map { list ->
-                val chapterToResume = list.firstOrNull { !it.hasSelectedAudio() } ?: list.first()
-                val activeChapter = workbookDataStore.activeChapterProperty.value ?: chapterToResume
+                val recentChapter = workbookDataStore.workbookRecentChapterMap
+                    .getOrDefault(workbookDataStore.workbook.hashCode(), 1)
+
+                val activeChapter = workbookDataStore.activeChapterProperty.value
+                    ?: list.find { it.sort == recentChapter }
+                    ?: list.first()
+
                 workbookDataStore.activeChapterProperty.set(activeChapter)
                 chapterList.setAll(list)
                 activeChapter
@@ -422,6 +427,7 @@ class NarrationViewModel : ViewModel() {
         )
 
         workbookDataStore.activeChapterProperty.set(chapter)
+        workbookDataStore.updateLastSelectedChapter(chapter.sort)
         initializeNarration(chapter)
 
         chunksList.clear()

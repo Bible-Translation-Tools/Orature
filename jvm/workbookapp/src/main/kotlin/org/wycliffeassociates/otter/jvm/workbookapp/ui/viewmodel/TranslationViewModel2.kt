@@ -297,6 +297,7 @@ class TranslationViewModel2 : ViewModel() {
     }
 
     private fun updateChapterSelector(chapter: Int) {
+        workbookDataStore.updateLastSelectedChapter(chapter)
         workbookDataStore.workbook.target
             .chapters
             .toList()
