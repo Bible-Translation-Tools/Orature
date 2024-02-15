@@ -31,6 +31,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
+import org.wycliffeassociates.otter.jvm.controls.button.debouncedButton
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEvent
@@ -119,7 +120,7 @@ class ChapterReview : View() {
 
             hbox {
                 addClass("consume__bottom", "chunking-bottom__media-btn-group")
-                button(messages["addVerse"]) {
+                debouncedButton(messages["addVerse"], 700.0) {
                     addClass("btn", "btn--primary", "consume__btn")
                     tooltip(text)
                     graphic = FontIcon(MaterialDesign.MDI_PLUS)
