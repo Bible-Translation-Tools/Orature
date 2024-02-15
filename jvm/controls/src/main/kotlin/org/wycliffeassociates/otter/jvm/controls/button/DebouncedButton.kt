@@ -71,3 +71,21 @@ fun EventTarget.debouncedButton(
     coolDownMillis: Double = DEFAULT_COOL_DOWN_MILLIS,
     op: DebouncedButton.() -> Unit = {}
 ) = DebouncedButton(text, coolDownMillis).attachTo(this, op)
+
+
+/**
+ * Prevents repetitive actions triggered rapidly over a short period of time.
+ *
+ * Only calls this method **after** onActionProperty has been set. Otherwise, it will not take effect.
+ */
+fun Button.debounce(coolDownMillis: Double = DEFAULT_COOL_DOWN_MILLIS) {
+    val actionHandler = this.onActionProperty().value ?: return
+    val coolDownTransition = PauseTransition(Duration.millis(coolDownMillis))
+
+    this.setOnAction {
+        if (coolDownTransition.status != Animation.Status.RUNNING) {
+            actionHandler.handle(it)
+            coolDownTransition.playFromStart()
+        }
+    }
+}
