@@ -74,9 +74,9 @@ fun EventTarget.debouncedButton(
 
 
 /**
- * Prevents repetitive actions triggered rapidly over a short period of time.
+ * Prevents repetitive actions triggered rapidly over a short period of time on a button.
  *
- * Only calls this method **after** onActionProperty has been set. Otherwise, it will not take effect.
+ * Only call this method **after** onActionProperty has been set. Otherwise, it will not take effect.
  */
 fun Button.debounce(coolDownMillis: Double = DEFAULT_COOL_DOWN_MILLIS) {
     val actionHandler = this.onActionProperty().value ?: return
