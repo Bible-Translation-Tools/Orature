@@ -35,11 +35,13 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
+import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
@@ -48,6 +50,7 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.ChapterTranslationBuilder
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
+import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
@@ -63,7 +66,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.SnackBarEvent
 import tornadofx.*
+import java.io.File
 import java.text.MessageFormat
+import java.time.LocalDate
 import javax.inject.Inject
 import kotlin.collections.sortBy
 
@@ -228,10 +233,14 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     }
 
     fun processWithPlugin() {
-        workbookDataStore.chapter.getSelectedTake()?.let { take ->
-            workbookDataStore.activeChapterProperty.value?.audio?.let { audio ->
-                val pluginType = PluginType.EDITOR
+        val chapter = workbookDataStore.chapter
+        createDuplicateTake()
+            .observeOnFx()
+            .subscribe { take ->
                 workbookDataStore.activeTakeNumberProperty.set(take.number)
+                chapter.audio.insertTake(take)
+
+                val pluginType = PluginType.EDITOR
                 audioPluginViewModel
                     .getPlugin(pluginType)
                     .doOnError { e ->
@@ -241,7 +250,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                     .flatMapSingle { plugin ->
                         pluginOpenedProperty.set(true)
                         fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
-                        audioPluginViewModel.edit(audio, take)
+                        audioPluginViewModel.edit(chapter.audio, take)
                     }
                     .observeOnFx()
                     .doOnError { e ->
@@ -251,17 +260,23 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                     .onErrorReturn { PluginActions.Result.NO_PLUGIN }
                     .subscribe { result: PluginActions.Result ->
                         logger.info("Returned from plugin with result: $result")
-                        FX.eventbus.fire(PluginClosedEvent(pluginType))
-
                         when (result) {
                             PluginActions.Result.NO_PLUGIN -> FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
+                            PluginActions.Result.SUCCESS -> {
+                                take.checkingState.accept(
+                                    TakeCheckingState(
+                                        CheckingStatus.VERSE,
+                                        take.checksum()
+                                    )
+                                )
+                            }
                             else -> {
-                                // noop }
+                                // no-op
                             }
                         }
+                        FX.eventbus.fire(PluginClosedEvent(pluginType))
                     }
             }
-        }
     }
 
     fun snackBarMessage(message: String) {
@@ -292,7 +307,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             }
     }
 
-    private fun loadTargetAudio(take: Take) : Single<OratureAudioFile> {
+    private fun loadTargetAudio(take: Take): Single<OratureAudioFile> {
         return Single
             .fromCallable {
                 val audioPlayer: IAudioPlayer = audioConnectionFactory.getPlayer()
@@ -315,7 +330,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         markers.clear()
         val sourceMarkers = getSourceMarkers(sourceAudio)
         val placedMarkers = audio.getVerseAndTitleMarkers()
-                .map { MarkerItem(it, true) }
+            .map { MarkerItem(it, true) }
 
         totalMarkersProperty.set(sourceMarkers.size)
         markerModel = MarkerPlacementModel(
@@ -363,6 +378,49 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             ).map { content ->
                 VerseMarker(content.start, content.end, 0)
             }
+    }
+
+    private fun createDuplicateTake(): Single<Take> {
+        return workbookDataStore.chapter.let { chapter ->
+            val namer = WorkbookFileNamerBuilder.createFileNamer(
+                workbook = workbookDataStore.workbook,
+                chapter = workbookDataStore.chapter,
+                chunk = null,
+                recordable = chapter,
+                rcSlug = workbookDataStore.workbook.sourceMetadataSlug
+            )
+            val chapterAudioDir = workbookDataStore.workbook.projectFilesAccessor.audioDir
+                .resolve(namer.formatChapterNumber())
+                .apply { mkdirs() }
+
+            chapter.audio.getNewTakeNumber()
+                .map { takeNumber ->
+                    createNewTake(
+                        takeNumber,
+                        namer.generateName(takeNumber, AudioFileFormat.WAV),
+                        chapterAudioDir
+                    )
+                }
+        }
+    }
+
+    private fun createNewTake(
+        newTakeNumber: Int,
+        filename: String,
+        audioDir: File
+    ): Take {
+        val newTakeFile = audioDir.resolve(File(filename))
+        val chapterTake = workbookDataStore.chapter.getSelectedTake()!!
+        chapterTake.file.copyTo(newTakeFile, true)
+
+        val newTake = Take(
+            name = newTakeFile.name,
+            file = newTakeFile,
+            number = newTakeNumber,
+            format = MimeType.WAV,
+            createdTimestamp = LocalDate.now()
+        )
+        return newTake
     }
 
     private fun cleanup() {
