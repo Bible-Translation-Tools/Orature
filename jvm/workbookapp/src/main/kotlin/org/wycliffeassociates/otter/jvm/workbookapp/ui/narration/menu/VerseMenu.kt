@@ -64,7 +64,7 @@ class VerseMenu : ContextMenu() {
                 FX.eventbus.fire(RecordAgainEvent(verseIndexProperty.value))
             }
             disableWhen {
-                isRecordingProperty
+                isRecordingProperty.or(isRecordAgainPausedProperty)
             }
         }
 //        item(importVerseTextProperty.value) {
@@ -85,7 +85,7 @@ class VerseMenu : ContextMenu() {
                 FX.eventbus.fire(OpenInAudioPluginEvent(verseIndexProperty.value))
             }
             disableWhen {
-                isRecordingProperty
+                isRecordingProperty.or(isRecordAgainPausedProperty)
             }
         }
 
