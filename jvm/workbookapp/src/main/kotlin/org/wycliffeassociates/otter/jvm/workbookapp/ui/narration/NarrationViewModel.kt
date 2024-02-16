@@ -311,7 +311,7 @@ class NarrationViewModel : ViewModel() {
             }
             .map { list ->
                 val recentChapter = workbookDataStore.workbookRecentChapterMap
-                    .getOrDefault(workbookDataStore.workbook.hashCode(), 1)
+                    .getOrDefault(workbookDataStore.workbook, 1)
 
                 val activeChapter = workbookDataStore.activeChapterProperty.value
                     ?: list.find { it.sort == recentChapter }

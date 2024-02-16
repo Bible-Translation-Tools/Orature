@@ -83,7 +83,7 @@ class TranslationViewModel2 : ViewModel() {
 
     fun dockPage() {
         val recentChapter = workbookDataStore.workbookRecentChapterMap.getOrDefault(
-            workbookDataStore.workbook.hashCode(),
+            workbookDataStore.workbook,
             1
         )
         navigateChapter(recentChapter)
