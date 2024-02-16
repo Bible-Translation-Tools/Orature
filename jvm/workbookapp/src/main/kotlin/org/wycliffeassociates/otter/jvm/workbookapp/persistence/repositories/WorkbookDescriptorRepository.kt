@@ -24,11 +24,14 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
+import org.wycliffeassociates.otter.common.domain.project.ProjectCompletionStatus
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.WorkbookDescriptorEntity
 import javax.inject.Inject
@@ -36,12 +39,16 @@ import javax.inject.Inject
 class WorkbookDescriptorRepository @Inject constructor(
     database: AppDatabase,
     private val collectionRepository: ICollectionRepository,
-    private val contentRepository: IContentRepository
+    private val contentRepository: IContentRepository,
+    private val workbookRepository: IWorkbookRepository
 ) : IWorkbookDescriptorRepository {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val workbookDescriptorDao = database.workbookDescriptorDao
     private val workbookTypeDao = database.workbookTypeDao
+
+    @Inject
+    lateinit var projectCompletionStatus: ProjectCompletionStatus
 
     override fun getById(id: Int): Maybe<WorkbookDescriptor> {
         return Maybe
@@ -86,12 +93,12 @@ class WorkbookDescriptorRepository @Inject constructor(
     private fun buildWorkbookDescriptor(entity: WorkbookDescriptorEntity): WorkbookDescriptor {
         val targetCollection = collectionRepository.getProject(entity.targetFk).blockingGet()
         val sourceCollection = collectionRepository.getProject(entity.sourceFk).blockingGet()
-        val progress = getProgress(targetCollection)
         val hasSourceAudio = SourceAudioAccessor.hasSourceAudio(
             sourceCollection.resourceContainer!!,
             sourceCollection.slug
         )
         val mode = workbookTypeDao.fetchById(entity.typeFk)!!
+        val progress = getProgress(sourceCollection, targetCollection, mode)
 
         return WorkbookDescriptor(
             entity.id,
@@ -103,8 +110,23 @@ class WorkbookDescriptorRepository @Inject constructor(
         )
     }
 
-    private fun getProgress(collection: Collection): Double {
-        val chapters = collectionRepository.getChildren(collection)
+    private fun getProgress(
+        source: Collection,
+        target: Collection,
+        mode: ProjectMode
+    ): Double {
+        return when (mode) {
+            ProjectMode.TRANSLATION -> {
+                calculateTranslationProgress(target)
+            }
+            ProjectMode.NARRATION, ProjectMode.DIALECT -> {
+                calculateNarrationProgress(source, target)
+            }
+        }
+    }
+
+    private fun calculateTranslationProgress(target: Collection): Double {
+        val chapters = collectionRepository.getChildren(target)
             .flattenAsObservable { it }
             .flatMapSingle { chapter ->
                 contentRepository.getCollectionMetaContent(chapter)
@@ -112,6 +134,25 @@ class WorkbookDescriptorRepository @Inject constructor(
             .blockingIterable().toList()
 
         return chapters.count { it.selectedTake != null }.toDouble() / chapters.size
+    }
+
+    private fun calculateNarrationProgress(
+        source: Collection,
+        target: Collection
+    ): Double {
+        val workbook = workbookRepository.get(source, target)
+        return if (workbook.projectFilesAccessor.isInitialized()) {
+            val chapterProgress = workbook.target.chapters
+                .toList()
+                .blockingGet()
+                .map {
+                    projectCompletionStatus.getChapterNarrationProgress(workbook, it)
+                }
+
+            chapterProgress.count { it == 1.0 }.toDouble() / chapterProgress.size
+        } else {
+            0.0
+        }
     }
 
     private fun mapToEntity(obj: WorkbookDescriptor): WorkbookDescriptorEntity {
