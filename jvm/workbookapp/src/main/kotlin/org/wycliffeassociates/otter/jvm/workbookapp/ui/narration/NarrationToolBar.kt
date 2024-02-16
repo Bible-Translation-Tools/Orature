@@ -87,8 +87,12 @@ class NarrationToolBar : View() {
             setOnAction {
                 viewModel.seekToPrevious()
             }
+
             disableWhen {
-                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(viewModel.hasVersesProperty.not())
+                viewModel.isPlayingProperty
+                    .or(viewModel.isRecordingProperty)
+                    .or(viewModel.hasVersesProperty.not())
+                    .or(viewModel.isRecordAgainPausedProperty)
             }
         }
         button {
@@ -99,7 +103,10 @@ class NarrationToolBar : View() {
                 viewModel.seekToNext()
             }
             disableWhen {
-                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(viewModel.hasVersesProperty.not())
+                viewModel.isPlayingProperty
+                    .or(viewModel.isRecordingProperty)
+                    .or(viewModel.hasVersesProperty.not())
+                    .or(viewModel.isRecordAgainPausedProperty)
             }
         }
     }
