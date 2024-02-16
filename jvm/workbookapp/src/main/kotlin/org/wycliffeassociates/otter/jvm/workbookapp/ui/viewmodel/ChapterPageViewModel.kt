@@ -55,6 +55,7 @@ import javax.inject.Inject
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
 
+// TODO: DELETE THIS CLASS
 class ChapterPageViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(ChapterPageViewModel::class.java)
@@ -369,8 +370,6 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     private fun updateLastSelectedChapter(chapterNumber: Int) {
-        val workbookHash = workbookDataStore.workbook.hashCode()
-        workbookDataStore.workbookRecentChapterMap[workbookHash] = chapterNumber - 1
     }
 
     private fun loadChapterContents(chapter: Chapter): Observable<CardData> {
