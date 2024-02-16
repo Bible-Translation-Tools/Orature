@@ -30,6 +30,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
+import org.wycliffeassociates.otter.jvm.controls.button.debouncedButton
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
 import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
@@ -88,7 +89,7 @@ class Chunking : View() {
             }
             bottom = hbox {
                 addClass("consume__bottom")
-                button(messages["addChunk"]) {
+                debouncedButton(messages["addChunk"], 700.0) {
                     addClass("btn", "btn--primary", "consume__btn")
                     tooltip(text)
                     graphic = FontIcon(MaterialDesign.MDI_PLUS)
