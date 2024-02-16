@@ -48,6 +48,7 @@ class NarrationTextCell(
     private val recordButtonTextProperty: ObservableValue<String>,
     private val isRecordingProperty: ObservableValue<Boolean>,
     private val isRecordingAgainProperty: ObservableValue<Boolean>,
+    private val isRecordAgainPausedProperty: ObservableValue<Boolean>,
     private val isPlayingProperty: ObservableValue<Boolean>,
     private val recordingIndexProperty: IntegerProperty,
     private val playingVerseProperty: IntegerProperty,
@@ -91,6 +92,7 @@ class NarrationTextCell(
             recordButtonTextProperty.bind(this@NarrationTextCell.recordButtonTextProperty)
             isRecordingProperty.bind(this@NarrationTextCell.isRecordingProperty)
             isRecordingAgainProperty.bind(this@NarrationTextCell.isRecordingAgainProperty)
+            isRecordAgainPausedProperty.bind(this@NarrationTextCell.isRecordAgainPausedProperty)
             isPlayingProperty.bind(this@NarrationTextCell.isPlayingProperty)
             playingVerseIndexProperty.bind(this@NarrationTextCell.playingVerseProperty)
             isHighlightedProperty.bind(shouldHighlight)

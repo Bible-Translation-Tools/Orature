@@ -185,6 +185,7 @@ class AudioWorkspaceView : View() {
                 verseIndexProperty.set(viewModel.recordedVerses.indexOf(marker))
                 labelProperty.set(markerLabel)
                 isRecordingProperty.bind(viewModel.isRecordingProperty)
+                isRecordAgainPausedProperty.bind(viewModel.isRecordAgainPausedProperty)
             }
         }
 
@@ -204,6 +205,7 @@ class AudioWorkspaceViewModel : ViewModel() {
     private val narrationViewModel: NarrationViewModel by inject()
 
     val isRecordingProperty = SimpleBooleanProperty()
+    val isRecordAgainPausedProperty = SimpleBooleanProperty()
     val isPlayingProperty = SimpleBooleanProperty()
     var recordedVerses = observableListOf<AudioMarker>()
 
@@ -222,6 +224,7 @@ class AudioWorkspaceViewModel : ViewModel() {
 
     fun onDock() {
         isRecordingProperty.bind(narrationViewModel.isRecordingProperty)
+        isRecordAgainPausedProperty.bind(narrationViewModel.isRecordAgainPausedProperty)
         isPlayingProperty.bind(narrationViewModel.isPlayingProperty)
         totalAudioSizeProperty.bind(narrationViewModel.totalAudioSizeProperty)
         audioPositionProperty.bind(narrationViewModel.audioPositionProperty)

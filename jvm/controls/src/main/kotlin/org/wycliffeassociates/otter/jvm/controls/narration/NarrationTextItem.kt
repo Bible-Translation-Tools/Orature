@@ -58,6 +58,7 @@ class NarrationTextItem : VBox() {
 
     val isRecordingAgainProperty = SimpleBooleanProperty()
     val isRecordingAgain by isRecordingAgainProperty
+    val isRecordAgainPausedProperty = SimpleBooleanProperty()
     val isSelectedProperty = SimpleBooleanProperty(false)
     val isLastVerseProperty = SimpleBooleanProperty()
 
@@ -68,7 +69,7 @@ class NarrationTextItem : VBox() {
     val onPauseRecordingAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onPauseRecordAgainAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onResumeRecordingAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    val onResumeRecordingAgainAction= SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onResumeRecordingAgainAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onRecordActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onRecordAgainActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onSaveRecordingActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
@@ -88,8 +89,9 @@ class NarrationTextItem : VBox() {
                         addClass("btn", "btn--secondary")
                         graphic = FontIcon(MaterialDesign.MDI_PLAY)
                         tooltip(messages["play"])
+
                         disableWhen {
-                            hasRecordingProperty.not()
+                            hasRecordingProperty.not().or(isRecordAgainPausedProperty)
                         }
                         disabledProperty().onChangeAndDoNow {
                             togglePseudoClass("inactive", it!!)

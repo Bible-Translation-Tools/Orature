@@ -51,7 +51,9 @@ class NarrationToolBar : View() {
 
 
             disableWhen {
-                viewModel.isRecordingProperty.or(viewModel.hasVersesProperty.not())
+                viewModel.isRecordingProperty
+                    .or(viewModel.hasVersesProperty.not())
+                    .or(viewModel.isRecordAgainPausedProperty)
             }
 
             viewModel.isPlayingProperty.onChangeAndDoNow {

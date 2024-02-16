@@ -68,6 +68,8 @@ class TeleprompterViewModel : ViewModel() {
     val isRecordingAgainProperty = SimpleBooleanProperty()
     private var isRecordingAgain by isRecordingAgainProperty
 
+    val isRecordAgainPausedProperty = SimpleBooleanProperty()
+
 
     val lastRecordedVerseProperty = SimpleIntegerProperty(0)
 
@@ -82,6 +84,7 @@ class TeleprompterViewModel : ViewModel() {
         isPlayingProperty.bind(narrationViewModel.isPlayingProperty)
         recordPauseProperty.bindBidirectional(narrationViewModel.recordPauseProperty)
         isRecordingAgainProperty.bindBidirectional(narrationViewModel.isRecordingAgainProperty)
+        isRecordAgainPausedProperty.bind(narrationViewModel.isRecordAgainPausedProperty)
         lastRecordedVerseProperty.bindBidirectional(narrationViewModel.lastRecordedVerseProperty)
         recordingVerseProperty.bind(narrationViewModel.recordingVerseIndex)
         playingVerseProperty.bind(narrationViewModel.playingVerseIndex)
@@ -136,9 +139,9 @@ class TeleprompterViewModel : ViewModel() {
             TeleprompterItemState.RECORD_AGAIN_PAUSED
         )
         val verse = narrationViewModel.narratableList
-                .firstOrNull {
-                    it.state in activeStates || !it.hasRecording
-                }
+            .firstOrNull {
+                it.state in activeStates || !it.hasRecording
+            }
 
         stickyVerseProperty.set(verse)
     }
@@ -240,6 +243,7 @@ class TeleprompterView : View() {
                     viewModel.recordButtonTextBinding(),
                     viewModel.isRecordingProperty,
                     viewModel.isRecordingAgainProperty,
+                    viewModel.isRecordAgainPausedProperty,
                     viewModel.isPlayingProperty,
                     viewModel.recordingVerseProperty,
                     viewModel.playingVerseProperty,

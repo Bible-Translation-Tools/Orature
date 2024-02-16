@@ -29,6 +29,7 @@ import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Region
+import net.bytebuddy.build.Plugin.Factory.Simple
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
@@ -48,6 +49,7 @@ class VerseMarkerControl : BorderPane() {
     val canBeMovedProperty: BooleanBinding = verseIndexProperty.greaterThan(0)
     val userIsDraggingProperty = SimpleBooleanProperty(false)
     val isRecordingProperty = SimpleBooleanProperty()
+    val isRecordAgainPausedProperty = SimpleBooleanProperty()
 
     val dragAreaProperty = SimpleObjectProperty<Node>()
 
@@ -102,10 +104,10 @@ class VerseMarkerControl : BorderPane() {
         }
 
         center = label(labelProperty) {
-                minWidth = Region.USE_PREF_SIZE
-                addClass("verse-marker__title")
-                setAlignment(this, Pos.BOTTOM_LEFT)
-            }
+            minWidth = Region.USE_PREF_SIZE
+            addClass("verse-marker__title")
+            setAlignment(this, Pos.BOTTOM_LEFT)
+        }
 
         right = Button().apply {
             addClass("btn", "btn--icon", "verse-marker__menu")
@@ -115,6 +117,7 @@ class VerseMarkerControl : BorderPane() {
 
             val menu = VerseMenu().apply {
                 isRecordingProperty.bind(this@VerseMarkerControl.isRecordingProperty)
+                isRecordAgainPausedProperty.bind(this@VerseMarkerControl.isRecordAgainPausedProperty)
                 verseProperty.bind(this@VerseMarkerControl.verseProperty)
                 verseIndexProperty.bind(this@VerseMarkerControl.verseIndexProperty)
             }

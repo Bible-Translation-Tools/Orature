@@ -34,6 +34,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
+import net.bytebuddy.build.Plugin.Factory.Simple
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
@@ -109,6 +110,7 @@ class NarrationViewModel : ViewModel() {
     var isRecordingAgain by isRecordingAgainProperty
     val recordAgainVerseIndexProperty = SimpleObjectProperty<Int?>()
     var recordAgainVerseIndex by recordAgainVerseIndexProperty
+    val isRecordAgainPausedProperty = SimpleBooleanProperty(false)
     val isPlayingProperty = SimpleBooleanProperty(false)
     val recordingVerseIndex = SimpleIntegerProperty()
 
@@ -166,6 +168,7 @@ class NarrationViewModel : ViewModel() {
                 recordedVerses.isNotEmpty() && recordedVerses.size == narratableList.size
             }
         )
+        isRecordAgainPausedProperty.bind(recordAgainVerseIndexProperty.isNotNull)
 
         subscribe<AppCloseRequestEvent> {
             logger.info("Received close event request")
