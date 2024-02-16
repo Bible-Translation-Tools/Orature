@@ -46,6 +46,7 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.NarrationDebugApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.AudioWorkspaceViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.NarrationHeaderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.NarrationViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppInfoViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BlindDraftViewModel
@@ -99,6 +100,7 @@ interface AppDependencyGraph {
     fun inject(viewModel: ExportProjectViewModel)
     fun inject(viewModel: AudioWorkspaceViewModel)
     fun inject(viewModel: NarrationViewModel)
+    fun inject(viewModel: NarrationHeaderViewModel)
     fun injectDatabase(): AppDatabase
     fun injectDirectoryProvider(): IDirectoryProvider
     fun injectAppPreferencesRepository(): IAppPreferencesRepository
