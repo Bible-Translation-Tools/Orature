@@ -583,7 +583,7 @@ class WorkbookRepository(
                         modelTake.id = insertionId
                         selectedTakeRelay.accept(TakeHolder(wbTake))
 
-                        if (content.type == ContentType.TEXT) {
+                        if (content.type == ContentType.TEXT || content.type == ContentType.META) {
                             subscribeToCheckingStatus(wbTake, modelTake, content) // subscribe to takes from UI
                         }
                     }
