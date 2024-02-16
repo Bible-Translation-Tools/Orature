@@ -271,6 +271,9 @@ class Narration @AssistedInject constructor(
     }
 
     fun onEditVerse(verseIndex: Int, editedFile: File) {
+
+        loadSectionIntoPlayer(activeVerses[verseIndex])
+
         val scratchAudio = chapterRepresentation.scratchAudio
         val start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1
         audioFileUtils.appendFile(chapterRepresentation.scratchAudio, editedFile)
@@ -284,6 +287,9 @@ class Narration @AssistedInject constructor(
             chapterRepresentation.getAudioFileReader(),
             activeVerses
         )
+
+        audioLoaded = false
+        loadChapterIntoPlayer()
     }
 
     fun onResetAll() {
