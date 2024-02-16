@@ -46,6 +46,7 @@ import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.domain.IUndoable
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.ChapterTranslationBuilder
@@ -54,6 +55,9 @@ import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuild
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
+import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
+import org.wycliffeassociates.otter.common.domain.translation.AddMarkerAction
+import org.wycliffeassociates.otter.common.domain.translation.DeleteMarkerAction
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
@@ -130,6 +134,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
     private val pluginOpenedProperty = SimpleBooleanProperty(false)
+    private val actionHistory = UndoableActionHistory<IUndoable>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -183,12 +188,17 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     }
 
     override fun placeMarker() {
-        super.placeMarker()
+//        super.placeMarker()
+        val location = waveformAudioPlayerProperty.get().getLocationInFrames()
+        val action = AddMarkerAction(markerModel!!, location)
+        actionHistory.execute(action)
         onUndoableAction()
     }
 
     override fun deleteMarker(id: Int) {
-        super.deleteMarker(id)
+//        super.deleteMarker(id)
+        val action = DeleteMarkerAction(markerModel!!, id)
+        actionHistory.execute(action)
         onUndoableAction()
     }
 
@@ -198,16 +208,22 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     }
 
     override fun undoMarker() {
-        super.undoMarker()
-        val dirty = markerModel?.hasDirtyMarkers() ?: false
+//        super.undoMarker()
+        actionHistory.undo()
+        markers.setAll(markerModel!!.markerItems.toList())
+
+        val dirty = actionHistory.canUndo()
         translationViewModel.canUndoProperty.set(dirty)
         translationViewModel.canRedoProperty.set(true)
     }
 
     override fun redoMarker() {
-        super.redoMarker()
+//        super.redoMarker()
+        actionHistory.redo()
+        markers.setAll(markerModel!!.markerItems.toList())
+
         translationViewModel.canUndoProperty.set(true)
-        translationViewModel.canRedoProperty.set(markerModel?.canRedo() == true)
+        translationViewModel.canRedoProperty.set(actionHistory.canRedo())
     }
 
     fun pauseAudio() = audioController?.pause()
@@ -443,6 +459,9 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     }
 
     private fun onUndoableAction() {
+        markers.clear()
+        markers.setAll(markerModel!!.markerItems.toList())
+
         translationViewModel.canUndoProperty.set(true)
         translationViewModel.canRedoProperty.set(false)
     }

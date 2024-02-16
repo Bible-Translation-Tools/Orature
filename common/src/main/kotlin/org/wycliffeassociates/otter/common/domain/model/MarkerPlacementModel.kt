@@ -153,8 +153,8 @@ class MarkerPlacementModel(
         refreshMarkers()
     }
 
-    fun addMarker(location: Int) {
-        val marker = markers.getOrNull(labelIndex) ?: return
+    fun addMarker(location: Int): Int {
+        val marker = markers.getOrNull(labelIndex) ?: return - 1
         val markerModel = MarkerItem(marker.clone(location), true)
 
         val op = Add(markerModel)
@@ -163,6 +163,8 @@ class MarkerPlacementModel(
         redoStack.clear()
 
         refreshMarkers()
+
+        return markerModel.id
     }
 
     fun deleteMarker(id: Int) {
@@ -230,7 +232,7 @@ class MarkerPlacementModel(
         }
     }
 
-    fun hasDirtyMarkers() = undoStack.isNotEmpty()
+    fun canUndo() = undoStack.isNotEmpty()
     fun canRedo() = redoStack.isNotEmpty()
 
     private fun refreshMarkers() {

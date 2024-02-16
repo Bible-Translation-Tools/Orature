@@ -131,14 +131,14 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         pause()
         translationViewModel.selectedStepProperty.value?.let {
             // handle when navigating to the next step
-            val hasUnsavedChanges = markerCountProperty.value != 0 && markerModel?.hasDirtyMarkers() == true
+            val hasUnsavedChanges = markerCountProperty.value != 0 && markerModel?.canUndo() == true
             if (hasUnsavedChanges && it.ordinal > ChunkingStep.CHUNKING.ordinal) {
                 saveChanges()
             }
             translationViewModel.updateStep()
         }
 
-        if (markerModel?.hasDirtyMarkers() == true) {
+        if (markerModel?.canUndo() == true) {
             chapterReviewViewModel.invalidateChapterTake()
         }
         cleanup()
@@ -171,7 +171,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     override fun undoMarker() {
         super.undoMarker()
-        val dirty = markerModel?.hasDirtyMarkers() ?: false
+        val dirty = markerModel?.canUndo() ?: false
         translationViewModel.canUndoProperty.set(dirty)
         translationViewModel.canRedoProperty.set(true)
         if (!dirty) {
