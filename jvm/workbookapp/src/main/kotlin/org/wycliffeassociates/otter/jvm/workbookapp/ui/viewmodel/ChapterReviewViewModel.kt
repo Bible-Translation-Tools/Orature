@@ -290,6 +290,8 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                                     setOnUndo { markerModel = existingMarkerModel }
                                 }
                                 actionHistory.execute(action)
+                                // TODO: load the new take after docking and set marker model.
+                                //  Cannot do here because the current view has not docked yet
                             }
                             else -> {
                                 // no-op
