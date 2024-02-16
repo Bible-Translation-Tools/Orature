@@ -58,6 +58,7 @@ import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
 import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
 import org.wycliffeassociates.otter.common.domain.translation.AddMarkerAction
 import org.wycliffeassociates.otter.common.domain.translation.DeleteMarkerAction
+import org.wycliffeassociates.otter.common.domain.translation.MoveMarkerAction
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
@@ -188,7 +189,6 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     }
 
     override fun placeMarker() {
-//        super.placeMarker()
         val location = waveformAudioPlayerProperty.get().getLocationInFrames()
         val action = AddMarkerAction(markerModel!!, location)
         actionHistory.execute(action)
@@ -196,19 +196,18 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     }
 
     override fun deleteMarker(id: Int) {
-//        super.deleteMarker(id)
         val action = DeleteMarkerAction(markerModel!!, id)
         actionHistory.execute(action)
         onUndoableAction()
     }
 
     override fun moveMarker(id: Int, start: Int, end: Int) {
-        super.moveMarker(id, start, end)
+        val action = MoveMarkerAction(markerModel!!, id, start, end)
+        actionHistory.execute(action)
         onUndoableAction()
     }
 
     override fun undoMarker() {
-//        super.undoMarker()
         actionHistory.undo()
         markers.setAll(markerModel!!.markerItems.toList())
 
@@ -218,7 +217,6 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     }
 
     override fun redoMarker() {
-//        super.redoMarker()
         actionHistory.redo()
         markers.setAll(markerModel!!.markerItems.toList())
 

@@ -42,3 +42,21 @@ class DeleteMarkerAction(
 
     override fun redo() = execute()
 }
+
+class MoveMarkerAction(
+    private val markerModel: MarkerPlacementModel,
+    private val id: Int,
+    private val from: Int,
+    private val to: Int
+) : IUndoable {
+    override fun execute() {
+        markerModel.moveMarker(id, from, to)
+    }
+
+    override fun undo() {
+        markerModel.moveMarker(id, to, from)
+    }
+
+    override fun redo() = execute()
+
+}
