@@ -1,5 +1,10 @@
 package org.wycliffeassociates.otter.common.domain.translation
 
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
+import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
+import org.wycliffeassociates.otter.common.data.workbook.DateHolder
+import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.domain.IUndoable
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
 
@@ -58,5 +63,40 @@ class MoveMarkerAction(
     }
 
     override fun redo() = execute()
+}
 
+class TakeEditAction(
+    private val audio: AssociatedAudio,
+    private val newTake: Take,
+    private val oldTake: Take,
+) : IUndoable {
+
+    private var undoCallback: () -> Unit = {}
+    private var redoCallback: () -> Unit = {}
+
+    override fun execute() {
+        newTake.checkingState.accept(
+            TakeCheckingState(
+                CheckingStatus.VERSE,
+                newTake.checksum()
+            )
+        )
+        oldTake.deletedTimestamp.accept(DateHolder.now())
+    }
+
+    override fun undo() {
+        oldTake.deletedTimestamp.accept(DateHolder.empty)
+        audio.selectTake(oldTake)
+        newTake.deletedTimestamp.accept(DateHolder.now())
+        undoCallback()
+    }
+
+    override fun redo() {
+        redoCallback()
+        audio.selectTake(newTake)
+        oldTake.deletedTimestamp.accept(DateHolder.now())
+    }
+
+    fun setOnUndo(op: () -> Unit) { undoCallback = op }
+    fun setOnRedo(op: () -> Unit) { redoCallback = op }
 }

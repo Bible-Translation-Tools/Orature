@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -59,6 +60,7 @@ import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
 import org.wycliffeassociates.otter.common.domain.translation.AddMarkerAction
 import org.wycliffeassociates.otter.common.domain.translation.DeleteMarkerAction
 import org.wycliffeassociates.otter.common.domain.translation.MoveMarkerAction
+import org.wycliffeassociates.otter.common.domain.translation.TakeEditAction
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
@@ -134,7 +136,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     val compositeDisposable = CompositeDisposable()
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
-    private val pluginOpenedProperty = SimpleBooleanProperty(false)
+    val pluginOpenedProperty = SimpleBooleanProperty(false)
     private val actionHistory = UndoableActionHistory<IUndoable>()
 
     init {
@@ -207,7 +209,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         onUndoableAction()
     }
 
-    override fun undoMarker() {
+    fun undo() {
         actionHistory.undo()
         markers.setAll(markerModel!!.markerItems.toList())
 
@@ -216,7 +218,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         translationViewModel.canRedoProperty.set(true)
     }
 
-    override fun redoMarker() {
+    fun redo() {
         actionHistory.redo()
         markers.setAll(markerModel!!.markerItems.toList())
 
@@ -248,11 +250,14 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
     fun processWithPlugin() {
         val chapter = workbookDataStore.chapter
+        val existingChapterTake = chapter.audio.getSelectedTake()!!
+        val existingMarkerModel = markerModel
+
         createDuplicateTake()
             .observeOnFx()
-            .subscribe { take ->
-                workbookDataStore.activeTakeNumberProperty.set(take.number)
-                chapter.audio.insertTake(take)
+            .subscribe { newTake ->
+                workbookDataStore.activeTakeNumberProperty.set(newTake.number)
+                chapter.audio.insertTake(newTake) // take must be inserted before editing
 
                 val pluginType = PluginType.EDITOR
                 audioPluginViewModel
@@ -264,7 +269,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                     .flatMapSingle { plugin ->
                         pluginOpenedProperty.set(true)
                         fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
-                        audioPluginViewModel.edit(chapter.audio, take)
+                        audioPluginViewModel.edit(chapter.audio, newTake)
                     }
                     .observeOnFx()
                     .doOnError { e ->
@@ -277,12 +282,14 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                         when (result) {
                             PluginActions.Result.NO_PLUGIN -> FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
                             PluginActions.Result.SUCCESS -> {
-                                take.checkingState.accept(
-                                    TakeCheckingState(
-                                        CheckingStatus.VERSE,
-                                        take.checksum()
-                                    )
-                                )
+                                val action = TakeEditAction(
+                                    chapter.audio,
+                                    newTake,
+                                    existingChapterTake
+                                ).apply {
+                                    setOnUndo { markerModel = existingMarkerModel }
+                                }
+                                actionHistory.execute(action)
                             }
                             else -> {
                                 // no-op
@@ -432,7 +439,10 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             file = newTakeFile,
             number = newTakeNumber,
             format = MimeType.WAV,
-            createdTimestamp = LocalDate.now()
+            createdTimestamp = LocalDate.now(),
+            checkingState = BehaviorRelay.createDefault(
+                TakeCheckingState(CheckingStatus.VERSE, chapterTake.getSavedChecksum())
+            )
         )
         return newTake
     }

@@ -188,19 +188,36 @@ class ChapterReview : View() {
     }
 
     override fun onDock() {
-        logger.info("Final Review docked.")
         timer = startAnimationTimer { viewModel.calculatePosition() }
         waveform.initializeMarkers()
-        viewModel.subscribeOnWaveformImagesProperty.set(::subscribeOnWaveformImages)
-        viewModel.cleanupWaveformProperty.set(waveform::cleanup)
-        viewModel.dock()
+
+        when (viewModel.pluginOpenedProperty.value) {
+            true -> { // navigate back from plugin
+                viewModel.pluginOpenedProperty.set(false)
+            }
+
+            else -> {
+                logger.info("Final Review docked.")
+                viewModel.subscribeOnWaveformImagesProperty.set(::subscribeOnWaveformImages)
+                viewModel.cleanupWaveformProperty.set(waveform::cleanup)
+                viewModel.dock()
+            }
+        }
         subscribeEvents()
     }
 
     override fun onUndock() {
-        logger.info("Final Review undocked.")
         timer?.stop()
-        viewModel.undock()
+
+        when (viewModel.pluginOpenedProperty.value) {
+            true -> {
+                /* no-op, opening plugin */
+            }
+            false -> {
+                logger.info("Final Review undocked.")
+                viewModel.undock()
+            }
+        }
         unsubscribeEvents()
     }
 
@@ -216,11 +233,11 @@ class ChapterReview : View() {
         }.also { eventSubscriptions.add(it) }
 
         subscribe<UndoChunkingPageEvent> {
-            viewModel.undoMarker()
+            viewModel.undo()
         }.also { eventSubscriptions.add(it) }
 
         subscribe<RedoChunkingPageEvent> {
-            viewModel.redoMarker()
+            viewModel.redo()
         }.also { eventSubscriptions.add(it) }
 
         subscribe<TranslationNavigationEvent> {
