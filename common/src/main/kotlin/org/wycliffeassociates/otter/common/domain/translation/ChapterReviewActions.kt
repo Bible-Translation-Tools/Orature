@@ -71,6 +71,8 @@ class TakeEditAction(
     private val oldTake: Take,
 ) : IUndoable {
 
+    lateinit var newMarkerModel: MarkerPlacementModel
+
     private var undoCallback: () -> Unit = {}
     private var redoCallback: () -> Unit = {}
 
@@ -92,9 +94,9 @@ class TakeEditAction(
     }
 
     override fun redo() {
-        redoCallback()
         audio.selectTake(newTake)
         oldTake.deletedTimestamp.accept(DateHolder.now())
+        redoCallback()
     }
 
     fun setOnUndo(op: () -> Unit) { undoCallback = op }

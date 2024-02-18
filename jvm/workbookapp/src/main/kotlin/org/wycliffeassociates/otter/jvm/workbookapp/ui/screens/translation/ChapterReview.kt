@@ -194,6 +194,7 @@ class ChapterReview : View() {
         when (viewModel.pluginOpenedProperty.value) {
             true -> { // navigate back from plugin
                 viewModel.pluginOpenedProperty.set(false)
+                viewModel.reloadAudio().subscribe()
             }
 
             else -> {

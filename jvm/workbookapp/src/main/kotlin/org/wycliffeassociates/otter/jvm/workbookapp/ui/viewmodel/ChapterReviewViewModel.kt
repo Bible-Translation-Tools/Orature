@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.github.thomasnield.rxkotlinfx.subscribeOnFx
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
@@ -253,6 +254,13 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         val existingChapterTake = chapter.audio.getSelectedTake()!!
         val existingMarkerModel = markerModel
 
+        // save current markers before sending to plugin
+        waveformAudioPlayerProperty.value?.stop()
+        waveformAudioPlayerProperty.value?.close()
+        markerModel
+            ?.writeMarkers()
+            ?.blockingAwait()
+
         createDuplicateTake()
             .observeOnFx()
             .subscribe { newTake ->
@@ -287,7 +295,19 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                                     newTake,
                                     existingChapterTake
                                 ).apply {
-                                    setOnUndo { markerModel = existingMarkerModel }
+                                    setOnUndo {
+                                        println("undo - revert old marker model")
+                                        newMarkerModel = markerModel!!
+                                        markerModel = existingMarkerModel
+                                    }
+                                    setOnRedo {
+                                        reloadAudio()
+                                            .doOnComplete {
+                                                markerModel = newMarkerModel
+                                                onUndoableAction()
+                                            }
+                                            .subscribe()
+                                    }
                                 }
                                 actionHistory.execute(action)
                                 // TODO: load the new take after docking and set marker model.
@@ -315,12 +335,32 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             .flatMap { take ->
                 loadTargetAudio(take)
             }
+            .flatMapCompletable { audio ->
+                loadMarkerWaveformStuff(audio)
+            }
             .subscribeOn(Schedulers.io())
             .observeOnFx()
             .doFinally {
                 translationViewModel.loadingStepProperty.set(false)
             }
-            .subscribe { audio ->
+            .subscribe()
+    }
+
+    fun reloadAudio(): Completable {
+        val chapterTake = workbookDataStore.chapter.audio.getSelectedTake()!!
+        println("Reloading after plugin return, take: ${chapterTake.name}")
+        return loadTargetAudio(chapterTake)
+            .flatMapCompletable {
+                loadMarkerWaveformStuff(it)
+            }
+            .doOnComplete {
+                onUndoableAction()
+            }
+    }
+
+    private fun loadMarkerWaveformStuff(audio: OratureAudioFile): Completable {
+        return Completable
+            .fromAction {
                 val sourceAudio = audioDataStore.sourceAudioProperty.value
                     ?.let { OratureAudioFile(it.file) }
 
@@ -328,6 +368,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                 createWaveformImages(audio)
                 subscribeOnWaveformImages()
             }
+            .subscribeOnFx()
     }
 
     private fun loadTargetAudio(take: Take): Single<OratureAudioFile> {
@@ -354,6 +395,8 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         val sourceMarkers = getSourceMarkers(sourceAudio)
         val placedMarkers = audio.getVerseAndTitleMarkers()
             .map { MarkerItem(it, true) }
+
+        println("markers: [${placedMarkers.size}]")
 
         totalMarkersProperty.set(sourceMarkers.size)
         markerModel = MarkerPlacementModel(
@@ -451,6 +494,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
     private fun cleanup() {
         builder.cancel()
+        actionHistory.clear()
         compositeDisposable.clear()
         markerModel = null
         cleanupWaveform()
@@ -458,6 +502,10 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
     private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
+
+        // TODO: RE-RENDER WAVEFORM AFTER GOING BACK FROM PLUGIN
+//        cleanupWaveform()
+//        builder.cancel()
 
         waveform = builder.buildAsync(
             audio.reader(),
@@ -472,7 +520,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         markers.clear()
         markers.setAll(markerModel!!.markerItems.toList())
 
-        translationViewModel.canUndoProperty.set(true)
-        translationViewModel.canRedoProperty.set(false)
+        translationViewModel.canUndoProperty.set(actionHistory.canUndo())
+        translationViewModel.canRedoProperty.set(actionHistory.canRedo())
     }
 }
