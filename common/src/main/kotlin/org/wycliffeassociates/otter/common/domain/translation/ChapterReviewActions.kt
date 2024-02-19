@@ -99,6 +99,6 @@ class TakeEditAction(
         redoCallback()
     }
 
-    fun setOnUndo(op: () -> Unit) { undoCallback = op }
-    fun setOnRedo(op: () -> Unit) { redoCallback = op }
+    fun setUndoCallback(op: () -> Unit) { undoCallback = op }
+    fun setRedoCallback(op: () -> Unit) { redoCallback = op }
 }

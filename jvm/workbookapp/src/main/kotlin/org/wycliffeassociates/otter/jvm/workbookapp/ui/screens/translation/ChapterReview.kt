@@ -190,6 +190,7 @@ class ChapterReview : View() {
     override fun onDock() {
         timer = startAnimationTimer { viewModel.calculatePosition() }
         waveform.initializeMarkers()
+        viewModel.initWaveformMarkerProperty.set(waveform::initializeMarkers)
 
         when (viewModel.pluginOpenedProperty.value) {
             true -> { // navigate back from plugin

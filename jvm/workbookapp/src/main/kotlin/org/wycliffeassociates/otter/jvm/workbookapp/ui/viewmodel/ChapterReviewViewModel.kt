@@ -124,6 +124,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
     var subscribeOnWaveformImagesProperty = SimpleObjectProperty {}
     val cleanupWaveformProperty = SimpleObjectProperty {}
+    val initWaveformMarkerProperty = SimpleObjectProperty {}
 
     val chapterTitleProperty = workbookDataStore.activeChapterTitleBinding()
     val sourcePlayerProperty = SimpleObjectProperty<IAudioPlayer>()
@@ -252,7 +253,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     fun processWithPlugin() {
         val chapter = workbookDataStore.chapter
         val existingChapterTake = chapter.audio.getSelectedTake()!!
-        val existingMarkerModel = markerModel
+        val oldMarkerModel = markerModel
 
         // save current markers before sending to plugin
         waveformAudioPlayerProperty.value?.stop()
@@ -295,12 +296,16 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                                     newTake,
                                     existingChapterTake
                                 ).apply {
-                                    setOnUndo {
-                                        println("undo - revert old marker model")
+                                    setUndoCallback {
                                         newMarkerModel = markerModel!!
-                                        markerModel = existingMarkerModel
+
+                                        reloadAudio()
+                                            .doOnComplete {
+                                                markerModel = oldMarkerModel
+                                            }
+                                            .subscribe()
                                     }
-                                    setOnRedo {
+                                    setRedoCallback {
                                         reloadAudio()
                                             .doOnComplete {
                                                 markerModel = newMarkerModel
@@ -310,8 +315,6 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                                     }
                                 }
                                 actionHistory.execute(action)
-                                // TODO: load the new take after docking and set marker model.
-                                //  Cannot do here because the current view has not docked yet
                             }
                             else -> {
                                 // no-op
@@ -347,8 +350,10 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     }
 
     fun reloadAudio(): Completable {
+        cleanupWaveform()
+        initWaveformMarkerProperty.value?.invoke()
+
         val chapterTake = workbookDataStore.chapter.audio.getSelectedTake()!!
-        println("Reloading after plugin return, take: ${chapterTake.name}")
         return loadTargetAudio(chapterTake)
             .flatMapCompletable {
                 loadMarkerWaveformStuff(it)
@@ -395,8 +400,6 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         val sourceMarkers = getSourceMarkers(sourceAudio)
         val placedMarkers = audio.getVerseAndTitleMarkers()
             .map { MarkerItem(it, true) }
-
-        println("markers: [${placedMarkers.size}]")
 
         totalMarkersProperty.set(sourceMarkers.size)
         markerModel = MarkerPlacementModel(
@@ -503,10 +506,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
 
-        // TODO: RE-RENDER WAVEFORM AFTER GOING BACK FROM PLUGIN
-//        cleanupWaveform()
-//        builder.cancel()
-
+        builder.cancel()
         waveform = builder.buildAsync(
             audio.reader(),
             width = imageWidthProperty.value.toInt(),
