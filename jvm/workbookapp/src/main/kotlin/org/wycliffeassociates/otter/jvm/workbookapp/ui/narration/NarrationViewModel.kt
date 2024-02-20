@@ -167,7 +167,6 @@ class NarrationViewModel : ViewModel() {
                 recordedVerses.isNotEmpty() && recordedVerses.size == narratableList.size
             }
         )
-        isRecordAgainPausedProperty.bind(recordAgainVerseIndexProperty.isNotNull)
 
         subscribe<AppCloseRequestEvent> {
             logger.info("Received close event request")
@@ -578,6 +577,7 @@ class NarrationViewModel : ViewModel() {
 
         recordAgainVerseIndex = verseIndex
         recordingVerseIndex.set(verseIndex)
+        isRecordAgainPausedProperty.set(true)
         isRecording = true
         isRecordingAgain = true
         recordPause = false
@@ -593,6 +593,7 @@ class NarrationViewModel : ViewModel() {
         narration.onSaveRecording(verseIndex)
 
         recordAgainVerseIndex = null
+        isRecordAgainPausedProperty.set(false)
         recordingVerseIndex.set(verseIndex)
         isRecording = false
         isRecordingAgain = false
@@ -688,6 +689,7 @@ class NarrationViewModel : ViewModel() {
 
         isRecording = false
         recordPause = true
+        isRecordAgainPausedProperty.set(true)
 
         narration.pauseRecording()
         narration.finalizeVerse(index)
