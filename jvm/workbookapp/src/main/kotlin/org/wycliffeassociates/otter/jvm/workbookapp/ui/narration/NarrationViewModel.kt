@@ -577,7 +577,7 @@ class NarrationViewModel : ViewModel() {
 
         recordAgainVerseIndex = verseIndex
         recordingVerseIndex.set(verseIndex)
-        isRecordAgainPausedProperty.set(true)
+        isRecordAgainPausedProperty.set(false)
         isRecording = true
         isRecordingAgain = true
         recordPause = false
