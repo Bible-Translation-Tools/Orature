@@ -689,7 +689,6 @@ class NarrationViewModel : ViewModel() {
 
         isRecording = false
         recordPause = true
-        isRecordAgainPausedProperty.set(true)
 
         narration.pauseRecording()
         narration.finalizeVerse(index)
@@ -704,6 +703,7 @@ class NarrationViewModel : ViewModel() {
 
         isRecording = false
         recordPause = true
+        isRecordAgainPausedProperty.set(true)
 
         narration.pauseRecording()
         narration.finalizeVerse(index)
