@@ -61,6 +61,7 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.SnackBarEvent
 import tornadofx.*
 import java.text.MessageFormat
@@ -86,6 +87,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     val audioDataStore: AudioDataStore by inject()
     val audioPluginViewModel: AudioPluginViewModel by inject()
     private val translationViewModel: TranslationViewModel2 by inject()
+    private val navigator: NavigationMediator by inject()
 
     override var markerModel: MarkerPlacementModel? = null
     override val markers = observableListOf<MarkerItem>()
@@ -269,6 +271,8 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     }
 
     private fun loadChapterTake() {
+        navigator.blockNavigationEvents.set(true)
+
         chapterTranslationBuilder
             .getOrCompile(
                 workbookDataStore.workbook,
@@ -279,10 +283,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             }
             .subscribeOn(Schedulers.io())
             .observeOnFx()
-            .doFinally {
-                translationViewModel.loadingStepProperty.set(false)
-            }
-            .subscribe { audio ->
+            .map { audio ->
                 val sourceAudio = audioDataStore.sourceAudioProperty.value
                     ?.let { OratureAudioFile(it.file) }
 
@@ -290,6 +291,12 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                 createWaveformImages(audio)
                 subscribeOnWaveformImages()
             }
+            .ignoreElement()
+            .doFinally {
+                translationViewModel.loadingStepProperty.set(false)
+                navigator.blockNavigationEvents.set(false)
+            }
+            .subscribe()
     }
 
     private fun loadTargetAudio(take: Take) : Single<OratureAudioFile> {
