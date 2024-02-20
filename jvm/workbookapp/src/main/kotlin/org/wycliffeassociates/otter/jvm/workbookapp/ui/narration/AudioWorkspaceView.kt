@@ -101,7 +101,9 @@ class AudioWorkspaceView : View() {
         }
 
         disableWhen {
-            viewModel.isRecordingProperty.or(viewModel.isPlayingProperty)
+            viewModel.isRecordingProperty
+                .or(viewModel.isPlayingProperty)
+                .or(viewModel.isRecordAgainPausedProperty)
         }
 
         unitIncrement = SCROLL_INCREMENT_UNIT
