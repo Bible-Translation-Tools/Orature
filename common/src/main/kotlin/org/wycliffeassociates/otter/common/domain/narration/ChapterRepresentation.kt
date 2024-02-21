@@ -123,6 +123,9 @@ internal class ChapterRepresentation(
 
     fun loadFromSerializedVerses() {
         val json = serializedVersesFile.readText()
+        if (json.isEmpty()) {
+            return
+        }
         val reference = object : TypeReference<List<VerseNode>>() {}
 
         try {
