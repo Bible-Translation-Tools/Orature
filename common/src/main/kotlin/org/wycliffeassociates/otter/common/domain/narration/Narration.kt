@@ -452,6 +452,11 @@ class Narration @AssistedInject constructor(
             start = end + 1
         }
 
+
+        for (i in segments.size until chapterRepresentation.totalVerses.size) {
+            nodes.add(chapterRepresentation.totalVerses[i])
+        }
+
         onChapterEdited(nodes)
     }
 
