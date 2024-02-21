@@ -271,6 +271,9 @@ class Narration @AssistedInject constructor(
     }
 
     fun onEditVerse(verseIndex: Int, editedFile: File) {
+
+        loadSectionIntoPlayer(activeVerses[verseIndex])
+
         val scratchAudio = chapterRepresentation.scratchAudio
         val start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1
         audioFileUtils.appendFile(chapterRepresentation.scratchAudio, editedFile)
@@ -284,6 +287,9 @@ class Narration @AssistedInject constructor(
             chapterRepresentation.getAudioFileReader(),
             activeVerses
         )
+
+        audioLoaded = false
+        loadChapterIntoPlayer()
     }
 
     fun onResetAll() {
@@ -308,7 +314,13 @@ class Narration @AssistedInject constructor(
     }
 
     fun resumeRecording() {
-        player.seek(player.getDurationInFrames())
+
+        // Ensures that the entire chapter is loaded into the player
+        lockToVerse(null)
+        audioLoaded = false
+        loadChapterIntoPlayer()
+
+        seek(player.getDurationInFrames())
         writer?.start()
         isRecording.set(true)
     }
@@ -389,6 +401,10 @@ class Narration @AssistedInject constructor(
     }
 
     private fun execute(action: NarrationAction) {
+        if (!audioLoaded) {
+            player.load(chapterReaderConnection)
+            audioLoaded = true
+        }
         // Ensures we are not locked to a verse and that the location is in the relative chapter space
         seek(getLocationInChapter(), true)
         history.execute(action, chapterRepresentation.totalVerses, chapterRepresentation.scratchAudio)

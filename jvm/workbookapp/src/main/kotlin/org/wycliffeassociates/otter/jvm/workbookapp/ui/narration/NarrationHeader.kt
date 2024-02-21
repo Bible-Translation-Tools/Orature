@@ -29,13 +29,17 @@ import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
+import org.wycliffeassociates.otter.common.domain.project.ProjectCompletionStatus
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.chapterselector.chapterSelector
 import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
+import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.ChapterSelectorPopup
@@ -47,6 +51,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.text.MessageFormat
+import javax.inject.Inject
 
 class NarrationHeader : View() {
     private val viewModel by inject<NarrationHeaderViewModel>()
@@ -131,6 +136,9 @@ class NarrationHeader : View() {
 class NarrationHeaderViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(NarrationHeaderViewModel::class.java)
 
+    @Inject
+    lateinit var projectCompletionStatus: ProjectCompletionStatus
+
     private val workbookDataStore by inject<WorkbookDataStore>()
     private val narrationViewModel: NarrationViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
@@ -160,19 +168,9 @@ class NarrationHeaderViewModel : ViewModel() {
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
 
-    val chapterList: List<ChapterGridItemData>
-        get() {
-            return narrationViewModel.chapterList.map {
-                val gridItem = ChapterGridItemData(
-                    it.sort,
-                    it.hasSelectedAudio(),
-                    workbookDataStore.activeChapterProperty.value?.sort == it.sort
-                )
-                gridItem
-            }
-        }
-
     init {
+        (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+
         chapterTakeProperty.bind(narrationViewModel.chapterTakeProperty)
         chapterTitleProperty.bind(narrationViewModel.chapterTitleProperty)
         hasNextChapter.bind(narrationViewModel.hasNextChapter)
@@ -184,6 +182,25 @@ class NarrationHeaderViewModel : ViewModel() {
         hasVersesProperty.bind(narrationViewModel.hasVersesProperty)
         hasAllItemsRecordedProperty.bind(narrationViewModel.hasAllItemsRecordedProperty)
     }
+
+    val chapterList: List<ChapterGridItemData>
+        get() {
+            return narrationViewModel.chapterList.map { chapter ->
+                val wb = workbookDataStore.workbook
+                val chapterProgress: Double = if (hasInProgressNarration(wb, chapter)) {
+                    projectCompletionStatus.getChapterNarrationProgress(wb, chapter)
+                } else {
+                    0.0
+                }
+                val isCompleted = chapterProgress == 1.0
+
+                ChapterGridItemData(
+                    chapter.sort,
+                    isCompleted,
+                    workbookDataStore.activeChapterProperty.value?.sort == chapter.sort
+                )
+            }
+        }
 
     private enum class StepDirection {
         FORWARD,
@@ -262,6 +279,11 @@ class NarrationHeaderViewModel : ViewModel() {
                     }
             }
         }
+    }
+
+    private fun hasInProgressNarration(workbook: Workbook, chapter: Chapter): Boolean {
+        val files = workbook.projectFilesAccessor.getInProgressNarrationFiles(workbook, chapter)
+        return files.all { it.exists() }
     }
 }
 

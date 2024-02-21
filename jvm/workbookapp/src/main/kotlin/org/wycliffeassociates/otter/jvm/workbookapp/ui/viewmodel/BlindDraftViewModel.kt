@@ -103,6 +103,9 @@ class BlindDraftViewModel : ViewModel() {
     }
 
     fun undockBlindDraft() {
+        workbookDataStore.workbook.let { wb ->
+            wb.projectFilesAccessor.updateSelectedTakesFile(wb).subscribe()
+        }
         audioDataStore.stopPlayers()
         audioDataStore.closePlayers()
         audioConnectionFactory.releasePlayer()
