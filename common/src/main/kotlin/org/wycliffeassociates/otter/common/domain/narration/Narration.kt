@@ -401,6 +401,10 @@ class Narration @AssistedInject constructor(
     }
 
     private fun execute(action: NarrationAction) {
+        if (!audioLoaded) {
+            player.load(chapterReaderConnection)
+            audioLoaded = true
+        }
         // Ensures we are not locked to a verse and that the location is in the relative chapter space
         seek(getLocationInChapter(), true)
         history.execute(action, chapterRepresentation.totalVerses, chapterRepresentation.scratchAudio)
