@@ -133,7 +133,7 @@ internal class ChapterRepresentation(
                 nodes.getOrNull(idx)?.let { totalVerses[idx] = it }
             }
         } catch (e: JsonMappingException) {
-            logger.error("Error in loadFromSerializedVerses: ${e.message}")
+            // file is empty, no-op
         }
     }
 
