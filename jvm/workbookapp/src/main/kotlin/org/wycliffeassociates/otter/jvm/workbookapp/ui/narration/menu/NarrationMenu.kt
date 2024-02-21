@@ -48,7 +48,7 @@ class NarrationMenu : ContextMenu() {
             action {
                 FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.EDITOR))
             }
-            enableWhen(hasChapterTakeProperty)
+            enableWhen(hasVersesProperty)
         }
         val verseMarkerOpt = MenuItem().apply {
             graphic = label(messages["editVerseMarkers"]) {
