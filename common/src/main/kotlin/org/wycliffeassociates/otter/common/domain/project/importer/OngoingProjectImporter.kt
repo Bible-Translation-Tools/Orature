@@ -157,15 +157,9 @@ class OngoingProjectImporter @Inject constructor(
                 val projects = workbookRepository.getProjects().blockingGet()
                 return projects.firstOrNull { existingProject ->
                     sourceLanguageSlug == existingProject.source.language.slug &&
-                            languageSlug == existingProject.target.language.slug &&
-                            projectSlug == existingProject.target.slug
-                }?.let { workbook ->
-                    directoryProvider.getProjectDirectory(
-                        workbook.source.resourceMetadata,
-                        workbook.target.resourceMetadata,
-                        projectSlug
-                    ).list().isNullOrEmpty().not() // since getProjectDirectory always uses mkdir()
-                } ?: false
+                        languageSlug == existingProject.target.language.slug &&
+                        projectSlug == existingProject.target.slug
+                }?.projectFilesAccessor?.isInitialized() ?: false
             }
         }
     }
