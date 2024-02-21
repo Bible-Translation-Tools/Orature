@@ -31,6 +31,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.content.Recordable
+import java.util.concurrent.TimeUnit
 
 class Chapter(
     override val sort: Int,
@@ -60,9 +61,17 @@ class Chapter(
     fun getSelectedTake() = audio.selected.value?.value
 
     fun getDraft(): Observable<Chunk> {
-        return getLatestDraftFromRelay()
-            .flattenAsObservable { it }
-            .switchIfEmpty(Observable.empty<Chunk>())
+        return Observable
+            .fromCallable {
+                val chunksList: List<Chunk> = Observable.amb(
+                    mutableListOf(
+                        chunks.take(1),
+                        Observable.timer(200, TimeUnit.MILLISECONDS).map { listOf() }
+                    )
+                ).blockingFirst()
+                Observable.fromIterable(chunksList)
+            }
+            .flatMap { it }
             .subscribeOn(Schedulers.io())
     }
 
