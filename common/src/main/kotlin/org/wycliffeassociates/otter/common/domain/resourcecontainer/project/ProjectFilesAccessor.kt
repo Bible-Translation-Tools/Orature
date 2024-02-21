@@ -141,7 +141,6 @@ class ProjectFilesAccessor(
             ResourceContainer.load(projectDir).close()
             true
         } catch (_: Exception) {
-            projectDir.deleteRecursively()
             false
         }
     }
