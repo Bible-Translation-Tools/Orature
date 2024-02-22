@@ -50,7 +50,7 @@ jobs:
           -e ORG_GRADLE_PROJECT_sentryDsn \
           -e GITHUB_TOKEN \
           -e SONAR_TOKEN \
-          wycliffeassociates/install4j-docker:9.0.2 \
+          wycliffeassociates/install4j-docker:9.0.5 \
           ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m"
         env:
           ORG_GRADLE_PROJECT_gradlewCommandLicenseProp: ${{ secrets.INSTALL4J_LICENSE_9 }}
@@ -60,6 +60,11 @@ jobs:
           ORG_GRADLE_PROJECT_sentryDsn: ${{ secrets.SENTRY_OTTER_DSN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: cache windows build for signing
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: jvm/workbookapp/.exec/*.exe
       - name: set s3 destination_dir
         run: echo "CURRENT_S3_DESTINATION=$CI_REPOSITORY_OWNER/$CI_REPOSITORY_NAME/$UPDATE_PATH" >> $GITHUB_ENV
       - name: Upload file to bucket
@@ -81,3 +86,46 @@ jobs:
             jvm/workbookapp/.exec/*.exe
             jvm/workbookapp/.exec/*.deb
             jvm/workbookapp/.exec/*.dmg
+  build-and-sign:
+    runs-on: windows-latest
+    name: Build app and sign files with Azure Code Signing
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 6.0.x
+      
+      - name: download artifacts from previous job
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-build
+          path: jvm/workbookapp/.exec/*.exe
+      - name: Load secret
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          AZURE_TENANT_ID: "op://AppDev Scripture Accessibility/azure-codesign-secrets/tenant-id"
+          AZURE_CLIENT_ID: "op://AppDev Scripture Accessibility/azure-codesign-secrets/client-id"
+          AZURE_CLIENT_SECRET: "op://AppDev Scripture Accessibility/azure-codesign-secrets/client-secret"
+          AZURE_CODE_SIGNING_ACCOUNT_NAME: "op://AppDev Scripture Accessibility/azure-codesign-secrets/code-signing-account-name"
+          AZURE_CERTIFICATE_PROFILE_NAME: "op://AppDev Scripture Accessibility/azure-codesign-secrets/certificate-profile-name"
+
+      - name: Sign files with Azure Code Signing
+        uses: azure/azure-code-signing-action@v0.3.0
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: https://eus.codesigning.azure.net/
+          code-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_ACCOUNT_NAME }}
+          certificate-profile-name: ${{ secrets.AZURE_CERTIFICATE_PROFILE_NAME }}
+          files-folder: ${{ github.workspace }}jvm\workbookapp\.exec
+          files-folder-filter: exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
