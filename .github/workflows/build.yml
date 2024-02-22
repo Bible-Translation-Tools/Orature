@@ -72,6 +72,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - uses: FranzDiebold/github-env-vars-action@v2.1.0
 
       - name: Setup .NET Core SDK
         uses: actions/setup-dotnet@v2
@@ -83,17 +84,6 @@ jobs:
         with:
           name: unsigned-binaries
           path: jvm/workbookapp/.exec
-      - name: Load secret
-        uses: 1password/load-secrets-action@v1
-        with:
-          export-env: true
-        env:
-          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          AZURE_TENANT_ID: "op://AppDev Scripture Accessibility/azure-codesign-secrets/tenant-id"
-          AZURE_CLIENT_ID: "op://AppDev Scripture Accessibility/azure-codesign-secrets/client-id"
-          AZURE_CLIENT_SECRET: "op://AppDev Scripture Accessibility/azure-codesign-secrets/client-secret"
-          AZURE_CODE_SIGNING_ACCOUNT_NAME: "op://AppDev Scripture Accessibility/azure-codesign-secrets/code-signing-account-name"
-          AZURE_CERTIFICATE_PROFILE_NAME: "op://AppDev Scripture Accessibility/azure-codesign-secrets/certificate-profile-name"
 
       - name: Sign files with Azure Code Signing
         uses: azure/azure-code-signing-action@v0.3.0
