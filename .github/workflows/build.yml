@@ -83,7 +83,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: unsigned-binaries
-          path: jvm/workbookapp/.exec
+          path: ${{ github.workspace }}/binaries
 
       - name: Sign files with Azure Code Signing
         uses: azure/azure-code-signing-action@v0.3.0
@@ -94,7 +94,7 @@ jobs:
           endpoint: https://eus.codesigning.azure.net/
           code-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_ACCOUNT_NAME }}
           certificate-profile-name: ${{ secrets.AZURE_CERTIFICATE_PROFILE_NAME }}
-          files-folder: ${{ github.workspace }}jvm\workbookapp\.exec
+          files-folder: ${{ github.workspace }}/binaries
           files-folder-filter: exe
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
@@ -108,7 +108,7 @@ jobs:
           aws_key_id: ${{ secrets.AWS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_bucket: ${{ secrets.AWS_BUCKET }}
-          source_dir: ./jvm/workbookapp/.exec
+          source_dir: ${{ github.workspace }}/binaries
           destination_dir: ${{ env.CURRENT_S3_DESTINATION }}
       - name: upload artifacts to github releases on tags
         uses: "marvinpinto/action-automatic-releases@v1.2.1"
@@ -117,6 +117,6 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: ${{ env.PRERELEASE_BOOL }}
           files: |
-            jvm/workbookapp/.exec/*.exe
-            jvm/workbookapp/.exec/*.deb
-            jvm/workbookapp/.exec/*.dmg
+            ${{ github.workspace }}/binaries/*.exe
+            ${{ github.workspace }}/binaries/*.deb
+            ${{ github.workspace }}/binaries/*.dmg
