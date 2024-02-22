@@ -81,8 +81,8 @@ jobs:
       - name: download artifacts from previous job
         uses: actions/download-artifact@v4
         with:
-          name: windows-build
-          path: jvm/workbookapp/.exec/*.exe
+          name: unsigned-binaries
+          path: jvm/workbookapp/.exec
       - name: Load secret
         uses: 1password/load-secrets-action@v1
         with:
