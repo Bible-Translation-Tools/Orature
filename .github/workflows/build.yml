@@ -36,7 +36,11 @@ jobs:
         run: echo "S3_DESTINATION=$CI_REPOSITORY_OWNER/$CI_REPOSITORY_NAME/$UPDATE_PATH" >> $GITHUB_ENV
       - name: output env vars
         id: output_env_vars_step
-        run: echo $GITHUB_ENV >> $GITHUB_OUTPUT
+        run: |
+          echo "GHA_VERSION=$GHA_VERSION" >> $GITHUB_OUTPUT
+          echo "UPDATE_PATH=$UPDATE_PATH" >> $GITHUB_OUTPUT
+          echo "PRERELEASE_BOOL=$PRERELEASE_BOOL" >> $GITHUB_OUTPUT
+          echo "S3_DESTINATION=$S3_DESTINATION" >> $GITHUB_OUTPUT
     outputs:
       GHA_VERSION: ${{ steps.output_env_vars_step.outputs.GHA_VERSION }}
       UPDATE_PATH: ${{ steps.output_env_vars_step.outputs.UPDATE_PATH }}
