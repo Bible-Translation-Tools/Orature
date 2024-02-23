@@ -1,7 +1,8 @@
 name: Java CI with Gradle
 on: [ push, pull_request ]
 jobs:
-  build:
+
+  set-env-vars:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -16,7 +17,7 @@ jobs:
       - name: set version var for tags and update path for releases
         id: tagged
         run: |
-          echo "ORG_GRADLE_PROJECT_gradlewCommandVersionProp=${{ steps.semver_parser.outputs.fullversion }}+$GITHUB_RUN_NUMBER" >> $GITHUB_ENV && \
+          echo "GHA_VERSION=${{ steps.semver_parser.outputs.fullversion }}+$GITHUB_RUN_NUMBER" >> $GITHUB_ENV && \
           echo "UPDATE_PATH=release" >> $GITHUB_ENV && \
           echo "PRERELEASE_BOOL=false" >> $GITHUB_ENV
         if: contains( github.ref, 'refs/tags/v' )
@@ -28,9 +29,29 @@ jobs:
         if: ${{ steps.semver_parser.outputs.prerelease }}
       - name: set version var for not-tags and upload dir for branches
         run: |
-          echo "ORG_GRADLE_PROJECT_gradlewCommandVersionProp=$(cat VERSION)+$GITHUB_RUN_NUMBER" >> $GITHUB_ENV && \
+          echo "GHA_VERSION=$(cat VERSION)+$GITHUB_RUN_NUMBER" >> $GITHUB_ENV && \
           echo "UPDATE_PATH=$CI_REF_NAME_SLUG" >> $GITHUB_ENV
         if: ${{ steps.tagged.outcome == 'skipped' }}
+      - name: set s3 destination_dir
+        run: echo "S3_DESTINATION=$CI_REPOSITORY_OWNER/$CI_REPOSITORY_NAME/$UPDATE_PATH" >> $GITHUB_ENV
+      - name: output env vars
+        id: output_env_vars_step
+        run: |
+          echo "GHA_VERSION=$GHA_VERSION" >> $GITHUB_OUTPUT
+          echo "UPDATE_PATH=$UPDATE_PATH" >> $GITHUB_OUTPUT
+          echo "PRERELEASE_BOOL=$PRERELEASE_BOOL" >> $GITHUB_OUTPUT
+          echo "S3_DESTINATION=$S3_DESTINATION" >> $GITHUB_OUTPUT
+    outputs:
+      GHA_VERSION: ${{ steps.output_env_vars_step.outputs.GHA_VERSION }}
+      UPDATE_PATH: ${{ steps.output_env_vars_step.outputs.UPDATE_PATH }}
+      PRERELEASE_BOOL: ${{ steps.output_env_vars_step.outputs.PRERELEASE_BOOL }}
+      S3_DESTINATION: ${{ steps.output_env_vars_step.outputs.S3_DESTINATION }}
+
+  build:
+    runs-on: ubuntu-20.04
+    needs: set-env-vars
+    steps:
+      - uses: actions/checkout@v2
       - name: Decrypt secret file
         shell: bash
         run: ./.github/scripts/decrypt_secret.sh
@@ -50,9 +71,11 @@ jobs:
           -e ORG_GRADLE_PROJECT_sentryDsn \
           -e GITHUB_TOKEN \
           -e SONAR_TOKEN \
-          wycliffeassociates/install4j-docker:9.0.2 \
+          wycliffeassociates/install4j-docker:9.0.5 \
           ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m"
         env:
+          UPDATE_PATH: ${{ needs.set-env-vars.outputs.UPDATE_PATH }}
+          ORG_GRADLE_PROJECT_gradlewCommandVersionProp: ${{ needs.set-env-vars.outputs.GHA_VERSION }}
           ORG_GRADLE_PROJECT_gradlewCommandLicenseProp: ${{ secrets.INSTALL4J_LICENSE_9 }}
           ORG_GRADLE_PROJECT_githubRepoUrl: https://api.github.com/repos/OratureCrashReports/orature-crash-reports/issues
           ORG_GRADLE_PROJECT_gradlewwinKeystorePassword: ${{ secrets.WIN_KEYSTORE_PW }}
@@ -60,24 +83,70 @@ jobs:
           ORG_GRADLE_PROJECT_sentryDsn: ${{ secrets.SENTRY_OTTER_DSN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      - name: set s3 destination_dir
-        run: echo "CURRENT_S3_DESTINATION=$CI_REPOSITORY_OWNER/$CI_REPOSITORY_NAME/$UPDATE_PATH" >> $GITHUB_ENV
-      - name: Upload file to bucket
-        uses: shallwefootball/s3-upload-action@v1.1.3
-        if: github.event_name != 'pull_request'
+      - name: cache binaries
+        uses: actions/upload-artifact@v4
         with:
-          aws_key_id: ${{ secrets.AWS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
-          aws_bucket: ${{ secrets.AWS_BUCKET }}
-          source_dir: ./jvm/workbookapp/.exec
-          destination_dir: ${{ env.CURRENT_S3_DESTINATION }}
+          name: unsigned-binaries
+          path: jvm/workbookapp/.exec/
+  sign-windows:
+    runs-on: windows-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - uses: FranzDiebold/github-env-vars-action@v2.1.0
+
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 6.0.x
+      
+      - name: download artifacts from previous job
+        uses: actions/download-artifact@v4
+        with:
+          name: unsigned-binaries
+          path: ${{ github.workspace }}/binaries
+
+      - name: Sign files with Azure Code Signing
+        uses: azure/azure-code-signing-action@v0.3.0
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: https://eus.codesigning.azure.net/
+          code-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_ACCOUNT_NAME }}
+          certificate-profile-name: ${{ secrets.AZURE_CERTIFICATE_PROFILE_NAME }}
+          files-folder: ${{ github.workspace }}/binaries
+          files-folder-filter: exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+      - name: cache binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: upload-binaries
+          path: ${{ github.workspace }}/binaries
+  upload:
+    runs-on: ubuntu-20.04
+    needs: [sign-windows, set-env-vars]
+    steps:
+      - name: download artifacts from previous job
+        uses: actions/download-artifact@v4
+        with:
+          name: upload-binaries
+          path: ${{ github.workspace }}/binaries
+      - name: upload
+        if: github.event_name != 'pull_request'
+        run: |
+          AWS_DEFAULT_REGION=us-east-1 AWS_ACCESS_KEY_ID=${{secrets.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 sync . s3://${{ secrets.AWS_BUCKET }}/${{ needs.set-env-vars.outputs.S3_DESTINATION }}
+        working-directory: ${{ github.workspace }}/binaries
       - name: upload artifacts to github releases on tags
         uses: "marvinpinto/action-automatic-releases@v1.2.1"
         if: contains( github.ref, 'refs/tags/v' )
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: ${{ env.PRERELEASE_BOOL }}
+          prerelease: ${{ needs.set-env-vars.outputs.PRERELEASE_BOOL }}
           files: |
-            jvm/workbookapp/.exec/*.exe
-            jvm/workbookapp/.exec/*.deb
-            jvm/workbookapp/.exec/*.dmg
+            ${{ github.workspace }}/binaries/*.exe
+            ${{ github.workspace }}/binaries/*.deb
+            ${{ github.workspace }}/binaries/*.dmg
