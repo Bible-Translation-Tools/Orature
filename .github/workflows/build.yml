@@ -108,6 +108,7 @@ jobs:
     runs-on: ubuntu-20.04
     needs: sign
     steps:
+      - uses: FranzDiebold/github-env-vars-action@v2.1.0
       - name: download artifacts from previous job
         uses: actions/download-artifact@v4
         with:
