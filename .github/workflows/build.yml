@@ -99,6 +99,20 @@ jobs:
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
+      - name: cache binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: upload-binaries
+          path: ${{ github.workspace }}/binaries
+  upload:
+    runs-on: ubuntu-20.04
+    needs: sign
+    steps:
+      - name: download artifacts from previous job
+        uses: actions/download-artifact@v4
+        with:
+          name: upload-binaries
+          path: ${{ github.workspace }}/binaries
       - name: set s3 destination_dir
         run: echo "CURRENT_S3_DESTINATION=$CI_REPOSITORY_OWNER/$CI_REPOSITORY_NAME/$UPDATE_PATH" >> $GITHUB_ENV
       - name: Upload file to bucket
