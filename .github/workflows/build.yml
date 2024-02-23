@@ -65,9 +65,8 @@ jobs:
         with:
           name: unsigned-binaries
           path: jvm/workbookapp/.exec/
-  sign:
+  sign-windows:
     runs-on: windows-latest
-    name: Build app and sign files with Azure Code Signing
     needs: build
     steps:
       - name: Checkout
@@ -106,7 +105,7 @@ jobs:
           path: ${{ github.workspace }}/binaries
   upload:
     runs-on: ubuntu-20.04
-    needs: sign
+    needs: sign-windows
     steps:
       - uses: FranzDiebold/github-env-vars-action@v2.1.0
       - name: download artifacts from previous job
