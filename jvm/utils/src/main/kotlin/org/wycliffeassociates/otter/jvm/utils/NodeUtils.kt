@@ -31,9 +31,7 @@ import javafx.scene.control.skin.ListViewSkin
 import javafx.scene.control.skin.VirtualFlow
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
-import javafx.scene.input.MouseEvent
 import javafx.util.Duration
-import tornadofx.*
 import kotlin.reflect.KClass
 
 inline fun <reified T : Node> Node.findChild(includeInvisible: Boolean = false): Node? =
@@ -92,32 +90,16 @@ fun <T> ComboBox<T>.overrideDefaultKeyEventHandler(action: (T) -> Unit = {}) {
     setOnShown {
         oldValue = value
 
-        val popup = (skin as ComboBoxListViewSkin<T>).popupContent
+        val skin = (skin as ComboBoxListViewSkin<T>)
+        val popup = skin.popupContent
+
         popup.setOnMouseReleased {
-            popup.hide()
+            skin.hide()
             if (oldValue != value) {
                 action(value)
             }
         }
     }
-
-    setOnMouseClicked {
-        val popup = (skin as ComboBoxListViewSkin<T>).popupContent
-        popup.show()
-    }
-
-//    this.addEventFilter(MouseEvent.MOUSE_PRESSED) {
-//        oldValue = this.value
-//
-//        setOnShown {
-//            wasOpen = true
-//        }
-//        setOnHidden {
-//            if (oldValue != this.value) {
-//                action(this.value)
-//            }
-//        }
-//    }
 
     this.addEventFilter(KeyEvent.KEY_RELEASED) {
         onHiddenProperty().set(null)
