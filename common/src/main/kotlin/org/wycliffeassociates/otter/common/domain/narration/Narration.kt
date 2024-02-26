@@ -34,6 +34,7 @@ import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -307,11 +308,15 @@ class Narration @AssistedInject constructor(
         val action = ChapterEditedAction(newVerses)
         execute(action)
 
-        NarrationTakeModifier.modifyAudioData(
-            takeToModify,
-            chapterRepresentation.getAudioFileReader(),
-            activeVerses
-        )
+        val hasAllVersesRecorded = newVerses.any { !it.placed }.not()
+
+        if (hasAllVersesRecorded) {
+            NarrationTakeModifier.modifyAudioData(
+                takeToModify,
+                chapterRepresentation.getAudioFileReader(),
+                activeVerses
+            )
+        }
     }
 
     fun pauseRecording() {
@@ -428,7 +433,8 @@ class Narration @AssistedInject constructor(
 
         if (narrationFromChapter || forceUpdate) {
             val segments = splitAudioOnCues.execute(chapterFile!!, firstVerse)
-            createVersesFromVerseSegments(segments)
+            val verseNodes = createVersesFromVerseSegments(segments)
+            onChapterEdited(verseNodes)
             appendVerseSegmentsToScratchAudio(segments)
         }
     }
@@ -439,7 +445,7 @@ class Narration @AssistedInject constructor(
         }
     }
 
-    private fun createVersesFromVerseSegments(segments: VerseSegments) {
+    private fun createVersesFromVerseSegments(segments: VerseSegments): List<VerseNode> {
         val nodes = mutableListOf<VerseNode>()
         var start = chapterRepresentation.scratchAudio.totalFrames
         var end = chapterRepresentation.scratchAudio.totalFrames
@@ -461,10 +467,53 @@ class Narration @AssistedInject constructor(
             nodes.add(chapterRepresentation.totalVerses[i])
         }
 
-        onChapterEdited(nodes)
+        return nodes
     }
 
+
+    /**
+     * Creates a Single that emits a take where the emission of the take is delayed until the take audio is finished
+     * bouncing.
+     */
+    fun createChapterTakeWithAudio(): Single<Take> {
+        return chapter.audio.getNewTakeNumber()
+            .flatMap { takeNumber ->
+                val namer = WorkbookFileNamerBuilder.createFileNamer(
+                    workbook,
+                    chapter,
+                    null,
+                    chapter,
+                    workbook.sourceMetadataSlug
+                )
+
+                val takeName = namer.generateName(takeNumber, AudioFileFormat.WAV)
+
+                val parentDir = workbook.projectFilesAccessor.getChapterAudioDir(workbook, chapter)
+                val takeFile = File(parentDir, takeName)
+                val take = Take(takeFile.name, takeFile, takeNumber, MimeType.WAV, LocalDate.now())
+
+                chapter.audio.insertTake(take)
+
+                Single.just(take)
+            }
+            .flatMap { take ->
+                takeToModify = take
+
+                NarrationTakeModifier.modifyAudioDataTask(
+                    take,
+                    chapterRepresentation.getAudioFileReader(),
+                    activeVerses
+                )
+                    .andThen(Single.just(take))
+            }
+    }
+
+    /**
+     * Creates a Single that emits a take where the emission of the take is not delayed while the take audio is
+     * bouncing.
+     */
     fun createChapterTake(): Single<Take> {
+
         return chapter
             .audio
             .getNewTakeNumber()
@@ -498,6 +547,16 @@ class Narration @AssistedInject constructor(
                     activeVerses
                 )
             }
+    }
+
+    fun deleteChapterTake() {
+        logger.info("Deleting chapter take")
+        chapter
+            .audio
+            .getSelectedTake()
+            ?.deletedTimestamp
+            ?.accept(DateHolder.now())
+        takeToModify = null
     }
 
     fun scrollAudio(delta: Int) {
