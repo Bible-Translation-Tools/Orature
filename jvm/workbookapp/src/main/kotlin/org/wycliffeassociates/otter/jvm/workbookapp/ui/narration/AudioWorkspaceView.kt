@@ -148,6 +148,8 @@ class AudioWorkspaceView : View() {
                     )
                 }
                 verse_markers_layer {
+                    isRecordingProperty.bind(viewModel.isRecordingProperty)
+                    isPlayingProperty.bind(viewModel.isPlayingProperty)
                     verseMarkersControls.bind(markerNodes) { it }
 
                     var pos = 0
@@ -221,7 +223,7 @@ class AudioWorkspaceViewModel : ViewModel() {
     }
 
     fun onDock() {
-        isRecordingProperty.bind(narrationViewModel.isRecordingProperty)
+        isRecordingProperty.bind(narrationViewModel.isRecordingProperty.or(narrationViewModel.isRecordingAgainProperty))
         isPlayingProperty.bind(narrationViewModel.isPlayingProperty)
         totalAudioSizeProperty.bind(narrationViewModel.totalAudioSizeProperty)
         audioPositionProperty.bind(narrationViewModel.audioPositionProperty)
