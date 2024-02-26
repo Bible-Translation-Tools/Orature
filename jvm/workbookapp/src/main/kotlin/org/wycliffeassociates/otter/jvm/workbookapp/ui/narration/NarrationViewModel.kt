@@ -683,8 +683,10 @@ class NarrationViewModel : ViewModel() {
 
         refreshTeleprompter()
 
+        // Indicates that we used a temporary take to edit the chapter
         if (hasAllItemsRecordedProperty.value == false) {
-            narration.deleteChapterTake()
+            // Deletes the wav file for the temporary take since it will not be referenced to again
+            narration.deleteChapterTake(true)
         }
     }
 

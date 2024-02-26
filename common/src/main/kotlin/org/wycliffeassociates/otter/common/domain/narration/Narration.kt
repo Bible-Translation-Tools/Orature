@@ -549,7 +549,12 @@ class Narration @AssistedInject constructor(
             }
     }
 
-    fun deleteChapterTake() {
+    fun deleteChapterTake(deleteAudioFile: Boolean = false) {
+
+        if (deleteAudioFile) {
+            chapter.audio.getSelectedTake()?.file?.delete()
+        }
+
         logger.info("Deleting chapter take")
         chapter
             .audio
