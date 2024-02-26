@@ -87,7 +87,7 @@ fun <T> ComboBox<T>.overrideDefaultKeyEventHandler(action: (T) -> Unit = {}) {
     var oldValue: T? = null
     var wasOpen = false
 
-    setOnShown {
+    setOnShowing {
         oldValue = value
 
         val skin = (skin as ComboBoxListViewSkin<T>)
