@@ -81,10 +81,10 @@ object NarrationTakeModifier {
 
 
     /**
-     * Encapsulates a single take audio modification request as a Completable.
+     * Encapsulates a take audio modification request as a Completable.
      *
-     * Completes if there is no take, if the bounce audio task is interrupted, or if the bounce audio task
-     * completes.
+     * Completes if there is no take, if the audio modification request is interrupted by a later audio modification
+     * requests, or if the bounce audio task completes.
      *
      * Cancels any ongoing audio modifications and metadata modifications on subscription.
      *

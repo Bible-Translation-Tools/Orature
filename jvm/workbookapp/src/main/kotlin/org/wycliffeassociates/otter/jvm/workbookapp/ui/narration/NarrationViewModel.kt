@@ -375,20 +375,21 @@ class NarrationViewModel : ViewModel() {
 
     fun processWithPlugin(pluginType: PluginType, useTemporaryTake: Boolean = false) {
 
-        val getChapterTakeTask = if (useTemporaryTake) {
+        val getChapterTake = if (useTemporaryTake) {
             narration.createChapterTakeWithAudio()
         } else {
             Single.just(chapterTakeProperty.value)
         }
 
-        getChapterTakeTask
+        getChapterTake
             .doOnSubscribe {
                 openLoadingModalProperty.set(true)
             }
             .doAfterSuccess { take ->
                 openLoadingModalProperty.set(false)
                 openTakeInPlugin(pluginType, take)
-            }.subscribe()
+            }
+            .subscribe()
     }
 
     private fun openTakeInPlugin(pluginType: PluginType, take: Take) {
