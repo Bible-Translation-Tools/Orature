@@ -134,7 +134,9 @@ class SettingsViewModel : ViewModel() {
             }
 
         supportedLocaleLanguages.setAll(localeLanguage.supportedLanguages)
-        selectedLocaleLanguageProperty.set(localeLanguage.preferredLanguage)
+        runLater {
+            selectedLocaleLanguageProperty.set(localeLanguage.preferredLanguage)
+        }
     }
 
     fun refreshPlugins() {
