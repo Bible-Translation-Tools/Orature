@@ -107,12 +107,15 @@ fun <T> ComboBox<T>.overrideDefaultKeyEventHandler(action: (T) -> Unit = {}) {
 
         when (it.code) {
             KeyCode.ENTER, KeyCode.SPACE -> {
-                if (this.isShowing) return@addEventFilter
+                if (this.isShowing) {
+                    oldValue = this.value
+                    return@addEventFilter
+                }
                 if (oldValue != this.value) {
+                    oldValue = this.value
                     action(this.value)
                     wasOpen = false
                 }
-                oldValue = this.value
                 it.consume()
             }
 
