@@ -218,12 +218,6 @@ class Narration @AssistedInject constructor(
         audioLoaded = false
         loadChapterIntoPlayer()
         seek(relLoc)
-
-        NarrationTakeModifier.modifyAudioData(
-            takeToModify,
-            chapterRepresentation.getAudioFileReader(),
-            activeVerses
-        )
     }
 
     fun onNewVerse(verseIndex: Int) {
