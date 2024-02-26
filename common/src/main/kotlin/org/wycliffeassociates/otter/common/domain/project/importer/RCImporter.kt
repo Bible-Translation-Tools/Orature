@@ -68,7 +68,7 @@ abstract class RCImporter(
             }
             .doFinally {
                 stream.close()
-                outFile.parentFile.deleteRecursively()
+                outFile.delete()
             }
             .subscribeOn(Schedulers.io())
     }

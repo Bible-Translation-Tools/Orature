@@ -141,7 +141,6 @@ class ProjectFilesAccessor(
             ResourceContainer.load(projectDir).close()
             true
         } catch (_: Exception) {
-            projectDir.deleteRecursively()
             false
         }
     }
@@ -703,7 +702,16 @@ class ProjectFilesAccessor(
 
         val bookElements: Observable<BookElement> = when {
             chaptersOnly -> chapters.cast()
-            else -> chapters.concatMap { chapter -> chapter.children.startWith(chapter) }
+            else -> {
+                chapters.flatMap { chapter ->
+                    chapter.chunks
+                        .take(1)
+                        .flatMap {
+                            it.toObservable().cast<BookElement>()
+                        }
+                        .startWith(chapter)
+                }
+            }
         }
 
         return bookElements
