@@ -89,6 +89,7 @@ fun <T> ComboBox<T>.overrideDefaultKeyEventHandler(action: (T) -> Unit = {}) {
 
     setOnShowing {
         oldValue = value
+        wasOpen = true
 
         val skin = (skin as ComboBoxListViewSkin<T>)
         val popup = skin.popupContent
@@ -108,7 +109,6 @@ fun <T> ComboBox<T>.overrideDefaultKeyEventHandler(action: (T) -> Unit = {}) {
         when (it.code) {
             KeyCode.ENTER, KeyCode.SPACE -> {
                 if (this.isShowing) {
-                    oldValue = this.value
                     return@addEventFilter
                 }
                 if (oldValue != this.value) {
