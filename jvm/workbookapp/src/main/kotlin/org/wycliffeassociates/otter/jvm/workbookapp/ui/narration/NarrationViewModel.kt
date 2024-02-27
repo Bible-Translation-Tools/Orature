@@ -373,12 +373,12 @@ class NarrationViewModel : ViewModel() {
     }
 
 
-    fun processWithPlugin(pluginType: PluginType, useTemporaryTake: Boolean = false) {
+    fun processWithPlugin(pluginType: PluginType) {
 
-        val getChapterTake = if (useTemporaryTake) {
-            narration.createChapterTakeWithAudio()
-        } else {
+        val getChapterTake = if (chapterTakeProperty.value != null) {
             Single.just(chapterTakeProperty.value)
+        } else {
+            narration.createChapterTakeWithAudio()
         }
 
         getChapterTake

@@ -229,10 +229,7 @@ class NarrationHeaderViewModel : ViewModel() {
 
 
     fun processWithPlugin(pluginType: PluginType) {
-
-        val useTemporaryChapterTake = chapterTakeProperty.value == null
-
-        narrationViewModel.processWithPlugin(pluginType, useTemporaryChapterTake)
+        narrationViewModel.processWithPlugin(pluginType)
     }
 
     private fun hasInProgressNarration(workbook: Workbook, chapter: Chapter): Boolean {
