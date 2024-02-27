@@ -131,9 +131,16 @@ internal class ChapterRepresentation(
         try {
             val nodes = activeVersesMapper.readValue(json, reference)
             logger.info("Loading ${nodes.size} audio markers from serialized data")
-            totalVerses.forEach { it.clear() }
-            totalVerses.forEachIndexed { idx, _ ->
-                nodes.getOrNull(idx)?.let { totalVerses[idx] = it }
+            val markerLabels = totalVerses.map {
+                it.clear()
+                it.marker.formattedLabel
+            }
+            nodes.forEach { nodeFromSerialized ->
+                val label = nodeFromSerialized.marker.formattedLabel
+                val indexInTotal = markerLabels.indexOf(label)
+                if (indexInTotal >= 0) {
+                    totalVerses[indexInTotal] = nodeFromSerialized
+                }
             }
         } catch (e: JsonMappingException) {
             logger.error("Error in loadFromSerializedVerses: ${e.message}")
