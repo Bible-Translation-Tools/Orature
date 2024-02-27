@@ -26,11 +26,11 @@ import javafx.scene.control.ComboBox
 import javafx.scene.control.ListView
 import javafx.scene.control.TabPane
 import javafx.scene.control.TextArea
+import javafx.scene.control.skin.ComboBoxListViewSkin
 import javafx.scene.control.skin.ListViewSkin
 import javafx.scene.control.skin.VirtualFlow
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
-import javafx.scene.input.MouseEvent
 import javafx.util.Duration
 import kotlin.reflect.KClass
 
@@ -87,15 +87,17 @@ fun <T> ComboBox<T>.overrideDefaultKeyEventHandler(action: (T) -> Unit = {}) {
     var oldValue: T? = null
     var wasOpen = false
 
-    this.addEventFilter(MouseEvent.MOUSE_PRESSED) {
-        oldValue = this.value
+    setOnShowing {
+        oldValue = value
+        wasOpen = true
 
-        setOnShown {
-            wasOpen = true
-        }
-        setOnHidden {
-            if (oldValue != this.value) {
-                action(this.value)
+        val skin = (skin as ComboBoxListViewSkin<T>)
+        val popup = skin.popupContent
+
+        popup.setOnMouseReleased {
+            skin.hide()
+            if (oldValue != value) {
+                action(value)
             }
         }
     }
@@ -106,12 +108,14 @@ fun <T> ComboBox<T>.overrideDefaultKeyEventHandler(action: (T) -> Unit = {}) {
 
         when (it.code) {
             KeyCode.ENTER, KeyCode.SPACE -> {
-                if (this.isShowing) return@addEventFilter
+                if (this.isShowing) {
+                    return@addEventFilter
+                }
                 if (oldValue != this.value) {
+                    oldValue = this.value
                     action(this.value)
                     wasOpen = false
                 }
-                oldValue = this.value
                 it.consume()
             }
 
