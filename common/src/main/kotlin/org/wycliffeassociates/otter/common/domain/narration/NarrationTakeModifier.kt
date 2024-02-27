@@ -17,6 +17,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.audio.AudioBouncer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import java.io.File
+import kotlin.math.log
 
 
 enum class TaskRunnerStatus {
@@ -56,7 +57,7 @@ object NarrationTakeModifier {
     /**
      * Called when we need to update chapter take audio.
      *
-     * Cancels any ongoing audio modifications and metadata modifications.
+     * Immediately cancels any ongoing audio modifications and metadata modifications.
      *
      * @param take the take to modify
      * @param reader the reader to retrieve new audio data
@@ -78,6 +79,45 @@ object NarrationTakeModifier {
         currentAudioBounceTask = bounceAudioTask(takeFile, reader, markers).subscribe()
     }
 
+
+    /**
+     * Encapsulates a take audio modification request as a Completable.
+     *
+     * Completes if there is no take, if the audio modification request is interrupted by a later audio modification
+     * requests, or if the bounce audio task completes.
+     *
+     * Cancels any ongoing audio modifications and metadata modifications on subscription.
+     *
+     * @param take the take to modify
+     * @param reader the reader to retrieve new audio data
+     * @param markers the markers that correspond to the new audio data
+     */
+    @Synchronized
+    fun modifyAudioDataTask(take: Take?, reader: AudioFileReader, markers: List<AudioMarker>): Completable {
+
+        return Completable.create { emitter ->
+            if (take == null) {
+                logger.info("Tried to modify audio data without an existing take")
+                emitter.onComplete()
+            } else {
+
+                updateStatus(TaskRunnerStatus.MODIFYING_AUDIO)
+
+                // Prevents waiting marker update task from executing after ongoing audio bounce tasks are canceled.
+                cancelMarkerUpdateTask()
+
+                cancelPreviousAudioBounceTask()
+
+                currentAudioBounceTask = bounceAudioTask(take.file, reader, markers)
+                    .doFinally {
+                        // Regardless of if the bounce audio task is interrupted or completed, we complete
+                        emitter.onComplete()
+                    }
+                    .subscribe()
+            }
+        }
+
+    }
 
     private fun updateStatus(status: TaskRunnerStatus) {
         isBouncingAudio =

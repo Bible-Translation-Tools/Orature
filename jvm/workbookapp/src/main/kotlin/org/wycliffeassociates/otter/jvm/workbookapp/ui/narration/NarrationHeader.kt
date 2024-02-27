@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
-import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -32,16 +31,12 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.project.ProjectCompletionStatus
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.chapterselector.chapterSelector
-import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.ChapterSelectorPopup
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationOpenInPluginEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
@@ -234,51 +229,7 @@ class NarrationHeaderViewModel : ViewModel() {
 
 
     fun processWithPlugin(pluginType: PluginType) {
-        chapterTakeProperty.value?.let { take ->
-            workbookDataStore.activeChapterProperty.value?.audio?.let { audio ->
-                pluginContextProperty.set(pluginType)
-                workbookDataStore.activeTakeNumberProperty.set(take.number)
-
-                audioPluginViewModel
-                    .getPlugin(pluginType)
-                    .doOnError { e ->
-                        logger.error("Error in processing take with plugin type: $pluginType, ${e.message}")
-                    }
-                    .flatMapSingle { plugin ->
-                        narrationViewModel.pluginOpenedProperty.set(true)
-                        fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
-                        when (pluginType) {
-                            PluginType.EDITOR -> audioPluginViewModel.edit(audio, take)
-                            PluginType.MARKER -> audioPluginViewModel.mark(audio, take)
-                            else -> null
-                        }
-                    }
-                    .observeOnFx()
-                    .doOnError { e ->
-                        logger.error("Error in processing take with plugin type: $pluginType - $e")
-                    }
-                    .onErrorReturn { PluginActions.Result.NO_PLUGIN }
-                    .subscribe { result: PluginActions.Result ->
-                        logger.info("Returned from plugin with result: $result")
-                        FX.eventbus.fire(PluginClosedEvent(pluginType))
-
-                        when (result) {
-                            PluginActions.Result.NO_PLUGIN -> FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
-                            else -> {
-                                when (pluginType) {
-                                    PluginType.EDITOR, PluginType.MARKER -> {
-                                        FX.eventbus.fire(ChapterReturnFromPluginEvent())
-                                    }
-
-                                    else -> {
-                                        logger.error("Plugin returned with result $result, plugintype: $pluginType did not match a known plugin.")
-                                    }
-                                }
-                            }
-                        }
-                    }
-            }
-        }
+        narrationViewModel.processWithPlugin(pluginType)
     }
 
     private fun hasInProgressNarration(workbook: Workbook, chapter: Chapter): Boolean {

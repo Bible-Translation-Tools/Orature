@@ -145,7 +145,7 @@ class NarrationViewModel : ViewModel() {
     val potentiallyFinishedProperty = hasAllItemsRecordedProperty
         .and(isRecordingProperty.not())
         .and(isRecordingAgainProperty.not())
-        .and(chapterTakeProperty.isNull)
+        .and(recordPauseProperty.not())
     val potentiallyFinished by potentiallyFinishedProperty
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
@@ -351,7 +351,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun createPotentiallyFinishedChapterTake() {
-        if (potentiallyFinished) {
+        if (potentiallyFinished && (chapterTakeProperty.value == null || chapterTakeProperty.value.isDeleted())) {
             narration
                 .createChapterTake()
                 .subscribeOn(Schedulers.io())
@@ -365,9 +365,78 @@ class NarrationViewModel : ViewModel() {
                         )
                     }
                 ).let { disposables.add(it) }
+        } else if (chapterTakeProperty.value != null && hasAllItemsRecordedProperty.value == false) {
+            // Deletes the chapter take because one currently exists, and we do not have all items recorded.
+            narration.deleteChapterTake()
+            chapterTakeProperty.set(null)
         }
     }
 
+
+    fun processWithPlugin(pluginType: PluginType) {
+
+        val getChapterTake = if (chapterTakeProperty.value != null) {
+            Single.just(chapterTakeProperty.value)
+        } else {
+            narration.createChapterTakeWithAudio()
+        }
+
+        getChapterTake
+            .doOnSubscribe {
+                openLoadingModalProperty.set(true)
+            }
+            .doAfterSuccess { take ->
+                openLoadingModalProperty.set(false)
+                openTakeInPlugin(pluginType, take)
+            }
+            .subscribe()
+    }
+
+    private fun openTakeInPlugin(pluginType: PluginType, take: Take) {
+        workbookDataStore.activeChapterProperty.value?.audio?.let { audio ->
+            pluginContextProperty.set(pluginType)
+            workbookDataStore.activeTakeNumberProperty.set(take.number)
+
+            audioPluginViewModel
+                .getPlugin(pluginType)
+                .doOnError { e ->
+                    logger.error("Error in processing take with plugin type: $pluginType, ${e.message}")
+                }
+                .flatMapSingle { plugin ->
+                    pluginOpenedProperty.set(true)
+                    fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
+                    when (pluginType) {
+                        PluginType.EDITOR -> audioPluginViewModel.edit(audio, take)
+                        PluginType.MARKER -> audioPluginViewModel.mark(audio, take)
+                        else -> null
+                    }
+                }
+                .observeOnFx()
+                .doOnError { e ->
+                    logger.error("Error in processing take with plugin type: $pluginType - $e")
+                }
+                .onErrorReturn { PluginActions.Result.NO_PLUGIN }
+                .subscribe { result: PluginActions.Result ->
+                    logger.info("Returned from plugin with result: $result")
+                    FX.eventbus.fire(PluginClosedEvent(pluginType))
+
+                    when (result) {
+                        PluginActions.Result.NO_PLUGIN -> FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
+                        else -> {
+                            when (pluginType) {
+                                PluginType.EDITOR, PluginType.MARKER -> {
+                                    FX.eventbus.fire(ChapterReturnFromPluginEvent())
+                                }
+
+                                else -> {
+                                    logger.error("Plugin returned with result $result, plugintype: $pluginType did not match a known plugin.")
+                                }
+                            }
+                        }
+                    }
+                }
+        }
+    }
 
     /**
      * If we are currently modifying the chapter take, the chapter navigation is postponed until the modification is
@@ -614,6 +683,12 @@ class NarrationViewModel : ViewModel() {
         updateRecordingState()
 
         refreshTeleprompter()
+
+        // Indicates that we used a temporary take to edit the chapter
+        if (hasAllItemsRecordedProperty.value == false) {
+            // Deletes the wav file for the temporary take since it will not be referenced to again
+            narration.deleteChapterTake(true)
+        }
     }
 
     fun onNext(index: Int) {
