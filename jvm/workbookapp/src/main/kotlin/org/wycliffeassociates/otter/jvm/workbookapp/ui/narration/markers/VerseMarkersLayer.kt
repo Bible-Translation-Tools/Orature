@@ -33,6 +33,7 @@ class VerseMarkersLayer : BorderPane() {
     private val logger = LoggerFactory.getLogger(VerseMarkersLayer::class.java)
 
     val isRecordingProperty = SimpleBooleanProperty()
+    val isPlayingProperty = SimpleBooleanProperty()
     val markers = observableListOf<VerseMarker>()
 
     val verseMarkersControls: ObservableList<VerseMarkerControl> = observableListOf()
@@ -43,6 +44,8 @@ class VerseMarkersLayer : BorderPane() {
         tryImportStylesheet("/css/verse-markers-layer.css")
 
         addClass("verse-markers-layer")
+
+        mouseTransparentProperty().bind(isRecordingProperty.or(isPlayingProperty))
 
         var scrollDelta = 0.0
         var scrollOldPos = 0.0
