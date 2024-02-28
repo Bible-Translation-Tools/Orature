@@ -74,7 +74,7 @@ class NarrationTextCell(
             return
         }
 
-        val isLast = index == listView.items.lastIndex
+        val isLast = index == listView.items.lastIndex || listView.items.all { (it as NarrationTextItemData).hasRecording }
 
         view.isSelectedProperty.set(isSelected)
         view.isLastVerseProperty.set(isLast)
