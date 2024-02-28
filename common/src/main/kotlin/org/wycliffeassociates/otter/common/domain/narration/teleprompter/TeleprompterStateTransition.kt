@@ -41,10 +41,16 @@ object RecordAction {
 
         contexts[index].changeState(TeleprompterItemState.RECORD_ACTIVE)
 
-        // Make next item available to record
         if (index < contexts.lastIndex) {
-            contexts[index + 1].changeState(TeleprompterItemState.RECORD)
+            var found = false
+            
             for (i in index + 1..contexts.lastIndex) {
+                if (!found && contexts[i].state.type == TeleprompterItemState.RECORD_DISABLED) {
+                    contexts[i].changeState(TeleprompterItemState.RECORD)
+                    found = true
+                    continue
+                }
+
                 contexts[i].disable()
             }
         }

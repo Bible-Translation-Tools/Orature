@@ -183,7 +183,8 @@ object RecordAgainState : TeleprompterState {
 
     override fun changeState(request: TeleprompterItemState): TeleprompterState {
         if (request !in validStateTransitions) {
-            throw IllegalStateException("State: $type tried to transition to state: $request")
+            return RecordActiveState
+//            throw IllegalStateException("State: $type tried to transition to state: $request")
         }
 
         return when (request) {
