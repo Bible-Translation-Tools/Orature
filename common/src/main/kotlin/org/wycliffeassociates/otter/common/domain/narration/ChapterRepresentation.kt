@@ -163,12 +163,17 @@ internal class ChapterRepresentation(
     }
 
     private fun updateTotalVerses() {
-        activeVerses.forEachIndexed { idx, verseNode ->
+        activeVerses.forEach { verseNode ->
             val newLoc = audioLocationToLocationInChapter(verseNode.firstFrame())
             val updatedMarker = verseNode.copyMarker(location = newLoc)
-            totalVerses[idx] = VerseNode(
-                true, updatedMarker, totalVerses[idx].sectors
-            )
+            val updateIndex = totalVerses.indexOfFirst {
+                it.marker.formattedLabel == verseNode.marker.formattedLabel
+            }
+            if (updateIndex >= 0) {
+                totalVerses[updateIndex] = VerseNode(
+                    true, updatedMarker, totalVerses[updateIndex].sectors
+                )
+            }
         }
     }
 

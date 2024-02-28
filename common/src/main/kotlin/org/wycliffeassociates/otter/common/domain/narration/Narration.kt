@@ -444,6 +444,19 @@ class Narration @AssistedInject constructor(
         var start = chapterRepresentation.scratchAudio.totalFrames
         var end = chapterRepresentation.scratchAudio.totalFrames
 
+        val segmentLabels = segments.keys.map { it.formattedLabel }
+        totalVerses
+            .filter { marker -> marker.formattedLabel !in segmentLabels }
+            .forEach {
+                nodes.add(
+                    VerseNode(
+                        false,
+                        it,
+                        mutableListOf()
+                    )
+                )
+            }
+
         segments.forEach { (marker, file) ->
             val verseAudio = AudioFile(file)
             end += verseAudio.totalFrames
@@ -456,12 +469,7 @@ class Narration @AssistedInject constructor(
             start = end + 1
         }
 
-
-        for (i in segments.size until chapterRepresentation.totalVerses.size) {
-            nodes.add(chapterRepresentation.totalVerses[i])
-        }
-
-        return nodes
+        return nodes.sortedBy { it.marker.sort }
     }
 
 
