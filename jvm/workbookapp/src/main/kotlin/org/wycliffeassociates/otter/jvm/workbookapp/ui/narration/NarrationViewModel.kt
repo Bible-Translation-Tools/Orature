@@ -185,9 +185,9 @@ class NarrationViewModel : ViewModel() {
         narratableList.bind(chunksList) { chunk ->
 
             val marker = when (chunk.sort) {
-                BOOK_TITLE_SORT -> recordedVerses.firstOrNull { it is BookMarker }
-                CHAPTER_TITLE_SORT -> recordedVerses.firstOrNull { it is ChapterMarker }
-                else -> recordedVerses.firstOrNull {
+                BOOK_TITLE_SORT -> totalVerses.firstOrNull { it is BookMarker }
+                CHAPTER_TITLE_SORT -> totalVerses.firstOrNull { it is ChapterMarker }
+                else -> totalVerses.firstOrNull {
                     it.label == chunk.title && it is VerseMarker
                 }
             }
@@ -613,12 +613,12 @@ class NarrationViewModel : ViewModel() {
         snackBarObservable.onNext(message)
     }
 
-    fun play(verse: AudioMarker) {
-        playingVerseIndex.set(recordedVerses.indexOf(verse))
+    fun play(verseIndex: Int) {
+        playingVerseIndex.set(verseIndex)
         renderer.clearActiveRecordingData()
         audioPlayer.pause()
 
-        narration.loadSectionIntoPlayer(verse)
+        narration.loadSectionIntoPlayer(totalVerses[verseIndex])
 
         // audioPlayer.seek(0)
         audioPlayer.play()
@@ -868,6 +868,7 @@ class NarrationViewModel : ViewModel() {
                     val verseWasAdded = recordedVerses.size != verses.size
 
                     recordedVerses.setAll(verses)
+                    totalVerses.setAll(narration.totalVerses)
 
                     hasUndo = narration.hasUndo()
                     hasRedo = narration.hasRedo()

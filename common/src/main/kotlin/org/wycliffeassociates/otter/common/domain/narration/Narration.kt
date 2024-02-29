@@ -239,7 +239,7 @@ class Narration @AssistedInject constructor(
         audioLoaded = false
         loadChapterIntoPlayer()
 
-        seek(activeVerses[verseIndex].location)
+        seek(totalVerses[verseIndex].location)
         writer?.start()
         isRecording.set(true)
     }
@@ -273,7 +273,7 @@ class Narration @AssistedInject constructor(
 
     fun onEditVerse(verseIndex: Int, editedFile: File) {
 
-        loadSectionIntoPlayer(activeVerses[verseIndex])
+        loadSectionIntoPlayer(totalVerses[verseIndex])
 
         val scratchAudio = chapterRepresentation.scratchAudio
         val start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1

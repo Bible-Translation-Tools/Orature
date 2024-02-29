@@ -133,7 +133,7 @@ class NarrationTextCell(
 
             onPlayActionProperty.set(DebouncedEventHandler {
                 item.marker?.let {
-                    FX.eventbus.fire(PlayVerseEvent(it))
+                    FX.eventbus.fire(PlayVerseEvent(index))
                 }
             })
 

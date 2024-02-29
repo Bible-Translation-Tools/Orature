@@ -55,7 +55,7 @@ class VerseMenu : ContextMenu() {
                 tooltip(text)
             }
             action {
-                FX.eventbus.fire(PlayVerseEvent(verseProperty.value))
+                FX.eventbus.fire(PlayVerseEvent(verseIndexProperty.value))
             }
             disableWhen {
                 isRecordingProperty
