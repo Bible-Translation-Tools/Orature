@@ -134,6 +134,7 @@ class NarrationViewModel : ViewModel() {
     val chunkTotalProperty = SimpleIntegerProperty(0)
     val chunksList: ObservableList<Chunk> = observableListOf()
     val narratableList: ObservableList<NarrationTextItemData> = observableListOf()
+    val totalVerses = observableListOf<AudioMarker>()
     val recordedVerses = observableListOf<AudioMarker>()
     val hasVersesProperty = SimpleBooleanProperty()
     val lastRecordedVerseProperty = SimpleIntegerProperty()
@@ -207,6 +208,7 @@ class NarrationViewModel : ViewModel() {
         }
 
         recordedVerses.onChange {
+            totalVerses.setAll(narration.totalVerses)
             narratableList.forEachIndexed { idx, chunk ->
 
                 val hasRecording = when (chunk.chunk.sort) {
@@ -853,6 +855,7 @@ class NarrationViewModel : ViewModel() {
 
     private fun subscribeActiveVersesChanged() {
         recordedVerses.setAll(narration.activeVerses)
+        totalVerses.setAll(narration.totalVerses)
         hasUndo = narration.hasUndo()
         hasRedo = narration.hasRedo()
 
