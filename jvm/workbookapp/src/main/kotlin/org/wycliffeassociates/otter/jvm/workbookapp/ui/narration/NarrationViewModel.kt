@@ -1088,7 +1088,7 @@ class NarrationViewModel : ViewModel() {
 
             else -> {
                 val marker = narration.findMarkerAtPosition(audioPosition)
-                val index = narratableList.indexOfFirst { it.marker == marker }
+                val index = totalVerses.indexOfFirst { it == marker }
                 highlightedVerseIndex.set(index)
             }
         }
