@@ -111,14 +111,14 @@ class Narration @AssistedInject constructor(
     private var takeToModify: Take?
 
     init {
-        val writer = initializeWavWriter()
+        // val writer = initializeWavWriter()
 
         firstVerse = getFirstVerseMarker()
         restoreFromExistingChapterAudio()
         chapterRepresentation.loadFromSerializedVerses()
-        recorder.start()
+        // recorder.start()
         disposables.addAll(
-            activeRecordingFrameCounter(writer),
+            // activeRecordingFrameCounter(writer),
             resetUncommittedFramesOnUpdatedVerses(),
         )
         loadChapterIntoPlayer()
