@@ -159,12 +159,9 @@ internal class MoveMarkerAction(
     override fun execute(
         totalVerses: MutableList<VerseNode>, workingAudio: AudioFile
     ) {
-        val activeVerses = mutableListOf<VerseNode>()
-        totalVerses.filterTo(activeVerses) { it.placed }
-
-        logger.info("Moving marker: ${activeVerses[verseIndex].marker.formattedLabel} by ${delta} frames")
-        oldPrecedingVerse = activeVerses.getOrNull(verseIndex - 1)?.copy()
-        oldVerse = activeVerses[verseIndex].copy()
+        logger.info("Moving marker: ${totalVerses[verseIndex].marker.formattedLabel} by ${delta} frames")
+        oldPrecedingVerse = totalVerses.getOrNull(verseIndex - 1)?.copy()
+        oldVerse = totalVerses[verseIndex].copy()
 
         val bothNull = oldPrecedingVerse == null && oldVerse == null
         val markerMovedBetweenVerses = oldPrecedingVerse != null && oldVerse != null
@@ -184,7 +181,7 @@ internal class MoveMarkerAction(
                     verse!!.addRange(listOf(delta.absoluteValue..verse!!.firstFrame()))
                 }
 
-                activeVerses[verseIndex] = verse!!.copy()
+                totalVerses[verseIndex] = verse!!.copy()
             }
 
             markerMovedBetweenVerses -> {
@@ -199,53 +196,29 @@ internal class MoveMarkerAction(
                     precedingVerse!!.sectors.addAll(framesToAdd)
                 }
 
-                activeVerses[verseIndex] = verse!!.copy()
-                activeVerses[verseIndex - 1] = precedingVerse!!.copy()
+                totalVerses[verseIndex] = verse!!.copy()
+                totalVerses[verseIndex - 1] = precedingVerse!!.copy()
             }
-        }
-
-        // update original list
-        activeVerses.forEach { node ->
-            val index = totalVerses.indexOfFirst { it.marker.formattedLabel == node.marker.formattedLabel }
-            totalVerses[index] = node
         }
     }
 
     override fun undo(totalVerses: MutableList<VerseNode>) {
-        val activeVerses = mutableListOf<VerseNode>()
-        totalVerses.filterTo(activeVerses) { it.placed }
-
         oldVerse?.let {
-            logger.info("Undoing moving marker: ${activeVerses[verseIndex].marker.formattedLabel}")
-            activeVerses[verseIndex] = it.copy()
+            logger.info("Undoing moving marker: ${totalVerses[verseIndex].marker.formattedLabel}")
+            totalVerses[verseIndex] = it.copy()
         }
         oldPrecedingVerse?.let {
-            activeVerses[verseIndex - 1] = it.copy()
-        }
-
-        // update original list
-        activeVerses.forEach { node ->
-            val index = totalVerses.indexOfFirst { it.marker.formattedLabel == node.marker.formattedLabel }
-            totalVerses[index] = node
+            totalVerses[verseIndex - 1] = it.copy()
         }
     }
 
     override fun redo(totalVerses: MutableList<VerseNode>) {
-        val activeVerses = mutableListOf<VerseNode>()
-        totalVerses.filterTo(activeVerses) { it.placed }
-
         verse?.let {
             logger.info("Redoing moving marker: ${totalVerses[verseIndex].marker.formattedLabel}")
-            activeVerses[verseIndex] = it.copy()
+            totalVerses[verseIndex] = it.copy()
         }
         precedingVerse?.let {
-            activeVerses[verseIndex - 1] = it.copy()
-        }
-
-        // update original list
-        activeVerses.forEach { node ->
-            val index = totalVerses.indexOfFirst { it.marker.formattedLabel == node.marker.formattedLabel }
-            totalVerses[index] = node
+            totalVerses[verseIndex - 1] = it.copy()
         }
     }
 }
