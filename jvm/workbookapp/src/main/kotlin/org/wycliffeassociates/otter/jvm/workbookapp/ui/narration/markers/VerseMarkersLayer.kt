@@ -76,7 +76,7 @@ class VerseMarkersLayer : BorderPane() {
         bindChildren(verseMarkersControls) { verseMarkerControl ->
 
             verseMarkerControl.apply {
-
+                canBeMovedProperty.set(verseMarkersControls.indexOf(this) > 0)
                 val dragTarget = dragAreaProperty.value
 
                 var delta = 0.0
@@ -132,11 +132,11 @@ class VerseMarkersLayer : BorderPane() {
     }
 
     private fun verseBoundaries(verseIndex: Int): Pair<Double, Double> {
-        val previousVerse = verseMarkersControls.getOrNull(verseIndex - 1)
+        val previousVerse = verseMarkersControls.find { it.verseIndexProperty.value == verseIndex - 1 }
         val startBounds = if (previousVerse != null && previousVerse.visibleProperty().value) {
             previousVerse.layoutX + (MARKER_AREA_WIDTH * 4)
         } else 0.0
-        val nextVerse = verseMarkersControls.getOrNull(verseIndex + 1)
+        val nextVerse = verseMarkersControls.find { it.verseIndexProperty.value == verseIndex + 1 }
         val endBounds = if (nextVerse != null && nextVerse.visibleProperty().value) {
             nextVerse.layoutX - (MARKER_AREA_WIDTH * 4)
         } else width
