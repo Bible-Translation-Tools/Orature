@@ -129,17 +129,18 @@ internal class ChapterRepresentation(
         val reference = object : TypeReference<List<VerseNode>>() {}
 
         try {
-            val nodes = activeVersesMapper.readValue(json, reference)
-            logger.info("Loading ${nodes.size} audio markers from serialized data")
-            val markerLabels = totalVerses.map {
-                it.clear()
-                it.marker.formattedLabel
+            val activeNodes = activeVersesMapper.readValue(json, reference)
+            logger.info("Loading ${activeNodes.size} audio markers from serialized data")
+            totalVerses.forEach {
+                it.clear() // reset the node's sectors
             }
-            nodes.forEach { nodeFromSerialized ->
-                val label = nodeFromSerialized.marker.formattedLabel
-                val indexInTotal = markerLabels.indexOf(label)
-                if (indexInTotal >= 0) {
-                    totalVerses[indexInTotal] = nodeFromSerialized
+            activeNodes.forEach { node ->
+                // find node position in totalVerses
+                val index = totalVerses.indexOfFirst {
+                    it.marker.formattedLabel == node.marker.formattedLabel
+                }
+                if (index != -1) {
+                    totalVerses[index] = node
                 }
             }
         } catch (e: JsonMappingException) {
@@ -166,12 +167,14 @@ internal class ChapterRepresentation(
         activeVerses.forEach { verseNode ->
             val newLoc = audioLocationToLocationInChapter(verseNode.firstFrame())
             val updatedMarker = verseNode.copyMarker(location = newLoc)
-            val updateIndex = totalVerses.indexOfFirst {
+
+            // find node position in totalVerses
+            val index = totalVerses.indexOfFirst {
                 it.marker.formattedLabel == verseNode.marker.formattedLabel
             }
-            if (updateIndex >= 0) {
-                totalVerses[updateIndex] = VerseNode(
-                    true, updatedMarker, totalVerses[updateIndex].sectors
+            if (index != -1) {
+                totalVerses[index] = VerseNode(
+                    true, updatedMarker, totalVerses[index].sectors
                 )
             }
         }
