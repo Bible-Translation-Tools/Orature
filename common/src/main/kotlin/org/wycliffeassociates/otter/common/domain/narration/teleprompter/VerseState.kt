@@ -72,6 +72,8 @@ object RecordState : VerseState {
         VerseItemState.RECORD,
         VerseItemState.RECORD_ACTIVE,
         VerseItemState.RECORD_DISABLED,
+        VerseItemState.PLAYING,
+        VerseItemState.PLAYING_DISABLED
     )
 
     override val disabledState = RecordDisabledState
@@ -85,6 +87,8 @@ object RecordState : VerseState {
             VerseItemState.RECORD -> RecordState
             VerseItemState.RECORD_ACTIVE -> RecordActiveState
             VerseItemState.RECORD_DISABLED -> RecordDisabledState
+            VerseItemState.PLAYING -> PlayingState
+            VerseItemState.PLAYING_DISABLED -> PlayingDisabledState
             else -> {
                 throw IllegalStateException("State: $type tried to transition to state: $request")
             }
@@ -97,7 +101,8 @@ object RecordDisabledState : VerseState {
 
     override val validStateTransitions = setOf(
         VerseItemState.RECORD,
-        VerseItemState.RECORD_ACTIVE
+        VerseItemState.RECORD_ACTIVE,
+        VerseItemState.PLAYING_DISABLED
     )
 
     override val disabledState = RecordDisabledState
@@ -110,6 +115,7 @@ object RecordDisabledState : VerseState {
         return when (request) {
             VerseItemState.RECORD -> RecordState
             VerseItemState.RECORD_ACTIVE -> RecordActiveState
+            VerseItemState.PLAYING_DISABLED -> PlayingDisabledState
             else -> {
                 throw IllegalStateException("State: $type tried to transition to state: $request")
             }
@@ -152,7 +158,8 @@ object RecordPausedState : VerseState {
     override val validStateTransitions = setOf(
         VerseItemState.RECORD_ACTIVE,
         VerseItemState.RECORD_AGAIN,
-        VerseItemState.RECORD_AGAIN_DISABLED
+        VerseItemState.RECORD_AGAIN_DISABLED,
+        VerseItemState.PLAYING,
     )
 
     override val disabledState = RecordDisabledState
@@ -166,8 +173,67 @@ object RecordPausedState : VerseState {
             VerseItemState.RECORD_ACTIVE -> RecordActiveState
             VerseItemState.RECORD_AGAIN -> RecordAgainState
             VerseItemState.RECORD_AGAIN_DISABLED -> RecordAgainDisabledState
+            VerseItemState.PLAYING -> PlayingState
             else -> {
                 throw IllegalStateException("State: $type tried to transition to state: $request")
+            }
+        }
+    }
+}
+
+
+object PlayingState : VerseState {
+    override val type = VerseItemState.PLAYING
+
+    override val validStateTransitions = setOf(
+        VerseItemState.RECORDING_PAUSED,
+        VerseItemState.RECORD,
+        VerseItemState.RECORD_AGAIN,
+    )
+
+    override val disabledState = RecordDisabledState
+
+    override fun changeState(request: VerseItemState): VerseState {
+        if (request !in validStateTransitions) {
+            throw IllegalStateException("State: ${type} tried to transition to state: $request")
+        }
+
+        return when (request) {
+            VerseItemState.RECORDING_PAUSED -> RecordPausedState
+            VerseItemState.RECORD -> RecordState
+            VerseItemState.RECORD_AGAIN -> RecordAgainState
+            else -> {
+                throw IllegalStateException("State: ${type} tried to transition to state: $request")
+            }
+        }
+    }
+}
+
+
+object PlayingDisabledState : VerseState {
+    override val type = VerseItemState.PLAYING_DISABLED
+
+    override val validStateTransitions = setOf(
+        VerseItemState.RECORD,
+        VerseItemState.RECORD_AGAIN,
+        VerseItemState.RECORD_DISABLED,
+        VerseItemState.RECORD_AGAIN_DISABLED,
+    )
+
+    override val disabledState = RecordDisabledState
+
+    override fun changeState(request: VerseItemState): VerseState {
+        if (request !in validStateTransitions) {
+            throw IllegalStateException("State: ${type} tried to transition to state: $request")
+        }
+
+        return when (request) {
+            VerseItemState.RECORD -> RecordState
+            VerseItemState.RECORD_AGAIN -> RecordAgainState
+            VerseItemState.RECORD_DISABLED -> RecordDisabledState
+            VerseItemState.RECORD_AGAIN_DISABLED -> RecordAgainDisabledState
+            else -> {
+                throw IllegalStateException("State: ${type} tried to transition to state: $request")
             }
         }
     }
@@ -179,6 +245,8 @@ object RecordAgainState : VerseState {
     override val validStateTransitions = setOf(
         VerseItemState.RECORD_AGAIN_ACTIVE,
         VerseItemState.RECORD_AGAIN_DISABLED,
+        VerseItemState.PLAYING,
+        VerseItemState.PLAYING_DISABLED
     )
 
     override val disabledState = RecordAgainDisabledState
@@ -191,6 +259,8 @@ object RecordAgainState : VerseState {
         return when (request) {
             VerseItemState.RECORD_AGAIN_ACTIVE -> RecordAgainActiveState
             VerseItemState.RECORD_AGAIN_DISABLED -> RecordAgainDisabledState
+            VerseItemState.PLAYING -> PlayingState
+            VerseItemState.PLAYING_DISABLED -> PlayingDisabledState
             else -> {
                 throw IllegalStateException("State: $type tried to transition to state: $request")
             }
@@ -202,7 +272,8 @@ object RecordAgainDisabledState : VerseState {
     override val type = VerseItemState.RECORD_AGAIN_DISABLED
 
     override val validStateTransitions = setOf(
-        VerseItemState.RECORD_AGAIN
+        VerseItemState.RECORD_AGAIN,
+        VerseItemState.PLAYING_DISABLED
     )
 
     override val disabledState = RecordAgainDisabledState
@@ -214,6 +285,7 @@ object RecordAgainDisabledState : VerseState {
 
         return when (request) {
             VerseItemState.RECORD_AGAIN -> RecordAgainState
+            VerseItemState.PLAYING_DISABLED -> PlayingDisabledState
             else -> {
                 throw IllegalStateException("State: $type tried to transition to state: $request")
             }
