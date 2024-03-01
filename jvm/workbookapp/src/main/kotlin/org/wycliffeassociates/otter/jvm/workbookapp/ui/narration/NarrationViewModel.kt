@@ -225,7 +225,7 @@ class NarrationViewModel : ViewModel() {
 
                 chunk.hasRecording = hasRecording
                 chunk.previousChunksRecorded = chunk.chunk.sort + sortPadding - 1 <= recordedVerses.size
-                chunk.marker = recordedVerses.getOrNull(idx)
+                chunk.marker = totalVerses.getOrNull(idx)
             }
         }
     }
@@ -931,8 +931,8 @@ class NarrationViewModel : ViewModel() {
                 var nextVerseLoc: Int? = null
                 if (isRecordingAgain) {
                     val reRecordingIndex = recordingVerseIndex.value
-                    nextVerseLoc = recordedVerses.getOrNull(reRecordingIndex + 1)?.location
-                    reRecordLoc = recordedVerses[reRecordingIndex].location
+                    nextVerseLoc = totalVerses.getOrNull(reRecordingIndex + 1)?.location
+                    reRecordLoc = totalVerses[reRecordingIndex].location
                 }
 
                 val viewports = renderer.draw(
