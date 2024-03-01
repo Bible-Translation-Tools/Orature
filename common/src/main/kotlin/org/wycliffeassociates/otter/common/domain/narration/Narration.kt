@@ -429,6 +429,9 @@ class Narration @AssistedInject constructor(
             val segments = splitAudioOnCues.execute(chapterFile!!, firstVerse)
             val verseNodes = createVersesFromVerseSegments(segments)
             onChapterEdited(verseNodes)
+            if (!forceUpdate) {
+                history.clear()
+            }
             appendVerseSegmentsToScratchAudio(segments)
         }
     }
