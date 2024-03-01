@@ -451,11 +451,11 @@ class Narration @AssistedInject constructor(
         totalVerses
             .filter { marker -> marker.formattedLabel !in segmentLabels }
             .forEach {
+                // inserts inactive nodes
                 nodes.add(
                     VerseNode(
-                        false,
-                        it,
-                        mutableListOf()
+                        placed = false,
+                        marker = it
                     )
                 )
             }
@@ -472,7 +472,7 @@ class Narration @AssistedInject constructor(
             start = end + 1
         }
 
-        return nodes.sortedBy { it.marker.sort }
+        return nodes.sortedBy { it.marker.sort } // sort order of book-chapter-verse
     }
 
 
