@@ -159,7 +159,10 @@ class OngoingProjectImporter @Inject constructor(
                     sourceLanguageSlug == existingProject.source.language.slug &&
                         languageSlug == existingProject.target.language.slug &&
                         projectSlug == existingProject.target.slug
-                }?.projectFilesAccessor?.isInitialized() ?: false
+                }?.let {
+                    workbookRepository.closeWorkbook(it)
+                    it.projectFilesAccessor.isInitialized()
+                } ?: false
             }
         }
     }
