@@ -26,7 +26,7 @@ import javafx.scene.control.ListCell
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.VerseItemState
 import org.wycliffeassociates.otter.jvm.controls.event.*
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
 import tornadofx.*
@@ -36,7 +36,7 @@ class NarrationTextItemData(
     var marker: AudioMarker?,
     var hasRecording: Boolean = false,
     var previousChunksRecorded: Boolean = false,
-    var state: TeleprompterItemState = TeleprompterItemState.RECORD_DISABLED
+    var state: VerseItemState = VerseItemState.RECORD_DISABLED
 ) {
     override fun toString(): String {
         return "${chunk.sort}, $hasRecording, $previousChunksRecorded"

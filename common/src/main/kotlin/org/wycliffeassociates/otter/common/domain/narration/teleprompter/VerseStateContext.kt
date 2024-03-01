@@ -18,14 +18,14 @@
  */
 package org.wycliffeassociates.otter.common.domain.narration.teleprompter
 
-class TeleprompterStateContext {
-    lateinit var state: TeleprompterState
+class VerseStateContext {
+    lateinit var state: VerseState
         internal set
 
-    private var temporarilyDisabledState: TeleprompterState? = null
+    private var temporarilyDisabledState: VerseState? = null
 
     fun changeState(
-        request: TeleprompterItemState
+        request: VerseItemState
     ) {
         temporarilyDisabledState = null
         state = state.changeState(request)

@@ -18,7 +18,7 @@
  */
 package org.wycliffeassociates.otter.common.domain.narration.teleprompter
 
-enum class TeleprompterItemState {
+enum class VerseItemState {
     BEGIN_RECORDING,
     RECORD,
     RECORDING_PAUSED,
@@ -27,35 +27,37 @@ enum class TeleprompterItemState {
     RECORD_AGAIN,
     RECORD_AGAIN_ACTIVE,
     RECORD_AGAIN_PAUSED,
-    RECORD_AGAIN_DISABLED
+    RECORD_AGAIN_DISABLED,
+    PLAYING,
+    PLAYING_DISABLED,
 }
 
-interface TeleprompterState {
-    val type: TeleprompterItemState
-    val validStateTransitions: Set<TeleprompterItemState>
-    val disabledState: TeleprompterState
+interface VerseState {
+    val type: VerseItemState
+    val validStateTransitions: Set<VerseItemState>
+    val disabledState: VerseState
 
-    fun changeState(request: TeleprompterItemState): TeleprompterState
+    fun changeState(request: VerseItemState): VerseState
 }
 
-object BeginRecordingState : TeleprompterState {
-    override val type = TeleprompterItemState.BEGIN_RECORDING
+object BeginRecordingState : VerseState {
+    override val type = VerseItemState.BEGIN_RECORDING
 
     override val validStateTransitions = setOf(
-        TeleprompterItemState.RECORD,
-        TeleprompterItemState.RECORD_DISABLED
+        VerseItemState.RECORD,
+        VerseItemState.RECORD_DISABLED
     )
 
     override val disabledState = RecordDisabledState
 
-    override fun changeState(request: TeleprompterItemState): TeleprompterState {
+    override fun changeState(request: VerseItemState): VerseState {
         if (request !in validStateTransitions) {
             throw IllegalStateException("State: $type tried to transition to state: $request")
         }
 
         return when (request) {
-            TeleprompterItemState.RECORD -> RecordState
-            TeleprompterItemState.RECORD_DISABLED -> RecordDisabledState
+            VerseItemState.RECORD -> RecordState
+            VerseItemState.RECORD_DISABLED -> RecordDisabledState
             else -> {
                 throw IllegalStateException("State: $type tried to transition to state: $request")
             }
@@ -63,26 +65,26 @@ object BeginRecordingState : TeleprompterState {
     }
 }
 
-object RecordState : TeleprompterState {
-    override val type = TeleprompterItemState.RECORD
+object RecordState : VerseState {
+    override val type = VerseItemState.RECORD
 
     override val validStateTransitions = setOf(
-        TeleprompterItemState.RECORD,
-        TeleprompterItemState.RECORD_ACTIVE,
-        TeleprompterItemState.RECORD_DISABLED,
+        VerseItemState.RECORD,
+        VerseItemState.RECORD_ACTIVE,
+        VerseItemState.RECORD_DISABLED,
     )
 
     override val disabledState = RecordDisabledState
 
-    override fun changeState(request: TeleprompterItemState): TeleprompterState {
+    override fun changeState(request: VerseItemState): VerseState {
         if (request !in validStateTransitions) {
             throw IllegalStateException("State: $type tried to transition to state: $request")
         }
 
         return when (request) {
-            TeleprompterItemState.RECORD -> RecordState
-            TeleprompterItemState.RECORD_ACTIVE -> RecordActiveState
-            TeleprompterItemState.RECORD_DISABLED -> RecordDisabledState
+            VerseItemState.RECORD -> RecordState
+            VerseItemState.RECORD_ACTIVE -> RecordActiveState
+            VerseItemState.RECORD_DISABLED -> RecordDisabledState
             else -> {
                 throw IllegalStateException("State: $type tried to transition to state: $request")
             }
@@ -90,24 +92,24 @@ object RecordState : TeleprompterState {
     }
 }
 
-object RecordDisabledState : TeleprompterState {
-    override val type = TeleprompterItemState.RECORD_DISABLED
+object RecordDisabledState : VerseState {
+    override val type = VerseItemState.RECORD_DISABLED
 
     override val validStateTransitions = setOf(
-        TeleprompterItemState.RECORD,
-        TeleprompterItemState.RECORD_ACTIVE
+        VerseItemState.RECORD,
+        VerseItemState.RECORD_ACTIVE
     )
 
     override val disabledState = RecordDisabledState
 
-    override fun changeState(request: TeleprompterItemState): TeleprompterState {
+    override fun changeState(request: VerseItemState): VerseState {
         if (request !in validStateTransitions) {
             throw IllegalStateException("State: $type tried to transition to state: $request")
         }
 
         return when (request) {
-            TeleprompterItemState.RECORD -> RecordState
-            TeleprompterItemState.RECORD_ACTIVE -> RecordActiveState
+            VerseItemState.RECORD -> RecordState
+            VerseItemState.RECORD_ACTIVE -> RecordActiveState
             else -> {
                 throw IllegalStateException("State: $type tried to transition to state: $request")
             }
@@ -115,28 +117,28 @@ object RecordDisabledState : TeleprompterState {
     }
 }
 
-object RecordActiveState : TeleprompterState {
-    override val type = TeleprompterItemState.RECORD_ACTIVE
+object RecordActiveState : VerseState {
+    override val type = VerseItemState.RECORD_ACTIVE
 
     override val validStateTransitions = setOf(
-        TeleprompterItemState.RECORDING_PAUSED,
-        TeleprompterItemState.RECORD_AGAIN,
-        TeleprompterItemState.RECORD_AGAIN_DISABLED
+        VerseItemState.RECORDING_PAUSED,
+        VerseItemState.RECORD_AGAIN,
+        VerseItemState.RECORD_AGAIN_DISABLED
     )
 
-    override val disabledState: TeleprompterState
+    override val disabledState: VerseState
         get() = throw IllegalStateException("Tried to disable an active recording")
 
-    override fun changeState(request: TeleprompterItemState): TeleprompterState {
+    override fun changeState(request: VerseItemState): VerseState {
         if (request !in validStateTransitions) {
             throw IllegalStateException("State: $type tried to transition to state: $request")
         }
 
         return when (request) {
             // NarrationTextItemState.RECORD_ACTIVE -> RecordActiveState
-            TeleprompterItemState.RECORDING_PAUSED -> RecordPausedState
-            TeleprompterItemState.RECORD_AGAIN -> RecordAgainState
-            TeleprompterItemState.RECORD_AGAIN_DISABLED -> RecordAgainDisabledState
+            VerseItemState.RECORDING_PAUSED -> RecordPausedState
+            VerseItemState.RECORD_AGAIN -> RecordAgainState
+            VerseItemState.RECORD_AGAIN_DISABLED -> RecordAgainDisabledState
             else -> {
                 throw IllegalStateException("State: $type tried to transition to state: $request")
             }
@@ -144,26 +146,26 @@ object RecordActiveState : TeleprompterState {
     }
 }
 
-object RecordPausedState : TeleprompterState {
-    override val type = TeleprompterItemState.RECORDING_PAUSED
+object RecordPausedState : VerseState {
+    override val type = VerseItemState.RECORDING_PAUSED
 
     override val validStateTransitions = setOf(
-        TeleprompterItemState.RECORD_ACTIVE,
-        TeleprompterItemState.RECORD_AGAIN,
-        TeleprompterItemState.RECORD_AGAIN_DISABLED
+        VerseItemState.RECORD_ACTIVE,
+        VerseItemState.RECORD_AGAIN,
+        VerseItemState.RECORD_AGAIN_DISABLED
     )
 
     override val disabledState = RecordDisabledState
 
-    override fun changeState(request: TeleprompterItemState): TeleprompterState {
+    override fun changeState(request: VerseItemState): VerseState {
         if (request !in validStateTransitions) {
             throw IllegalStateException("State: $type tried to transition to state: $request")
         }
 
         return when (request) {
-            TeleprompterItemState.RECORD_ACTIVE -> RecordActiveState
-            TeleprompterItemState.RECORD_AGAIN -> RecordAgainState
-            TeleprompterItemState.RECORD_AGAIN_DISABLED -> RecordAgainDisabledState
+            VerseItemState.RECORD_ACTIVE -> RecordActiveState
+            VerseItemState.RECORD_AGAIN -> RecordAgainState
+            VerseItemState.RECORD_AGAIN_DISABLED -> RecordAgainDisabledState
             else -> {
                 throw IllegalStateException("State: $type tried to transition to state: $request")
             }
@@ -171,24 +173,24 @@ object RecordPausedState : TeleprompterState {
     }
 }
 
-object RecordAgainState : TeleprompterState {
-    override val type = TeleprompterItemState.RECORD_AGAIN
+object RecordAgainState : VerseState {
+    override val type = VerseItemState.RECORD_AGAIN
 
     override val validStateTransitions = setOf(
-        TeleprompterItemState.RECORD_AGAIN_ACTIVE,
-        TeleprompterItemState.RECORD_AGAIN_DISABLED,
+        VerseItemState.RECORD_AGAIN_ACTIVE,
+        VerseItemState.RECORD_AGAIN_DISABLED,
     )
 
     override val disabledState = RecordAgainDisabledState
 
-    override fun changeState(request: TeleprompterItemState): TeleprompterState {
+    override fun changeState(request: VerseItemState): VerseState {
         if (request !in validStateTransitions) {
             throw IllegalStateException("State: $type tried to transition to state: $request")
         }
 
         return when (request) {
-            TeleprompterItemState.RECORD_AGAIN_ACTIVE -> RecordAgainActiveState
-            TeleprompterItemState.RECORD_AGAIN_DISABLED -> RecordAgainDisabledState
+            VerseItemState.RECORD_AGAIN_ACTIVE -> RecordAgainActiveState
+            VerseItemState.RECORD_AGAIN_DISABLED -> RecordAgainDisabledState
             else -> {
                 throw IllegalStateException("State: $type tried to transition to state: $request")
             }
@@ -196,22 +198,22 @@ object RecordAgainState : TeleprompterState {
     }
 }
 
-object RecordAgainDisabledState : TeleprompterState {
-    override val type = TeleprompterItemState.RECORD_AGAIN_DISABLED
+object RecordAgainDisabledState : VerseState {
+    override val type = VerseItemState.RECORD_AGAIN_DISABLED
 
     override val validStateTransitions = setOf(
-        TeleprompterItemState.RECORD_AGAIN
+        VerseItemState.RECORD_AGAIN
     )
 
     override val disabledState = RecordAgainDisabledState
 
-    override fun changeState(request: TeleprompterItemState): TeleprompterState {
+    override fun changeState(request: VerseItemState): VerseState {
         if (request !in validStateTransitions) {
             throw IllegalStateException("State: $type tried to transition to state: $request")
         }
 
         return when (request) {
-            TeleprompterItemState.RECORD_AGAIN -> RecordAgainState
+            VerseItemState.RECORD_AGAIN -> RecordAgainState
             else -> {
                 throw IllegalStateException("State: $type tried to transition to state: $request")
             }
@@ -219,22 +221,22 @@ object RecordAgainDisabledState : TeleprompterState {
     }
 }
 
-object RecordAgainActiveState : TeleprompterState {
-    override val type = TeleprompterItemState.RECORD_AGAIN_ACTIVE
+object RecordAgainActiveState : VerseState {
+    override val type = VerseItemState.RECORD_AGAIN_ACTIVE
 
     override val validStateTransitions = setOf(
-        TeleprompterItemState.RECORD_AGAIN_PAUSED,
-        TeleprompterItemState.RECORD_AGAIN
+        VerseItemState.RECORD_AGAIN_PAUSED,
+        VerseItemState.RECORD_AGAIN
     )
 
-    override fun changeState(request: TeleprompterItemState): TeleprompterState {
+    override fun changeState(request: VerseItemState): VerseState {
         if (request !in validStateTransitions) {
             throw IllegalStateException("State: $type tried to transition to state: $request")
         }
 
         return when (request) {
-            TeleprompterItemState.RECORD_AGAIN_PAUSED -> RecordAgainPausedState
-            TeleprompterItemState.RECORD_AGAIN -> RecordAgainState
+            VerseItemState.RECORD_AGAIN_PAUSED -> RecordAgainPausedState
+            VerseItemState.RECORD_AGAIN -> RecordAgainState
             else -> {
                 throw IllegalStateException("State: $type tried to transition to state: $request")
             }
@@ -244,30 +246,30 @@ object RecordAgainActiveState : TeleprompterState {
     override val disabledState = RecordAgainDisabledState
 }
 
-object RecordAgainPausedState : TeleprompterState {
-    override val type = TeleprompterItemState.RECORD_AGAIN_PAUSED
+object RecordAgainPausedState : VerseState {
+    override val type = VerseItemState.RECORD_AGAIN_PAUSED
 
     override val validStateTransitions = setOf(
-        TeleprompterItemState.RECORD_AGAIN_ACTIVE,
-        TeleprompterItemState.RECORD_AGAIN,
-        TeleprompterItemState.RECORD_AGAIN_DISABLED
+        VerseItemState.RECORD_AGAIN_ACTIVE,
+        VerseItemState.RECORD_AGAIN,
+        VerseItemState.RECORD_AGAIN_DISABLED
     )
 
-    override fun changeState(request: TeleprompterItemState): TeleprompterState {
+    override fun changeState(request: VerseItemState): VerseState {
         if (request !in validStateTransitions) {
             throw IllegalStateException("State: $type tried to transition to state: $request")
         }
 
         return when (request) {
-            TeleprompterItemState.RECORD_AGAIN_ACTIVE -> RecordAgainActiveState
-            TeleprompterItemState.RECORD_AGAIN -> RecordAgainState
-            TeleprompterItemState.RECORD_AGAIN_DISABLED -> RecordAgainDisabledState
+            VerseItemState.RECORD_AGAIN_ACTIVE -> RecordAgainActiveState
+            VerseItemState.RECORD_AGAIN -> RecordAgainState
+            VerseItemState.RECORD_AGAIN_DISABLED -> RecordAgainDisabledState
             else -> {
                 throw IllegalStateException("State: $type tried to transition to state: $request")
             }
         }
     }
 
-    override val disabledState: TeleprompterState
+    override val disabledState: VerseState
         get() = throw IllegalStateException("Tried to disable a paused re-recording")
 }

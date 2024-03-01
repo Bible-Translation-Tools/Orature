@@ -50,9 +50,9 @@ import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.*
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterStateMachine
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterStateTransition
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.VerseItemState
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateMachine
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.VerseStateTransition
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.event.*
@@ -93,7 +93,7 @@ class NarrationViewModel : ViewModel() {
 
     private lateinit var narration: Narration
     private lateinit var renderer: NarrationWaveformRenderer
-    private lateinit var teleprompterStateMachine: TeleprompterStateMachine
+    private lateinit var narrationStateMachine: NarrationStateMachine
 
     private lateinit var volumeBar: VolumeBar
     val recordStartProperty = SimpleBooleanProperty()
@@ -293,8 +293,8 @@ class NarrationViewModel : ViewModel() {
             )
         )
         totalAudioSizeProperty.set(rendererAudioReader.totalFrames)
-        teleprompterStateMachine = TeleprompterStateMachine(narration.totalVerses)
-        teleprompterStateMachine.initialize(narration.versesWithRecordings())
+        narrationStateMachine = NarrationStateMachine(narration.totalVerses)
+        narrationStateMachine.initialize(narration.versesWithRecordings())
     }
 
     private fun updateRecordingState() {
@@ -563,9 +563,9 @@ class NarrationViewModel : ViewModel() {
 
     private fun clearTeleprompter() {
         narratableList.forEachIndexed { idx, chunk ->
-            chunk.state = TeleprompterItemState.RECORD_DISABLED
+            chunk.state = VerseItemState.RECORD_DISABLED
         }
-        narratableList[0].state = TeleprompterItemState.RECORD
+        narratableList[0].state = VerseItemState.RECORD
         narratableList.setAll(narratableList.toList())
         refreshTeleprompter()
         FX.eventbus.fire(TeleprompterSeekEvent(0))
@@ -574,16 +574,16 @@ class NarrationViewModel : ViewModel() {
     private fun resetTeleprompter() {
         narratableList.forEachIndexed { idx, chunk ->
             if (chunk.hasRecording) {
-                chunk.state = TeleprompterItemState.RECORD_AGAIN
+                chunk.state = VerseItemState.RECORD_AGAIN
             } else {
-                chunk.state = TeleprompterItemState.RECORD_DISABLED
+                chunk.state = VerseItemState.RECORD_DISABLED
             }
         }
         val lastIndex = narratableList.indexOfFirst { !it.hasRecording }
         var scrollToVerse = 0
 
         if (lastIndex != -1) {
-            narratableList.get(lastIndex).state = TeleprompterItemState.RECORD
+            narratableList.get(lastIndex).state = VerseItemState.RECORD
             scrollToVerse = lastIndex
         }
 
@@ -721,7 +721,7 @@ class NarrationViewModel : ViewModel() {
      */
     fun restartChapter() {
         narration.onResetAll()
-        teleprompterStateMachine.initialize(narration.versesWithRecordings())
+        narrationStateMachine.initialize(narration.versesWithRecordings())
         recordStart = true
         recordResume = false
         recordPause = false
@@ -731,7 +731,7 @@ class NarrationViewModel : ViewModel() {
 
     fun undo() {
         narration.undo()
-        teleprompterStateMachine.initialize(narration.versesWithRecordings())
+        narrationStateMachine.initialize(narration.versesWithRecordings())
         recordPause = false
 
         resetTeleprompter()
@@ -739,7 +739,7 @@ class NarrationViewModel : ViewModel() {
 
     fun redo() {
         narration.redo()
-        teleprompterStateMachine.initialize(narration.versesWithRecordings())
+        narrationStateMachine.initialize(narration.versesWithRecordings())
         recordPause = false
 
         resetTeleprompter()
@@ -1023,48 +1023,48 @@ class NarrationViewModel : ViewModel() {
         val list = when (event) {
             is BeginRecordingEvent -> {
                 record(event.index)
-                teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, event.index)
+                narrationStateMachine.transition(VerseStateTransition.RECORD, event.index)
             }
 
             is NextVerseEvent -> {
                 onNext(event.index)
-                teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, event.index)
+                narrationStateMachine.transition(VerseStateTransition.NEXT, event.index)
             }
 
             is PauseRecordingEvent -> {
                 pauseRecording(event.index)
-                teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORDING, event.index)
+                narrationStateMachine.transition(VerseStateTransition.PAUSE_RECORDING, event.index)
             }
 
 
             is ResumeRecordingEvent -> {
                 resumeRecording()
-                teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, event.index)
+                narrationStateMachine.transition(VerseStateTransition.RECORD, event.index)
             }
 
             is RecordVerseEvent -> {
                 record(event.index)
-                teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, event.index)
+                narrationStateMachine.transition(VerseStateTransition.RECORD, event.index)
             }
 
             is RecordAgainEvent -> {
                 recordAgain(event.index)
-                teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD_AGAIN, event.index)
+                narrationStateMachine.transition(VerseStateTransition.RECORD_AGAIN, event.index)
             }
 
             is PauseRecordAgainEvent -> {
                 pauseRecordAgain(event.index)
-                teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORD_AGAIN, event.index)
+                narrationStateMachine.transition(VerseStateTransition.PAUSE_RECORD_AGAIN, event.index)
             }
 
             is ResumeRecordingAgainEvent -> {
                 resumeRecordingAgain()
-                teleprompterStateMachine.transition(TeleprompterStateTransition.RESUME_RECORD_AGAIN, event.index)
+                narrationStateMachine.transition(VerseStateTransition.RESUME_RECORD_AGAIN, event.index)
             }
 
             is SaveRecordingEvent -> {
                 saveRecording(event.index)
-                teleprompterStateMachine.transition(TeleprompterStateTransition.SAVE, event.index)
+                narrationStateMachine.transition(VerseStateTransition.SAVE, event.index)
             }
 
             else -> {
