@@ -29,7 +29,7 @@ enum class VerseStateTransition {
     SAVE
 }
 
-object RecordAction {
+object RecordVerseAction {
     fun apply(contexts: MutableList<VerseStateContext>, index: Int) {
         if (index !in contexts.indices) return
 
@@ -51,7 +51,7 @@ object RecordAction {
     }
 }
 
-object PauseRecordingAction {
+object PauseVerseRecordingAction {
     fun apply(contexts: MutableList<VerseStateContext>, index: Int) {
         if (index !in contexts.indices) return
 
@@ -68,7 +68,7 @@ object PauseRecordingAction {
     }
 }
 
-object ResumeRecordAction {
+object ResumeVerseRecordAction {
     fun apply(contexts: MutableList<VerseStateContext>, index: Int) {
         if (index !in contexts.indices) return
 
@@ -104,7 +104,7 @@ object NextVerseAction {
     }
 }
 
-object RecordAgainAction {
+object RecordVerseAgainAction {
     fun apply(contexts: MutableList<VerseStateContext>, index: Int) {
         if (index !in contexts.indices) return
 
@@ -124,13 +124,13 @@ object RecordAgainAction {
     }
 }
 
-object PauseRecordAgainAction {
+object PauseRecordVerseAgainAction {
     fun apply(contexts: MutableList<VerseStateContext>, index: Int) {
         contexts[index].changeState(VerseItemState.RECORD_AGAIN_PAUSED)
     }
 }
 
-object ResumeRecordAgainAction {
+object ResumeRecordVerseAgainAction {
     fun apply(contexts: MutableList<VerseStateContext>, index: Int) {
         if (index !in contexts.indices) return
 
@@ -151,7 +151,7 @@ object ResumeRecordAgainAction {
     }
 }
 
-object SaveRecordingAction {
+object SaveVerseRecordingAction {
     fun apply(contexts: MutableList<VerseStateContext>, index: Int) {
         if (index !in contexts.indices) return
 

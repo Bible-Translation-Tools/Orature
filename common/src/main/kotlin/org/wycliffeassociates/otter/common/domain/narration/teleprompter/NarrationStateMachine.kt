@@ -55,32 +55,32 @@ class NarrationStateMachine(
         }
         verseContexts.firstOrNull { it.state.type == VerseItemState.RECORD_DISABLED }?.state = RecordState
     }
-
+    
     fun transition(request: VerseStateTransition, requestIndex: Int): List<VerseItemState> {
         try {
             when (request) {
-                VerseStateTransition.RECORD -> RecordAction.apply(verseContexts, requestIndex)
-                VerseStateTransition.PAUSE_RECORDING -> PauseRecordingAction.apply(verseContexts, requestIndex)
-                VerseStateTransition.RESUME_RECORDING -> ResumeRecordAction.apply(verseContexts, requestIndex)
+                VerseStateTransition.RECORD -> RecordVerseAction.apply(verseContexts, requestIndex)
+                VerseStateTransition.PAUSE_RECORDING -> PauseVerseRecordingAction.apply(verseContexts, requestIndex)
+                VerseStateTransition.RESUME_RECORDING -> ResumeVerseRecordAction.apply(verseContexts, requestIndex)
                 VerseStateTransition.NEXT -> NextVerseAction.apply(verseContexts, requestIndex)
                 VerseStateTransition.RECORD_AGAIN -> {
                     if (verseContexts.any { it.state.type == VerseItemState.RECORDING_PAUSED }) {
                         completePausedRecording()
                     }
-                    RecordAgainAction.apply(verseContexts, requestIndex)
+                    RecordVerseAgainAction.apply(verseContexts, requestIndex)
                 }
 
-                VerseStateTransition.PAUSE_RECORD_AGAIN -> PauseRecordAgainAction.apply(
+                VerseStateTransition.PAUSE_RECORD_AGAIN -> PauseRecordVerseAgainAction.apply(
                     verseContexts,
                     requestIndex
                 )
 
-                VerseStateTransition.RESUME_RECORD_AGAIN -> ResumeRecordAgainAction.apply(
+                VerseStateTransition.RESUME_RECORD_AGAIN -> ResumeRecordVerseAgainAction.apply(
                     verseContexts,
                     requestIndex
                 )
 
-                VerseStateTransition.SAVE -> SaveRecordingAction.apply(verseContexts, requestIndex)
+                VerseStateTransition.SAVE -> SaveVerseRecordingAction.apply(verseContexts, requestIndex)
             }
         } catch (e: java.lang.IllegalStateException) {
             logger.error("Error in state transition for requestIndex: $requestIndex, action $request", e)
