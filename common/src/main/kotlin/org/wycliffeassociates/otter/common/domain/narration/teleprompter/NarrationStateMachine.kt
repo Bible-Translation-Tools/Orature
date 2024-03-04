@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.common.domain.narration.teleprompter
 
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
+import org.wycliffeassociates.otter.common.domain.narration.RecordAgainAction
 
 class NarrationStateMachine(
     val total: List<AudioMarker>
@@ -43,44 +44,92 @@ class NarrationStateMachine(
 
 
     private var verseContexts: MutableList<VerseStateContext>
+    private var globalContext: NarrationState
+
+    fun getGlobalContext(): NarrationState {
+        return globalContext
+    }
 
     init {
+        globalContext = IdleEmptyState
         verseContexts = total.map { VerseStateContext() }.toMutableList()
     }
 
     fun initialize(active: List<Boolean>) {
         verseContexts = total.map { VerseStateContext() }.toMutableList()
+
+        var hasAllItemsRecorded = true
+        var hasNoItemsRecorded = true
+
         active.forEachIndexed { index, hasRecording ->
-            verseContexts[index].state = if (hasRecording) RecordAgainState else RecordDisabledState
+            verseContexts[index].state = if (hasRecording) {
+                hasNoItemsRecorded = false
+                RecordAgainState
+            } else {
+                hasAllItemsRecorded = false
+                RecordDisabledState
+            }
         }
         verseContexts.firstOrNull { it.state.type == VerseItemState.RECORD_DISABLED }?.state = RecordState
+
+        if (hasAllItemsRecorded) {
+            globalContext = IdleFinishedState
+        } else if (hasNoItemsRecorded) {
+            globalContext = IdleEmptyState
+        } else {
+            globalContext = IdleInProgressState
+        }
+
     }
-    
-    fun transition(request: VerseStateTransition, requestIndex: Int): List<VerseItemState> {
+
+    // TODO: overload this method with a method that takes in a NarrationStateTransition and an optional requestIndex
+    //  then have it call this method if the request index is NOT null
+
+    fun transition(request: NarrationStateTransition, requestIndex: Int): List<VerseItemState> {
         try {
-            when (request) {
-                VerseStateTransition.RECORD -> RecordVerseAction.apply(verseContexts, requestIndex)
-                VerseStateTransition.PAUSE_RECORDING -> PauseVerseRecordingAction.apply(verseContexts, requestIndex)
-                VerseStateTransition.RESUME_RECORDING -> ResumeVerseRecordAction.apply(verseContexts, requestIndex)
-                VerseStateTransition.NEXT -> NextVerseAction.apply(verseContexts, requestIndex)
-                VerseStateTransition.RECORD_AGAIN -> {
+            globalContext = when (request) {
+
+                NarrationStateTransition.RECORD -> RecordAction.apply(globalContext, verseContexts, requestIndex)
+                NarrationStateTransition.PAUSE_RECORDING -> PauseRecordingAction.apply(
+                    globalContext,
+                    verseContexts,
+                    requestIndex
+                )
+
+                NarrationStateTransition.RESUME_RECORDING -> ResumeRecordAction.apply(
+                    globalContext,
+                    verseContexts,
+                    requestIndex
+                )
+
+                NarrationStateTransition.NEXT -> NextAction.apply(globalContext, verseContexts, requestIndex)
+
+
+                NarrationStateTransition.RECORD_AGAIN -> {
                     if (verseContexts.any { it.state.type == VerseItemState.RECORDING_PAUSED }) {
                         completePausedRecording()
                     }
-                    RecordVerseAgainAction.apply(verseContexts, requestIndex)
+                    RecordAgain.apply(globalContext, verseContexts, requestIndex)
                 }
 
-                VerseStateTransition.PAUSE_RECORD_AGAIN -> PauseRecordVerseAgainAction.apply(
+
+                NarrationStateTransition.PAUSE_RECORD_AGAIN -> PauseRecordAgain.apply(
+                    globalContext,
                     verseContexts,
                     requestIndex
                 )
 
-                VerseStateTransition.RESUME_RECORD_AGAIN -> ResumeRecordVerseAgainAction.apply(
+
+                NarrationStateTransition.RESUME_RECORD_AGAIN -> ResumeRecordAgain.apply(
+                    globalContext,
                     verseContexts,
                     requestIndex
                 )
 
-                VerseStateTransition.SAVE -> SaveVerseRecordingAction.apply(verseContexts, requestIndex)
+
+                NarrationStateTransition.SAVE -> SaveAction.apply(globalContext, verseContexts, requestIndex)
+
+                else -> IdleInProgressState // TODO: fix this
             }
         } catch (e: java.lang.IllegalStateException) {
             logger.error("Error in state transition for requestIndex: $requestIndex, action $request", e)
