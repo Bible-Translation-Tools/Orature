@@ -962,7 +962,11 @@ class NarrationViewModel : ViewModel() {
         viewports: List<IntRange>,
         width: Int
     ) {
-        val checkpointRAVI = recordAgainVerseIndex
+        val checkpointRAVI = recordAgainVerseIndex?.let {
+            // map the index from total verse list to "active/recorded" list
+            val indexInRecorded = recordedVerses.indexOf(totalVerses[it])
+            if (indexInRecorded >= 0) indexInRecorded else null
+        }
         val adjustedWidth = if (checkpointRAVI == null) width else width / viewports.size
         for (i in markerNodes.indices) {
             val marker = markerNodes[i]
@@ -973,7 +977,6 @@ class NarrationViewModel : ViewModel() {
             for (viewPortIndex in viewports.indices) {
                 val viewport = viewports[viewPortIndex]
 
-                val checkpointRAVI = recordAgainVerseIndex
                 if (checkpointRAVI != null) {
                     if (viewPortIndex != viewports.lastIndex && i > checkpointRAVI) continue
                     if (viewPortIndex == viewports.lastIndex && i <= checkpointRAVI) continue
