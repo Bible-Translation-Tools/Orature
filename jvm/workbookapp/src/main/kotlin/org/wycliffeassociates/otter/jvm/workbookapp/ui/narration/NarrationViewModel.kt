@@ -962,24 +962,21 @@ class NarrationViewModel : ViewModel() {
         viewports: List<IntRange>,
         width: Int
     ) {
-        val checkpointRAVI = recordAgainVerseIndex?.let {
-            // map the index from total verse list to "active/recorded" list
-            val indexInRecorded = recordedVerses.indexOf(totalVerses[it])
-            if (indexInRecorded >= 0) indexInRecorded else null
-        }
+        val checkpointRAVI = recordAgainVerseIndex
         val adjustedWidth = if (checkpointRAVI == null) width else width / viewports.size
-        for (i in markerNodes.indices) {
-            val marker = markerNodes[i]
+
+        for (marker in markerNodes) {
             if (marker.userIsDraggingProperty.value == true) continue
 
             val verse = marker.verseProperty.value
+            val verseIndex = marker.verseIndexProperty.value
             var found = false
             for (viewPortIndex in viewports.indices) {
                 val viewport = viewports[viewPortIndex]
 
                 if (checkpointRAVI != null) {
-                    if (viewPortIndex != viewports.lastIndex && i > checkpointRAVI) continue
-                    if (viewPortIndex == viewports.lastIndex && i <= checkpointRAVI) continue
+                    if (viewPortIndex != viewports.lastIndex && verseIndex > checkpointRAVI) continue
+                    if (viewPortIndex == viewports.lastIndex && verseIndex <= checkpointRAVI) continue
                 }
 
                 if (verse.location in viewport) {
