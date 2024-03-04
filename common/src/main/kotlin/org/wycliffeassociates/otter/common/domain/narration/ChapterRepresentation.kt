@@ -483,7 +483,7 @@ internal class ChapterRepresentation(
         }
 
         private fun getVerseToReadFrom(verses: List<VerseNode>): VerseNode? {
-            var currentVerseIndex = verses.indexOfFirst { absoluteFramePosition in it }
+            var currentVerseIndex = verses.indexOfFirst { position in it }
             if (currentVerseIndex == -1) {
                 currentVerseIndex = 0
             }
@@ -496,52 +496,54 @@ internal class ChapterRepresentation(
         private fun getPcmBufferVerse(bytes: ByteArray, verse: VerseNode): Int {
             var bytesWritten = 0
             randomAccessFile?.let { raf ->
-                if (absoluteFramePosition !in verse) {
+                if (position !in verse) {
                     return 0
                 }
 
-                var framesToRead = min(bytes.size / frameSizeInBytes, verse.length)
+                var bytesToRead = min(bytes.size, verse.length)
 
                 // if there is a negative frames to read or
-                if (framesToRead <= 0 || absoluteFramePosition !in verse) {
-                    logger.error("Frames to read is negative: $absoluteFramePosition, $framesToRead, ${verse.marker.formattedLabel}")
-                    position = verse.lastFrame() * frameSizeInBytes
+                if (bytesToRead <= 0 || position !in verse) {
+                    logger.error("Frames to read is negative: $position, $bytesToRead, ${verse.marker.formattedLabel}")
+                    position = verse.lastFrame()
                     return 0
                 }
 
-                val sectors = verse.getSectorsFromOffset(absoluteFramePosition, framesToRead)
+                val sectors = verse.getSectorsFromOffset(position, bytesToRead)
 
                 if (sectors.isEmpty()) {
                     logger.error("sectors is empty for verse ${verse.marker.label}")
-                    position = verse.lastFrame() * frameSizeInBytes
+                    position = verse.lastFrame()
                     return 0
                 }
 
                 for (sector in sectors) {
-                    if (framesToRead <= 0 || absoluteFramePosition !in verse) break
+                    if (bytesToRead <= 0 || position !in verse) break
 
-                    val framesToCopyFromSector = max(min(framesToRead, sector.length()), 0)
+                    val framesToCopyFromSector = max(min(bytesToRead, sector.length()), 0)
 
-                    val seekLoc = (sector.first * frameSizeInBytes).toLong()
+                    val seekLoc = (sector.first).toLong()
                     raf.seek(seekLoc)
-                    val temp = ByteArray(framesToCopyFromSector * frameSizeInBytes)
+                    val temp = ByteArray(framesToCopyFromSector)
                     val toCopy = raf.read(temp)
                     try {
                         System.arraycopy(temp, 0, bytes, bytesWritten, toCopy)
 
                         bytesWritten += toCopy
                         position += toCopy
-                        framesToRead -= toCopy / frameSizeInBytes
+                        bytesToRead -= toCopy
                     } catch (e: ArrayIndexOutOfBoundsException) {
                         logger.error("arraycopy out of bounds, $bytesWritten bytes written, $toCopy toCopy", e)
                     }
 
-                    if (absoluteFramePosition !in sector) {
-                        position = sector.last * frameSizeInBytes
+                    // this would move the reader back to a read value
+                    // because the next unread value might NOT be the next position! need to look at the next sector
+                    if (position !in sector) {
+                        position = sector.last
                     }
                 }
 
-                if (absoluteFramePosition == verse.lastFrame()) {
+                if (position == verse.lastFrame()) {
                     adjustPositionToNextVerse(verse)
                 }
 
@@ -550,7 +552,7 @@ internal class ChapterRepresentation(
         }
 
         private fun adjustPositionToNextSector(verse: VerseNode, sector: IntRange, sectors: List<IntRange>) {
-            if (absoluteFramePosition != sector.last) return
+            if (position != sector.last) return
 
             val sectorIndex = sectors.indexOf(sector)
             if (sectorIndex == sectors.lastIndex) {
@@ -567,7 +569,7 @@ internal class ChapterRepresentation(
             val index = verses.indexOf(verse)
             if (index == verses.lastIndex) return
 
-            position = verses[index + 1].firstFrame() * frameSizeInBytes
+            position = verses[index + 1].firstFrame()
         }
 
         fun locationInVerseToLocationInChapter(sample: Int, verseIndex: Int): Int {

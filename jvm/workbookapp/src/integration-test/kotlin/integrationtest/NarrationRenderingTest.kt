@@ -5,6 +5,7 @@ import integrationtest.di.DaggerTestPersistenceComponent
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.Observable
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.wycliffeassociates.otter.common.audio.pcm.PcmFile
@@ -31,7 +32,7 @@ class NarrationRenderingTest {
     private lateinit var chunk: Observable<List<Chunk>>
     private val numTestVerses = 31
 
-    private val seconds = 10
+    private val seconds = 11
     private lateinit var file: File
 
     @Inject
@@ -52,6 +53,22 @@ class NarrationRenderingTest {
 
         narration = narrationFactory.create(workbookWithAudio, chapter)
         println(narration.totalVerses)
+    }
+
+    @Test
+    fun testNarration() {
+
+        narration.audioReader.use {
+            it.open()
+            for (i in 1 until seconds) {
+                val bytes = ByteArray(88200)
+                it.getPcmBuffer(bytes)
+                println(bytes.count { it.toInt() == i })
+                Assert.assertTrue("Not all bytes matched for ${i}", bytes.all { it.toInt() == i })
+            }
+
+
+        }
     }
 
     private fun createTestAudioFolders() {
@@ -116,18 +133,13 @@ class NarrationRenderingTest {
         return Observable.just(listOf( chunk))
     }
 
-    @Test
-    fun testNarration() {
-
-    }
-
     private fun writeWavFile(): File {
         val file = File.createTempFile("test", ".pcm")
         file.deleteOnExit()
 
         PcmOutputStream(PcmFile(file)).use { wos ->
-            for (i in 0..seconds) {
-                for (x in 0..88200) {
+            for (i in 1..seconds) {
+                for (x in 0 until 88200) {
                     wos.write(i)
                 }
             }

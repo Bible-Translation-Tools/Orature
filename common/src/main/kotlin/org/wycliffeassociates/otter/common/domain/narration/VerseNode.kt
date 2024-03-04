@@ -248,27 +248,27 @@ internal data class VerseNode(
         throw IndexOutOfBoundsException("Requested offset $framesFromStart exceeded boundaries within ranges $sectors")
     }
 
-    fun getSectorsFromOffset(framePosition: Int, ftr: Int): List<IntRange> {
-        if (ftr <= 0 || framePosition !in this) return listOf()
+    fun getSectorsFromOffset(framePosition: Int, btr: Int): List<IntRange> {
+        if (btr <= 0 || framePosition !in this) return listOf()
 
-        var framesToRead = ftr
+        var bytesToRead = btr
         val stuff = mutableListOf<IntRange>()
 
         val startIndex = sectors.indexOfFirst { framePosition in it }
 
         var start = framePosition
-        val end = min(sectors[startIndex].last, start + framesToRead - 1)
+        val end = min(sectors[startIndex].last, start + bytesToRead - 1)
         val firstRange = start..end
         stuff.add(firstRange)
-        framesToRead -= firstRange.length()
+        bytesToRead -= firstRange.length()
 
         for (idx in startIndex + 1 until sectors.size) {
-            if (framesToRead <= 0) break
+            if (bytesToRead <= 0) break
             val sector = sectors[idx]
             val start = sector.first
-            val end = min(sectors[idx].last, start + framesToRead - 1)
+            val end = min(sectors[idx].last, start + bytesToRead - 1)
             val range = (sector.first..end)
-            framesToRead -= range.length()
+            bytesToRead -= range.length()
             stuff.add(range)
         }
 
