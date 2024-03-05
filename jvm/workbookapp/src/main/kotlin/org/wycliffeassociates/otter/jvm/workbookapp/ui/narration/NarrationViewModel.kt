@@ -712,7 +712,9 @@ class NarrationViewModel : ViewModel() {
 
             else -> {}
         }
-        isPrependingRecordProperty.set(false) // TODO: DELETE
+        if (isPrependingRecordProperty.value) {
+            recordAgainVerseIndex = index
+        }
         refreshTeleprompter()
     }
 
@@ -764,6 +766,8 @@ class NarrationViewModel : ViewModel() {
                 break
             }
         }
+
+        recordAgainVerseIndex = index
 
         refreshTeleprompter()
     }
@@ -946,8 +950,9 @@ class NarrationViewModel : ViewModel() {
                     reRecordLoc = totalVerses[reRecordingIndex].location
                 } else if (isPrependingRecordProperty.value) {
                     val reRecordingIndex = recordingVerseIndex.value
-                    reRecordLoc = totalVerses[reRecordingIndex].location
-                    nextVerseLoc = recordedVerses.first { it != totalVerses[reRecordingIndex] }.location
+                    val currentMarker = totalVerses[reRecordingIndex]
+                    reRecordLoc = currentMarker.location
+                    nextVerseLoc = recordedVerses.first { it.sort > currentMarker.sort }.location
                 }
 
                 val viewports = renderer.draw(
