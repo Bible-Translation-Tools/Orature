@@ -107,11 +107,13 @@ class NarrationViewModel : ViewModel() {
     var isRecording by isRecordingProperty
     val isRecordingAgainProperty = SimpleBooleanProperty()
     var isRecordingAgain by isRecordingAgainProperty
-    val isPrependingRecordProperty = SimpleBooleanProperty(false)
     val recordAgainVerseIndexProperty = SimpleObjectProperty<Int?>()
     var recordAgainVerseIndex by recordAgainVerseIndexProperty
-    val isPlayingProperty = SimpleBooleanProperty(false)
+    val isPrependRecordingProperty = SimpleBooleanProperty(false)
+    var isPrependRecording by isPrependRecordingProperty
+    val prependRecordingVerseIndex = SimpleObjectProperty<Int?>()
     val recordingVerseIndex = SimpleIntegerProperty()
+    val isPlayingProperty = SimpleBooleanProperty(false)
 
     val playingVerseProperty = SimpleObjectProperty<VerseMarker?>()
     var playingVerse by playingVerseProperty
@@ -342,7 +344,8 @@ class NarrationViewModel : ViewModel() {
         isRecordingProperty.set(false)
         isRecordingAgainProperty.set(false)
         recordAgainVerseIndexProperty.set(null)
-        isPrependingRecordProperty.set(false)
+        isPrependRecordingProperty.set(false)
+        prependRecordingVerseIndex.set(null)
         isPlayingProperty.set(false)
         recordingVerseIndex.set(-1)
         playingVerseProperty.set(null)
@@ -664,10 +667,11 @@ class NarrationViewModel : ViewModel() {
         narration.onSaveRecording(verseIndex)
 
         recordAgainVerseIndex = null
+        prependRecordingVerseIndex.set(null)
         recordingVerseIndex.set(verseIndex)
         isRecording = false
         isRecordingAgain = false
-        isPrependingRecordProperty.value = false
+        isPrependRecording = false
         recordPause = false
 
         renderer.clearActiveRecordingData()
@@ -712,8 +716,9 @@ class NarrationViewModel : ViewModel() {
 
             else -> {}
         }
-        if (isPrependingRecordProperty.value) {
-            recordAgainVerseIndex = index
+
+        if (isPrependRecordingProperty.value) {
+            prependRecordingVerseIndex.set(index)
         }
         refreshTeleprompter()
     }
@@ -760,14 +765,11 @@ class NarrationViewModel : ViewModel() {
         recordResume = false
         recordingVerseIndex.set(index)
 
-        for (i in index + 1..narratableList.lastIndex) {
-            if (narratableList[i].hasRecording) {
-                isPrependingRecordProperty.set(true)
-                break
-            }
+        val anyRecordedAfter = recordedVerses.any { it.sort > totalVerses[index].sort }
+        if (anyRecordedAfter) {
+            prependRecordingVerseIndex.set(index)
         }
-
-        recordAgainVerseIndex = index
+        isPrependRecordingProperty.set(anyRecordedAfter)
 
         refreshTeleprompter()
     }
@@ -948,11 +950,15 @@ class NarrationViewModel : ViewModel() {
                     val reRecordingIndex = recordingVerseIndex.value
                     nextVerseLoc = totalVerses.getOrNull(reRecordingIndex + 1)?.location
                     reRecordLoc = totalVerses[reRecordingIndex].location
-                } else if (isPrependingRecordProperty.value) {
-                    val reRecordingIndex = recordingVerseIndex.value
-                    val currentMarker = totalVerses[reRecordingIndex]
-                    reRecordLoc = currentMarker.location
-                    nextVerseLoc = recordedVerses.first { it.sort > currentMarker.sort }.location
+                } else if (isPrependRecording) {
+                    val currentMarker = totalVerses[recordingVerseIndex.value]
+                    recordedVerses
+                        .find { it.sort > currentMarker.sort } // finds the next active verse (recorded)
+                        ?.let { nextActive ->
+                            // set reRecord location to render as "reRecord mode" (split view)
+                            reRecordLoc = currentMarker.location
+                            nextVerseLoc = nextActive.location
+                        }
                 }
 
                 val viewports = renderer.draw(
@@ -982,7 +988,7 @@ class NarrationViewModel : ViewModel() {
         viewports: List<IntRange>,
         width: Int
     ) {
-        val checkpointRAVI = recordAgainVerseIndex
+        val checkpointRAVI = recordAgainVerseIndex ?: prependRecordingVerseIndex.value
         val adjustedWidth = if (checkpointRAVI == null) width else width / viewports.size
 
         for (marker in markerNodes) {
