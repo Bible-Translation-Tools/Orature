@@ -107,6 +107,7 @@ class NarrationViewModel : ViewModel() {
     var isRecording by isRecordingProperty
     val isRecordingAgainProperty = SimpleBooleanProperty()
     var isRecordingAgain by isRecordingAgainProperty
+    val isPrependingRecordProperty = SimpleBooleanProperty(false)
     val recordAgainVerseIndexProperty = SimpleObjectProperty<Int?>()
     var recordAgainVerseIndex by recordAgainVerseIndexProperty
     val isPlayingProperty = SimpleBooleanProperty(false)
@@ -341,6 +342,7 @@ class NarrationViewModel : ViewModel() {
         isRecordingProperty.set(false)
         isRecordingAgainProperty.set(false)
         recordAgainVerseIndexProperty.set(null)
+        isPrependingRecordProperty.set(false)
         isPlayingProperty.set(false)
         recordingVerseIndex.set(-1)
         playingVerseProperty.set(null)
@@ -665,6 +667,7 @@ class NarrationViewModel : ViewModel() {
         recordingVerseIndex.set(verseIndex)
         isRecording = false
         isRecordingAgain = false
+        isPrependingRecordProperty.value = false
         recordPause = false
 
         renderer.clearActiveRecordingData()
@@ -709,7 +712,7 @@ class NarrationViewModel : ViewModel() {
 
             else -> {}
         }
-
+        isPrependingRecordProperty.set(false) // TODO: DELETE
         refreshTeleprompter()
     }
 
@@ -754,6 +757,13 @@ class NarrationViewModel : ViewModel() {
         recordStart = false
         recordResume = false
         recordingVerseIndex.set(index)
+
+        for (i in index + 1..narratableList.lastIndex) {
+            if (narratableList[i].hasRecording) {
+                isPrependingRecordProperty.set(true)
+                break
+            }
+        }
 
         refreshTeleprompter()
     }
@@ -929,10 +939,15 @@ class NarrationViewModel : ViewModel() {
                 }
                 var reRecordLoc: Int? = null
                 var nextVerseLoc: Int? = null
+
                 if (isRecordingAgain) {
                     val reRecordingIndex = recordingVerseIndex.value
                     nextVerseLoc = totalVerses.getOrNull(reRecordingIndex + 1)?.location
                     reRecordLoc = totalVerses[reRecordingIndex].location
+                } else if (isPrependingRecordProperty.value) {
+                    val reRecordingIndex = recordingVerseIndex.value
+                    reRecordLoc = totalVerses[reRecordingIndex].location
+                    nextVerseLoc = recordedVerses.first { it != totalVerses[reRecordingIndex] }.location
                 }
 
                 val viewports = renderer.draw(

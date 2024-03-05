@@ -227,7 +227,8 @@ class Narration @AssistedInject constructor(
         audioLoaded = false
         loadChapterIntoPlayer()
 
-        player.seek(player.getDurationInFrames())
+        seek(totalVerses[verseIndex].location)
+
         writer?.start()
         isRecording.set(true)
     }
