@@ -1000,7 +1000,7 @@ class NarrationViewModel : ViewModel() {
             for (viewPortIndex in viewports.indices) {
                 val viewport = viewports[viewPortIndex]
 
-                if (checkpointRAVI != null) {
+                if (checkpointRAVI != null && viewports.size > 1) {
                     if (viewPortIndex != viewports.lastIndex && verseIndex > checkpointRAVI) continue
                     if (viewPortIndex == viewports.lastIndex && verseIndex <= checkpointRAVI) continue
                 }
