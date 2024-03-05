@@ -26,7 +26,9 @@ enum class VerseStateTransition {
     RECORD_AGAIN,
     RESUME_RECORD_AGAIN,
     PAUSE_RECORD_AGAIN,
-    SAVE
+    SAVE,
+    PLAY,
+    PAUSE_PLAYBACK,
 }
 
 object RecordVerseAction {
@@ -175,3 +177,43 @@ object SaveVerseRecordingAction {
         }
     }
 }
+
+
+object PlayVerseAction {
+    fun apply(contexts: MutableList<VerseStateContext>, index: Int) {
+        if (index !in contexts.indices) return
+
+        if (contexts[index].state == RecordPausedState) {
+            contexts[index].changeState(VerseItemState.PLAYING_WHILE_RECORDING_PAUSED)
+        } else {
+            contexts[index].changeState(VerseItemState.PLAYING)
+        }
+
+
+        contexts.forEachIndexed { i, verseContext ->
+            if (i != index) {
+                contexts[i].disable()
+            }
+        }
+    }
+}
+
+
+object PauseVersePlaybackAction {
+    fun apply(contexts: MutableList<VerseStateContext>, index: Int) {
+        if (index !in contexts.indices) return
+
+        if (contexts[index].state == PlayingWhileRecordingPausedState) {
+            contexts[index].changeState(VerseItemState.RECORDING_PAUSED)
+        } else {
+            contexts[index].changeState(VerseItemState.RECORD_AGAIN)
+        }
+
+        contexts.forEachIndexed { i, verseContext ->
+            if (i != index) {
+                contexts[i].restore()
+            }
+        }
+    }
+}
+

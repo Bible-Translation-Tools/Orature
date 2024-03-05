@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.common.domain.narration.teleprompter
 
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
-import org.wycliffeassociates.otter.common.domain.narration.RecordAgainAction
 
 class NarrationStateMachine(
     val total: List<AudioMarker>
@@ -128,6 +127,16 @@ class NarrationStateMachine(
 
 
                 NarrationStateTransition.SAVE -> SaveAction.apply(globalContext, verseContexts, requestIndex)
+
+                NarrationStateTransition.PLAY_AUDIO -> PlayAction.apply(globalContext, verseContexts, requestIndex)
+
+                NarrationStateTransition.PAUSE_AUDIO_PLAYBACK -> PausePlaybackAction.apply(
+                    globalContext,
+                    verseContexts,
+                    requestIndex
+                )
+
+                NarrationStateTransition.SAVE_FINISHED -> SaveFinished.apply(globalContext, verseContexts, requestIndex)
 
                 else -> IdleInProgressState // TODO: fix this
             }

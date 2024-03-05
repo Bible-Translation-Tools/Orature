@@ -50,9 +50,7 @@ import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.*
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.VerseItemState
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateMachine
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.VerseStateTransition
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.*
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.event.*
@@ -266,11 +264,24 @@ class NarrationViewModel : ViewModel() {
         audioPlayer.addEventListener { event: AudioPlayerEvent ->
             runLater {
                 when (event) {
-                    AudioPlayerEvent.PLAY -> isPlayingProperty.set(true)
+                    AudioPlayerEvent.PLAY -> {
+                        isPlayingProperty.set(true)
+                    }
 
-                    AudioPlayerEvent.COMPLETE,
+                    AudioPlayerEvent.COMPLETE -> {
+                        isPlayingProperty.set(false)
+
+                        // TODO: remove this
+                        val recordingVerse = if (recordingVerseIndex.value != null) recordingVerseIndex.value else -1
+
+                        narrationStateMachine.transition(NarrationStateTransition.PAUSE_AUDIO_PLAYBACK, recordingVerse)
+                    }
+
                     AudioPlayerEvent.PAUSE,
-                    AudioPlayerEvent.STOP -> isPlayingProperty.set(false)
+
+                    AudioPlayerEvent.STOP -> {
+                        isPlayingProperty.set(false)
+                    }
 
                     else -> {}
                 }
@@ -612,7 +623,10 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun play(verse: AudioMarker) {
-        playingVerseIndex.set(recordedVerses.indexOf(verse))
+        val verseIndex = recordedVerses.indexOf(verse)
+        narrationStateMachine.transition(NarrationStateTransition.PLAY_AUDIO, verseIndex)
+
+        playingVerseIndex.set(verseIndex)
         renderer.clearActiveRecordingData()
         audioPlayer.pause()
 
@@ -623,6 +637,8 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun playAll() {
+
+        narrationStateMachine.transition(NarrationStateTransition.PLAY_AUDIO, -1)
         logger.info("Playing all")
         playingVerseIndex.set(-1)
         renderer.clearActiveRecordingData()
@@ -634,6 +650,8 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun pausePlayback() {
+        narrationStateMachine.transition(NarrationStateTransition.PAUSE_AUDIO_PLAYBACK, recordingVerseIndex.value)
+
         logger.info("Pausing playback")
         audioPlayer.pause()
     }
@@ -660,7 +678,7 @@ class NarrationViewModel : ViewModel() {
         narration.onSaveRecording(verseIndex)
 
         recordAgainVerseIndex = null
-        recordingVerseIndex.set(verseIndex)
+        recordingVerseIndex.set(-1)
         isRecording = false
         isRecordingAgain = false
         recordPause = false
@@ -703,6 +721,7 @@ class NarrationViewModel : ViewModel() {
             recordPause -> {
                 recordPause = false
                 recordResume = true
+                recordingVerseIndex.set(-1)
             }
 
             else -> {}
@@ -721,6 +740,7 @@ class NarrationViewModel : ViewModel() {
      */
     fun restartChapter() {
         narration.onResetAll()
+
         narrationStateMachine.initialize(narration.versesWithRecordings())
         recordStart = true
         recordResume = false
@@ -899,6 +919,10 @@ class NarrationViewModel : ViewModel() {
                     isModifyingTakeAudioProperty.set(!isIdle)
                     navigator.blockNavigationEvents.set(!isIdle)
 
+                    if (isIdle && narrationStateMachine.getGlobalContext() == BouncingAudioState) {
+                        narrationStateMachine.transition(NarrationStateTransition.SAVE_FINISHED, -1)
+                    }
+
                     // Indicates that we have opened the saving model to interrupt either a chapter navigation or
                     // home navigation and that we should re-attempt the interrupted navigation
                     if (isIdle && openLoadingModalProperty.value) {
@@ -1023,48 +1047,48 @@ class NarrationViewModel : ViewModel() {
         val list = when (event) {
             is BeginRecordingEvent -> {
                 record(event.index)
-                narrationStateMachine.transition(VerseStateTransition.RECORD, event.index)
+                narrationStateMachine.transition(NarrationStateTransition.RECORD, event.index)
             }
 
             is NextVerseEvent -> {
                 onNext(event.index)
-                narrationStateMachine.transition(VerseStateTransition.NEXT, event.index)
+                narrationStateMachine.transition(NarrationStateTransition.NEXT, event.index)
             }
 
             is PauseRecordingEvent -> {
                 pauseRecording(event.index)
-                narrationStateMachine.transition(VerseStateTransition.PAUSE_RECORDING, event.index)
+                narrationStateMachine.transition(NarrationStateTransition.PAUSE_RECORDING, event.index)
             }
 
 
             is ResumeRecordingEvent -> {
                 resumeRecording()
-                narrationStateMachine.transition(VerseStateTransition.RECORD, event.index)
+                narrationStateMachine.transition(NarrationStateTransition.RECORD, event.index)
             }
 
             is RecordVerseEvent -> {
                 record(event.index)
-                narrationStateMachine.transition(VerseStateTransition.RECORD, event.index)
+                narrationStateMachine.transition(NarrationStateTransition.RECORD, event.index)
             }
 
             is RecordAgainEvent -> {
                 recordAgain(event.index)
-                narrationStateMachine.transition(VerseStateTransition.RECORD_AGAIN, event.index)
+                narrationStateMachine.transition(NarrationStateTransition.RECORD_AGAIN, event.index)
             }
 
             is PauseRecordAgainEvent -> {
                 pauseRecordAgain(event.index)
-                narrationStateMachine.transition(VerseStateTransition.PAUSE_RECORD_AGAIN, event.index)
+                narrationStateMachine.transition(NarrationStateTransition.PAUSE_RECORD_AGAIN, event.index)
             }
 
             is ResumeRecordingAgainEvent -> {
                 resumeRecordingAgain()
-                narrationStateMachine.transition(VerseStateTransition.RESUME_RECORD_AGAIN, event.index)
+                narrationStateMachine.transition(NarrationStateTransition.RESUME_RECORD_AGAIN, event.index)
             }
 
             is SaveRecordingEvent -> {
                 saveRecording(event.index)
-                narrationStateMachine.transition(VerseStateTransition.SAVE, event.index)
+                narrationStateMachine.transition(NarrationStateTransition.SAVE, event.index)
             }
 
             else -> {

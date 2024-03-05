@@ -10,11 +10,9 @@ enum class NarrationStateTransition {
     RESUME_RECORD_AGAIN,
     PAUSE_RECORD_AGAIN,
     SAVE,
-    UNDO, // TODO
-    REDO, // TODO
-    RESTART_CHAPTER, // TODO
-    EDIT_VERSE, // TODO
-    EDIT_CHAPTER, // TODO
+    SAVE_FINISHED,
+    PLAY_AUDIO,
+    PAUSE_AUDIO_PLAYBACK,
 }
 
 
@@ -71,7 +69,6 @@ object NextAction {
 
         NextVerseAction.apply(verseContexts, index)
 
-        // TODO: make sure that this is correct
         val isRecording = verseContexts.any { it.state == RecordActiveState || it.state == RecordAgainActiveState }
 
         return if (isRecording) {
@@ -139,7 +136,9 @@ object SaveAction {
         index: Int
     ): NarrationState {
 
-        SaveVerseRecordingAction.apply(verseContexts, index)
+        if (index >= 0) {
+            SaveVerseRecordingAction.apply(verseContexts, index)
+        }
 
 
         val allVersesRecorded = verseContexts.all { it.state == RecordAgainState }
@@ -153,6 +152,89 @@ object SaveAction {
     }
 }
 
+
+object SaveFinished {
+    fun apply(
+        globalContext: NarrationState,
+        verseContexts: MutableList<VerseStateContext>,
+        index: Int
+    ): NarrationState {
+
+        val allVersesRecorded =
+            verseContexts.all {
+                it.state == RecordAgainState
+                        || it.state == RecordAgainActiveState
+                        || it.state == RecordAgainPausedState
+            }
+
+        val isRecordingAgain = verseContexts.any { it.state == RecordAgainActiveState }
+
+        val isRecordAgainPaused = verseContexts.any { it.state == RecordAgainPausedState }
+
+        return if (allVersesRecorded && !isRecordingAgain && !isRecordAgainPaused) {
+            globalContext.changeState(NarrationStateType.IDLE_FINISHED)
+        } else if (isRecordingAgain) {
+            globalContext.changeState(NarrationStateType.RECORDING_AGAIN)
+        } else {
+            globalContext.changeState(NarrationStateType.RECORDING_AGAIN_PAUSED)
+        }
+
+    }
+}
+
+object PlayAction {
+
+    fun apply(
+        globalContext: NarrationState,
+        verseContexts: MutableList<VerseStateContext>,
+        index: Int
+    ): NarrationState {
+
+        // Set the individual verse to playing if given a valid index.
+        if (index >= 0) {
+            PlayVerseAction.apply(verseContexts, index)
+        } else {
+            verseContexts.forEach {
+                it.disable()
+            }
+        }
+
+        return globalContext.changeState(NarrationStateType.PLAYING)
+    }
+}
+
+
+object PausePlaybackAction {
+
+    fun apply(
+        globalContext: NarrationState,
+        verseContexts: MutableList<VerseStateContext>,
+        index: Int
+    ): NarrationState {
+
+        val wasRecordingPaused = verseContexts.any { it.state == PlayingWhileRecordingPausedState }
+        val allVersesRecorded = !verseContexts.any { it.state == RecordDisabledState }
+
+        val newGlobalStateRequest = if (wasRecordingPaused) {
+            NarrationStateType.RECORDING_PAUSED
+        } else if (allVersesRecorded) {
+            NarrationStateType.IDLE_FINISHED
+        } else {
+            NarrationStateType.IDLE_IN_PROGRESS
+        }
+
+        // If the user supplies a valid verse index, then we assume that we are pausing a verse playback
+        if (index >= 0) {
+            PauseVersePlaybackAction.apply(verseContexts, index)
+        } else {
+            verseContexts.forEach {
+                it.restore()
+            }
+        }
+
+        return globalContext.changeState(newGlobalStateRequest)
+    }
+}
 
 
 
