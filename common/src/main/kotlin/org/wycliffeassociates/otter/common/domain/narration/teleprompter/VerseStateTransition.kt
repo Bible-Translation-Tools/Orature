@@ -84,6 +84,7 @@ object ResumeVerseRecordAction {
 
         // Make next item available to record
         if (index < contexts.lastIndex) {
+            // TODO: this may be the issue.
             contexts[index + 1].changeState(VerseItemState.RECORD)
             for (i in index + 1..contexts.lastIndex) {
                 contexts[i].disable()
@@ -183,16 +184,17 @@ object PlayVerseAction {
     fun apply(contexts: MutableList<VerseStateContext>, index: Int) {
         if (index !in contexts.indices) return
 
-        if (contexts[index].state == RecordPausedState) {
+        val isVerseBeingRecorded = contexts[index].state == RecordPausedState
+
+        if (isVerseBeingRecorded) {
             contexts[index].changeState(VerseItemState.PLAYING_WHILE_RECORDING_PAUSED)
         } else {
             contexts[index].changeState(VerseItemState.PLAYING)
-        }
 
-
-        contexts.forEachIndexed { i, verseContext ->
-            if (i != index) {
-                contexts[i].disable()
+            contexts.forEachIndexed { i, verseContext ->
+                if (i != index) {
+                    contexts[i].disable()
+                }
             }
         }
     }
@@ -203,15 +205,17 @@ object PauseVersePlaybackAction {
     fun apply(contexts: MutableList<VerseStateContext>, index: Int) {
         if (index !in contexts.indices) return
 
-        if (contexts[index].state == PlayingWhileRecordingPausedState) {
+        val isVerseBeingRecorded = contexts[index].state == PlayingWhileRecordingPausedState
+
+        if (isVerseBeingRecorded) {
             contexts[index].changeState(VerseItemState.RECORDING_PAUSED)
         } else {
             contexts[index].changeState(VerseItemState.RECORD_AGAIN)
-        }
 
-        contexts.forEachIndexed { i, verseContext ->
-            if (i != index) {
-                contexts[i].restore()
+            contexts.forEachIndexed { i, verseContext ->
+                if (i != index) {
+                    contexts[i].restore()
+                }
             }
         }
     }
