@@ -26,6 +26,7 @@ import javafx.scene.control.ListCell
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationState
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.VerseItemState
 import org.wycliffeassociates.otter.jvm.controls.event.*
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
@@ -36,7 +37,7 @@ class NarrationTextItemData(
     var marker: AudioMarker?,
     var hasRecording: Boolean = false,
     var previousChunksRecorded: Boolean = false,
-    var state: VerseItemState = VerseItemState.RECORD_DISABLED
+    var verseState: VerseItemState = VerseItemState.RECORD_DISABLED,
 ) {
     override fun toString(): String {
         return "${chunk.sort}, $hasRecording, $previousChunksRecorded"
@@ -46,12 +47,8 @@ class NarrationTextItemData(
 class NarrationTextCell(
     private val nextChunkText: String,
     private val recordButtonTextProperty: ObservableValue<String>,
-    private val isRecordingProperty: ObservableValue<Boolean>,
-    private val isRecordingAgainProperty: ObservableValue<Boolean>,
-    private val isPlayingProperty: ObservableValue<Boolean>,
-    private val recordingIndexProperty: IntegerProperty,
-    private val playingVerseProperty: IntegerProperty,
-    highlightedVerseProperty: IntegerProperty
+    private val narrationStateProperty: ObservableValue<NarrationState>,
+    highlightedVerseProperty: IntegerProperty,
 ) : ListCell<NarrationTextItemData>() {
 
     private val logger = LoggerFactory.getLogger(NarrationTextCell::class.java)
@@ -89,11 +86,9 @@ class NarrationTextCell(
 
             hasRecordingProperty.set(item.hasRecording)
             recordButtonTextProperty.bind(this@NarrationTextCell.recordButtonTextProperty)
-            isRecordingProperty.bind(this@NarrationTextCell.isRecordingProperty)
-            isRecordingAgainProperty.bind(this@NarrationTextCell.isRecordingAgainProperty)
-            isPlayingProperty.bind(this@NarrationTextCell.isPlayingProperty)
-            playingVerseIndexProperty.bind(this@NarrationTextCell.playingVerseProperty)
             isHighlightedProperty.bind(shouldHighlight)
+
+            narrationStateProperty.bind(this@NarrationTextCell.narrationStateProperty)
 
             indexProperty.set(index)
             nextChunkTextProperty.set(nextChunkText)
@@ -139,7 +134,7 @@ class NarrationTextCell(
 
             onPauseActionProperty.set(DebouncedEventHandler {
                 item.marker?.let {
-                    FX.eventbus.fire(PauseEvent())
+                    FX.eventbus.fire(PauseVerseEvent(it))
                 }
             })
 
@@ -167,7 +162,7 @@ class NarrationTextCell(
                 FX.eventbus.fire(ResumeRecordingAgainEvent(index, item.chunk))
             })
 
-            stateProperty.set(item.state)
+            verseStateProperty.set(item.verseState)
         }
     }
 
