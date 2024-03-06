@@ -948,7 +948,13 @@ class NarrationViewModel : ViewModel() {
 
                 if (isRecordingAgain) {
                     val reRecordingIndex = recordingVerseIndex.value
-                    nextVerseLoc = totalVerses.getOrNull(reRecordingIndex + 1)?.location
+                    nextVerseLoc = totalVerses.getOrNull(reRecordingIndex + 1)?.let { marker ->
+                        if (marker in recordedVerses) {
+                            marker.location
+                        } else {
+                            null
+                        }
+                    }
                     reRecordLoc = totalVerses[reRecordingIndex].location
                 } else if (isPrependRecording) {
                     val currentMarker = totalVerses[recordingVerseIndex.value]
