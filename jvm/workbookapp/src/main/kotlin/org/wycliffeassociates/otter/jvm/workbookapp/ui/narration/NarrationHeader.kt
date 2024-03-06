@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
+import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
 import org.wycliffeassociates.otter.common.domain.project.ProjectCompletionStatus
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.chapterselector.chapterSelector
@@ -80,7 +82,18 @@ class NarrationHeader : View() {
                 setOnAction {
                     FX.eventbus.fire(NarrationUndoEvent())
                 }
-                enableWhen(viewModel.hasUndoProperty.and(viewModel.isRecordingProperty.not()))
+                enableWhen(
+                    Bindings.createBooleanBinding(
+                        {
+                            val isRecording = viewModel.narrationStateProperty.value?.let {
+                                it == NarrationStateType.RECORDING || it == NarrationStateType.RECORDING_AGAIN
+                            } ?: false
+
+                            viewModel.hasUndoProperty.value && !isRecording
+                        },
+                        viewModel.hasUndoProperty, viewModel.narrationStateProperty
+                    )
+                )
             }
             button {
                 tooltip = tooltip(messages["redoAction"])
@@ -89,14 +102,36 @@ class NarrationHeader : View() {
                 setOnAction {
                     FX.eventbus.fire(NarrationRedoEvent())
                 }
-                enableWhen(viewModel.hasRedoProperty.and(viewModel.isRecordingProperty.not()))
+                enableWhen(
+                    Bindings.createBooleanBinding(
+                        {
+                            val isRecording = viewModel.narrationStateProperty.value?.let {
+                                it == NarrationStateType.RECORDING || it == NarrationStateType.RECORDING_AGAIN
+                            } ?: false
+
+                            viewModel.hasRedoProperty.value && !isRecording
+                        },
+                        viewModel.hasRedoProperty, viewModel.narrationStateProperty
+                    )
+                )
             }
             narrationMenuButton(
                 viewModel.hasChapterTakeProperty,
                 viewModel.hasVersesProperty,
                 viewModel.hasAllItemsRecordedProperty
             ) {
-                enableWhen(viewModel.chapterTakeBusyProperty.not().and(viewModel.isRecordingProperty.not()))
+                enableWhen(
+                    Bindings.createBooleanBinding(
+                        {
+                            val isRecording = viewModel.narrationStateProperty.value?.let {
+                                it == NarrationStateType.RECORDING || it == NarrationStateType.RECORDING_AGAIN
+                            } ?: false
+
+                            viewModel.chapterTakeBusyProperty.value.not() && !isRecording
+                        },
+                        viewModel.chapterTakeBusyProperty, viewModel.narrationStateProperty
+                    )
+                )
             }
             chapterSelector {
                 chapterTitleProperty.bind(viewModel.chapterTitleProperty)
@@ -114,8 +149,30 @@ class NarrationHeader : View() {
                     popupMenu.y = screenBound.maxY - 25
                 }
 
-                prevDisabledProperty.bind(viewModel.hasPreviousChapter.not().or(viewModel.isRecordingProperty))
-                nextDisabledProperty.bind(viewModel.hasNextChapter.not().or(viewModel.isRecordingProperty))
+                prevDisabledProperty.bind(
+                    Bindings.createBooleanBinding(
+                        {
+                            val isRecording = viewModel.narrationStateProperty.value?.let {
+                                it == NarrationStateType.RECORDING || it == NarrationStateType.RECORDING_AGAIN
+                            } ?: false
+
+                            viewModel.hasPreviousChapter.value.not() || isRecording
+                        },
+                        viewModel.hasPreviousChapter, viewModel.narrationStateProperty
+                    )
+                )
+                nextDisabledProperty.bind(
+                    Bindings.createBooleanBinding(
+                        {
+                            val isRecording = viewModel.narrationStateProperty.value?.let {
+                                it == NarrationStateType.RECORDING || it == NarrationStateType.RECORDING_AGAIN
+                            } ?: false
+
+                            viewModel.hasNextChapter.value.not() || isRecording
+                        },
+                        viewModel.hasNextChapter, viewModel.narrationStateProperty
+                    )
+                )
 
                 setOnPreviousChapter {
                     viewModel.selectPreviousChapter()
@@ -159,7 +216,7 @@ class NarrationHeaderViewModel : ViewModel() {
 
     val hasUndoProperty = SimpleBooleanProperty()
     val hasRedoProperty = SimpleBooleanProperty()
-    val isRecordingProperty = narrationViewModel.isRecordingProperty.or(narrationViewModel.isRecordingAgainProperty)
+    val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
 
@@ -176,6 +233,7 @@ class NarrationHeaderViewModel : ViewModel() {
         hasRedoProperty.bind(narrationViewModel.hasRedoProperty)
         hasVersesProperty.bind(narrationViewModel.hasVersesProperty)
         hasAllItemsRecordedProperty.bind(narrationViewModel.hasAllItemsRecordedProperty)
+        narrationStateProperty.bind(narrationViewModel.narrationStateProperty)
     }
 
     val chapterList: List<ChapterGridItemData>

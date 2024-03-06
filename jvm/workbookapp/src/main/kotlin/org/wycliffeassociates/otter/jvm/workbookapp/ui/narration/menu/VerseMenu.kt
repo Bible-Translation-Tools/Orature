@@ -34,6 +34,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
 import org.wycliffeassociates.otter.jvm.controls.event.OpenInAudioPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
@@ -44,7 +45,8 @@ class VerseMenu : ContextMenu() {
 
     val verseProperty = SimpleObjectProperty<AudioMarker>()
     val verseIndexProperty = SimpleIntegerProperty()
-    val isRecordingProperty = SimpleBooleanProperty()
+
+    val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
 
     init {
         addClass("wa-context-menu")
@@ -58,7 +60,8 @@ class VerseMenu : ContextMenu() {
                 FX.eventbus.fire(PlayVerseEvent(verseProperty.value))
             }
             disableWhen {
-                isRecordingProperty
+                narrationStateProperty.isEqualTo(NarrationStateType.RECORDING)
+                    .or(narrationStateProperty.isEqualTo(NarrationStateType.RECORDING_AGAIN))
             }
         }
         val recordAgainOpt = MenuItem().apply {
@@ -70,18 +73,10 @@ class VerseMenu : ContextMenu() {
                 FX.eventbus.fire(RecordAgainEvent(verseIndexProperty.value))
             }
             disableWhen {
-                isRecordingProperty
+                narrationStateProperty.isEqualTo(NarrationStateType.RECORDING)
+                    .or(narrationStateProperty.isEqualTo(NarrationStateType.RECORDING_AGAIN))
             }
         }
-//        item(importVerseTextProperty.value) {
-//            graphic = FontIcon(MaterialDesign.MDI_DOWNLOAD)
-//            action {
-//                FX.eventbus.fire(ImportVerseEvent(verseProperty.value))
-//            }
-//            disableWhen {
-//                isRecordingProperty
-//            }
-//        }
         val editVerseOpt = MenuItem().apply {
             graphic = label(messages["openIn"]) {
                 graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
@@ -91,7 +86,8 @@ class VerseMenu : ContextMenu() {
                 FX.eventbus.fire(OpenInAudioPluginEvent(verseIndexProperty.value))
             }
             disableWhen {
-                isRecordingProperty
+                narrationStateProperty.isEqualTo(NarrationStateType.RECORDING)
+                    .or(narrationStateProperty.isEqualTo(NarrationStateType.RECORDING_AGAIN))
             }
         }
 

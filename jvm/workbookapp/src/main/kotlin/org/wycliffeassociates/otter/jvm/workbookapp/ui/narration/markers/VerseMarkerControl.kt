@@ -32,6 +32,7 @@ import javafx.scene.layout.Region
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.VerseMenu
 import tornadofx.*
 import tornadofx.FX.Companion.messages
@@ -47,7 +48,8 @@ class VerseMarkerControl : BorderPane() {
     val labelProperty = SimpleStringProperty()
     val canBeMovedProperty: BooleanBinding = verseIndexProperty.greaterThan(0)
     val userIsDraggingProperty = SimpleBooleanProperty(false)
-    val isRecordingProperty = SimpleBooleanProperty()
+
+    val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
 
     val dragAreaProperty = SimpleObjectProperty<Node>()
 
@@ -102,10 +104,10 @@ class VerseMarkerControl : BorderPane() {
         }
 
         center = label(labelProperty) {
-                minWidth = Region.USE_PREF_SIZE
-                addClass("verse-marker__title")
-                setAlignment(this, Pos.BOTTOM_LEFT)
-            }
+            minWidth = Region.USE_PREF_SIZE
+            addClass("verse-marker__title")
+            setAlignment(this, Pos.BOTTOM_LEFT)
+        }
 
         right = Button().apply {
             addClass("btn", "btn--icon", "verse-marker__menu")
@@ -114,7 +116,7 @@ class VerseMarkerControl : BorderPane() {
             tooltip(messages["options"])
 
             val menu = VerseMenu().apply {
-                isRecordingProperty.bind(this@VerseMarkerControl.isRecordingProperty)
+                narrationStateProperty.bind(this@VerseMarkerControl.narrationStateProperty)
                 verseProperty.bind(this@VerseMarkerControl.verseProperty)
                 verseIndexProperty.bind(this@VerseMarkerControl.verseIndexProperty)
             }

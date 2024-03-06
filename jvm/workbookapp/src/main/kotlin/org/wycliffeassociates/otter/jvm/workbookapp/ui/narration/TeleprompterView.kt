@@ -47,7 +47,7 @@ class TeleprompterViewModel : ViewModel() {
     private val narrationViewModel: NarrationViewModel by inject()
 
     val chunks = narrationViewModel.narratableList
-    var currentNarrationState = SimpleObjectProperty<NarrationStateType>(NarrationStateType.IDLE_EMPTY)
+    var narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
 
     val stickyVerseProperty = SimpleObjectProperty<NarrationTextItemData>()
     val showStickyVerseProperty = SimpleBooleanProperty(false)
@@ -61,16 +61,6 @@ class TeleprompterViewModel : ViewModel() {
     private val recordResumeProperty = SimpleBooleanProperty()
     private var recordResume by recordResumeProperty
 
-    val isRecordingProperty = SimpleBooleanProperty()
-    private var isRecording by isRecordingProperty
-
-    val isPlayingProperty = SimpleBooleanProperty()
-    private var isPlaying by isPlayingProperty
-
-    val isRecordingAgainProperty = SimpleBooleanProperty()
-    private var isRecordingAgain by isRecordingAgainProperty
-
-
     val lastRecordedVerseProperty = SimpleIntegerProperty(0)
 
     val recordingVerseProperty = SimpleIntegerProperty()
@@ -80,15 +70,12 @@ class TeleprompterViewModel : ViewModel() {
     init {
         recordStartProperty.bindBidirectional(narrationViewModel.recordStartProperty)
         recordResumeProperty.bindBidirectional(narrationViewModel.recordResumeProperty)
-        isRecordingProperty.bindBidirectional(narrationViewModel.isRecordingProperty)
-        isPlayingProperty.bind(narrationViewModel.isPlayingProperty)
         recordPauseProperty.bindBidirectional(narrationViewModel.recordPauseProperty)
-        isRecordingAgainProperty.bindBidirectional(narrationViewModel.isRecordingAgainProperty)
         lastRecordedVerseProperty.bindBidirectional(narrationViewModel.lastRecordedVerseProperty)
         recordingVerseProperty.bind(narrationViewModel.recordingVerseIndex)
         playingVerseProperty.bind(narrationViewModel.playingVerseIndex)
         highlightedVerseProperty.bind(narrationViewModel.highlightedVerseIndex)
-        currentNarrationState.bind(narrationViewModel.narrationStateProperty)
+        narrationStateProperty.bind(narrationViewModel.narrationStateProperty)
     }
 
     fun currentVerseTextBinding(): StringBinding {
@@ -117,17 +104,16 @@ class TeleprompterViewModel : ViewModel() {
         return Bindings.createStringBinding(
             {
                 when {
-                    isRecording && !isRecordingAgain -> messages["pauseRecording"]
-                    isRecording && isRecordingAgain -> messages["stopRecording"]
+                    narrationStateProperty.value == NarrationStateType.RECORDING -> messages["pauseRecording"]
+                    narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN -> messages["stopRecording"]
                     recordResume || recordPause -> messages["resumeRecording"]
                     else -> messages["beginRecording"]
                 }
             },
             recordStartProperty,
             recordResumeProperty,
-            isRecordingProperty,
             recordPauseProperty,
-            isRecordingAgainProperty
+            narrationStateProperty,
         )
     }
 
@@ -241,7 +227,7 @@ class TeleprompterView : View() {
                 NarrationTextCell(
                     messages["nextVerse"],
                     viewModel.recordButtonTextBinding(),
-                    viewModel.currentNarrationState,
+                    viewModel.narrationStateProperty,
                     viewModel.highlightedVerseProperty,
                 )
             }

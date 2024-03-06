@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers
 
+import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
@@ -28,13 +29,14 @@ import tornadofx.*
 import javafx.event.EventTarget
 import javafx.scene.layout.BorderPane
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationState
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
 
 class VerseMarkersLayer : BorderPane() {
     private val logger = LoggerFactory.getLogger(VerseMarkersLayer::class.java)
-
-    val isRecordingProperty = SimpleBooleanProperty()
-    val isPlayingProperty = SimpleBooleanProperty()
     val markers = observableListOf<VerseMarker>()
+
+    val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
 
     val verseMarkersControls: ObservableList<VerseMarkerControl> = observableListOf()
     private val onScrollProperty = SimpleObjectProperty<(Int) -> Unit>()
@@ -45,7 +47,21 @@ class VerseMarkersLayer : BorderPane() {
 
         addClass("verse-markers-layer")
 
-        mouseTransparentProperty().bind(isRecordingProperty.or(isPlayingProperty))
+        mouseTransparentProperty().bind(
+
+            Bindings.createBooleanBinding(
+                {
+                    narrationStateProperty.value?.let {
+                        it == NarrationStateType.RECORDING
+                                || it == NarrationStateType.RECORDING_AGAIN
+                                || it == NarrationStateType.RECORDING_AGAIN_PAUSED
+                                || it == NarrationStateType.PLAYING
+
+                    } ?: false
+                },
+                narrationStateProperty
+            )
+        )
 
         var scrollDelta = 0.0
         var scrollOldPos = 0.0

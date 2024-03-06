@@ -20,9 +20,11 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
+import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
@@ -30,6 +32,7 @@ import javafx.scene.control.ScrollBar
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
 import org.wycliffeassociates.otter.jvm.controls.SCROLL_INCREMENT_UNIT
 import org.wycliffeassociates.otter.jvm.controls.SCROLL_JUMP_UNIT
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
@@ -101,7 +104,18 @@ class AudioWorkspaceView : View() {
         }
 
         disableWhen {
-            viewModel.isRecordingProperty.or(viewModel.isPlayingProperty)
+            Bindings.createBooleanBinding(
+                {
+                    viewModel.narrationStateProperty.value?.let {
+
+                        it == NarrationStateType.RECORDING
+                                || it == NarrationStateType.RECORDING_AGAIN
+                                || it == NarrationStateType.RECORDING_AGAIN_PAUSED
+                                || it == NarrationStateType.PLAYING
+                    } ?: false
+                },
+                viewModel.narrationStateProperty
+            )
         }
 
         unitIncrement = SCROLL_INCREMENT_UNIT
@@ -148,8 +162,8 @@ class AudioWorkspaceView : View() {
                     )
                 }
                 verse_markers_layer {
-                    isRecordingProperty.bind(viewModel.isRecordingProperty)
-                    isPlayingProperty.bind(viewModel.isPlayingProperty)
+                    narrationStateProperty.bind(viewModel.narrationStateProperty)
+
                     verseMarkersControls.bind(markerNodes) { it }
 
                     var pos = 0
@@ -186,7 +200,6 @@ class AudioWorkspaceView : View() {
                 verseProperty.set(marker)
                 verseIndexProperty.set(viewModel.recordedVerses.indexOf(marker))
                 labelProperty.set(markerLabel)
-                isRecordingProperty.bind(viewModel.isRecordingProperty)
             }
         }
 
@@ -205,8 +218,7 @@ class AudioWorkspaceViewModel : ViewModel() {
 
     private val narrationViewModel: NarrationViewModel by inject()
 
-    val isRecordingProperty = SimpleBooleanProperty()
-    val isPlayingProperty = SimpleBooleanProperty()
+    val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
     var recordedVerses = observableListOf<AudioMarker>()
 
     val audioPositionProperty = SimpleIntegerProperty()
@@ -223,15 +235,13 @@ class AudioWorkspaceViewModel : ViewModel() {
     }
 
     fun onDock() {
-        isRecordingProperty.bind(narrationViewModel.isRecordingProperty.or(narrationViewModel.isRecordingAgainProperty))
-        isPlayingProperty.bind(narrationViewModel.isPlayingProperty)
+        narrationStateProperty.bind(narrationViewModel.narrationStateProperty)
         totalAudioSizeProperty.bind(narrationViewModel.totalAudioSizeProperty)
         audioPositionProperty.bind(narrationViewModel.audioPositionProperty)
         recordedVerses.bind(narrationViewModel.recordedVerses) { it }
     }
 
     fun onUndock() {
-        isRecordingProperty.unbind()
     }
 
     fun seekPercent(percent: Double) {

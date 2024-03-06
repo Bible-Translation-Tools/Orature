@@ -18,18 +18,18 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
-import javafx.beans.binding.Bindings.not
+import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
-import javafx.scene.layout.Region
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.*
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
@@ -38,8 +38,8 @@ import tornadofx.*
 import java.text.MessageFormat
 
 class NarrationToolBar : View() {
-    private val viewModel by inject<NarrationViewModel>()
-
+    private val narrationViewModel by inject<NarrationViewModel>()
+    private val viewModel: NarrationToolbarViewModel by inject()
 
     override val root = hbox {
         addClass("narration-toolbar", "narration-toolbar__play-controls")
@@ -49,32 +49,43 @@ class NarrationToolBar : View() {
             addPseudoClass("active")
             tooltip { textProperty().bind(this@button.textProperty()) }
 
-
             disableWhen {
-                viewModel.isRecordingProperty.or(viewModel.hasVersesProperty.not())
+                Bindings.createBooleanBinding(
+                    {
+                        // TODO: figure out why this only works when I use viewModel
+                        narrationViewModel.narrationStateProperty.value?.let {
+                            it == NarrationStateType.RECORDING
+                                    || it == NarrationStateType.RECORDING_AGAIN
+                                    || it == NarrationStateType.IDLE_EMPTY
+                                    || it == NarrationStateType.RECORDING_PAUSED
+                                    || it == NarrationStateType.RECORDING_AGAIN_PAUSED
+                        } ?: false
+                    },
+                    narrationViewModel.narrationStateProperty
+                )
             }
 
-            viewModel.isPlayingProperty.onChangeAndDoNow {
-                it?.let { playing ->
+            narrationViewModel.narrationStateProperty.onChangeAndDoNow {
+                it?.let { state ->
                     runLater {
-                        if (!playing) {
-                            graphic = FontIcon(MaterialDesign.MDI_PLAY)
-                            text = messages["playAll"]
-                            togglePseudoClass("active", false)
-                        } else {
+                        if (state == NarrationStateType.PLAYING) {
                             graphic = FontIcon(MaterialDesign.MDI_PAUSE)
                             text = messages["pause"]
                             togglePseudoClass("active", true)
+                        } else {
+                            graphic = FontIcon(MaterialDesign.MDI_PLAY)
+                            text = messages["playAll"]
+                            togglePseudoClass("active", false)
                         }
                     }
                 }
             }
 
             setOnAction {
-                if (viewModel.isPlayingProperty.value) {
+                if (narrationViewModel.narrationStateProperty.value == NarrationStateType.PLAYING) {
                     viewModel.pausePlayback()
                 } else {
-                    viewModel.playAll()
+                    narrationViewModel.playAll()
                 }
             }
         }
@@ -83,10 +94,22 @@ class NarrationToolBar : View() {
             tooltip(messages["previousVerse"])
             graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
             setOnAction {
-                viewModel.seekToPrevious()
+                narrationViewModel.seekToPrevious()
             }
             disableWhen {
-                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(viewModel.hasVersesProperty.not())
+
+                Bindings.createBooleanBinding(
+                    {
+                        narrationViewModel.narrationStateProperty.value?.let {
+                            it == NarrationStateType.RECORDING
+                                    || it == NarrationStateType.RECORDING_AGAIN
+                                    || it == NarrationStateType.IDLE_EMPTY
+                                    || it == NarrationStateType.RECORDING_AGAIN_PAUSED
+                                    || it == NarrationStateType.PLAYING
+                        } ?: false
+                    },
+                    narrationViewModel.narrationStateProperty
+                )
             }
         }
         button {
@@ -94,12 +117,31 @@ class NarrationToolBar : View() {
             tooltip(messages["nextVerse"])
             graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
             setOnAction {
-                viewModel.seekToNext()
+                narrationViewModel.seekToNext()
             }
             disableWhen {
-                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(viewModel.hasVersesProperty.not())
+                Bindings.createBooleanBinding(
+                    {
+                        narrationViewModel.narrationStateProperty.value?.let {
+                            it == NarrationStateType.RECORDING
+                                    || it == NarrationStateType.RECORDING_AGAIN
+                                    || it == NarrationStateType.IDLE_EMPTY
+                                    || it == NarrationStateType.RECORDING_AGAIN_PAUSED
+                                    || it == NarrationStateType.PLAYING
+                        } ?: false
+                    },
+                    narrationViewModel.narrationStateProperty
+                )
             }
         }
+    }
+
+    override fun onDock() {
+        super.onDock()
+    }
+
+    override fun onUndock() {
+        super.onUndock()
     }
 }
 
@@ -119,6 +161,7 @@ class NarrationToolbarViewModel : ViewModel() {
         } ?: ""
     }
 
+    val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
     val chapterTitleProperty = SimpleStringProperty()
 
     val hasNextChapter = SimpleBooleanProperty()
@@ -146,5 +189,17 @@ class NarrationToolbarViewModel : ViewModel() {
         hasUndoProperty.bind(narrationViewModel.hasUndoProperty)
         hasRedoProperty.bind(narrationViewModel.hasRedoProperty)
         hasVersesProperty.bind(narrationViewModel.hasVersesProperty)
+
+        narrationStateProperty.bind(narrationViewModel.narrationStateProperty)
+    }
+
+
+    fun pausePlayback() {
+        if (narrationViewModel.recordingVerseIndex.value >= 0) {
+            val recordingVerse = narrationViewModel.recordedVerses[narrationViewModel.recordingVerseIndex.value]
+            narrationViewModel.pauseVersePlayback(recordingVerse)
+        } else {
+            narrationViewModel.pausePlayback()
+        }
     }
 }
