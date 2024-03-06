@@ -782,7 +782,10 @@ class NarrationViewModel : ViewModel() {
 
         narration.pauseRecording()
         narration.finalizeVerse(index)
-        renderer.clearActiveRecordingData()
+
+        if (!isPrependRecording) {
+            renderer.clearActiveRecordingData()
+        }
 
         refreshTeleprompter()
     }
@@ -816,8 +819,7 @@ class NarrationViewModel : ViewModel() {
 
         stopPlayer()
 
-        narration.resumeRecording()
-
+        narration.resumeRecording(recordingVerseIndex.value)
         isRecording = true
         recordPause = false
 

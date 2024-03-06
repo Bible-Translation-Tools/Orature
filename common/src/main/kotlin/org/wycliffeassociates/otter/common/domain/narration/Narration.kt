@@ -319,14 +319,14 @@ class Narration @AssistedInject constructor(
         isRecording.set(false)
     }
 
-    fun resumeRecording() {
+    fun resumeRecording(index: Int) {
 
         // Ensures that the entire chapter is loaded into the player
         lockToVerse(null)
         audioLoaded = false
         loadChapterIntoPlayer()
 
-        seek(player.getDurationInFrames())
+        seek(chapterRepresentation.audioLocationToLocationInChapter(chapterRepresentation.totalVerses[index].lastFrame()))
         writer?.start()
         isRecording.set(true)
     }
