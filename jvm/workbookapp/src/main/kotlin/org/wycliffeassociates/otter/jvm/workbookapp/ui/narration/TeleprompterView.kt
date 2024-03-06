@@ -29,7 +29,6 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.layout.Priority
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.IdleEmptyState
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationState
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.VerseItemState
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
@@ -89,7 +88,7 @@ class TeleprompterViewModel : ViewModel() {
         recordingVerseProperty.bind(narrationViewModel.recordingVerseIndex)
         playingVerseProperty.bind(narrationViewModel.playingVerseIndex)
         highlightedVerseProperty.bind(narrationViewModel.highlightedVerseIndex)
-        currentNarrationState.bind(narrationViewModel.narrationState)
+        currentNarrationState.bind(narrationViewModel.narrationStateProperty)
     }
 
     fun currentVerseTextBinding(): StringBinding {
