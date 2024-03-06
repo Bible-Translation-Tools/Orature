@@ -18,6 +18,9 @@
  */
 package org.wycliffeassociates.otter.common.domain.narration.teleprompter
 
+import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
+import io.reactivex.observables.ConnectableObservable
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 
@@ -26,31 +29,30 @@ class NarrationStateMachine(
 ) {
     private val logger = LoggerFactory.getLogger(NarrationStateMachine::class.java)
 
+    private lateinit var currentStateEmitter: ObservableEmitter<NarrationState>
 
-    /*
-        have this class manage the states for verses (verseContext) and the states for narration (globalContext)
-        Each change in the global context causes the verseContext to change entirely.
-
-        Before, the teleprompter state was managing the verse context, and I added an entirely separate machine to
-        manage the global context. Then I was having verse nodes listen to changes in the global context and
-        make adjustments accordingly.
-
-        Now I want change in the global context to explicitly create the correct verseContext for that particular
-        global state.
-
-        For things like the menu options in the header, have different buttons based on the global state.
-     */
-
+    val currentState: ConnectableObservable<NarrationState> = Observable.create { emitter ->
+        currentStateEmitter = emitter
+        emitter.onNext(IdleEmptyState)
+    }.publish()
 
     private var verseContexts: MutableList<VerseStateContext>
-    private var globalContext: NarrationState
+    private var globalContext: NarrationState = IdleEmptyState
+
+    init {
+        currentState.connect()
+    }
 
     fun getGlobalContext(): NarrationState {
         return globalContext
     }
 
+    private fun updateGlobalContext(newContext: NarrationState) {
+        globalContext = newContext
+        currentStateEmitter.onNext(newContext)
+    }
+
     init {
-        globalContext = IdleEmptyState
         verseContexts = total.map { VerseStateContext() }.toMutableList()
     }
 
@@ -71,22 +73,21 @@ class NarrationStateMachine(
         }
         verseContexts.firstOrNull { it.state.type == VerseItemState.RECORD_DISABLED }?.state = RecordState
 
-        if (hasAllItemsRecorded) {
-            globalContext = IdleFinishedState
+        val newGlobalContext = if (hasAllItemsRecorded) {
+            IdleFinishedState
         } else if (hasNoItemsRecorded) {
-            globalContext = IdleEmptyState
+            IdleEmptyState
         } else {
-            globalContext = IdleInProgressState
+            IdleInProgressState
         }
 
+        updateGlobalContext(newGlobalContext)
     }
 
-    // TODO: overload this method with a method that takes in a NarrationStateTransition and an optional requestIndex
-    //  then have it call this method if the request index is NOT null
 
     fun transition(request: NarrationStateTransition, requestIndex: Int): List<VerseItemState> {
         try {
-            globalContext = when (request) {
+            val newGlobalContext = when (request) {
 
                 NarrationStateTransition.RECORD -> RecordAction.apply(globalContext, verseContexts, requestIndex)
                 NarrationStateTransition.PAUSE_RECORDING -> PauseRecordingAction.apply(
@@ -137,9 +138,9 @@ class NarrationStateMachine(
                 )
 
                 NarrationStateTransition.SAVE_FINISHED -> SaveFinished.apply(globalContext, verseContexts, requestIndex)
-
-                else -> IdleInProgressState // TODO: fix this
             }
+
+            updateGlobalContext(newGlobalContext)
         } catch (e: java.lang.IllegalStateException) {
             logger.error("Error in state transition for requestIndex: $requestIndex, action $request", e)
             throw e
