@@ -48,8 +48,7 @@ class NarrationTextItem : VBox() {
     val verseStateProperty = SimpleObjectProperty(VerseItemState.RECORD)
     val verseState by verseStateProperty
 
-    val narrationStateProperty = SimpleObjectProperty<NarrationState>(IdleEmptyState)
-    val narrationState by narrationStateProperty
+    val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
     val hasRecordingProperty = SimpleBooleanProperty(false)
     val verseLabelProperty = SimpleStringProperty()
     val verseTextProperty = SimpleStringProperty()
@@ -90,12 +89,12 @@ class NarrationTextItem : VBox() {
                                 {
                                     val isAnotherVerseRecordingPaused =
                                         verseStateProperty.value == VerseItemState.RECORD_AGAIN
-                                                && narrationStateProperty.value.type == NarrationStateType.RECORDING_PAUSED
+                                                && narrationStateProperty.value == NarrationStateType.RECORDING_PAUSED
 
                                     val hasRecording = verseStateProperty.value == VerseItemState.RECORD_AGAIN
                                             || verseStateProperty.value == VerseItemState.RECORDING_PAUSED
 
-                                    val isPlaying = narrationState.type == NarrationStateType.PLAYING
+                                    val isPlaying = narrationStateProperty.value == NarrationStateType.PLAYING
                                     !isAnotherVerseRecordingPaused && hasRecording && !isPlaying
                                 },
                                 verseStateProperty, narrationStateProperty
@@ -453,8 +452,8 @@ class NarrationTextItem : VBox() {
             btn.disableWhen {
                 booleanBinding(verseStateProperty, narrationStateProperty) {
 
-                    val isPlaying = narrationState.type == NarrationStateType.PLAYING
-                    val isRecording = narrationState.type == NarrationStateType.RECORDING
+                    val isPlaying = narrationStateProperty.value == NarrationStateType.PLAYING
+                    val isRecording = narrationStateProperty.value == NarrationStateType.RECORDING
                     val differentItemRecording = isRecording && verseState !in recordingStates
                     when {
                         isPlaying -> true

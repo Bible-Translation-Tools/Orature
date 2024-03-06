@@ -29,7 +29,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.layout.Priority
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationState
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.VerseItemState
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
@@ -47,7 +47,7 @@ class TeleprompterViewModel : ViewModel() {
     private val narrationViewModel: NarrationViewModel by inject()
 
     val chunks = narrationViewModel.narratableList
-    var currentNarrationState = SimpleObjectProperty<NarrationState>()
+    var currentNarrationState = SimpleObjectProperty<NarrationStateType>(NarrationStateType.IDLE_EMPTY)
 
     val stickyVerseProperty = SimpleObjectProperty<NarrationTextItemData>()
     val showStickyVerseProperty = SimpleBooleanProperty(false)

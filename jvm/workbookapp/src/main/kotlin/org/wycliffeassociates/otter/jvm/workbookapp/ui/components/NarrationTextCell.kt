@@ -26,7 +26,7 @@ import javafx.scene.control.ListCell
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationState
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.VerseItemState
 import org.wycliffeassociates.otter.jvm.controls.event.*
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
@@ -47,7 +47,7 @@ class NarrationTextItemData(
 class NarrationTextCell(
     private val nextChunkText: String,
     private val recordButtonTextProperty: ObservableValue<String>,
-    private val narrationStateProperty: ObservableValue<NarrationState>,
+    private val narrationStateProperty: ObservableValue<NarrationStateType>,
     highlightedVerseProperty: IntegerProperty,
 ) : ListCell<NarrationTextItemData>() {
 

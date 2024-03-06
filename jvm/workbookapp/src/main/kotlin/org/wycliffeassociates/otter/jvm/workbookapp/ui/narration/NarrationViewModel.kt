@@ -92,7 +92,7 @@ class NarrationViewModel : ViewModel() {
     private lateinit var narration: Narration
     private lateinit var renderer: NarrationWaveformRenderer
     private lateinit var narrationStateMachine: NarrationStateMachine
-    val narrationStateProperty = SimpleObjectProperty<NarrationState>()
+    val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
 
     private lateinit var volumeBar: VolumeBar
     val recordStartProperty = SimpleBooleanProperty()
@@ -975,7 +975,7 @@ class NarrationViewModel : ViewModel() {
     private fun subscribeNarrationStateChanged() {
         narrationStateMachine.currentState
             .doOnNext {
-                narrationStateProperty.set(it)
+                narrationStateProperty.set(it.type)
             }
             .subscribe().let(disposables::add)
     }
