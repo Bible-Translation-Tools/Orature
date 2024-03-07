@@ -30,15 +30,12 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.*
-import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.text.MessageFormat
 
 class NarrationToolBar : View() {
-    private val narrationViewModel by inject<NarrationViewModel>()
     private val viewModel: NarrationToolbarViewModel by inject()
 
     override val root = hbox {
@@ -52,8 +49,7 @@ class NarrationToolBar : View() {
             disableWhen {
                 Bindings.createBooleanBinding(
                     {
-                        // TODO: figure out why this only works when I use viewModel
-                        narrationViewModel.narrationStateProperty.value?.let {
+                        viewModel.narrationStateProperty.value?.let {
                             it == NarrationStateType.RECORDING
                                     || it == NarrationStateType.RECORDING_AGAIN
                                     || it == NarrationStateType.IDLE_EMPTY
@@ -61,11 +57,11 @@ class NarrationToolBar : View() {
                                     || it == NarrationStateType.RECORDING_AGAIN_PAUSED
                         } ?: false
                     },
-                    narrationViewModel.narrationStateProperty
+                    viewModel.narrationStateProperty
                 )
             }
 
-            narrationViewModel.narrationStateProperty.onChangeAndDoNow {
+            viewModel.narrationStateProperty.onChangeAndDoNow {
                 it?.let { state ->
                     runLater {
                         if (state == NarrationStateType.PLAYING) {
@@ -82,10 +78,10 @@ class NarrationToolBar : View() {
             }
 
             setOnAction {
-                if (narrationViewModel.narrationStateProperty.value == NarrationStateType.PLAYING) {
+                if (viewModel.narrationStateProperty.value == NarrationStateType.PLAYING) {
                     viewModel.pausePlayback()
                 } else {
-                    narrationViewModel.playAll()
+                    viewModel.playAll()
                 }
             }
         }
@@ -94,13 +90,13 @@ class NarrationToolBar : View() {
             tooltip(messages["previousVerse"])
             graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
             setOnAction {
-                narrationViewModel.seekToPrevious()
+                viewModel.seekToPrevious()
             }
             disableWhen {
 
                 Bindings.createBooleanBinding(
                     {
-                        narrationViewModel.narrationStateProperty.value?.let {
+                        viewModel.narrationStateProperty.value?.let {
                             it == NarrationStateType.RECORDING
                                     || it == NarrationStateType.RECORDING_AGAIN
                                     || it == NarrationStateType.IDLE_EMPTY
@@ -108,7 +104,7 @@ class NarrationToolBar : View() {
                                     || it == NarrationStateType.PLAYING
                         } ?: false
                     },
-                    narrationViewModel.narrationStateProperty
+                    viewModel.narrationStateProperty
                 )
             }
         }
@@ -117,12 +113,12 @@ class NarrationToolBar : View() {
             tooltip(messages["nextVerse"])
             graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
             setOnAction {
-                narrationViewModel.seekToNext()
+                viewModel.seekToNext()
             }
             disableWhen {
                 Bindings.createBooleanBinding(
                     {
-                        narrationViewModel.narrationStateProperty.value?.let {
+                        viewModel.narrationStateProperty.value?.let {
                             it == NarrationStateType.RECORDING
                                     || it == NarrationStateType.RECORDING_AGAIN
                                     || it == NarrationStateType.IDLE_EMPTY
@@ -130,18 +126,10 @@ class NarrationToolBar : View() {
                                     || it == NarrationStateType.PLAYING
                         } ?: false
                     },
-                    narrationViewModel.narrationStateProperty
+                    viewModel.narrationStateProperty
                 )
             }
         }
-    }
-
-    override fun onDock() {
-        super.onDock()
-    }
-
-    override fun onUndock() {
-        super.onUndock()
     }
 }
 
@@ -150,7 +138,6 @@ class NarrationToolbarViewModel : ViewModel() {
 
     private val workbookDataStore by inject<WorkbookDataStore>()
     private val narrationViewModel: NarrationViewModel by inject()
-    private val audioPluginViewModel: AudioPluginViewModel by inject()
 
     val titleProperty = workbookDataStore.activeWorkbookProperty.stringBinding {
         it?.let {
@@ -169,12 +156,10 @@ class NarrationToolbarViewModel : ViewModel() {
     val hasVersesProperty = SimpleBooleanProperty()
 
     val chapterTakeProperty = SimpleObjectProperty<Take>()
-    val hasChapterTakeProperty = chapterTakeProperty.isNotNull
 
     val hasUndoProperty = SimpleBooleanProperty()
     val hasRedoProperty = SimpleBooleanProperty()
 
-    val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
 
     private val chapterList: ObservableList<Chapter> = observableListOf()
 
@@ -201,5 +186,17 @@ class NarrationToolbarViewModel : ViewModel() {
         } else {
             narrationViewModel.pausePlayback()
         }
+    }
+
+    fun seekToNext() {
+        narrationViewModel.seekToNext()
+    }
+
+    fun seekToPrevious() {
+        narrationViewModel.seekToPrevious()
+    }
+
+    fun playAll() {
+        narrationViewModel.playAll()
     }
 }
