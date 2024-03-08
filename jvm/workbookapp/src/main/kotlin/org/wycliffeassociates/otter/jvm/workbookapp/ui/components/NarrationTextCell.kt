@@ -37,6 +37,9 @@ class NarrationTextItemData(
     var marker: AudioMarker?,
     var hasRecording: Boolean = false,
     var previousChunksRecorded: Boolean = false,
+    var playEnabled: Boolean = false,
+    var editVerseEnabled: Boolean = false,
+    var recordAgainEnabled: Boolean = false,
     var verseState: VerseItemState = VerseItemState.RECORD_DISABLED,
 ) {
     override fun toString(): String {
@@ -163,6 +166,8 @@ class NarrationTextCell(
             })
 
             verseStateProperty.set(item.verseState)
+
+            isPlayEnabledProperty.set(item.playEnabled)
         }
     }
 

@@ -85,9 +85,10 @@ class NarrationHeader : View() {
                 enableWhen(
                     Bindings.createBooleanBinding(
                         {
-                            val isRecording = viewModel.narrationStateProperty.value?.let {
-                                it == NarrationStateType.RECORDING || it == NarrationStateType.RECORDING_AGAIN
-                            } ?: false
+                            val isRecording =
+                                viewModel.narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN_PAUSED
+                                        || viewModel.narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN
+                                        || viewModel.narrationStateProperty.value == NarrationStateType.RECORDING
 
                             viewModel.hasUndoProperty.value && !isRecording
                         },
@@ -105,9 +106,10 @@ class NarrationHeader : View() {
                 enableWhen(
                     Bindings.createBooleanBinding(
                         {
-                            val isRecording = viewModel.narrationStateProperty.value?.let {
-                                it == NarrationStateType.RECORDING || it == NarrationStateType.RECORDING_AGAIN
-                            } ?: false
+                            val isRecording =
+                                viewModel.narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN_PAUSED
+                                        || viewModel.narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN
+                                        || viewModel.narrationStateProperty.value == NarrationStateType.RECORDING
 
                             viewModel.hasRedoProperty.value && !isRecording
                         },
@@ -116,20 +118,20 @@ class NarrationHeader : View() {
                 )
             }
             narrationMenuButton(
-                viewModel.hasChapterTakeProperty,
-                viewModel.hasVersesProperty,
-                viewModel.hasAllItemsRecordedProperty
+                viewModel.narrationStateProperty
             ) {
-                enableWhen(
+                disableWhen(
                     Bindings.createBooleanBinding(
                         {
-                            val isRecording = viewModel.narrationStateProperty.value?.let {
-                                it == NarrationStateType.RECORDING || it == NarrationStateType.RECORDING_AGAIN
-                            } ?: false
+                            val isRecording =
+                                viewModel.narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN_PAUSED
+                                        || viewModel.narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN
+                                        || viewModel.narrationStateProperty.value == NarrationStateType.RECORDING
 
-                            viewModel.chapterTakeBusyProperty.value.not() && !isRecording
+                            val isBouncing = viewModel.narrationStateProperty.value == NarrationStateType.BOUNCING_AUDIO
+                            isRecording || isBouncing
                         },
-                        viewModel.chapterTakeBusyProperty, viewModel.narrationStateProperty
+                        viewModel.narrationStateProperty
                     )
                 )
             }
@@ -208,11 +210,6 @@ class NarrationHeaderViewModel : ViewModel() {
 
     val hasNextChapter = SimpleBooleanProperty()
     val hasPreviousChapter = SimpleBooleanProperty()
-    val hasVersesProperty = SimpleBooleanProperty()
-    val hasAllItemsRecordedProperty = SimpleBooleanProperty()
-    val chapterTakeProperty = SimpleObjectProperty<Take>()
-    val hasChapterTakeProperty = chapterTakeProperty.isNotNull
-    val chapterTakeBusyProperty = SimpleBooleanProperty()
 
     val hasUndoProperty = SimpleBooleanProperty()
     val hasRedoProperty = SimpleBooleanProperty()
@@ -223,16 +220,12 @@ class NarrationHeaderViewModel : ViewModel() {
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
-        chapterTakeProperty.bind(narrationViewModel.chapterTakeProperty)
         chapterTitleProperty.bind(narrationViewModel.chapterTitleProperty)
         hasNextChapter.bind(narrationViewModel.hasNextChapter)
         hasPreviousChapter.bind(narrationViewModel.hasPreviousChapter)
-        chapterTakeBusyProperty.bind(narrationViewModel.isModifyingTakeAudioProperty)
 
         hasUndoProperty.bind(narrationViewModel.hasUndoProperty)
         hasRedoProperty.bind(narrationViewModel.hasRedoProperty)
-        hasVersesProperty.bind(narrationViewModel.hasVersesProperty)
-        hasAllItemsRecordedProperty.bind(narrationViewModel.hasAllItemsRecordedProperty)
         narrationStateProperty.bind(narrationViewModel.narrationStateProperty)
     }
 

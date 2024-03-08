@@ -285,6 +285,7 @@ class NarrationViewModel : ViewModel() {
                                 item.verseState = newVerseList[idx]
                             }
                         }
+                        setVerseOptions(updated)
                         narratableList.setAll(updated)
                         refreshTeleprompter()
                     }
@@ -590,6 +591,7 @@ class NarrationViewModel : ViewModel() {
             chunk.verseState = VerseItemState.RECORD_DISABLED
         }
         narratableList[0].verseState = VerseItemState.RECORD
+        setVerseOptions(narratableList)
         narratableList.setAll(narratableList.toList())
         refreshTeleprompter()
         FX.eventbus.fire(TeleprompterSeekEvent(0))
@@ -611,6 +613,7 @@ class NarrationViewModel : ViewModel() {
             scrollToVerse = lastIndex
         }
 
+        setVerseOptions(narratableList)
         narratableList.setAll(narratableList.toList())
 
         refreshTeleprompter()
@@ -635,6 +638,47 @@ class NarrationViewModel : ViewModel() {
         snackBarObservable.onNext(message)
     }
 
+
+    private fun setVerseOptions(verses: List<NarrationTextItemData>) {
+
+        val isRecording = narrationStateProperty.value == NarrationStateType.RECORDING
+        val isRecordingPaused = narrationStateProperty.value == NarrationStateType.RECORDING_PAUSED
+        val isRecordingAgain = narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN
+        val isRecordAgainPaused = narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN_PAUSED
+        val isPlaying = narrationStateProperty.value == NarrationStateType.PLAYING
+
+        verses.forEach {
+            val isAnotherVerseRecordingPaused = isRecordingPaused && it.verseState != VerseItemState.RECORDING_PAUSED
+
+            val hasRecording = it.verseState == VerseItemState.RECORD_AGAIN_PAUSED
+                    || it.verseState == VerseItemState.RECORDING_PAUSED || it.verseState == VerseItemState.RECORD_AGAIN
+
+            val isVerseRecordingPaused = it.verseState == VerseItemState.RECORDING_PAUSED
+
+
+            it.playEnabled = hasRecording
+                    && !isRecording
+                    && !isRecordingAgain
+                    && !isRecordAgainPaused
+                    && !isPlaying
+                    && !isAnotherVerseRecordingPaused
+
+            it.editVerseEnabled = hasRecording
+                    && !isRecording
+                    && !isRecordingPaused
+                    && !isRecordingAgain
+                    && !isRecordAgainPaused
+                    && !isPlaying
+
+            it.recordAgainEnabled = hasRecording
+                    && !isRecording
+                    && !isRecordingAgain
+                    && !isRecordAgainPaused
+                    && !isPlaying
+                    && !isVerseRecordingPaused
+        }
+    }
+
     fun play(verse: AudioMarker) {
         val verseIndex = recordedVerses.indexOf(verse)
         val newVerseList = narrationStateMachine.transition(NarrationStateTransition.PLAY_AUDIO, verseIndex)
@@ -649,6 +693,7 @@ class NarrationViewModel : ViewModel() {
         audioPlayer.play()
 
         val updated = narratableList.mapIndexed { idx, item -> item.apply { item.verseState = newVerseList[idx] } }
+        setVerseOptions(updated)
         narratableList.setAll(updated)
         refreshTeleprompter()
     }
@@ -678,6 +723,7 @@ class NarrationViewModel : ViewModel() {
                 item.verseState = newVerseList[idx]
             }
         }
+        setVerseOptions(updated)
         narratableList.setAll(updated)
         refreshTeleprompter()
 
@@ -955,6 +1001,7 @@ class NarrationViewModel : ViewModel() {
                     isModifyingTakeAudioProperty.set(!isIdle)
                     navigator.blockNavigationEvents.set(!isIdle)
 
+                    // TODO note: this gets hairy when working with PLAYING_WHILE_BOUNCING
                     if (isIdle && narrationStateMachine.getGlobalContext() == BouncingAudioState) {
                         narrationStateMachine.transition(NarrationStateTransition.SAVE_FINISHED, -1)
                     }
@@ -1142,7 +1189,10 @@ class NarrationViewModel : ViewModel() {
                 return
             }
         }
+
+
         val updated = narratableList.mapIndexed { idx, item -> item.apply { item.verseState = list[idx] } }
+        setVerseOptions(updated)
         narratableList.setAll(updated)
         refreshTeleprompter()
     }

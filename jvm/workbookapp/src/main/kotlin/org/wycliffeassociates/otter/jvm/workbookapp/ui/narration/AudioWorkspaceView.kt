@@ -33,12 +33,14 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.VerseItemState
 import org.wycliffeassociates.otter.jvm.controls.SCROLL_INCREMENT_UNIT
 import org.wycliffeassociates.otter.jvm.controls.SCROLL_JUMP_UNIT
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextItemData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.verse_markers_layer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.WaveformLayer
@@ -189,17 +191,22 @@ class AudioWorkspaceView : View() {
     override fun onDock() {
         super.onDock()
         viewModel.onDock()
-        markerNodes.bind(viewModel.recordedVerses) { marker ->
+        markerNodes.bind(viewModel.recordedVerses) { verseItem ->
+            val marker = verseItem.marker
+            val state = verseItem.verseState
             VerseMarkerControl().apply {
                 visibleProperty().set(false)
                 val markerLabel = when (marker) {
                     is ChapterMarker -> "c${marker.label}"
-                    else -> marker.label
+                    else -> marker?.label
                 }
 
                 verseProperty.set(marker)
-                verseIndexProperty.set(viewModel.recordedVerses.indexOf(marker))
+                verseIndexProperty.set(viewModel.recordedVerses.indexOfFirst { it.marker == marker })
                 labelProperty.set(markerLabel)
+                isPlayingEnabledProperty.set(verseItem.playEnabled)
+                isEditVerseEnabledProperty.set(verseItem.editVerseEnabled)
+                isRecordAgainEnabledProperty.set(verseItem.recordAgainEnabled)
             }
         }
 
@@ -219,7 +226,7 @@ class AudioWorkspaceViewModel : ViewModel() {
     private val narrationViewModel: NarrationViewModel by inject()
 
     val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
-    var recordedVerses = observableListOf<AudioMarker>()
+    var recordedVerses = observableListOf<NarrationTextItemData>()
 
     val audioPositionProperty = SimpleIntegerProperty()
     val totalAudioSizeProperty = SimpleIntegerProperty()
@@ -238,7 +245,11 @@ class AudioWorkspaceViewModel : ViewModel() {
         narrationStateProperty.bind(narrationViewModel.narrationStateProperty)
         totalAudioSizeProperty.bind(narrationViewModel.totalAudioSizeProperty)
         audioPositionProperty.bind(narrationViewModel.audioPositionProperty)
-        recordedVerses.bind(narrationViewModel.recordedVerses) { it }
+
+        narrationViewModel.narratableList.onChange {
+            val verseMarkersList = narrationViewModel.narratableList.filter { it.hasRecording && it.marker != null }
+            recordedVerses.setAll(verseMarkersList)
+        }
     }
 
     fun onUndock() {

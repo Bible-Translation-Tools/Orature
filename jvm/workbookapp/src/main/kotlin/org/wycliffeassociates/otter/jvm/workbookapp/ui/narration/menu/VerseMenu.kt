@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu
 
+import javafx.beans.binding.Bindings
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.IntegerProperty
 import javafx.beans.property.ObjectProperty
@@ -30,11 +31,14 @@ import javafx.scene.control.Button
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuButton
 import javafx.scene.control.MenuItem
+import net.bytebuddy.build.Plugin.Factory.Simple
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.VerseItemState
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.VerseState
 import org.wycliffeassociates.otter.jvm.controls.event.OpenInAudioPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
@@ -46,7 +50,9 @@ class VerseMenu : ContextMenu() {
     val verseProperty = SimpleObjectProperty<AudioMarker>()
     val verseIndexProperty = SimpleIntegerProperty()
 
-    val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
+    val isPlayingEnabledProperty = SimpleBooleanProperty()
+    val isEditVerseEnabledProperty = SimpleBooleanProperty()
+    val isRecordAgainEnabledProperty = SimpleBooleanProperty()
 
     init {
         addClass("wa-context-menu")
@@ -59,9 +65,8 @@ class VerseMenu : ContextMenu() {
             action {
                 FX.eventbus.fire(PlayVerseEvent(verseProperty.value))
             }
-            disableWhen {
-                narrationStateProperty.isEqualTo(NarrationStateType.RECORDING)
-                    .or(narrationStateProperty.isEqualTo(NarrationStateType.RECORDING_AGAIN))
+            enableWhen {
+                isPlayingEnabledProperty
             }
         }
         val recordAgainOpt = MenuItem().apply {
@@ -72,9 +77,8 @@ class VerseMenu : ContextMenu() {
             action {
                 FX.eventbus.fire(RecordAgainEvent(verseIndexProperty.value))
             }
-            disableWhen {
-                narrationStateProperty.isEqualTo(NarrationStateType.RECORDING)
-                    .or(narrationStateProperty.isEqualTo(NarrationStateType.RECORDING_AGAIN))
+            enableWhen {
+                isRecordAgainEnabledProperty
             }
         }
         val editVerseOpt = MenuItem().apply {
@@ -85,9 +89,8 @@ class VerseMenu : ContextMenu() {
             action {
                 FX.eventbus.fire(OpenInAudioPluginEvent(verseIndexProperty.value))
             }
-            disableWhen {
-                narrationStateProperty.isEqualTo(NarrationStateType.RECORDING)
-                    .or(narrationStateProperty.isEqualTo(NarrationStateType.RECORDING_AGAIN))
+            enableWhen {
+                isEditVerseEnabledProperty
             }
         }
 

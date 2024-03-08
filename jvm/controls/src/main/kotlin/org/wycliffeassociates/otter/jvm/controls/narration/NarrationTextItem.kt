@@ -47,8 +47,10 @@ class NarrationTextItem : VBox() {
 
     val verseStateProperty = SimpleObjectProperty(VerseItemState.RECORD)
     val verseState by verseStateProperty
-
     val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
+
+    val isPlayEnabledProperty = SimpleBooleanProperty()
+
     val hasRecordingProperty = SimpleBooleanProperty(false)
     val verseLabelProperty = SimpleStringProperty()
     val verseTextProperty = SimpleStringProperty()
@@ -85,20 +87,7 @@ class NarrationTextItem : VBox() {
 
 
                         enableWhen {
-                            Bindings.createBooleanBinding(
-                                {
-                                    val isAnotherVerseRecordingPaused =
-                                        verseStateProperty.value == VerseItemState.RECORD_AGAIN
-                                                && narrationStateProperty.value == NarrationStateType.RECORDING_PAUSED
-
-                                    val hasRecording = verseStateProperty.value == VerseItemState.RECORD_AGAIN
-                                            || verseStateProperty.value == VerseItemState.RECORDING_PAUSED
-
-                                    val isPlaying = narrationStateProperty.value == NarrationStateType.PLAYING
-                                    !isAnotherVerseRecordingPaused && hasRecording && !isPlaying
-                                },
-                                verseStateProperty, narrationStateProperty
-                            )
+                            isPlayEnabledProperty
                         }
 
                         disabledProperty().onChangeAndDoNow {
