@@ -337,9 +337,9 @@ open class MarkerTrackControl : Region() {
             audioPositionProperty.value + framesOnScreen
         )
         children.clear()
+        children.addAll(highlights)
         markers.forEachIndexed { index, markerItem ->
             if (markerItem.frame in bufferRange) {
-                children.add(highlights[index])
                 children.add(_markers[index])
             }
         }
