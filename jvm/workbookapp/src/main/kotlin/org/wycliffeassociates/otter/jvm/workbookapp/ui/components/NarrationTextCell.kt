@@ -35,7 +35,6 @@ import tornadofx.*
 class NarrationTextItemData(
     val chunk: Chunk,
     var marker: AudioMarker?,
-    var hasRecording: Boolean = false,
     var previousChunksRecorded: Boolean = false,
     var playEnabled: Boolean = false,
     var editVerseEnabled: Boolean = false,
@@ -43,7 +42,7 @@ class NarrationTextItemData(
     var verseState: VerseItemState = VerseItemState.RECORD_DISABLED,
 ) {
     override fun toString(): String {
-        return "${chunk.sort}, $hasRecording, $previousChunksRecorded"
+        return "${chunk.sort}, $verseState, $previousChunksRecorded"
     }
 }
 
@@ -87,7 +86,6 @@ class NarrationTextCell(
 
             verseTextProperty.set(item.chunk.textItem.text)
 
-            hasRecordingProperty.set(item.hasRecording)
             recordButtonTextProperty.bind(this@NarrationTextCell.recordButtonTextProperty)
             isHighlightedProperty.bind(shouldHighlight)
 

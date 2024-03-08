@@ -208,20 +208,10 @@ class NarrationViewModel : ViewModel() {
 
         recordedVerses.onChange {
             narratableList.forEachIndexed { idx, chunk ->
-
-                val hasRecording = when (chunk.chunk.sort) {
-                    BOOK_TITLE_SORT -> recordedVerses.any { it is BookMarker }
-                    CHAPTER_TITLE_SORT -> recordedVerses.any { it is ChapterMarker }
-                    else -> recordedVerses.any {
-                        val matchingChunk = chunk.chunk.title == it.label && it is VerseMarker
-                        matchingChunk
-                    }
-                }
                 // how much to pad the sort value due to injecting book and chapter titles
                 // the first chapter will be the only chapter with a book title
                 val sortPadding = if (workbookDataStore.chapter.sort == 1) 2 else 1
 
-                chunk.hasRecording = hasRecording
                 chunk.previousChunksRecorded = chunk.chunk.sort + sortPadding - 1 <= recordedVerses.size
                 chunk.marker = recordedVerses.getOrNull(idx)
             }
@@ -598,14 +588,24 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun resetTeleprompter() {
+
+        val statesWithoutRecording = listOf(
+            VerseItemState.BEGIN_RECORDING,
+            VerseItemState.RECORD,
+            VerseItemState.RECORD_DISABLED
+        )
+
         narratableList.forEachIndexed { idx, chunk ->
-            if (chunk.hasRecording) {
+
+            if (chunk.verseState !in statesWithoutRecording) {
                 chunk.verseState = VerseItemState.RECORD_AGAIN
             } else {
                 chunk.verseState = VerseItemState.RECORD_DISABLED
             }
         }
-        val lastIndex = narratableList.indexOfFirst { !it.hasRecording }
+
+
+        val lastIndex = narratableList.indexOfFirst { it.verseState in statesWithoutRecording }
         var scrollToVerse = 0
 
         if (lastIndex != -1) {
@@ -700,7 +700,7 @@ class NarrationViewModel : ViewModel() {
 
     fun playAll() {
 
-        narrationStateMachine.transition(NarrationStateTransition.PLAY_AUDIO, -1)
+        val newVerseList = narrationStateMachine.transition(NarrationStateTransition.PLAY_AUDIO, -1)
         logger.info("Playing all")
         playingVerseIndex.set(-1)
         renderer.clearActiveRecordingData()
@@ -709,6 +709,11 @@ class NarrationViewModel : ViewModel() {
 
         // audioPlayer.seek(0)
         audioPlayer.play()
+
+        val updated = narratableList.mapIndexed { idx, item -> item.apply { item.verseState = newVerseList[idx] } }
+        setVerseOptions(updated)
+        narratableList.setAll(updated)
+        refreshTeleprompter()
     }
 
 
@@ -732,7 +737,16 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun pausePlayback() {
-        narrationStateMachine.transition(NarrationStateTransition.PAUSE_AUDIO_PLAYBACK, -1)
+        val newVerseList = narrationStateMachine.transition(NarrationStateTransition.PAUSE_AUDIO_PLAYBACK, -1)
+
+        val updated = narratableList.mapIndexed { idx, item ->
+            item.apply {
+                item.verseState = newVerseList[idx]
+            }
+        }
+        setVerseOptions(updated)
+        narratableList.setAll(updated)
+        refreshTeleprompter()
 
         logger.info("Pausing playback")
         audioPlayer.pause()

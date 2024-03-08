@@ -51,7 +51,6 @@ class NarrationTextItem : VBox() {
 
     val isPlayEnabledProperty = SimpleBooleanProperty()
 
-    val hasRecordingProperty = SimpleBooleanProperty(false)
     val verseLabelProperty = SimpleStringProperty()
     val verseTextProperty = SimpleStringProperty()
 
@@ -97,7 +96,6 @@ class NarrationTextItem : VBox() {
 
 
                         visibleProperty().bind(
-
                             verseStateProperty.isNotEqualTo(VerseItemState.PLAYING)
                                 .and(verseStateProperty.isNotEqualTo(VerseItemState.PLAYING_WHILE_RECORDING_PAUSED))
                         )
@@ -106,15 +104,15 @@ class NarrationTextItem : VBox() {
                         addClass("btn", "btn--secondary")
                         graphic = FontIcon(MaterialDesign.MDI_PAUSE)
                         tooltip(messages["pause"])
-                        disableWhen {
-                            hasRecordingProperty.not()
+                        enableWhen {
+                            verseStateProperty.isEqualTo(VerseItemState.PLAYING)
+                                .or(verseStateProperty.isEqualTo(VerseItemState.PLAYING_WHILE_RECORDING_PAUSED))
                         }
                         disabledProperty().onChangeAndDoNow {
                             togglePseudoClass("inactive", it!!)
                         }
                         onActionProperty().bind(onPauseActionProperty)
                         visibleProperty().bind(
-
                             verseStateProperty.isEqualTo(VerseItemState.PLAYING)
                                 .or(verseStateProperty.isEqualTo(VerseItemState.PLAYING_WHILE_RECORDING_PAUSED))
                         )

@@ -124,9 +124,15 @@ class TeleprompterViewModel : ViewModel() {
             VerseItemState.RECORDING_PAUSED,
             VerseItemState.RECORD_AGAIN_PAUSED
         )
+
+        val statesWithoutRecording = listOf(
+            VerseItemState.BEGIN_RECORDING,
+            VerseItemState.RECORD,
+        )
+        
         val verse = narrationViewModel.narratableList
             .firstOrNull {
-                it.verseState in activeStates || !it.hasRecording
+                it.verseState in activeStates || it.verseState in statesWithoutRecording
             }
 
         stickyVerseProperty.set(verse)
