@@ -40,7 +40,7 @@ import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextItemData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.NarratableItemData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.verse_markers_layer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.WaveformLayer
@@ -226,7 +226,7 @@ class AudioWorkspaceViewModel : ViewModel() {
     private val narrationViewModel: NarrationViewModel by inject()
 
     val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
-    var recordedVerses = observableListOf<NarrationTextItemData>()
+    var recordedVerses = observableListOf<NarratableItemData>()
 
     val audioPositionProperty = SimpleIntegerProperty()
     val totalAudioSizeProperty = SimpleIntegerProperty()

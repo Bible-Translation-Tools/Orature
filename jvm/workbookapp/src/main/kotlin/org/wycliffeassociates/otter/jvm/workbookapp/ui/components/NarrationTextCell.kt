@@ -30,28 +30,15 @@ import org.wycliffeassociates.otter.common.domain.narration.teleprompter.Narrati
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.VerseItemState
 import org.wycliffeassociates.otter.jvm.controls.event.*
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.NarratableItemData
 import tornadofx.*
-
-class NarrationTextItemData(
-    val chunk: Chunk,
-    var marker: AudioMarker?,
-    var previousChunksRecorded: Boolean = false,
-    var playEnabled: Boolean = false,
-    var editVerseEnabled: Boolean = false,
-    var recordAgainEnabled: Boolean = false,
-    var verseState: VerseItemState = VerseItemState.RECORD_DISABLED,
-) {
-    override fun toString(): String {
-        return "${chunk.sort}, $verseState, $previousChunksRecorded"
-    }
-}
 
 class NarrationTextCell(
     private val nextChunkText: String,
     private val recordButtonTextProperty: ObservableValue<String>,
     private val narrationStateProperty: ObservableValue<NarrationStateType>,
     highlightedVerseProperty: IntegerProperty,
-) : ListCell<NarrationTextItemData>() {
+) : ListCell<NarratableItemData>() {
 
     private val logger = LoggerFactory.getLogger(NarrationTextCell::class.java)
 
@@ -65,7 +52,7 @@ class NarrationTextCell(
         addClass("narration-list__verse-cell")
     }
 
-    override fun updateItem(item: NarrationTextItemData?, empty: Boolean) {
+    override fun updateItem(item: NarratableItemData?, empty: Boolean) {
         super.updateItem(item, empty)
 
         if (empty || item == null) {

@@ -35,7 +35,7 @@ import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.*
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextCell
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextItemData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.NarratableItemData
 import tornadofx.*
 import java.text.MessageFormat
 import kotlin.math.max
@@ -49,7 +49,7 @@ class TeleprompterViewModel : ViewModel() {
     val chunks = narrationViewModel.narratableList
     var narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
 
-    val stickyVerseProperty = SimpleObjectProperty<NarrationTextItemData>()
+    val stickyVerseProperty = SimpleObjectProperty<NarratableItemData>()
     val showStickyVerseProperty = SimpleBooleanProperty(false)
 
     private val recordStartProperty = SimpleBooleanProperty()
@@ -129,7 +129,7 @@ class TeleprompterViewModel : ViewModel() {
             VerseItemState.BEGIN_RECORDING,
             VerseItemState.RECORD,
         )
-        
+
         val verse = narrationViewModel.narratableList
             .firstOrNull {
                 it.verseState in activeStates || it.verseState in statesWithoutRecording
@@ -144,7 +144,7 @@ class TeleprompterView : View() {
     private val logger = LoggerFactory.getLogger(TeleprompterView::class.java)
 
     private val viewModel: TeleprompterViewModel by inject()
-    private var listView: NarrationTextListView<NarrationTextItemData> by singleAssign()
+    private var listView: NarrationTextListView<NarratableItemData> by singleAssign()
 
     private val subscriptions = mutableListOf<EventRegistration>()
 

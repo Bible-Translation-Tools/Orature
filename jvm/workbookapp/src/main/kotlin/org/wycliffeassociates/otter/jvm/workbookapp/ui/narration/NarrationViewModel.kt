@@ -61,7 +61,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextItemData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.NarratableItemData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.MARKER_AREA_WIDTH
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.NarrationWaveformRenderer
@@ -133,7 +133,7 @@ class NarrationViewModel : ViewModel() {
 
     val chunkTotalProperty = SimpleIntegerProperty(0)
     val chunksList: ObservableList<Chunk> = observableListOf()
-    val narratableList: ObservableList<NarrationTextItemData> = observableListOf()
+    val narratableList: ObservableList<NarratableItemData> = observableListOf()
     val recordedVerses = observableListOf<AudioMarker>()
     val hasVersesProperty = SimpleBooleanProperty()
     val lastRecordedVerseProperty = SimpleIntegerProperty()
@@ -198,7 +198,7 @@ class NarrationViewModel : ViewModel() {
                 }
             }
 
-            NarrationTextItemData(
+            NarratableItemData(
                 chunk,
                 marker,
                 hasRecording,
@@ -639,7 +639,7 @@ class NarrationViewModel : ViewModel() {
     }
 
 
-    private fun setVerseOptions(verses: List<NarrationTextItemData>) {
+    private fun setVerseOptions(verses: List<NarratableItemData>) {
 
         val isRecording = narrationStateProperty.value == NarrationStateType.RECORDING
         val isRecordingPaused = narrationStateProperty.value == NarrationStateType.RECORDING_PAUSED
