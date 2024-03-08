@@ -57,7 +57,6 @@ class NarrationRenderingTest {
 
     @Test
     fun testNarration() {
-
         narration.audioReader.use {
             it.open()
             for (i in 1 until seconds) {
@@ -66,8 +65,6 @@ class NarrationRenderingTest {
                 println(bytes.count { it.toInt() == i })
                 Assert.assertTrue("Not all bytes matched for ${i}", bytes.all { it.toInt() == i })
             }
-
-
         }
     }
 
