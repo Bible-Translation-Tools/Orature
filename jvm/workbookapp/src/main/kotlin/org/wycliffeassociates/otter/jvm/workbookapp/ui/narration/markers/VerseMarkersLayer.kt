@@ -51,6 +51,7 @@ class VerseMarkersLayer : BorderPane() {
                 {
                     narrationStateProperty.value?.let {
                         it == NarrationStateType.RECORDING
+                                || it == NarrationStateType.RECORDING_PAUSED
                                 || it == NarrationStateType.RECORDING_AGAIN
                                 || it == NarrationStateType.RECORDING_AGAIN_PAUSED
                                 || it == NarrationStateType.PLAYING
