@@ -597,7 +597,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun clearTeleprompter() {
-        narratableList.forEachIndexed { idx, chunk ->
+        narratableList.forEach { chunk ->
             chunk.verseState = VerseItemState.RECORD_DISABLED
         }
         narratableList[0].verseState = VerseItemState.RECORD
@@ -615,7 +615,7 @@ class NarrationViewModel : ViewModel() {
             VerseItemState.RECORD_DISABLED
         )
 
-        narratableList.forEachIndexed { idx, chunk ->
+        narratableList.forEach { chunk ->
 
             if (chunk.verseState !in statesWithoutRecording) {
                 chunk.verseState = VerseItemState.RECORD_AGAIN
@@ -629,7 +629,7 @@ class NarrationViewModel : ViewModel() {
         var scrollToVerse = 0
 
         if (lastIndex != -1) {
-            narratableList.get(lastIndex).verseState = VerseItemState.RECORD
+            narratableList[lastIndex].verseState = VerseItemState.RECORD
             scrollToVerse = lastIndex
         }
 

@@ -84,7 +84,6 @@ object ResumeVerseRecordAction {
 
         // Make next item available to record
         if (index < contexts.lastIndex) {
-            // TODO: this may be the issue.
             contexts[index + 1].changeState(VerseItemState.RECORD)
             for (i in index + 1..contexts.lastIndex) {
                 contexts[i].disable()
