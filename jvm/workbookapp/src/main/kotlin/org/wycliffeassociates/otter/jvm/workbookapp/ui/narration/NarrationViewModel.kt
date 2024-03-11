@@ -92,8 +92,7 @@ class NarrationViewModel : ViewModel() {
     private lateinit var narration: Narration
     private lateinit var renderer: NarrationWaveformRenderer
     private lateinit var narrationStateMachine: NarrationStateMachine
-    val narrationStateProperty =
-        SimpleObjectProperty<NarrationStateType>(NarrationStateType.IDLE_EMPTY) // TODO: maybe give this an init value
+    val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
 
     private lateinit var volumeBar: VolumeBar
     val recordStartProperty = SimpleBooleanProperty()
@@ -181,29 +180,47 @@ class NarrationViewModel : ViewModel() {
             }
         }
 
-        narratableList.bind(chunksList) { chunk ->
 
-            val marker = when (chunk.sort) {
-                BOOK_TITLE_SORT -> recordedVerses.firstOrNull { it is BookMarker }
-                CHAPTER_TITLE_SORT -> recordedVerses.firstOrNull { it is ChapterMarker }
-                else -> recordedVerses.firstOrNull {
-                    it.label == chunk.title && it is VerseMarker
+        chunksList.onChange {
+            val newNarratableItems = chunksList.map { chunk ->
+
+                val marker = when (chunk.sort) {
+                    BOOK_TITLE_SORT -> recordedVerses.firstOrNull { it is BookMarker }
+                    CHAPTER_TITLE_SORT -> recordedVerses.firstOrNull { it is ChapterMarker }
+                    else -> recordedVerses.firstOrNull {
+                        it.label == chunk.title && it is VerseMarker
+                    }
                 }
-            }
-            val hasRecording = when (chunk.sort) {
-                BOOK_TITLE_SORT -> recordedVerses.any { it is BookMarker }
-                CHAPTER_TITLE_SORT -> recordedVerses.any { it is ChapterMarker }
-                else -> recordedVerses.any {
-                    it.label == chunk.title && it is VerseMarker
+
+                val hasRecording = when (chunk.sort) {
+                    BOOK_TITLE_SORT -> recordedVerses.any { it is BookMarker }
+                    CHAPTER_TITLE_SORT -> recordedVerses.any { it is ChapterMarker }
+                    else -> recordedVerses.any {
+                        it.label == chunk.title && it is VerseMarker
+                    }
                 }
+
+                val verseState =
+                    if (hasRecording) VerseItemState.RECORD_AGAIN else VerseItemState.RECORD_DISABLED
+
+                NarratableItemData(
+                    chunk,
+                    marker,
+                    verseState,
+                    chunk.sort - 1 <= recordedVerses.size,
+                )
             }
 
-            NarratableItemData(
-                chunk,
-                marker,
-                hasRecording,
-                chunk.sort - 1 <= recordedVerses.size
-            )
+            val firstUnrecordedVerse =
+                newNarratableItems.indexOfFirst { it.verseState == VerseItemState.RECORD_DISABLED }
+
+            if (firstUnrecordedVerse >= 0) {
+                newNarratableItems[firstUnrecordedVerse].verseState = VerseItemState.RECORD
+            }
+
+            setVerseOptions(newNarratableItems)
+
+            narratableList.setAll(newNarratableItems)
         }
 
         recordedVerses.onChange {

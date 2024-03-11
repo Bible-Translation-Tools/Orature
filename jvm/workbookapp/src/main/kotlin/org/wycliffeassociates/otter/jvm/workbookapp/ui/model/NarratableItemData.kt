@@ -7,11 +7,11 @@ import org.wycliffeassociates.otter.common.domain.narration.teleprompter.VerseIt
 class NarratableItemData(
     val chunk: Chunk,
     var marker: AudioMarker?,
+    var verseState: VerseItemState = VerseItemState.RECORD_DISABLED,
     var previousChunksRecorded: Boolean = false,
     var playEnabled: Boolean = false,
     var editVerseEnabled: Boolean = false,
     var recordAgainEnabled: Boolean = false,
-    var verseState: VerseItemState = VerseItemState.RECORD_DISABLED,
 ) {
     override fun toString(): String {
         return "${chunk.sort}, $verseState, $previousChunksRecorded"
