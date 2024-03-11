@@ -804,7 +804,14 @@ class NarrationViewModel : ViewModel() {
         recordedVerses.setAll(narration.activeVerses)
         updateRecordingState()
 
-        refreshTeleprompter()
+
+
+        narrationStateMachine.initialize(narration.versesWithRecordings())
+        val newVerses = narrationStateMachine.getVerseItemStates()
+        val updated = narratableList.mapIndexed { idx, item -> item.apply { item.verseState = newVerses[idx] } }
+        setVerseOptions(updated)
+        narratableList.setAll(updated)
+        resetTeleprompter()
 
         // Indicates that we used a temporary take to edit the chapter
         if (hasAllItemsRecordedProperty.value == false) {
@@ -987,6 +994,13 @@ class NarrationViewModel : ViewModel() {
 
                     else -> {
                         narration.onEditVerse(verseIndex, file)
+                        narrationStateMachine.initialize(narration.versesWithRecordings())
+                        val newVerses = narrationStateMachine.getVerseItemStates()
+                        val updated =
+                            narratableList.mapIndexed { idx, item -> item.apply { item.verseState = newVerses[idx] } }
+                        setVerseOptions(updated)
+                        narratableList.setAll(updated)
+                        resetTeleprompter()
                     }
                 }
                 FX.eventbus.fire(PluginClosedEvent(pluginType))
@@ -1041,7 +1055,6 @@ class NarrationViewModel : ViewModel() {
                     isModifyingTakeAudioProperty.set(!isIdle)
                     navigator.blockNavigationEvents.set(!isIdle)
 
-                    // TODO note: this gets hairy when working with PLAYING_WHILE_BOUNCING
                     if (isIdle && narrationStateMachine.getGlobalContext().type == NarrationStateType.BOUNCING_AUDIO) {
                         narrationStateMachine.transition(NarrationStateTransition.SAVE_FINISHED, -1)
                     }
