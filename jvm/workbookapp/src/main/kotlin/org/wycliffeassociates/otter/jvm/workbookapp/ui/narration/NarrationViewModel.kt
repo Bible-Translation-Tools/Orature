@@ -826,6 +826,13 @@ class NarrationViewModel : ViewModel() {
 
     fun moveMarker(index: Int, delta: Int) {
         narration.onVerseMarkerMoved(index, delta)
+
+        narrationStateMachine.initialize(narration.versesWithRecordings())
+        val newVerses = narrationStateMachine.getVerseItemStates()
+        val updated = narratableList.mapIndexed { idx, item -> item.apply { item.verseState = newVerses[idx] } }
+        setVerseOptions(updated)
+        narratableList.setAll(updated)
+        refreshTeleprompter()
     }
 
     /**
