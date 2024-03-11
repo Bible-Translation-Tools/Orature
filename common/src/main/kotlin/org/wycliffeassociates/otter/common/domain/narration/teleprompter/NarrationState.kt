@@ -139,7 +139,8 @@ object PlayingAudioState : NarrationState {
         setOf(
             NarrationStateType.RECORDING_PAUSED, // After playing a verse that was in a recording paused state
             NarrationStateType.IDLE_IN_PROGRESS, // Playing audio completes without all verses recorded
-            NarrationStateType.IDLE_FINISHED, // Playing audio completes  with all verses recorded
+            NarrationStateType.IDLE_FINISHED, // Playing audio completes  with all verses recorded,
+            NarrationStateType.BOUNCING_AUDIO, // Started playing audio while bouncing, and bouncing has not finished
         )
 
     override fun changeState(request: NarrationStateType): NarrationState {
@@ -151,6 +152,7 @@ object PlayingAudioState : NarrationState {
             NarrationStateType.RECORDING_PAUSED -> RecordingPausedState
             NarrationStateType.IDLE_IN_PROGRESS -> IdleInProgressState
             NarrationStateType.IDLE_FINISHED -> IdleFinishedState
+            NarrationStateType.BOUNCING_AUDIO -> BouncingAudioState
             else -> {
                 throw IllegalStateException("State: ${type} tried to transition to state: $request")
             }
@@ -256,6 +258,7 @@ object BouncingAudioState : NarrationState {
             NarrationStateType.IDLE_IN_PROGRESS, // After bouncing audio for opening plugin without all verses recorded
             NarrationStateType.IDLE_FINISHED, // After record again/undo/redo
             NarrationStateType.RECORDING_AGAIN, // Starts recording again while bouncing audio
+            NarrationStateType.PLAYING, // Plays verse/chapter while bouncing audio
         )
 
     override fun changeState(request: NarrationStateType): NarrationState {
@@ -267,6 +270,7 @@ object BouncingAudioState : NarrationState {
             NarrationStateType.IDLE_IN_PROGRESS -> IdleInProgressState
             NarrationStateType.IDLE_FINISHED -> IdleFinishedState
             NarrationStateType.RECORDING_AGAIN -> RecordingAgainState
+            NarrationStateType.PLAYING -> PlayingAudioState
             else -> {
                 throw IllegalStateException("State: ${type} tried to transition to state: $request")
             }
