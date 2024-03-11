@@ -325,8 +325,8 @@ class NarrationViewModel : ViewModel() {
         )
         totalAudioSizeProperty.set(rendererAudioReader.totalFrames)
         narrationStateMachine = NarrationStateMachine(narration.totalVerses)
-        narrationStateMachine.initialize(narration.versesWithRecordings())
         subscribeNarrationStateChanged()
+        narrationStateMachine.initialize(narration.versesWithRecordings())
     }
 
     private fun updateRecordingState() {
