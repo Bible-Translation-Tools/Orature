@@ -845,16 +845,27 @@ class NarrationViewModel : ViewModel() {
 
     fun undo() {
         narration.undo()
-        narrationStateMachine.initialize(narration.versesWithRecordings())
         recordPause = false
+
+
+        narrationStateMachine.initialize(narration.versesWithRecordings())
+        val newVerses = narrationStateMachine.getVerseItemStates()
+        val updated = narratableList.mapIndexed { idx, item -> item.apply { item.verseState = newVerses[idx] } }
+        setVerseOptions(updated)
+        narratableList.setAll(updated)
 
         resetTeleprompter()
     }
 
     fun redo() {
         narration.redo()
-        narrationStateMachine.initialize(narration.versesWithRecordings())
         recordPause = false
+
+        narrationStateMachine.initialize(narration.versesWithRecordings())
+        val newVerses = narrationStateMachine.getVerseItemStates()
+        val updated = narratableList.mapIndexed { idx, item -> item.apply { item.verseState = newVerses[idx] } }
+        setVerseOptions(updated)
+        narratableList.setAll(updated)
 
         resetTeleprompter()
     }
@@ -1014,8 +1025,12 @@ class NarrationViewModel : ViewModel() {
                     navigator.blockNavigationEvents.set(!isIdle)
 
                     // TODO note: this gets hairy when working with PLAYING_WHILE_BOUNCING
-                    if (isIdle && narrationStateMachine.getGlobalContext() == BouncingAudioState) {
+                    if (isIdle && narrationStateMachine.getGlobalContext().type == NarrationStateType.BOUNCING_AUDIO) {
                         narrationStateMachine.transition(NarrationStateTransition.SAVE_FINISHED, -1)
+                    }
+
+                    if (!isIdle && narrationStateMachine.getGlobalContext().type == NarrationStateType.IDLE_FINISHED) {
+                        narrationStateMachine.transition(NarrationStateTransition.SAVE, -1)
                     }
 
                     // Indicates that we have opened the saving model to interrupt either a chapter navigation or

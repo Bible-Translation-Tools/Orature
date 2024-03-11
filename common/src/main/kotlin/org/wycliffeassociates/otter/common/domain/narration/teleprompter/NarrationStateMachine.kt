@@ -47,6 +47,10 @@ class NarrationStateMachine(
         return globalContext
     }
 
+    fun getVerseItemStates(): List<VerseItemState> {
+        return verseContexts.map { it.state.type }
+    }
+
     private fun updateGlobalContext(newContext: NarrationState) {
         globalContext = newContext
         currentStateEmitter.onNext(newContext)
