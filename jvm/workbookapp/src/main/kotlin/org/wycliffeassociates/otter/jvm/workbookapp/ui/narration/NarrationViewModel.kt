@@ -845,6 +845,11 @@ class NarrationViewModel : ViewModel() {
         narration.onVerseMarkerMoved(index, delta)
 
         narrationStateMachine.initialize(narration.versesWithRecordings())
+
+        if (isModifyingTakeAudioProperty.value) {
+            narrationStateMachine.transition(NarrationStateTransition.SAVE, -1)
+        }
+
         val newVerses = narrationStateMachine.getVerseItemStates()
         val updated = narratableList.mapIndexed { idx, item -> item.apply { item.verseState = newVerses[idx] } }
         setVerseOptions(updated)
