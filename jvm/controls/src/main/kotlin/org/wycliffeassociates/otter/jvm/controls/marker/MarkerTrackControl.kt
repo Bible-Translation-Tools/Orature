@@ -26,7 +26,6 @@ import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.geometry.Point2D
-import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
@@ -34,6 +33,7 @@ import java.util.concurrent.Callable
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
+import javafx.scene.layout.Pane
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
@@ -49,7 +49,7 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 const val MOVE_MARKER_INTERVAL = 0.001
 const val MARKER_COUNT = 500
 
-open class MarkerTrackControl : Region() {
+open class MarkerTrackControl : Pane() {
 
     val markers = observableListOf<MarkerItem>()
     val canMoveMarkerProperty = SimpleBooleanProperty(true)
@@ -337,8 +337,8 @@ open class MarkerTrackControl : Region() {
             audioPositionProperty.value + framesOnScreen
         )
         children.clear()
-        children.addAll(highlights)
         markers.forEachIndexed { index, markerItem ->
+            children.add(highlights[index])
             if (markerItem.frame in bufferRange) {
                 children.add(_markers[index])
             }
