@@ -282,10 +282,13 @@ class NarrationViewModel : ViewModel() {
 
                         val playingVerse = playingVerseIndex.value
 
-                        val newVerseList = narrationStateMachine.transition(
-                            NarrationStateTransition.PAUSE_AUDIO_PLAYBACK,
-                            playingVerse
-                        )
+                        val transition = if (isModifyingTakeAudioProperty.value) {
+                            NarrationStateTransition.PAUSE_AUDIO_PLAYBACK_WHILE_BOUNCING
+                        } else {
+                            NarrationStateTransition.PAUSE_AUDIO_PLAYBACK
+                        }
+
+                        val newVerseList = narrationStateMachine.transition(transition, playingVerse)
 
                         val updated = narratableList.mapIndexed { idx, item ->
                             item.apply {
@@ -735,7 +738,14 @@ class NarrationViewModel : ViewModel() {
 
 
     fun pausePlayback() {
-        val newVerseList = narrationStateMachine.transition(NarrationStateTransition.PAUSE_AUDIO_PLAYBACK, -1)
+
+        val transition = if (isModifyingTakeAudioProperty.value) {
+            NarrationStateTransition.PAUSE_AUDIO_PLAYBACK_WHILE_BOUNCING
+        } else {
+            NarrationStateTransition.PAUSE_AUDIO_PLAYBACK
+        }
+
+        val newVerseList = narrationStateMachine.transition(transition, -1)
 
         val updated = narratableList.mapIndexed { idx, item ->
             item.apply {

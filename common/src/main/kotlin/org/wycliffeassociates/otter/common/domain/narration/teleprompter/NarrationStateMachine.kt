@@ -141,6 +141,12 @@ class NarrationStateMachine(
                     requestIndex
                 )
 
+                NarrationStateTransition.PAUSE_AUDIO_PLAYBACK_WHILE_BOUNCING -> PausePlaybackWhileBouncingAction.apply(
+                    globalContext,
+                    verseContexts,
+                    requestIndex
+                )
+
                 NarrationStateTransition.SAVE_FINISHED -> SaveFinished.apply(globalContext, verseContexts, requestIndex)
             }
 

@@ -13,6 +13,7 @@ enum class NarrationStateTransition {
     SAVE_FINISHED,
     PLAY_AUDIO,
     PAUSE_AUDIO_PLAYBACK,
+    PAUSE_AUDIO_PLAYBACK_WHILE_BOUNCING
 }
 
 
@@ -230,6 +231,31 @@ object PausePlaybackAction {
         }
 
         return globalContext.changeState(newGlobalStateRequest)
+    }
+}
+
+
+object PausePlaybackWhileBouncingAction {
+    fun apply(
+        globalContext: NarrationState,
+        verseContexts: MutableList<VerseStateContext>,
+        index: Int
+    ): NarrationState {
+
+        val playingVerse = verseContexts.indexOfFirst {
+            it.state.type == VerseItemState.PLAYING
+                    || it.state.type == VerseItemState.PLAYING_WHILE_RECORDING_PAUSED
+        }
+
+        if (playingVerse >= 0) {
+            PauseVersePlaybackAction.apply(verseContexts, playingVerse)
+        } else {
+            verseContexts.forEach {
+                it.restore()
+            }
+        }
+
+        return globalContext.changeState(NarrationStateType.BOUNCING_AUDIO)
     }
 }
 
