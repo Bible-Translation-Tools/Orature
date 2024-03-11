@@ -29,8 +29,8 @@ import tornadofx.*
 import javafx.event.EventTarget
 import javafx.scene.layout.BorderPane
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationState
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
+import org.wycliffeassociates.otter.common.domain.narration.statemachine.NarrationState
+import org.wycliffeassociates.otter.common.domain.narration.statemachine.NarrationStateType
 
 class VerseMarkersLayer : BorderPane() {
     private val logger = LoggerFactory.getLogger(VerseMarkersLayer::class.java)

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.domain.narration.teleprompter
+package org.wycliffeassociates.otter.common.domain.narration.statemachine
 
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter

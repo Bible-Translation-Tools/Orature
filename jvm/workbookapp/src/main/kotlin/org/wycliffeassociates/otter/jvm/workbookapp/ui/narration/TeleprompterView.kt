@@ -29,8 +29,8 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.layout.Priority
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.VerseItemState
+import org.wycliffeassociates.otter.common.domain.narration.statemachine.NarrationStateType
+import org.wycliffeassociates.otter.common.domain.narration.statemachine.VerseItemState
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.*

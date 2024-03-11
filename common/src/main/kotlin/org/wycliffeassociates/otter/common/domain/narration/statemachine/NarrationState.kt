@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.domain.narration.teleprompter
+package org.wycliffeassociates.otter.common.domain.narration.statemachine
 
 enum class NarrationStateType {
     RECORDING,

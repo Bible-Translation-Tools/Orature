@@ -36,9 +36,9 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.VerseItemState
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.VerseState
+import org.wycliffeassociates.otter.common.domain.narration.statemachine.NarrationStateType
+import org.wycliffeassociates.otter.common.domain.narration.statemachine.VerseItemState
+import org.wycliffeassociates.otter.common.domain.narration.statemachine.VerseState
 import org.wycliffeassociates.otter.jvm.controls.event.OpenInAudioPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent

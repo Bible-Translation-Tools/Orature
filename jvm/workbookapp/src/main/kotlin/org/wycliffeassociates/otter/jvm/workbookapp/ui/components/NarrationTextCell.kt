@@ -24,7 +24,7 @@ import javafx.event.Event
 import javafx.event.EventHandler
 import javafx.scene.control.ListCell
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
+import org.wycliffeassociates.otter.common.domain.narration.statemachine.NarrationStateType
 import org.wycliffeassociates.otter.jvm.controls.event.*
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.NarratableItemData

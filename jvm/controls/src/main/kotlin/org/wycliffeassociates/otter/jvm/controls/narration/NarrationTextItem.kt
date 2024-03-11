@@ -35,7 +35,7 @@ import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.*
+import org.wycliffeassociates.otter.common.domain.narration.statemachine.*
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import tornadofx.FX.Companion.messages

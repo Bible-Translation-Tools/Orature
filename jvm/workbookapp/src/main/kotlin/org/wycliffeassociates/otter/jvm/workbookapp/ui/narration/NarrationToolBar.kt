@@ -29,7 +29,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.*
+import org.wycliffeassociates.otter.common.domain.narration.statemachine.*
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
