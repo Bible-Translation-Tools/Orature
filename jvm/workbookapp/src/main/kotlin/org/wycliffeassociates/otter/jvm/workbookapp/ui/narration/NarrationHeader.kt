@@ -30,7 +30,6 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
-import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.narration.statemachine.NarrationStateType
 import org.wycliffeassociates.otter.common.domain.project.ProjectCompletionStatus

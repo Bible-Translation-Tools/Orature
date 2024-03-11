@@ -30,7 +30,6 @@ import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.ScrollBar
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.domain.narration.statemachine.NarrationStateType
 import org.wycliffeassociates.otter.common.domain.narration.statemachine.VerseItemState
@@ -50,7 +49,6 @@ import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.math.min
 
 class AudioWorkspaceView : View() {
     private val userIsDraggingProperty = SimpleBooleanProperty(false)

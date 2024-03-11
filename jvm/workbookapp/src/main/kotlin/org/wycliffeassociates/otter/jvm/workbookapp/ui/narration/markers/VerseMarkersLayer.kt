@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers
 
 import javafx.beans.binding.Bindings
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
@@ -29,7 +28,6 @@ import tornadofx.*
 import javafx.event.EventTarget
 import javafx.scene.layout.BorderPane
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.narration.statemachine.NarrationState
 import org.wycliffeassociates.otter.common.domain.narration.statemachine.NarrationStateType
 
 class VerseMarkersLayer : BorderPane() {

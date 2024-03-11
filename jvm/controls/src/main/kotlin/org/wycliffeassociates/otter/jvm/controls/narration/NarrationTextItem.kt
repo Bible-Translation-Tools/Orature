@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.narration
 
-import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty

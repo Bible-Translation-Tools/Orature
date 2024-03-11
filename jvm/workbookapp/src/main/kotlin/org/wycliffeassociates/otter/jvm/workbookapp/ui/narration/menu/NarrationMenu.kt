@@ -18,9 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu
 
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.value.ObservableBooleanValue
 import javafx.beans.value.ObservableObjectValue
 import javafx.event.EventTarget
 import javafx.scene.control.Button
