@@ -45,7 +45,6 @@ object PauseRecordingAction {
 
 
 object ResumeRecordAction {
-
     fun apply(
         globalContext: NarrationState,
         verseContexts: MutableList<VerseStateContext>,
@@ -60,7 +59,6 @@ object ResumeRecordAction {
 
 
 object NextAction {
-
     fun apply(
         globalContext: NarrationState,
         verseContexts: MutableList<VerseStateContext>,
@@ -83,7 +81,6 @@ object NextAction {
 
 
 object RecordAgain {
-
     fun apply(
         globalContext: NarrationState,
         verseContexts: MutableList<VerseStateContext>,
@@ -99,7 +96,6 @@ object RecordAgain {
 
 
 object PauseRecordAgain {
-
     fun apply(
         globalContext: NarrationState,
         verseContexts: MutableList<VerseStateContext>,
@@ -114,7 +110,6 @@ object PauseRecordAgain {
 
 
 object ResumeRecordAgain {
-
     fun apply(
         globalContext: NarrationState,
         verseContexts: MutableList<VerseStateContext>,
@@ -129,7 +124,6 @@ object ResumeRecordAgain {
 
 
 object SaveAction {
-
     fun apply(
         globalContext: NarrationState,
         verseContexts: MutableList<VerseStateContext>,
@@ -183,7 +177,6 @@ object SaveFinished {
 }
 
 object PlayAction {
-
     fun apply(
         globalContext: NarrationState,
         verseContexts: MutableList<VerseStateContext>,
@@ -205,7 +198,6 @@ object PlayAction {
 
 
 object PausePlaybackAction {
-
     fun apply(
         globalContext: NarrationState,
         verseContexts: MutableList<VerseStateContext>,
@@ -223,9 +215,14 @@ object PausePlaybackAction {
             NarrationStateType.IDLE_IN_PROGRESS
         }
 
-        // If the user supplies a valid verse index, then we assume that we are pausing a verse playback
-        if (index >= 0) {
-            PauseVersePlaybackAction.apply(verseContexts, index)
+
+        val playingVerse = verseContexts.indexOfFirst {
+            it.state.type == VerseItemState.PLAYING
+                    || it.state.type == VerseItemState.PLAYING_WHILE_RECORDING_PAUSED
+        }
+
+        if (playingVerse >= 0) {
+            PauseVersePlaybackAction.apply(verseContexts, playingVerse)
         } else {
             verseContexts.forEach {
                 it.restore()

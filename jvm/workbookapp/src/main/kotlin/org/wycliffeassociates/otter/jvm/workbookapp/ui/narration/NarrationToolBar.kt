@@ -180,12 +180,7 @@ class NarrationToolbarViewModel : ViewModel() {
 
 
     fun pausePlayback() {
-        if (narrationViewModel.recordingVerseIndex.value >= 0) {
-            val recordingVerse = narrationViewModel.recordedVerses[narrationViewModel.recordingVerseIndex.value]
-            narrationViewModel.pauseVersePlayback(recordingVerse)
-        } else {
-            narrationViewModel.pausePlayback()
-        }
+        narrationViewModel.pausePlayback()
     }
 
     fun seekToNext() {

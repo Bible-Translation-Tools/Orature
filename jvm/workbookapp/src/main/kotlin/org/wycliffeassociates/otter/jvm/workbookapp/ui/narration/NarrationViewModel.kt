@@ -717,25 +717,6 @@ class NarrationViewModel : ViewModel() {
     }
 
 
-    fun pauseVersePlayback(verse: AudioMarker) {
-        val verseIndex = recordedVerses.indexOf(verse)
-
-        val newVerseList =
-            narrationStateMachine.transition(NarrationStateTransition.PAUSE_AUDIO_PLAYBACK, verseIndex)
-
-        val updated = narratableList.mapIndexed { idx, item ->
-            item.apply {
-                item.verseState = newVerseList[idx]
-            }
-        }
-        setVerseOptions(updated)
-        narratableList.setAll(updated)
-        refreshTeleprompter()
-
-        logger.info("Pausing playback")
-        audioPlayer.pause()
-    }
-
     fun pausePlayback() {
         val newVerseList = narrationStateMachine.transition(NarrationStateTransition.PAUSE_AUDIO_PLAYBACK, -1)
 

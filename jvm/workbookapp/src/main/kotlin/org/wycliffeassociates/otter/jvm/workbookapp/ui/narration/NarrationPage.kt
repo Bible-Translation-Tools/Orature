@@ -29,7 +29,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEv
 import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.OpenInAudioPluginEvent
-import org.wycliffeassociates.otter.jvm.controls.event.PauseVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PlayChapterEvent
@@ -208,8 +208,8 @@ class NarrationPage : View() {
             viewModel.playAll()
         }.let { eventSubscriptions.add(it) }
 
-        subscribe<PauseVerseEvent> {
-            viewModel.pauseVersePlayback(it.verse)
+        subscribe<PauseEvent> {
+            viewModel.pausePlayback()
         }.let { eventSubscriptions.add(it) }
 
         subscribe<RecordAgainEvent> {
