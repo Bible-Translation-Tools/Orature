@@ -33,7 +33,6 @@ import javafx.scene.paint.Color
 import kotlin.math.absoluteValue
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
-import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import java.util.concurrent.CopyOnWriteArrayList
 
 const val SIGNED_SHORT_MAX = 32767
@@ -208,28 +207,6 @@ class ObservableWaveformBuilder {
                     subscribers.forEach {
                         if (!it.isDisposed) {
                             it.onNext(img)
-                        }
-                    }
-                }
-            }
-            val remainderFrames = (reader.totalFrames % width)
-            if (remainderFrames >= DEFAULT_SAMPLE_RATE/2) {
-                val offPixels = remainderFrames / framesPerPixel
-                img = WritableImage(
-                    img.pixelReader,
-                    0,
-                    0,
-                    offPixels,
-                    height
-                )
-                renderImage(img, reader, offPixels, height, framesPerPixel)
-                if (!cancelled.get()) {
-                    synchronized(this@ObservableWaveformBuilder) {
-                        images.add(img)
-                        subscribers.forEach {
-                            if (!it.isDisposed) {
-                                it.onNext(img)
-                            }
                         }
                     }
                 }
