@@ -149,7 +149,7 @@ class NarrationTextCell(
 
             verseStateProperty.set(item.verseState)
 
-            isPlayEnabledProperty.set(item.playEnabled)
+            isPlayEnabledProperty.set(item.isPlayOptionEnabled)
         }
     }
 

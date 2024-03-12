@@ -30,7 +30,6 @@ import javafx.scene.layout.Priority
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.narration.statemachine.NarrationStateType
-import org.wycliffeassociates.otter.common.domain.narration.statemachine.VerseItemState
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.*
@@ -118,21 +117,9 @@ class TeleprompterViewModel : ViewModel() {
     }
 
     fun updateStickyVerse() {
-        val activeStates = listOf(
-            VerseItemState.RECORD_ACTIVE,
-            VerseItemState.RECORD_AGAIN_ACTIVE,
-            VerseItemState.RECORDING_PAUSED,
-            VerseItemState.RECORD_AGAIN_PAUSED
-        )
-
-        val statesWithoutRecording = listOf(
-            VerseItemState.BEGIN_RECORDING,
-            VerseItemState.RECORD,
-        )
-
         val verse = narrationViewModel.narratableList
             .firstOrNull {
-                it.verseState in activeStates || it.verseState in statesWithoutRecording
+                it.isActiveRecording || !it.hasRecording
             }
 
         stickyVerseProperty.set(verse)

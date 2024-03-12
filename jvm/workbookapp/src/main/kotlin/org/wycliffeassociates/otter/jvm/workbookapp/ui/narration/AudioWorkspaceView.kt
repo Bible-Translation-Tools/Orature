@@ -32,7 +32,6 @@ import javafx.scene.control.ScrollBar
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.domain.narration.statemachine.NarrationStateType
-import org.wycliffeassociates.otter.common.domain.narration.statemachine.VerseItemState
 import org.wycliffeassociates.otter.jvm.controls.SCROLL_INCREMENT_UNIT
 import org.wycliffeassociates.otter.jvm.controls.SCROLL_JUMP_UNIT
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
@@ -202,9 +201,9 @@ class AudioWorkspaceView : View() {
                 verseProperty.set(marker)
                 verseIndexProperty.set(viewModel.recordedVerses.indexOfFirst { it.marker == marker })
                 labelProperty.set(markerLabel)
-                isPlayingEnabledProperty.set(verseItem.playEnabled)
-                isEditVerseEnabledProperty.set(verseItem.editVerseEnabled)
-                isRecordAgainEnabledProperty.set(verseItem.recordAgainEnabled)
+                isPlayingEnabledProperty.set(verseItem.isPlayOptionEnabled)
+                isEditVerseEnabledProperty.set(verseItem.isEditVerseOptionEnabled)
+                isRecordAgainEnabledProperty.set(verseItem.isRecordAgainOptionEnabled)
             }
         }
 
@@ -246,15 +245,7 @@ class AudioWorkspaceViewModel : ViewModel() {
 
         narrationViewModel.narratableList.onChange {
             val verseMarkersList = narrationViewModel.narratableList.filter {
-
-                val statesWithoutRecording = listOf(
-                    VerseItemState.BEGIN_RECORDING,
-                    VerseItemState.RECORD,
-                )
-
-                val hasRecording = it.verseState !in statesWithoutRecording
-
-                hasRecording && it.marker != null
+                it.hasRecording && it.marker != null
             }
             recordedVerses.setAll(verseMarkersList)
         }
