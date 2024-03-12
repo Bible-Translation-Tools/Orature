@@ -280,24 +280,13 @@ class NarrationViewModel : ViewModel() {
                     AudioPlayerEvent.COMPLETE -> {
                         isPlayingProperty.set(false)
 
-                        val playingVerse = playingVerseIndex.value
-
                         val transition = if (isModifyingTakeAudioProperty.value) {
                             NarrationStateTransition.PAUSE_AUDIO_PLAYBACK_WHILE_BOUNCING
                         } else {
                             NarrationStateTransition.PAUSE_AUDIO_PLAYBACK
                         }
 
-                        val newVerseList = narrationStateMachine.transition(transition, playingVerse)
-
-                        val updated = narratableList.mapIndexed { idx, item ->
-                            item.apply {
-                                item.verseState = newVerseList[idx]
-                            }
-                        }
-                        setVerseOptions(updated)
-                        narratableList.setAll(updated)
-                        refreshTeleprompter()
+                        performNarrationStateMachineTransition(transition, playingVerseIndex.value)
                     }
 
                     AudioPlayerEvent.PAUSE,
@@ -563,7 +552,7 @@ class NarrationViewModel : ViewModel() {
                     chunkTotalProperty.set(chunks.size)
                 },
                 {},
-                { resetTeleprompter() }
+                { resetNarratableList() }
             )
     }
 
@@ -607,35 +596,23 @@ class NarrationViewModel : ViewModel() {
         FX.eventbus.fire(TeleprompterSeekEvent(0))
     }
 
-    private fun resetTeleprompter() {
+    private fun resetNarratableList() {
 
-        val statesWithoutRecording = listOf(
-            VerseItemState.BEGIN_RECORDING,
-            VerseItemState.RECORD,
-            VerseItemState.RECORD_DISABLED
-        )
+        narrationStateMachine.initialize(narration.versesWithRecordings())
+        val newVerseStates = narrationStateMachine.getVerseItemStates()
+        val updatedNarratableList =
+            narratableList.mapIndexed { idx, item -> item.apply { item.verseState = newVerseStates[idx] } }
 
-        narratableList.forEach { chunk ->
-
-            if (chunk.verseState !in statesWithoutRecording) {
-                chunk.verseState = VerseItemState.RECORD_AGAIN
-            } else {
-                chunk.verseState = VerseItemState.RECORD_DISABLED
-            }
-        }
-
-
-        val lastIndex = narratableList.indexOfFirst { it.verseState in statesWithoutRecording }
+        val lastIndex = updatedNarratableList.indexOfFirst { !it.hasRecording }
         var scrollToVerse = 0
 
         if (lastIndex != -1) {
-            narratableList[lastIndex].verseState = VerseItemState.RECORD
+            updatedNarratableList[lastIndex].verseState = VerseItemState.RECORD
             scrollToVerse = lastIndex
         }
 
-        setVerseOptions(narratableList)
-        narratableList.setAll(narratableList.toList())
-
+        setVerseOptions(updatedNarratableList)
+        narratableList.setAll(updatedNarratableList)
         refreshTeleprompter()
         FX.eventbus.fire(TeleprompterSeekEvent(scrollToVerse))
     }
@@ -659,6 +636,7 @@ class NarrationViewModel : ViewModel() {
     }
 
 
+    // TODO: I really do not like this method here. It seems like it belongs in another class. Just not sure where.
     private fun setVerseOptions(verses: List<NarratableItemData>) {
 
         val isRecording = narrationStateProperty.value == NarrationStateType.RECORDING
@@ -676,21 +654,21 @@ class NarrationViewModel : ViewModel() {
             val isVerseRecordingPaused = it.verseState == VerseItemState.RECORDING_PAUSED
 
 
-            it.playEnabled = hasRecording
+            it.isPlayOptionEnabled = hasRecording
                     && !isRecording
                     && !isRecordingAgain
                     && !isRecordAgainPaused
                     && !isPlaying
                     && !isAnotherVerseRecordingPaused
 
-            it.editVerseEnabled = hasRecording
+            it.isEditVerseOptionEnabled = hasRecording
                     && !isRecording
                     && !isRecordingPaused
                     && !isRecordingAgain
                     && !isRecordAgainPaused
                     && !isPlaying
 
-            it.recordAgainEnabled = hasRecording
+            it.isRecordAgainOptionEnabled = hasRecording
                     && !isRecording
                     && !isRecordingAgain
                     && !isRecordAgainPaused
@@ -701,26 +679,19 @@ class NarrationViewModel : ViewModel() {
 
     fun play(verse: AudioMarker) {
         val verseIndex = recordedVerses.indexOf(verse)
-        val newVerseList = narrationStateMachine.transition(NarrationStateTransition.PLAY_AUDIO, verseIndex)
 
         playingVerseIndex.set(verseIndex)
         renderer.clearActiveRecordingData()
         audioPlayer.pause()
-
         narration.loadSectionIntoPlayer(verse)
 
         // audioPlayer.seek(0)
         audioPlayer.play()
 
-        val updated = narratableList.mapIndexed { idx, item -> item.apply { item.verseState = newVerseList[idx] } }
-        setVerseOptions(updated)
-        narratableList.setAll(updated)
-        refreshTeleprompter()
+        performNarrationStateMachineTransition(NarrationStateTransition.PLAY_AUDIO, verseIndex)
     }
 
     fun playAll() {
-
-        val newVerseList = narrationStateMachine.transition(NarrationStateTransition.PLAY_AUDIO, -1)
         logger.info("Playing all")
         playingVerseIndex.set(-1)
         renderer.clearActiveRecordingData()
@@ -729,11 +700,7 @@ class NarrationViewModel : ViewModel() {
 
         // audioPlayer.seek(0)
         audioPlayer.play()
-
-        val updated = narratableList.mapIndexed { idx, item -> item.apply { item.verseState = newVerseList[idx] } }
-        setVerseOptions(updated)
-        narratableList.setAll(updated)
-        refreshTeleprompter()
+        performNarrationStateMachineTransition(NarrationStateTransition.PLAY_AUDIO, -1)
     }
 
 
@@ -745,16 +712,7 @@ class NarrationViewModel : ViewModel() {
             NarrationStateTransition.PAUSE_AUDIO_PLAYBACK
         }
 
-        val newVerseList = narrationStateMachine.transition(transition, -1)
-
-        val updated = narratableList.mapIndexed { idx, item ->
-            item.apply {
-                item.verseState = newVerseList[idx]
-            }
-        }
-        setVerseOptions(updated)
-        narratableList.setAll(updated)
-        refreshTeleprompter()
+        performNarrationStateMachineTransition(transition, -1)
 
         logger.info("Pausing playback")
         audioPlayer.pause()
@@ -770,8 +728,6 @@ class NarrationViewModel : ViewModel() {
         isRecording = true
         isRecordingAgain = true
         recordPause = false
-
-        refreshTeleprompter()
     }
 
     fun saveRecording(verseIndex: Int) {
@@ -789,8 +745,6 @@ class NarrationViewModel : ViewModel() {
 
         renderer.clearActiveRecordingData()
 
-        refreshTeleprompter()
-
         createPotentiallyFinishedChapterTake()
     }
 
@@ -804,14 +758,7 @@ class NarrationViewModel : ViewModel() {
         recordedVerses.setAll(narration.activeVerses)
         updateRecordingState()
 
-
-
-        narrationStateMachine.initialize(narration.versesWithRecordings())
-        val newVerses = narrationStateMachine.getVerseItemStates()
-        val updated = narratableList.mapIndexed { idx, item -> item.apply { item.verseState = newVerses[idx] } }
-        setVerseOptions(updated)
-        narratableList.setAll(updated)
-        resetTeleprompter()
+        resetNarratableList()
 
         // Indicates that we used a temporary take to edit the chapter
         if (hasAllItemsRecordedProperty.value == false) {
@@ -837,24 +784,17 @@ class NarrationViewModel : ViewModel() {
 
             else -> {}
         }
-
-        refreshTeleprompter()
     }
 
     fun moveMarker(index: Int, delta: Int) {
         narration.onVerseMarkerMoved(index, delta)
 
-        narrationStateMachine.initialize(narration.versesWithRecordings())
 
         if (isModifyingTakeAudioProperty.value) {
-            narrationStateMachine.transition(NarrationStateTransition.SAVE, -1)
+            performNarrationStateMachineTransition(NarrationStateTransition.SAVE, -1)
+        } else {
+            resetNarratableList()
         }
-
-        val newVerses = narrationStateMachine.getVerseItemStates()
-        val updated = narratableList.mapIndexed { idx, item -> item.apply { item.verseState = newVerses[idx] } }
-        setVerseOptions(updated)
-        narratableList.setAll(updated)
-        refreshTeleprompter()
     }
 
     /**
@@ -876,27 +816,14 @@ class NarrationViewModel : ViewModel() {
         narration.undo()
         recordPause = false
 
-
-        narrationStateMachine.initialize(narration.versesWithRecordings())
-        val newVerses = narrationStateMachine.getVerseItemStates()
-        val updated = narratableList.mapIndexed { idx, item -> item.apply { item.verseState = newVerses[idx] } }
-        setVerseOptions(updated)
-        narratableList.setAll(updated)
-
-        resetTeleprompter()
+        resetNarratableList()
     }
 
     fun redo() {
         narration.redo()
         recordPause = false
 
-        narrationStateMachine.initialize(narration.versesWithRecordings())
-        val newVerses = narrationStateMachine.getVerseItemStates()
-        val updated = narratableList.mapIndexed { idx, item -> item.apply { item.verseState = newVerses[idx] } }
-        setVerseOptions(updated)
-        narratableList.setAll(updated)
-
-        resetTeleprompter()
+        resetNarratableList()
     }
 
     fun record(index: Int) {
@@ -906,8 +833,6 @@ class NarrationViewModel : ViewModel() {
         recordStart = false
         recordResume = false
         recordingVerseIndex.set(index)
-
-        refreshTeleprompter()
     }
 
     fun pauseRecording(index: Int) {
@@ -919,8 +844,6 @@ class NarrationViewModel : ViewModel() {
         narration.pauseRecording()
         narration.finalizeVerse(index)
         renderer.clearActiveRecordingData()
-
-        refreshTeleprompter()
     }
 
 
@@ -932,7 +855,6 @@ class NarrationViewModel : ViewModel() {
 
         narration.pauseRecording()
         narration.finalizeVerse(index)
-        refreshTeleprompter()
     }
 
     fun resumeRecordingAgain() {
@@ -943,8 +865,6 @@ class NarrationViewModel : ViewModel() {
         narration.resumeRecordingAgain()
         isRecording = true
         recordPause = false
-
-        refreshTeleprompter()
     }
 
     fun resumeRecording() {
@@ -956,8 +876,6 @@ class NarrationViewModel : ViewModel() {
 
         isRecording = true
         recordPause = false
-
-        refreshTeleprompter()
     }
 
     private fun stopPlayer() {
@@ -999,13 +917,7 @@ class NarrationViewModel : ViewModel() {
 
                     else -> {
                         narration.onEditVerse(verseIndex, file)
-                        narrationStateMachine.initialize(narration.versesWithRecordings())
-                        val newVerses = narrationStateMachine.getVerseItemStates()
-                        val updated =
-                            narratableList.mapIndexed { idx, item -> item.apply { item.verseState = newVerses[idx] } }
-                        setVerseOptions(updated)
-                        narratableList.setAll(updated)
-                        resetTeleprompter()
+                        resetNarratableList()
                     }
                 }
                 FX.eventbus.fire(PluginClosedEvent(pluginType))
@@ -1200,51 +1112,63 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun handleEvent(event: FXEvent) {
-        val list = when (event) {
+
+        var index = -1
+        val transition: NarrationStateTransition = when (event) {
+            
             is BeginRecordingEvent -> {
                 record(event.index)
-                narrationStateMachine.transition(NarrationStateTransition.RECORD, event.index)
+                index = event.index
+                NarrationStateTransition.RECORD
             }
 
             is NextVerseEvent -> {
                 onNext(event.index)
-                narrationStateMachine.transition(NarrationStateTransition.NEXT, event.index)
+                index = event.index
+                NarrationStateTransition.NEXT
             }
 
             is PauseRecordingEvent -> {
                 pauseRecording(event.index)
-                narrationStateMachine.transition(NarrationStateTransition.PAUSE_RECORDING, event.index)
+                index = event.index
+                NarrationStateTransition.PAUSE_RECORDING
             }
 
 
             is ResumeRecordingEvent -> {
                 resumeRecording()
-                narrationStateMachine.transition(NarrationStateTransition.RECORD, event.index)
+                index = event.index
+                NarrationStateTransition.RECORD
             }
 
             is RecordVerseEvent -> {
                 record(event.index)
-                narrationStateMachine.transition(NarrationStateTransition.RECORD, event.index)
+                index = event.index
+                NarrationStateTransition.RECORD
             }
 
             is RecordAgainEvent -> {
                 recordAgain(event.index)
-                narrationStateMachine.transition(NarrationStateTransition.RECORD_AGAIN, event.index)
+                index = event.index
+                NarrationStateTransition.RECORD_AGAIN
             }
 
             is PauseRecordAgainEvent -> {
                 pauseRecordAgain(event.index)
-                narrationStateMachine.transition(NarrationStateTransition.PAUSE_RECORD_AGAIN, event.index)
+                index = event.index
+                NarrationStateTransition.PAUSE_RECORD_AGAIN
             }
 
             is ResumeRecordingAgainEvent -> {
                 resumeRecordingAgain()
-                narrationStateMachine.transition(NarrationStateTransition.RESUME_RECORD_AGAIN, event.index)
+                index = event.index
+                NarrationStateTransition.RESUME_RECORD_AGAIN
             }
 
             is SaveRecordingEvent -> {
                 saveRecording(event.index)
-                narrationStateMachine.transition(NarrationStateTransition.SAVE, event.index)
+                index = event.index
+                NarrationStateTransition.SAVE
             }
 
             else -> {
@@ -1252,10 +1176,15 @@ class NarrationViewModel : ViewModel() {
             }
         }
 
+        performNarrationStateMachineTransition(transition, index)
+    }
 
-        val updated = narratableList.mapIndexed { idx, item -> item.apply { item.verseState = list[idx] } }
-        setVerseOptions(updated)
-        narratableList.setAll(updated)
+    private fun performNarrationStateMachineTransition(transition: NarrationStateTransition, index: Int) {
+        val newVerseStates = narrationStateMachine.transition(transition, index)
+        val updatednNarratableList =
+            narratableList.mapIndexed { idx, item -> item.apply { item.verseState = newVerseStates[idx] } }
+        setVerseOptions(updatednNarratableList)
+        narratableList.setAll(updatednNarratableList)
         refreshTeleprompter()
     }
 
