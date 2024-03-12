@@ -102,20 +102,7 @@ class AudioWorkspaceView : View() {
             customizeScrollbarSkin()
         }
 
-        disableWhen {
-            Bindings.createBooleanBinding(
-                {
-                    viewModel.narrationStateProperty.value?.let {
-
-                        it == NarrationStateType.RECORDING
-                                || it == NarrationStateType.RECORDING_AGAIN
-                                || it == NarrationStateType.RECORDING_AGAIN_PAUSED
-                                || it == NarrationStateType.PLAYING
-                    } ?: false
-                },
-                viewModel.narrationStateProperty
-            )
-        }
+        disableWhen { viewModel.isScrollEnabledProperty.not() }
 
         unitIncrement = SCROLL_INCREMENT_UNIT
         blockIncrementProperty().bind(maxProperty().doubleBinding {
@@ -162,6 +149,7 @@ class AudioWorkspaceView : View() {
                 }
                 verse_markers_layer {
                     narrationStateProperty.bind(viewModel.narrationStateProperty)
+                    mouseTransparentProperty().bind(viewModel.isScrollEnabledProperty.not())
 
                     verseMarkersControls.bind(markerNodes) { it }
 
@@ -190,7 +178,6 @@ class AudioWorkspaceView : View() {
         viewModel.onDock()
         markerNodes.bind(viewModel.recordedVerses) { verseItem ->
             val marker = verseItem.marker
-            val state = verseItem.verseState
             VerseMarkerControl().apply {
                 visibleProperty().set(false)
                 val markerLabel = when (marker) {
@@ -230,6 +217,8 @@ class AudioWorkspaceViewModel : ViewModel() {
 
     val scrollBarPositionProperty = SimpleDoubleProperty()
 
+    val isScrollEnabledProperty = SimpleBooleanProperty()
+
     fun drawWaveform(context: GraphicsContext, canvas: Canvas, markerNodes: ObservableList<VerseMarkerControl>) {
         narrationViewModel.drawWaveform(context, canvas, markerNodes)
     }
@@ -249,6 +238,23 @@ class AudioWorkspaceViewModel : ViewModel() {
             }
             recordedVerses.setAll(verseMarkersList)
         }
+
+        isScrollEnabledProperty.bind(
+            Bindings.createBooleanBinding(
+                {
+                    narrationStateProperty.value?.let {
+
+                        it != NarrationStateType.RECORDING
+                                && it != NarrationStateType.RECORDING_AGAIN
+                                && it != NarrationStateType.RECORDING_AGAIN_PAUSED
+                                && it != NarrationStateType.PLAYING
+
+                    } ?: false
+                },
+                narrationStateProperty
+
+            )
+        )
     }
 
     fun onUndock() {

@@ -45,23 +45,6 @@ class VerseMarkersLayer : BorderPane() {
 
         addClass("verse-markers-layer")
 
-        mouseTransparentProperty().bind(
-
-            Bindings.createBooleanBinding(
-                {
-                    narrationStateProperty.value?.let {
-                        it == NarrationStateType.RECORDING
-                                || it == NarrationStateType.RECORDING_PAUSED
-                                || it == NarrationStateType.RECORDING_AGAIN
-                                || it == NarrationStateType.RECORDING_AGAIN_PAUSED
-                                || it == NarrationStateType.PLAYING
-
-                    } ?: false
-                },
-                narrationStateProperty
-            )
-        )
-
         var scrollDelta = 0.0
         var scrollOldPos = 0.0
 
@@ -92,6 +75,21 @@ class VerseMarkersLayer : BorderPane() {
 
             verseMarkerControl.apply {
 
+                mouseTransparentProperty().bind(
+                    Bindings.createBooleanBinding(
+                        {
+                            narrationStateProperty.value?.let {
+                                it == NarrationStateType.RECORDING
+                                        || it == NarrationStateType.RECORDING_PAUSED
+                                        || it == NarrationStateType.RECORDING_AGAIN
+                                        || it == NarrationStateType.RECORDING_AGAIN_PAUSED
+                                        || it == NarrationStateType.PLAYING
+
+                            } ?: false
+                        },
+                        narrationStateProperty
+                    )
+                )
                 val dragTarget = dragAreaProperty.value
 
                 var delta = 0.0
