@@ -28,18 +28,6 @@ import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 
 private const val DEFAULT_LANGUAGE_SLUG = "en"
 
-/**
- * ISO 639 language codes that were changed,
- * but Locale api still returns old values
- * @see <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Locale.html">Legacy language codes section</a>
- * @see <a href="https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes">ISO 639 language codes</a>
- */
-private val EXCEPTIONAL_LANGUAGES = mapOf(
-    "id" to "in",
-    "he" to "iw",
-    "yi" to "ji"
-)
-
 class LocaleLanguage @Inject constructor(
     private val appPrefRepo: IAppPreferences,
     private val langRepo: ILanguageRepository,
@@ -73,9 +61,8 @@ class LocaleLanguage @Inject constructor(
 
     private fun preferredLanguage(): Language? {
         val language = preferredLocale().language
-        val normalized = normalizeLocale(language)
         return when {
-            supportedLanguages.map { it.slug }.contains(normalized) -> langRepo.getBySlug(normalized).blockingGet()
+            supportedLanguages.map { it.slug }.contains(language) -> langRepo.getBySlug(language).blockingGet()
             else -> defaultLanguage
         }
     }
@@ -86,8 +73,7 @@ class LocaleLanguage @Inject constructor(
 
     private fun defaultLanguage(): Language? {
         val systemLocale = localeDataSource.getDefaultLocale()
-        val normalized = normalizeLocale(systemLocale)
-        val systemLanguage = langRepo.getBySlug(normalized).blockingGet()
+        val systemLanguage = langRepo.getBySlug(systemLocale).blockingGet()
         return when {
             supportedLanguages.contains(systemLanguage) -> systemLanguage
             else -> langRepo.getBySlug(DEFAULT_LANGUAGE_SLUG).blockingGet()
@@ -95,21 +81,15 @@ class LocaleLanguage @Inject constructor(
     }
 
     private fun supportedLanguages(): List<Language> {
+        val locales = localeDataSource.getSupportedLocales()
         return langRepo.getAll().blockingGet()
-            .filter(::filterExceptionalLanguages)
+            .filter {
+                locales.contains(it.slug)
+            }
             .sortedBy { it.slug }
     }
 
     private fun getLanguageFromPrefs(): String {
         return appPrefRepo.localeLanguage().blockingGet()
-    }
-
-    private fun filterExceptionalLanguages(lang: Language): Boolean {
-        val locales = localeDataSource.getSupportedLocales()
-        return locales.contains(lang.slug) || locales.contains(EXCEPTIONAL_LANGUAGES[lang.slug])
-    }
-
-    private fun normalizeLocale(old: String): String {
-        return EXCEPTIONAL_LANGUAGES.entries.singleOrNull { it.value == old }?.key ?: old
     }
 }
