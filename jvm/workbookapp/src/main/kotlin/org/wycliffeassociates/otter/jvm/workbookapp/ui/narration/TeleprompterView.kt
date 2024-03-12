@@ -91,23 +91,6 @@ class TeleprompterViewModel : ViewModel() {
         )
     }
 
-    fun recordButtonTextBinding(): StringBinding {
-        return Bindings.createStringBinding(
-            {
-                when {
-                    narrationStateProperty.value == NarrationStateType.RECORDING -> messages["pauseRecording"]
-                    narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN -> messages["stopRecording"]
-                    recordResume || narrationStateProperty.value == NarrationStateType.RECORDING_PAUSED ->
-                        messages["resumeRecording"]
-
-                    else -> messages["beginRecording"]
-                }
-            },
-            recordResumeProperty,
-            narrationStateProperty,
-        )
-    }
-
     fun updateStickyVerse() {
         val verse = narrationViewModel.narratableList
             .firstOrNull {
@@ -211,7 +194,6 @@ class TeleprompterView : View() {
             setCellFactory {
                 NarrationTextCell(
                     messages["nextVerse"],
-                    viewModel.recordButtonTextBinding(),
                     viewModel.narrationStateProperty,
                     viewModel.highlightedVerseProperty,
                 )

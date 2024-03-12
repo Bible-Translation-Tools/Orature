@@ -58,7 +58,6 @@ class NarrationTextItem : VBox() {
     val isSelectedProperty = SimpleBooleanProperty(false)
     val isLastVerseProperty = SimpleBooleanProperty()
 
-    val recordButtonTextProperty = SimpleStringProperty()
     val nextChunkTextProperty = SimpleStringProperty()
 
     val onBeginRecordingAction = SimpleObjectProperty<EventHandler<ActionEvent>>()

@@ -32,7 +32,6 @@ import tornadofx.*
 
 class NarrationTextCell(
     private val nextChunkText: String,
-    private val recordButtonTextProperty: ObservableValue<String>,
     private val narrationStateProperty: ObservableValue<NarrationStateType>,
     highlightedVerseProperty: IntegerProperty,
 ) : ListCell<NarratableItemData>() {
@@ -70,7 +69,6 @@ class NarrationTextCell(
 
             verseTextProperty.set(item.chunk.textItem.text)
 
-            recordButtonTextProperty.bind(this@NarrationTextCell.recordButtonTextProperty)
             isHighlightedProperty.bind(shouldHighlight)
 
             narrationStateProperty.bind(this@NarrationTextCell.narrationStateProperty)
