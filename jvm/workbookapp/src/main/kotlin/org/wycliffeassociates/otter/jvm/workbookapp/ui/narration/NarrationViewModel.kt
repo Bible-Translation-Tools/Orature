@@ -96,9 +96,7 @@ class NarrationViewModel : ViewModel() {
     val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
 
     private lateinit var volumeBar: VolumeBar
-    val recordStartProperty = SimpleBooleanProperty()
 
-    var recordStart by recordStartProperty
     val recordResumeProperty = SimpleBooleanProperty()
     var recordResume by recordResumeProperty
     val recordAgainVerseIndexProperty = SimpleObjectProperty<Int?>()
@@ -308,7 +306,6 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun updateRecordingState() {
-        recordStart = recordedVerses.isEmpty()
         recordResume = recordedVerses.isNotEmpty()
     }
 
@@ -343,7 +340,6 @@ class NarrationViewModel : ViewModel() {
         chunksList.clear()
         narratableList.clear()
 
-        recordStartProperty.set(false)
         recordResumeProperty.set(false)
         recordAgainVerseIndexProperty.set(null)
         recordingVerseIndex.set(-1)
@@ -778,7 +774,6 @@ class NarrationViewModel : ViewModel() {
         narration.onResetAll()
 
         narrationStateMachine.initialize(narration.versesWithRecordings())
-        recordStart = true
         recordResume = false
 
         clearTeleprompter()
@@ -907,7 +902,6 @@ class NarrationViewModel : ViewModel() {
                         narration.seek(0)
                     }
 
-                    recordStart = recordedVerses.isEmpty()
                     recordResume = recordedVerses.isNotEmpty()
                     createPotentiallyFinishedChapterTake()
                 },
