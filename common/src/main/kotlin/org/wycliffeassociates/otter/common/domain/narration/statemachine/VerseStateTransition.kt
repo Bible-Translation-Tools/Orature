@@ -18,19 +18,6 @@
  */
 package org.wycliffeassociates.otter.common.domain.narration.statemachine
 
-enum class VerseStateTransition {
-    RECORD,
-    PAUSE_RECORDING,
-    RESUME_RECORDING,
-    NEXT,
-    RECORD_AGAIN,
-    RESUME_RECORD_AGAIN,
-    PAUSE_RECORD_AGAIN,
-    SAVE,
-    PLAY,
-    PAUSE_PLAYBACK,
-}
-
 object RecordVerseAction {
     fun apply(contexts: MutableList<VerseStateContext>, index: Int) {
         if (index !in contexts.indices) return
