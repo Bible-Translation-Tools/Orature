@@ -107,8 +107,6 @@ class NarrationViewModel : ViewModel() {
     var recordAgainVerseIndex by recordAgainVerseIndexProperty
     val recordingVerseIndex = SimpleIntegerProperty()
 
-    val playingVerseProperty = SimpleObjectProperty<VerseMarker?>()
-    var playingVerse by playingVerseProperty
     val playingVerseIndex = SimpleIntegerProperty(-1)
     val highlightedVerseIndex = SimpleIntegerProperty(-1)
 
@@ -352,7 +350,6 @@ class NarrationViewModel : ViewModel() {
         recordResumeProperty.set(false)
         recordAgainVerseIndexProperty.set(null)
         recordingVerseIndex.set(-1)
-        playingVerseProperty.set(null)
         playingVerseIndex.set(-1)
         highlightedVerseIndex.set(-1)
         hasUndoProperty.set(false)
@@ -845,7 +842,6 @@ class NarrationViewModel : ViewModel() {
 
     private fun stopPlayer() {
         audioPlayer.pause()
-        playingVerse = null
     }
 
     private fun closeNarrationAudio() {
