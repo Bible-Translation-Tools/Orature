@@ -42,8 +42,8 @@ fun pixelsToFrames(
     width: Int = Screen.getMainScreen().platformWidth,
     framesOnScreen: Int = SECONDS_ON_SCREEN * SAMPLE_RATE
 ): Int {
-    val framesInPixel = framesOnScreen / width.toFloat()
-    return (pixels * framesInPixel).toInt()
+    val framesInPixel = framesOnScreen / width
+    return pixels.toInt() * framesInPixel
 }
 
 fun framesToPixels(
@@ -51,6 +51,6 @@ fun framesToPixels(
     width: Int = Screen.getMainScreen().platformWidth,
     framesOnScreen: Int = SECONDS_ON_SCREEN * SAMPLE_RATE
 ): Int {
-    val framesInPixel = framesOnScreen / width.toFloat()
-    return (frames / framesInPixel).toInt()
+    val framesInPixel = framesOnScreen / width
+    return frames / framesInPixel
 }
