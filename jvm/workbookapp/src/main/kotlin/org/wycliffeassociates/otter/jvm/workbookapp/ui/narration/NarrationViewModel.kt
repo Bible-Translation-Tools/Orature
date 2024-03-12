@@ -27,6 +27,7 @@ import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
+import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -102,13 +103,8 @@ class NarrationViewModel : ViewModel() {
     var recordPause by recordPauseProperty
     val recordResumeProperty = SimpleBooleanProperty()
     var recordResume by recordResumeProperty
-    val isRecordingProperty = SimpleBooleanProperty()
-    var isRecording by isRecordingProperty
-    val isRecordingAgainProperty = SimpleBooleanProperty()
-    var isRecordingAgain by isRecordingAgainProperty
     val recordAgainVerseIndexProperty = SimpleObjectProperty<Int?>()
     var recordAgainVerseIndex by recordAgainVerseIndexProperty
-    val isPlayingProperty = SimpleBooleanProperty(false)
     val recordingVerseIndex = SimpleIntegerProperty()
 
     val playingVerseProperty = SimpleObjectProperty<VerseMarker?>()
@@ -142,9 +138,10 @@ class NarrationViewModel : ViewModel() {
 
     val hasAllItemsRecordedProperty = SimpleBooleanProperty()
     val potentiallyFinishedProperty = hasAllItemsRecordedProperty
-        .and(isRecordingProperty.not())
-        .and(isRecordingAgainProperty.not())
-        .and(recordPauseProperty.not())
+        .and(narrationStateProperty.isNotEqualTo(NarrationStateType.RECORDING))
+        .and(narrationStateProperty.isNotEqualTo(NarrationStateType.RECORDING_AGAIN))
+        .and(narrationStateProperty.isNotEqualTo(NarrationStateType.RECORDING_PAUSED))
+        .and(narrationStateProperty.isNotEqualTo(NarrationStateType.RECORDING_AGAIN_PAUSED))
     val potentiallyFinished by potentiallyFinishedProperty
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
@@ -273,13 +270,7 @@ class NarrationViewModel : ViewModel() {
         audioPlayer.addEventListener { event: AudioPlayerEvent ->
             runLater {
                 when (event) {
-                    AudioPlayerEvent.PLAY -> {
-                        isPlayingProperty.set(true)
-                    }
-
                     AudioPlayerEvent.COMPLETE -> {
-                        isPlayingProperty.set(false)
-
                         val transition = if (isModifyingTakeAudioProperty.value) {
                             NarrationStateTransition.PAUSE_AUDIO_PLAYBACK_WHILE_BOUNCING
                         } else {
@@ -287,12 +278,6 @@ class NarrationViewModel : ViewModel() {
                         }
 
                         performNarrationStateMachineTransition(transition, playingVerseIndex.value)
-                    }
-
-                    AudioPlayerEvent.PAUSE,
-
-                    AudioPlayerEvent.STOP -> {
-                        isPlayingProperty.set(false)
                     }
 
                     else -> {}
@@ -309,7 +294,12 @@ class NarrationViewModel : ViewModel() {
             AudioScene(
                 rendererAudioReader,
                 narration.getRecorderAudioStream(),
-                isRecordingProperty.toObservable(),
+                Bindings.createBooleanBinding(
+                    {
+                        narrationStateProperty.value == NarrationStateType.RECORDING
+                                || narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN
+                    }, narrationStateProperty
+                ).toObservable(),
                 Screen.getMainScreen().width - 25 - 88,
                 10,
                 DEFAULT_SAMPLE_RATE
@@ -360,10 +350,7 @@ class NarrationViewModel : ViewModel() {
         recordStartProperty.set(false)
         recordPauseProperty.set(false)
         recordResumeProperty.set(false)
-        isRecordingProperty.set(false)
-        isRecordingAgainProperty.set(false)
         recordAgainVerseIndexProperty.set(null)
-        isPlayingProperty.set(false)
         recordingVerseIndex.set(-1)
         playingVerseProperty.set(null)
         playingVerseIndex.set(-1)
@@ -725,9 +712,6 @@ class NarrationViewModel : ViewModel() {
 
         recordAgainVerseIndex = verseIndex
         recordingVerseIndex.set(verseIndex)
-        isRecording = true
-        isRecordingAgain = true
-        recordPause = false
     }
 
     fun saveRecording(verseIndex: Int) {
@@ -739,9 +723,6 @@ class NarrationViewModel : ViewModel() {
 
         recordAgainVerseIndex = null
         recordingVerseIndex.set(-1)
-        isRecording = false
-        isRecordingAgain = false
-        recordPause = false
 
         renderer.clearActiveRecordingData()
 
@@ -769,16 +750,14 @@ class NarrationViewModel : ViewModel() {
 
     fun onNext(index: Int) {
         when {
-            isRecording -> {
+            narrationStateProperty.value == NarrationStateType.RECORDING -> {
                 narration.finalizeVerse(max(index - 1, 0))
                 narration.onNewVerse(index)
                 renderer.clearActiveRecordingData()
                 recordingVerseIndex.set(index)
             }
 
-            recordPause -> {
-                recordPause = false
-                recordResume = true
+            narrationStateProperty.value == NarrationStateType.RECORDING_PAUSED -> {
                 recordingVerseIndex.set(-1)
             }
 
@@ -829,17 +808,11 @@ class NarrationViewModel : ViewModel() {
     fun record(index: Int) {
         narration.onNewVerse(index)
 
-        isRecording = true
-        recordStart = false
-        recordResume = false
         recordingVerseIndex.set(index)
     }
 
     fun pauseRecording(index: Int) {
         logger.info("Pausing recording for: ${narration.totalVerses[index].formattedLabel}")
-
-        isRecording = false
-        recordPause = true
 
         narration.pauseRecording()
         narration.finalizeVerse(index)
@@ -849,9 +822,6 @@ class NarrationViewModel : ViewModel() {
 
     fun pauseRecordAgain(index: Int) {
         logger.info("Pausing record again for: ${narration.totalVerses[index].formattedLabel}")
-
-        isRecording = false
-        recordPause = true
 
         narration.pauseRecording()
         narration.finalizeVerse(index)
@@ -863,8 +833,6 @@ class NarrationViewModel : ViewModel() {
         stopPlayer()
 
         narration.resumeRecordingAgain()
-        isRecording = true
-        recordPause = false
     }
 
     fun resumeRecording() {
@@ -873,9 +841,6 @@ class NarrationViewModel : ViewModel() {
         stopPlayer()
 
         narration.resumeRecording()
-
-        isRecording = true
-        recordPause = false
     }
 
     private fun stopPlayer() {
@@ -1017,7 +982,7 @@ class NarrationViewModel : ViewModel() {
                 }
                 var reRecordLoc: Int? = null
                 var nextVerseLoc: Int? = null
-                if (isRecordingAgain) {
+                if (narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN || narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN_PAUSED) {
                     val reRecordingIndex = recordingVerseIndex.value
                     nextVerseLoc = recordedVerses.getOrNull(reRecordingIndex + 1)?.location
                     reRecordLoc = recordedVerses[reRecordingIndex].location
@@ -1191,9 +1156,13 @@ class NarrationViewModel : ViewModel() {
 
     private fun updateHighlightedItem(audioPosition: Int) {
         when {
-            isRecording -> highlightedVerseIndex.set(recordingVerseIndex.value)
+            narrationStateProperty.value == NarrationStateType.RECORDING -> highlightedVerseIndex.set(
+                recordingVerseIndex.value
+            )
 
-            isRecordingAgain -> highlightedVerseIndex.set(recordAgainVerseIndex!!)
+            narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN -> highlightedVerseIndex.set(
+                recordAgainVerseIndex!!
+            )
 
             else -> {
                 val marker = narration.findMarkerAtPosition(audioPosition)
