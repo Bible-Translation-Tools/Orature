@@ -99,8 +99,6 @@ class NarrationViewModel : ViewModel() {
     val recordStartProperty = SimpleBooleanProperty()
 
     var recordStart by recordStartProperty
-    val recordPauseProperty = SimpleBooleanProperty()
-    var recordPause by recordPauseProperty
     val recordResumeProperty = SimpleBooleanProperty()
     var recordResume by recordResumeProperty
     val recordAgainVerseIndexProperty = SimpleObjectProperty<Int?>()
@@ -346,7 +344,6 @@ class NarrationViewModel : ViewModel() {
         narratableList.clear()
 
         recordStartProperty.set(false)
-        recordPauseProperty.set(false)
         recordResumeProperty.set(false)
         recordAgainVerseIndexProperty.set(null)
         recordingVerseIndex.set(-1)
@@ -783,21 +780,18 @@ class NarrationViewModel : ViewModel() {
         narrationStateMachine.initialize(narration.versesWithRecordings())
         recordStart = true
         recordResume = false
-        recordPause = false
 
         clearTeleprompter()
     }
 
     fun undo() {
         narration.undo()
-        recordPause = false
 
         resetNarratableList()
     }
 
     fun redo() {
         narration.redo()
-        recordPause = false
 
         resetNarratableList()
     }
