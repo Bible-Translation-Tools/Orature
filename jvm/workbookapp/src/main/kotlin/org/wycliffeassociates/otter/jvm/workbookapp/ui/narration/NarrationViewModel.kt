@@ -97,8 +97,6 @@ class NarrationViewModel : ViewModel() {
 
     private lateinit var volumeBar: VolumeBar
 
-    val recordResumeProperty = SimpleBooleanProperty()
-    var recordResume by recordResumeProperty
     val recordAgainVerseIndexProperty = SimpleObjectProperty<Int?>()
     var recordAgainVerseIndex by recordAgainVerseIndexProperty
     val recordingVerseIndex = SimpleIntegerProperty()
@@ -281,7 +279,6 @@ class NarrationViewModel : ViewModel() {
         volumeBar = VolumeBar(narration.getRecorderAudioStream())
         subscribeActiveVersesChanged()
         subscribeTaskRunnerBusyChanged()
-        updateRecordingState()
         rendererAudioReader = narration.audioReader
         rendererAudioReader.open()
         renderer = NarrationWaveformRenderer(
@@ -303,10 +300,6 @@ class NarrationViewModel : ViewModel() {
         narrationStateMachine = NarrationStateMachine(narration.totalVerses)
         subscribeNarrationStateChanged()
         narrationStateMachine.initialize(narration.versesWithRecordings())
-    }
-
-    private fun updateRecordingState() {
-        recordResume = recordedVerses.isNotEmpty()
     }
 
     private fun getChapterList(chapters: Observable<Chapter>): Single<Chapter> {
@@ -340,7 +333,6 @@ class NarrationViewModel : ViewModel() {
         chunksList.clear()
         narratableList.clear()
 
-        recordResumeProperty.set(false)
         recordAgainVerseIndexProperty.set(null)
         recordingVerseIndex.set(-1)
         playingVerseIndex.set(-1)
@@ -727,8 +719,6 @@ class NarrationViewModel : ViewModel() {
     fun onChapterReturnFromPlugin() {
         narration.loadFromSelectedChapterFile()
         recordedVerses.setAll(narration.activeVerses)
-        updateRecordingState()
-
         resetNarratableList()
 
         // Indicates that we used a temporary take to edit the chapter
@@ -774,7 +764,6 @@ class NarrationViewModel : ViewModel() {
         narration.onResetAll()
 
         narrationStateMachine.initialize(narration.versesWithRecordings())
-        recordResume = false
 
         clearTeleprompter()
     }
@@ -901,8 +890,6 @@ class NarrationViewModel : ViewModel() {
                     } else {
                         narration.seek(0)
                     }
-
-                    recordResume = recordedVerses.isNotEmpty()
                     createPotentiallyFinishedChapterTake()
                 },
                 { e ->

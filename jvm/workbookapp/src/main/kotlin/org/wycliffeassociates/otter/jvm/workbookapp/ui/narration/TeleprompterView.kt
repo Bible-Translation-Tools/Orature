@@ -50,10 +50,7 @@ class TeleprompterViewModel : ViewModel() {
 
     val stickyVerseProperty = SimpleObjectProperty<NarratableItemData>()
     val showStickyVerseProperty = SimpleBooleanProperty(false)
-
-    private val recordResumeProperty = SimpleBooleanProperty()
-    private var recordResume by recordResumeProperty
-
+    
     val lastRecordedVerseProperty = SimpleIntegerProperty(0)
 
     val recordingVerseProperty = SimpleIntegerProperty()
@@ -61,7 +58,6 @@ class TeleprompterViewModel : ViewModel() {
     val highlightedVerseProperty = SimpleIntegerProperty()
 
     init {
-        recordResumeProperty.bindBidirectional(narrationViewModel.recordResumeProperty)
         lastRecordedVerseProperty.bindBidirectional(narrationViewModel.lastRecordedVerseProperty)
         recordingVerseProperty.bind(narrationViewModel.recordingVerseIndex)
         playingVerseProperty.bind(narrationViewModel.playingVerseIndex)
