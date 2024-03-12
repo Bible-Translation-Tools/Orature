@@ -700,7 +700,7 @@ class NarrationViewModel : ViewModel() {
 
         // audioPlayer.seek(0)
         audioPlayer.play()
-        performNarrationStateMachineTransition(NarrationStateTransition.PLAY_AUDIO, -1)
+        performNarrationStateMachineTransition(NarrationStateTransition.PLAY_AUDIO)
     }
 
 
@@ -712,7 +712,7 @@ class NarrationViewModel : ViewModel() {
             NarrationStateTransition.PAUSE_AUDIO_PLAYBACK
         }
 
-        performNarrationStateMachineTransition(transition, -1)
+        performNarrationStateMachineTransition(transition)
 
         logger.info("Pausing playback")
         audioPlayer.pause()
@@ -791,7 +791,7 @@ class NarrationViewModel : ViewModel() {
 
 
         if (isModifyingTakeAudioProperty.value) {
-            performNarrationStateMachineTransition(NarrationStateTransition.SAVE, -1)
+            performNarrationStateMachineTransition(NarrationStateTransition.SAVE)
         } else {
             resetNarratableList()
         }
@@ -1113,9 +1113,9 @@ class NarrationViewModel : ViewModel() {
 
     fun handleEvent(event: FXEvent) {
 
-        var index = -1
+        val index: Int
         val transition: NarrationStateTransition = when (event) {
-            
+
             is BeginRecordingEvent -> {
                 record(event.index)
                 index = event.index
@@ -1179,10 +1179,11 @@ class NarrationViewModel : ViewModel() {
         performNarrationStateMachineTransition(transition, index)
     }
 
-    private fun performNarrationStateMachineTransition(transition: NarrationStateTransition, index: Int) {
+    private fun performNarrationStateMachineTransition(transition: NarrationStateTransition, index: Int? = null) {
         val newVerseStates = narrationStateMachine.transition(transition, index)
         val updatednNarratableList =
             narratableList.mapIndexed { idx, item -> item.apply { item.verseState = newVerseStates[idx] } }
+
         setVerseOptions(updatednNarratableList)
         narratableList.setAll(updatednNarratableList)
         refreshTeleprompter()

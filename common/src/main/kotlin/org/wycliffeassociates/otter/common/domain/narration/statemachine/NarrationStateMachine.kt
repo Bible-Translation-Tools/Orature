@@ -89,65 +89,66 @@ class NarrationStateMachine(
     }
 
 
-    fun transition(request: NarrationStateTransition, requestIndex: Int): List<VerseItemState> {
+    fun transition(request: NarrationStateTransition, requestIndex: Int? = null): List<VerseItemState> {
         try {
+            val verseIndex = requestIndex ?: -1
             val newGlobalContext = when (request) {
 
-                NarrationStateTransition.RECORD -> RecordAction.apply(globalContext, verseContexts, requestIndex)
+                NarrationStateTransition.RECORD -> RecordAction.apply(globalContext, verseContexts, verseIndex)
                 NarrationStateTransition.PAUSE_RECORDING -> PauseRecordingAction.apply(
                     globalContext,
                     verseContexts,
-                    requestIndex
+                    verseIndex
                 )
 
                 NarrationStateTransition.RESUME_RECORDING -> ResumeRecordAction.apply(
                     globalContext,
                     verseContexts,
-                    requestIndex
+                    verseIndex
                 )
 
-                NarrationStateTransition.NEXT -> NextAction.apply(globalContext, verseContexts, requestIndex)
+                NarrationStateTransition.NEXT -> NextAction.apply(globalContext, verseContexts, verseIndex)
 
 
                 NarrationStateTransition.RECORD_AGAIN -> {
                     if (verseContexts.any { it.state.type == VerseItemState.RECORDING_PAUSED }) {
                         completePausedRecording()
                     }
-                    RecordAgain.apply(globalContext, verseContexts, requestIndex)
+                    RecordAgain.apply(globalContext, verseContexts, verseIndex)
                 }
 
 
                 NarrationStateTransition.PAUSE_RECORD_AGAIN -> PauseRecordAgain.apply(
                     globalContext,
                     verseContexts,
-                    requestIndex
+                    verseIndex
                 )
 
 
                 NarrationStateTransition.RESUME_RECORD_AGAIN -> ResumeRecordAgain.apply(
                     globalContext,
                     verseContexts,
-                    requestIndex
+                    verseIndex
                 )
 
 
-                NarrationStateTransition.SAVE -> SaveAction.apply(globalContext, verseContexts, requestIndex)
+                NarrationStateTransition.SAVE -> SaveAction.apply(globalContext, verseContexts, verseIndex)
 
-                NarrationStateTransition.PLAY_AUDIO -> PlayAction.apply(globalContext, verseContexts, requestIndex)
+                NarrationStateTransition.PLAY_AUDIO -> PlayAction.apply(globalContext, verseContexts, verseIndex)
 
                 NarrationStateTransition.PAUSE_AUDIO_PLAYBACK -> PausePlaybackAction.apply(
                     globalContext,
                     verseContexts,
-                    requestIndex
+                    verseIndex
                 )
 
                 NarrationStateTransition.PAUSE_AUDIO_PLAYBACK_WHILE_BOUNCING -> PausePlaybackWhileBouncingAction.apply(
                     globalContext,
                     verseContexts,
-                    requestIndex
+                    verseIndex
                 )
 
-                NarrationStateTransition.SAVE_FINISHED -> SaveFinished.apply(globalContext, verseContexts, requestIndex)
+                NarrationStateTransition.SAVE_FINISHED -> SaveFinished.apply(globalContext, verseContexts, verseIndex)
             }
 
             updateGlobalContext(newGlobalContext)
