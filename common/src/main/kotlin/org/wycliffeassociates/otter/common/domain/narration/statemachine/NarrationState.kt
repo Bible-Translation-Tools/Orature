@@ -259,6 +259,7 @@ object BouncingAudioState : NarrationState {
             NarrationStateType.IDLE_FINISHED, // After record again/undo/redo
             NarrationStateType.RECORDING_AGAIN, // Starts recording again while bouncing audio
             NarrationStateType.PLAYING, // Plays verse/chapter while bouncing audio
+            NarrationStateType.BOUNCING_AUDIO, // Moving markers while bouncing
         )
 
     override fun changeState(request: NarrationStateType): NarrationState {
@@ -271,6 +272,7 @@ object BouncingAudioState : NarrationState {
             NarrationStateType.IDLE_FINISHED -> IdleFinishedState
             NarrationStateType.RECORDING_AGAIN -> RecordingAgainState
             NarrationStateType.PLAYING -> PlayingAudioState
+            NarrationStateType.BOUNCING_AUDIO -> BouncingAudioState
             else -> {
                 throw IllegalStateException("State: ${type} tried to transition to state: $request")
             }

@@ -750,6 +750,7 @@ class NarrationViewModel : ViewModel() {
 
 
         if (isModifyingTakeAudioProperty.value) {
+            // TODO: try this without an index and see what happens
             performNarrationStateMachineTransition(NarrationStateTransition.SAVE)
         } else {
             resetNarratableList()
