@@ -182,6 +182,7 @@ class NarrationStateMachine(
         val isRecordingAgain = globalContext.type == NarrationStateType.RECORDING_AGAIN
         val isRecordAgainPaused = globalContext.type == NarrationStateType.RECORDING_AGAIN_PAUSED
         val isPlaying = globalContext.type == NarrationStateType.PLAYING
+        val isBouncing = globalContext.type == NarrationStateType.BOUNCING_AUDIO
 
 
         return verseContexts.map {
@@ -206,6 +207,7 @@ class NarrationStateMachine(
                     && !isRecordingAgain
                     && !isRecordAgainPaused
                     && !isPlaying
+                    && !isBouncing
 
             val isRecordAgainOptionEnabled = hasRecording
                     && !isRecording

@@ -866,11 +866,11 @@ class NarrationViewModel : ViewModel() {
                     navigator.blockNavigationEvents.set(!isIdle)
 
                     if (isIdle && narrationStateMachine.getGlobalContext().type == NarrationStateType.BOUNCING_AUDIO) {
-                        narrationStateMachine.transition(NarrationStateTransition.SAVE_FINISHED, -1)
+                        performNarrationStateMachineTransition(NarrationStateTransition.SAVE_FINISHED)
                     }
 
                     if (!isIdle && narrationStateMachine.getGlobalContext().type == NarrationStateType.IDLE_FINISHED) {
-                        narrationStateMachine.transition(NarrationStateTransition.SAVE, -1)
+                        performNarrationStateMachineTransition(NarrationStateTransition.SAVE)
                     }
 
                     // Indicates that we have opened the saving model to interrupt either a chapter navigation or
