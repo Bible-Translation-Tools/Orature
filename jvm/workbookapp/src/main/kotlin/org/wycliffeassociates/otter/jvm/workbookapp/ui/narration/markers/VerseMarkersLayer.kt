@@ -74,23 +74,19 @@ class VerseMarkersLayer : BorderPane() {
         bindChildren(verseMarkersControls) { verseMarkerControl ->
 
             verseMarkerControl.apply {
+                val dragTarget = dragAreaProperty.value
 
-                mouseTransparentProperty().bind(
+                dragTarget.mouseTransparentProperty().bind(
                     Bindings.createBooleanBinding(
                         {
                             narrationStateProperty.value?.let {
-                                it == NarrationStateType.RECORDING
-                                        || it == NarrationStateType.RECORDING_PAUSED
-                                        || it == NarrationStateType.RECORDING_AGAIN
-                                        || it == NarrationStateType.RECORDING_AGAIN_PAUSED
-                                        || it == NarrationStateType.PLAYING
-
+                                it == NarrationStateType.RECORDING_PAUSED
                             } ?: false
                         },
                         narrationStateProperty
                     )
                 )
-                val dragTarget = dragAreaProperty.value
+
 
                 var delta = 0.0
                 var oldPos = 0.0
