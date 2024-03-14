@@ -62,7 +62,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.NarratableItemData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.NarratableItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.MARKER_AREA_WIDTH
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.NarrationWaveformRenderer
@@ -120,7 +120,7 @@ class NarrationViewModel : ViewModel() {
 
     val chunkTotalProperty = SimpleIntegerProperty(0)
     val chunksList: ObservableList<Chunk> = observableListOf()
-    val narratableList: ObservableList<NarratableItemData> = observableListOf()
+    val narratableList: ObservableList<NarratableItemModel> = observableListOf()
     val recordedVerses = observableListOf<AudioMarker>()
     val hasVersesProperty = SimpleBooleanProperty()
     val lastRecordedVerseProperty = SimpleIntegerProperty()
@@ -169,7 +169,6 @@ class NarrationViewModel : ViewModel() {
             }
         }
 
-
         chunksList.onChange {
             val newNarratableItems = chunksList.map { chunk ->
 
@@ -192,22 +191,24 @@ class NarrationViewModel : ViewModel() {
                 val verseState =
                     if (hasRecording) VerseItemState.RECORD_AGAIN else VerseItemState.RECORD_DISABLED
 
-                NarratableItemData(
+
+                NarratableItemModel(
+                    NarratableItem(verseState),
                     chunk,
                     marker,
-                    verseState,
                     chunk.sort - 1 <= recordedVerses.size,
                 )
             }
 
+
+            // TODO: remove lines where I have something like "it.narratableItem.verseState". We should be using the model
+            //  not the data.
             val firstUnrecordedVerse =
                 newNarratableItems.indexOfFirst { it.verseState == VerseItemState.RECORD_DISABLED }
 
             if (firstUnrecordedVerse >= 0) {
                 newNarratableItems[firstUnrecordedVerse].verseState = VerseItemState.RECORD
             }
-
-            setVerseOptions(newNarratableItems)
 
             narratableList.setAll(newNarratableItems)
         }
@@ -554,23 +555,19 @@ class NarrationViewModel : ViewModel() {
         }
     }
 
-    private fun clearTeleprompter() {
-        narratableList.forEach { chunk ->
-            chunk.verseState = VerseItemState.RECORD_DISABLED
-        }
-        narratableList[0].verseState = VerseItemState.RECORD
-        setVerseOptions(narratableList)
-        narratableList.setAll(narratableList.toList())
-        refreshTeleprompter()
-        FX.eventbus.fire(TeleprompterSeekEvent(0))
-    }
-
     private fun resetNarratableList() {
 
         narrationStateMachine.initialize(narration.versesWithRecordings())
         val newVerseStates = narrationStateMachine.getVerseItemStates()
         val updatedNarratableList =
-            narratableList.mapIndexed { idx, item -> item.apply { item.verseState = newVerseStates[idx] } }
+            narratableList.mapIndexed { idx, item ->
+                NarratableItemModel(
+                    newVerseStates[idx],
+                    item.chunk,
+                    item.marker,
+                    item.previousChunksRecorded
+                )
+            }
 
         val lastIndex = updatedNarratableList.indexOfFirst { !it.hasRecording }
         var scrollToVerse = 0
@@ -580,7 +577,6 @@ class NarrationViewModel : ViewModel() {
             scrollToVerse = lastIndex
         }
 
-        setVerseOptions(updatedNarratableList)
         narratableList.setAll(updatedNarratableList)
         refreshTeleprompter()
         FX.eventbus.fire(TeleprompterSeekEvent(scrollToVerse))
@@ -604,47 +600,6 @@ class NarrationViewModel : ViewModel() {
         snackBarObservable.onNext(message)
     }
 
-
-    // TODO: I really do not like this method here. It seems like it belongs in another class. Just not sure where.
-    private fun setVerseOptions(verses: List<NarratableItemData>) {
-
-        val isRecording = narrationStateProperty.value == NarrationStateType.RECORDING
-        val isRecordingPaused = narrationStateProperty.value == NarrationStateType.RECORDING_PAUSED
-        val isRecordingAgain = narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN
-        val isRecordAgainPaused = narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN_PAUSED
-        val isPlaying = narrationStateProperty.value == NarrationStateType.PLAYING
-
-        verses.forEach {
-            val isAnotherVerseRecordingPaused = isRecordingPaused && it.verseState != VerseItemState.RECORDING_PAUSED
-
-            val hasRecording = it.verseState == VerseItemState.RECORD_AGAIN_PAUSED
-                    || it.verseState == VerseItemState.RECORDING_PAUSED || it.verseState == VerseItemState.RECORD_AGAIN
-
-            val isVerseRecordingPaused = it.verseState == VerseItemState.RECORDING_PAUSED
-
-
-            it.isPlayOptionEnabled = hasRecording
-                    && !isRecording
-                    && !isRecordingAgain
-                    && !isRecordAgainPaused
-                    && !isPlaying
-                    && !isAnotherVerseRecordingPaused
-
-            it.isEditVerseOptionEnabled = hasRecording
-                    && !isRecording
-                    && !isRecordingPaused
-                    && !isRecordingAgain
-                    && !isRecordAgainPaused
-                    && !isPlaying
-
-            it.isRecordAgainOptionEnabled = hasRecording
-                    && !isRecording
-                    && !isRecordingAgain
-                    && !isRecordAgainPaused
-                    && !isPlaying
-                    && !isVerseRecordingPaused
-        }
-    }
 
     fun play(verse: AudioMarker) {
         val verseIndex = recordedVerses.indexOf(verse)
@@ -708,7 +663,10 @@ class NarrationViewModel : ViewModel() {
 
         renderer.clearActiveRecordingData()
 
-        createPotentiallyFinishedChapterTake()
+
+//        // TODO NOTE: this call to createPotentiallyFinishedChapterTake fails because we are still in a recording paused state while
+//        //  trying to save
+//        createPotentiallyFinishedChapterTake()
     }
 
     fun openInAudioPlugin(index: Int) {
@@ -766,7 +724,8 @@ class NarrationViewModel : ViewModel() {
 
         narrationStateMachine.initialize(narration.versesWithRecordings())
 
-        clearTeleprompter()
+        refreshTeleprompter()
+        FX.eventbus.fire(TeleprompterSeekEvent(0))
     }
 
     fun undo() {
@@ -1114,14 +1073,25 @@ class NarrationViewModel : ViewModel() {
         }
 
         performNarrationStateMachineTransition(transition, index)
+
+        if (transition == NarrationStateTransition.SAVE) {
+            createPotentiallyFinishedChapterTake()
+        }
     }
 
     private fun performNarrationStateMachineTransition(transition: NarrationStateTransition, index: Int? = null) {
         val newVerseStates = narrationStateMachine.transition(transition, index)
-        val updatednNarratableList =
-            narratableList.mapIndexed { idx, item -> item.apply { item.verseState = newVerseStates[idx] } }
 
-        setVerseOptions(updatednNarratableList)
+        val updatednNarratableList =
+            narratableList.mapIndexed { idx, item ->
+                NarratableItemModel(
+                    newVerseStates[idx],
+                    item.chunk,
+                    item.marker,
+                    item.previousChunksRecorded
+                )
+            }
+        
         narratableList.setAll(updatednNarratableList)
         refreshTeleprompter()
     }

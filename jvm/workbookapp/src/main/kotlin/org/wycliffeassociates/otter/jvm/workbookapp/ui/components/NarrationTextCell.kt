@@ -27,14 +27,14 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.narration.statemachine.NarrationStateType
 import org.wycliffeassociates.otter.jvm.controls.event.*
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.NarratableItemData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.NarratableItemModel
 import tornadofx.*
 
 class NarrationTextCell(
     private val nextChunkText: String,
     private val narrationStateProperty: ObservableValue<NarrationStateType>,
     highlightedVerseProperty: IntegerProperty,
-) : ListCell<NarratableItemData>() {
+) : ListCell<NarratableItemModel>() {
 
     private val logger = LoggerFactory.getLogger(NarrationTextCell::class.java)
 
@@ -48,7 +48,7 @@ class NarrationTextCell(
         addClass("narration-list__verse-cell")
     }
 
-    override fun updateItem(item: NarratableItemData?, empty: Boolean) {
+    override fun updateItem(item: NarratableItemModel?, empty: Boolean) {
         super.updateItem(item, empty)
 
         if (empty || item == null) {

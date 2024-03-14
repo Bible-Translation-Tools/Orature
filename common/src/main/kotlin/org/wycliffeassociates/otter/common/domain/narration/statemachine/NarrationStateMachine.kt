@@ -47,8 +47,8 @@ class NarrationStateMachine(
         return globalContext
     }
 
-    fun getVerseItemStates(): List<VerseItemState> {
-        return verseContexts.map { it.state.type }
+    fun getVerseItemStates(): List<NarratableItem> {
+        return getNarratableItemsList(verseContexts)
     }
 
     private fun updateGlobalContext(newContext: NarrationState) {
@@ -89,7 +89,7 @@ class NarrationStateMachine(
     }
 
 
-    fun transition(request: NarrationStateTransition, requestIndex: Int? = null): List<VerseItemState> {
+    fun transition(request: NarrationStateTransition, requestIndex: Int? = null): List<NarratableItem> {
         try {
             val verseIndex = requestIndex ?: -1
             val newGlobalContext = when (request) {
@@ -156,7 +156,7 @@ class NarrationStateMachine(
             logger.error("Error in state transition for requestIndex: $requestIndex, action $request", e)
             throw e
         }
-        return verseContexts.map { it.state.type }
+        return getNarratableItemsList(verseContexts)
     }
 
     /**
@@ -174,4 +174,48 @@ class NarrationStateMachine(
             verseContexts[pausedRecordingIndex + 1].changeState(VerseItemState.RECORD)
         }
     }
+
+    private fun getNarratableItemsList(verseContexts: List<VerseStateContext>): List<NarratableItem> {
+
+        val isRecording = globalContext.type == NarrationStateType.RECORDING
+        val isRecordingPaused = globalContext.type == NarrationStateType.RECORDING_PAUSED
+        val isRecordingAgain = globalContext.type == NarrationStateType.RECORDING_AGAIN
+        val isRecordAgainPaused = globalContext.type == NarrationStateType.RECORDING_AGAIN_PAUSED
+        val isPlaying = globalContext.type == NarrationStateType.PLAYING
+
+
+        return verseContexts.map {
+            val isAnotherVerseRecordingPaused = isRecordingPaused && it.state.type != VerseItemState.RECORDING_PAUSED
+
+            val hasRecording = it.state.type == VerseItemState.RECORD_AGAIN_PAUSED
+                    || it.state.type == VerseItemState.RECORDING_PAUSED || it.state.type == VerseItemState.RECORD_AGAIN
+
+            val isVerseRecordingPaused = it.state.type == VerseItemState.RECORDING_PAUSED
+
+
+            val isPlayOptionEnabled = hasRecording
+                    && !isRecording
+                    && !isRecordingAgain
+                    && !isRecordAgainPaused
+                    && !isPlaying
+                    && !isAnotherVerseRecordingPaused
+
+            val isEditVerseOptionEnabled = hasRecording
+                    && !isRecording
+                    && !isRecordingPaused
+                    && !isRecordingAgain
+                    && !isRecordAgainPaused
+                    && !isPlaying
+
+            val isRecordAgainOptionEnabled = hasRecording
+                    && !isRecording
+                    && !isRecordingAgain
+                    && !isRecordAgainPaused
+                    && !isPlaying
+                    && !isVerseRecordingPaused
+
+            NarratableItem(it.state.type, isPlayOptionEnabled, isEditVerseOptionEnabled, isRecordAgainOptionEnabled)
+        }
+    }
+
 }
