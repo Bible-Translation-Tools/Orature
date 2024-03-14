@@ -722,10 +722,7 @@ class NarrationViewModel : ViewModel() {
     fun restartChapter() {
         narration.onResetAll()
 
-        narrationStateMachine.initialize(narration.versesWithRecordings())
-
-        refreshTeleprompter()
-        FX.eventbus.fire(TeleprompterSeekEvent(0))
+        resetNarratableList()
     }
 
     fun undo() {
@@ -1091,7 +1088,7 @@ class NarrationViewModel : ViewModel() {
                     item.previousChunksRecorded
                 )
             }
-        
+
         narratableList.setAll(updatednNarratableList)
         refreshTeleprompter()
     }
