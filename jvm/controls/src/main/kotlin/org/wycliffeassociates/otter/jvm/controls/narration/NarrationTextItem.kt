@@ -135,7 +135,8 @@ class NarrationTextItem : VBox() {
                 alignment = Pos.CENTER
                 hbox {
                     // BEGIN RECORDING
-                    alignment = Pos.CENTER
+                    alignment = Pos.TOP_CENTER
+                    paddingTop = 10.0
                     narration_button {
                         alignment = Pos.CENTER
                         prefWidth = 316.0
@@ -149,7 +150,8 @@ class NarrationTextItem : VBox() {
                 }
                 hbox {
                     // RECORD
-                    alignment = Pos.CENTER
+                    alignment = Pos.TOP_CENTER
+                    paddingTop = 10.0
                     narration_button {
                         alignment = Pos.CENTER
                         prefWidth = 316.0
@@ -163,7 +165,8 @@ class NarrationTextItem : VBox() {
                 }
                 hbox {
                     // RECORD_ACTIVE
-                    alignment = Pos.CENTER
+                    alignment = Pos.TOP_CENTER
+                    paddingTop = 10.0
                     spacing = 16.0
                     narration_button {
                         prefWidth = 150.0
@@ -212,7 +215,8 @@ class NarrationTextItem : VBox() {
                 }
                 hbox {
                     // RECORDING PAUSED
-                    alignment = Pos.CENTER
+                    alignment = Pos.TOP_CENTER
+                    paddingTop = 10.0
                     spacing = 16.0
                     narration_button {
                         prefWidth = 150.0
@@ -260,7 +264,8 @@ class NarrationTextItem : VBox() {
                 }
                 hbox {
                     // RECORD_DISABLED
-                    alignment = Pos.CENTER
+                    alignment = Pos.TOP_CENTER
+                    paddingTop = 10.0
                     narration_button {
                         alignment = Pos.CENTER
                         prefWidth = 316.0
@@ -274,7 +279,8 @@ class NarrationTextItem : VBox() {
                 }
                 hbox {
                     // RECORD_AGAIN
-                    alignment = Pos.CENTER
+                    alignment = Pos.TOP_CENTER
+                    paddingTop = 10.0
                     narration_button {
                         alignment = Pos.CENTER
                         prefWidth = 316.0
@@ -288,7 +294,8 @@ class NarrationTextItem : VBox() {
                 }
                 hbox {
                     // RECORD_AGAIN_DISABLED
-                    alignment = Pos.CENTER
+                    alignment = Pos.TOP_CENTER
+                    paddingTop = 10.0
                     narration_button {
                         alignment = Pos.CENTER
                         prefWidth = 316.0
@@ -303,7 +310,8 @@ class NarrationTextItem : VBox() {
                 }
                 hbox {
                     // RECORD_AGAIN_ACTIVE
-                    alignment = Pos.CENTER
+                    alignment = Pos.TOP_CENTER
+                    paddingTop = 10.0
                     spacing = 16.0
                     narration_button {
                         addClass("btn", "btn--secondary")
@@ -323,7 +331,8 @@ class NarrationTextItem : VBox() {
                 }
                 hbox {
                     // RECORD_AGAIN_PAUSED
-                    alignment = Pos.CENTER
+                    alignment = Pos.TOP_CENTER
+                    paddingTop = 10.0
                     spacing = 16.0
                     narration_button {
                         addClass("btn", "btn--secondary")
