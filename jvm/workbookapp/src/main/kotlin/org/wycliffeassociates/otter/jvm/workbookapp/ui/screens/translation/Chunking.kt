@@ -22,6 +22,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.animation.AnimationTimer
+import javafx.beans.binding.BooleanBinding
 import javafx.scene.control.Tooltip
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
@@ -37,6 +38,8 @@ import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
+import org.wycliffeassociates.otter.jvm.controls.marker.MARKER_WIDTH_APPROX
+import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
@@ -93,6 +96,10 @@ class Chunking : View() {
                     addClass("btn", "btn--primary", "consume__btn")
                     tooltip(text)
                     graphic = FontIcon(MaterialDesign.MDI_PLUS)
+
+                    disableWhen {
+                        isOverlappingNearbyMarker()
+                    }
 
                     action {
                         viewModel.placeMarker()
@@ -155,6 +162,17 @@ class Chunking : View() {
         timer?.stop()
         unsubscribeEvents()
         viewModel.undock()
+    }
+
+    private fun isOverlappingNearbyMarker(): BooleanBinding {
+        return booleanBinding(viewModel.positionProperty, viewModel.markers) {
+            viewModel.markers.any {
+                framesToPixels(it.frame) in IntRange(
+                    (viewModel.positionProperty.value - MARKER_WIDTH_APPROX).toInt(),
+                    (viewModel.positionProperty.value + MARKER_WIDTH_APPROX).toInt()
+                )
+            }
+        }
     }
 
     private fun subscribeEvents() {
