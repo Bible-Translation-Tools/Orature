@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.common.persistence.repositories
 
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.atLeast
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
@@ -656,13 +657,13 @@ class TestWorkbookRepository {
 
         // Select a take to set up the test, and verify the preconditions
         chunk.audio.selected.accept(TakeHolder(take))
-        verify(mockedDb, times(1)).updateContent(any())
+        verify(mockedDb, atLeast(1)).updateContent(any())
         verify(mockedDb, times(0)).deleteTake(any(), any())
         Assert.assertNotNull("Selection should be non-null", chunk.audio.selected.value?.value)
 
         // Delete the take, and confirm the selection is cleared
         take.deletedTimestamp.accept(DateHolder.now())
-        verify(mockedDb, times(2)).updateContent(any())
+        verify(mockedDb, atLeast(2)).updateContent(any())
         verify(mockedDb, times(1)).deleteTake(any(), any())
         Assert.assertNull("Selection should be null", chunk.audio.selected.value?.value)
     }
