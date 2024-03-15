@@ -200,9 +200,6 @@ class NarrationViewModel : ViewModel() {
                 )
             }
 
-
-            // TODO: remove lines where I have something like "it.narratableItem.verseState". We should be using the model
-            //  not the data.
             val firstUnrecordedVerse =
                 newNarratableItems.indexOfFirst { it.verseState == VerseItemState.RECORD_DISABLED }
 
@@ -265,7 +262,7 @@ class NarrationViewModel : ViewModel() {
                 when (event) {
                     AudioPlayerEvent.COMPLETE -> {
                         val transition = if (isModifyingTakeAudioProperty.value) {
-                            NarrationStateTransition.PAUSE_AUDIO_PLAYBACK_WHILE_BOUNCING
+                            NarrationStateTransition.PAUSE_PLAYBACK_WHILE_MODIFYING_AUDIO
                         } else {
                             NarrationStateTransition.PAUSE_AUDIO_PLAYBACK
                         }
@@ -631,7 +628,7 @@ class NarrationViewModel : ViewModel() {
     fun pausePlayback() {
 
         val transition = if (isModifyingTakeAudioProperty.value) {
-            NarrationStateTransition.PAUSE_AUDIO_PLAYBACK_WHILE_BOUNCING
+            NarrationStateTransition.PAUSE_PLAYBACK_WHILE_MODIFYING_AUDIO
         } else {
             NarrationStateTransition.PAUSE_AUDIO_PLAYBACK
         }
@@ -662,11 +659,6 @@ class NarrationViewModel : ViewModel() {
         recordingVerseIndex.set(-1)
 
         renderer.clearActiveRecordingData()
-
-
-//        // TODO NOTE: this call to createPotentiallyFinishedChapterTake fails because we are still in a recording paused state while
-//        //  trying to save
-//        createPotentiallyFinishedChapterTake()
     }
 
     fun openInAudioPlugin(index: Int) {
@@ -703,15 +695,17 @@ class NarrationViewModel : ViewModel() {
         }
     }
 
-    fun moveMarker(index: Int, delta: Int) {
+    fun startMoveMarker(index: Int) {
+        performNarrationStateMachineTransition(NarrationStateTransition.MOVING_MARKER)
+    }
+
+    fun finishMoveMarker(index: Int, delta: Int) {
         narration.onVerseMarkerMoved(index, delta)
 
-
         if (isModifyingTakeAudioProperty.value) {
-            // TODO: try this without an index and see what happens
-            performNarrationStateMachineTransition(NarrationStateTransition.SAVE)
+            performNarrationStateMachineTransition(NarrationStateTransition.PLACE_MARKER_WHILE_MODIFYING_AUDIO, index)
         } else {
-            resetNarratableList()
+            performNarrationStateMachineTransition(NarrationStateTransition.PLACE_MARKER, index)
         }
     }
 
@@ -865,7 +859,7 @@ class NarrationViewModel : ViewModel() {
                     isModifyingTakeAudioProperty.set(!isIdle)
                     navigator.blockNavigationEvents.set(!isIdle)
 
-                    if (isIdle && narrationStateMachine.getGlobalContext().type == NarrationStateType.BOUNCING_AUDIO) {
+                    if (isIdle && narrationStateMachine.getGlobalContext().type == NarrationStateType.MODIFYING_AUDIO_FILE) {
                         performNarrationStateMachineTransition(NarrationStateTransition.SAVE_FINISHED)
                     }
 
@@ -1079,7 +1073,10 @@ class NarrationViewModel : ViewModel() {
     private fun performNarrationStateMachineTransition(transition: NarrationStateTransition, index: Int? = null) {
         val newVerseStates = narrationStateMachine.transition(transition, index)
 
-        val updatednNarratableList =
+        if (transition == NarrationStateTransition.MOVING_MARKER) {
+            return
+        }
+        val updatedNarratableList =
             narratableList.mapIndexed { idx, item ->
                 NarratableItemModel(
                     newVerseStates[idx],
@@ -1089,7 +1086,7 @@ class NarrationViewModel : ViewModel() {
                 )
             }
 
-        narratableList.setAll(updatednNarratableList)
+        narratableList.setAll(updatedNarratableList)
         refreshTeleprompter()
     }
 

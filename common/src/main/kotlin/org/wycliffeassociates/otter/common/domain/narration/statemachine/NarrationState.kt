@@ -9,7 +9,8 @@ enum class NarrationStateType {
     IDLE_EMPTY,
     IDLE_IN_PROGRESS,
     IDLE_FINISHED,
-    BOUNCING_AUDIO,
+    MODIFYING_AUDIO_FILE,
+    MOVING_MARKER,
 }
 
 
@@ -26,7 +27,7 @@ object RecordingState : NarrationState {
     override val validStateTransitions: Set<NarrationStateType> =
         setOf(
             NarrationStateType.RECORDING_PAUSED, // Pause
-            NarrationStateType.BOUNCING_AUDIO, // Save (while recording last verse)
+            NarrationStateType.MODIFYING_AUDIO_FILE, // Save (while recording last verse)
             NarrationStateType.RECORDING, // Next
         )
 
@@ -37,7 +38,7 @@ object RecordingState : NarrationState {
 
         return when (request) {
             NarrationStateType.RECORDING_PAUSED -> RecordingPausedState
-            NarrationStateType.BOUNCING_AUDIO -> BouncingAudioState
+            NarrationStateType.MODIFYING_AUDIO_FILE -> ModifyingAudioState
             NarrationStateType.RECORDING -> RecordingState
             else -> {
                 throw IllegalStateException("State: ${type} tried to transition to state: $request")
@@ -54,7 +55,7 @@ object RecordingPausedState : NarrationState {
         setOf(
             NarrationStateType.RECORDING, // Resume
             NarrationStateType.IDLE_IN_PROGRESS, // Next
-            NarrationStateType.BOUNCING_AUDIO, // Save (last verse)
+            NarrationStateType.MODIFYING_AUDIO_FILE, // Save (last verse)
             NarrationStateType.PLAYING, // Playing paused verse
             NarrationStateType.RECORDING_AGAIN, // Record again
         )
@@ -67,7 +68,7 @@ object RecordingPausedState : NarrationState {
         return when (request) {
             NarrationStateType.RECORDING -> RecordingState
             NarrationStateType.IDLE_IN_PROGRESS -> IdleInProgressState
-            NarrationStateType.BOUNCING_AUDIO -> BouncingAudioState
+            NarrationStateType.MODIFYING_AUDIO_FILE -> ModifyingAudioState
             NarrationStateType.PLAYING -> PlayingAudioState
             NarrationStateType.RECORDING_AGAIN -> RecordingAgainState
             else -> {
@@ -83,7 +84,7 @@ object RecordingAgainState : NarrationState {
 
     override val validStateTransitions: Set<NarrationStateType> =
         setOf(
-            NarrationStateType.BOUNCING_AUDIO, // Save
+            NarrationStateType.MODIFYING_AUDIO_FILE, // Save
             NarrationStateType.RECORDING_AGAIN_PAUSED, // Pause
             NarrationStateType.IDLE_IN_PROGRESS
         )
@@ -94,7 +95,7 @@ object RecordingAgainState : NarrationState {
         }
 
         return when (request) {
-            NarrationStateType.BOUNCING_AUDIO -> BouncingAudioState
+            NarrationStateType.MODIFYING_AUDIO_FILE -> ModifyingAudioState
             NarrationStateType.RECORDING_AGAIN_PAUSED -> RecordingAgainPausedState
             NarrationStateType.IDLE_IN_PROGRESS -> IdleInProgressState
             else -> {
@@ -110,7 +111,7 @@ object RecordingAgainPausedState : NarrationState {
 
     override val validStateTransitions: Set<NarrationStateType> =
         setOf(
-            NarrationStateType.BOUNCING_AUDIO, // Save (with all verses recorded)
+            NarrationStateType.MODIFYING_AUDIO_FILE, // Save (with all verses recorded)
             NarrationStateType.RECORDING_AGAIN, // Resume
             NarrationStateType.IDLE_IN_PROGRESS, // Save (without all verses recorded)
         )
@@ -121,7 +122,7 @@ object RecordingAgainPausedState : NarrationState {
         }
 
         return when (request) {
-            NarrationStateType.BOUNCING_AUDIO -> BouncingAudioState
+            NarrationStateType.MODIFYING_AUDIO_FILE -> ModifyingAudioState
             NarrationStateType.RECORDING_AGAIN -> RecordingAgainState
             NarrationStateType.IDLE_IN_PROGRESS -> IdleInProgressState
             else -> {
@@ -140,7 +141,7 @@ object PlayingAudioState : NarrationState {
             NarrationStateType.RECORDING_PAUSED, // After playing a verse that was in a recording paused state
             NarrationStateType.IDLE_IN_PROGRESS, // Playing audio completes without all verses recorded
             NarrationStateType.IDLE_FINISHED, // Playing audio completes  with all verses recorded,
-            NarrationStateType.BOUNCING_AUDIO, // Started playing audio while bouncing, and bouncing has not finished
+            NarrationStateType.MODIFYING_AUDIO_FILE, // Started playing audio while bouncing, and bouncing has not finished
         )
 
     override fun changeState(request: NarrationStateType): NarrationState {
@@ -152,7 +153,7 @@ object PlayingAudioState : NarrationState {
             NarrationStateType.RECORDING_PAUSED -> RecordingPausedState
             NarrationStateType.IDLE_IN_PROGRESS -> IdleInProgressState
             NarrationStateType.IDLE_FINISHED -> IdleFinishedState
-            NarrationStateType.BOUNCING_AUDIO -> BouncingAudioState
+            NarrationStateType.MODIFYING_AUDIO_FILE -> ModifyingAudioState
             else -> {
                 throw IllegalStateException("State: ${type} tried to transition to state: $request")
             }
@@ -195,9 +196,10 @@ object IdleInProgressState : NarrationState {
         setOf(
             NarrationStateType.RECORDING, // Record
             NarrationStateType.RECORDING_AGAIN, // Record again
-            NarrationStateType.BOUNCING_AUDIO, // Open plugin
+            NarrationStateType.MODIFYING_AUDIO_FILE, // Open plugin
             NarrationStateType.IDLE_EMPTY, // Undo record,
             NarrationStateType.PLAYING, // Play verse/chapter
+            NarrationStateType.MOVING_MARKER,
         )
 
     override fun changeState(request: NarrationStateType): NarrationState {
@@ -207,10 +209,11 @@ object IdleInProgressState : NarrationState {
 
         return when (request) {
             NarrationStateType.RECORDING -> RecordingState
-            NarrationStateType.BOUNCING_AUDIO -> BouncingAudioState
+            NarrationStateType.MODIFYING_AUDIO_FILE -> ModifyingAudioState
             NarrationStateType.IDLE_EMPTY -> IdleEmptyState
             NarrationStateType.RECORDING_AGAIN -> RecordingAgainState
             NarrationStateType.PLAYING -> PlayingAudioState
+            NarrationStateType.MOVING_MARKER -> MovingMarkerState
             else -> {
                 throw IllegalStateException("State: ${type} tried to transition to state: $request")
             }
@@ -225,10 +228,11 @@ object IdleFinishedState : NarrationState {
     override val validStateTransitions: Set<NarrationStateType> =
         setOf(
             NarrationStateType.RECORDING_AGAIN, // Record again
-            NarrationStateType.BOUNCING_AUDIO, // Undo/redo, save (after record again), return/open from plugin
+            NarrationStateType.MODIFYING_AUDIO_FILE, // Undo/redo, save (after record again), return/open from plugin
             NarrationStateType.IDLE_EMPTY, // Restart chapter
             NarrationStateType.IDLE_IN_PROGRESS, // Undo record
             NarrationStateType.PLAYING, // Play verse/chapter
+            NarrationStateType.MOVING_MARKER,
         )
 
     override fun changeState(request: NarrationStateType): NarrationState {
@@ -238,10 +242,11 @@ object IdleFinishedState : NarrationState {
 
         return when (request) {
             NarrationStateType.RECORDING_AGAIN -> RecordingAgainState
-            NarrationStateType.BOUNCING_AUDIO -> BouncingAudioState
+            NarrationStateType.MODIFYING_AUDIO_FILE -> ModifyingAudioState
             NarrationStateType.IDLE_EMPTY -> IdleEmptyState
             NarrationStateType.IDLE_IN_PROGRESS -> IdleInProgressState
             NarrationStateType.PLAYING -> PlayingAudioState
+            NarrationStateType.MOVING_MARKER -> MovingMarkerState
             else -> {
                 throw IllegalStateException("State: ${type} tried to transition to state: $request")
             }
@@ -250,8 +255,8 @@ object IdleFinishedState : NarrationState {
 }
 
 
-object BouncingAudioState : NarrationState {
-    override val type: NarrationStateType = NarrationStateType.BOUNCING_AUDIO
+object ModifyingAudioState : NarrationState {
+    override val type: NarrationStateType = NarrationStateType.MODIFYING_AUDIO_FILE
 
     override val validStateTransitions: Set<NarrationStateType> =
         setOf(
@@ -259,7 +264,8 @@ object BouncingAudioState : NarrationState {
             NarrationStateType.IDLE_FINISHED, // After record again/undo/redo
             NarrationStateType.RECORDING_AGAIN, // Starts recording again while bouncing audio
             NarrationStateType.PLAYING, // Plays verse/chapter while bouncing audio
-            NarrationStateType.BOUNCING_AUDIO, // Moving markers while bouncing
+            NarrationStateType.MODIFYING_AUDIO_FILE, // TODO: remove this transition once I have MOVING_MARKER state finished
+            NarrationStateType.MOVING_MARKER, // Moving markers while bouncing
         )
 
     override fun changeState(request: NarrationStateType): NarrationState {
@@ -272,10 +278,39 @@ object BouncingAudioState : NarrationState {
             NarrationStateType.IDLE_FINISHED -> IdleFinishedState
             NarrationStateType.RECORDING_AGAIN -> RecordingAgainState
             NarrationStateType.PLAYING -> PlayingAudioState
-            NarrationStateType.BOUNCING_AUDIO -> BouncingAudioState
+            NarrationStateType.MODIFYING_AUDIO_FILE -> ModifyingAudioState
+            NarrationStateType.MOVING_MARKER -> MovingMarkerState
             else -> {
                 throw IllegalStateException("State: ${type} tried to transition to state: $request")
             }
         }
     }
+}
+
+
+object MovingMarkerState : NarrationState {
+    override val type: NarrationStateType = NarrationStateType.MOVING_MARKER
+
+    override val validStateTransitions: Set<NarrationStateType> =
+        setOf(
+            NarrationStateType.IDLE_IN_PROGRESS, // Moving marker finished without all verses placed
+            NarrationStateType.IDLE_FINISHED, // Moving marker finished with all verses placed
+            NarrationStateType.MODIFYING_AUDIO_FILE, // Moving marker finished while bouncing audio
+        )
+
+    override fun changeState(request: NarrationStateType): NarrationState {
+        if (request !in validStateTransitions) {
+            throw IllegalStateException("State: ${type} tried to transition to state: $request")
+        }
+
+        return when (request) {
+            NarrationStateType.IDLE_IN_PROGRESS -> IdleInProgressState
+            NarrationStateType.IDLE_FINISHED -> IdleFinishedState
+            NarrationStateType.MODIFYING_AUDIO_FILE -> ModifyingAudioState
+            else -> {
+                throw IllegalStateException("State: ${type} tried to transition to state: $request")
+            }
+        }
+    }
+
 }

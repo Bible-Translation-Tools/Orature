@@ -13,7 +13,10 @@ enum class NarrationStateTransition {
     SAVE_FINISHED,
     PLAY_AUDIO,
     PAUSE_AUDIO_PLAYBACK,
-    PAUSE_AUDIO_PLAYBACK_WHILE_BOUNCING
+    PAUSE_PLAYBACK_WHILE_MODIFYING_AUDIO,
+    MOVING_MARKER,
+    PLACE_MARKER,
+    PLACE_MARKER_WHILE_MODIFYING_AUDIO,
 }
 
 
@@ -139,7 +142,7 @@ object SaveAction {
         val allVersesRecorded = verseContexts.all { it.state == RecordAgainState }
 
         return if (allVersesRecorded) {
-            globalContext.changeState(NarrationStateType.BOUNCING_AUDIO)
+            globalContext.changeState(NarrationStateType.MODIFYING_AUDIO_FILE)
         } else {
             globalContext.changeState(NarrationStateType.IDLE_IN_PROGRESS)
         }
@@ -235,7 +238,7 @@ object PausePlaybackAction {
 }
 
 
-object PausePlaybackWhileBouncingAction {
+object PausePlaybackWhileModifyingAudioAction {
     fun apply(
         globalContext: NarrationState,
         verseContexts: MutableList<VerseStateContext>,
@@ -255,10 +258,59 @@ object PausePlaybackWhileBouncingAction {
             }
         }
 
-        return globalContext.changeState(NarrationStateType.BOUNCING_AUDIO)
+        return globalContext.changeState(NarrationStateType.MODIFYING_AUDIO_FILE)
     }
 }
 
+
+object MovingMarkerAction {
+    fun apply(
+        globalContext: NarrationState,
+        verseContexts: MutableList<VerseStateContext>,
+        index: Int
+    ): NarrationState {
+
+
+        // TODO note: I should transition the individual marker to MOVING
+
+        return globalContext.changeState(NarrationStateType.MOVING_MARKER)
+    }
+
+}
+
+
+object PlaceMarkerAction {
+    fun apply(
+        globalContext: NarrationState,
+        verseContexts: MutableList<VerseStateContext>,
+        index: Int
+    ): NarrationState {
+
+        // TODO note: I should transition the individual marker back to not moving
+        val allVersesRecorded =
+            !verseContexts.any { it.state.type == VerseItemState.RECORD_DISABLED || it.state.type == VerseItemState.RECORD }
+
+        return if (allVersesRecorded) {
+            globalContext.changeState(NarrationStateType.IDLE_FINISHED)
+        } else {
+            globalContext.changeState(NarrationStateType.IDLE_IN_PROGRESS)
+        }
+    }
+}
+
+
+object PlaceMarkerWhileModifyingAudioAction {
+    fun apply(
+        globalContext: NarrationState,
+        verseContexts: MutableList<VerseStateContext>,
+        index: Int
+    ): NarrationState {
+
+        // TODO note: I should transition the individual marker back to not moving
+
+        return globalContext.changeState(NarrationStateType.MODIFYING_AUDIO_FILE)
+    }
+}
 
 
 

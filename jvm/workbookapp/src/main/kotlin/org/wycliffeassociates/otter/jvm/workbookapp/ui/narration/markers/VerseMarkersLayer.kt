@@ -95,11 +95,16 @@ class VerseMarkersLayer : BorderPane() {
                 prefHeightProperty().bind(this@VerseMarkersLayer.heightProperty())
 
                 dragTarget.setOnMousePressed { event ->
+
                     event.consume()
                     userIsDraggingProperty.set(true)
                     if (!canBeMovedProperty.value) return@setOnMousePressed
                     delta = 0.0
                     oldPos = layoutX
+
+                    FX.eventbus.fire(
+                        NarrationMovingMarkerEvent(verseMarkerControl.verseIndexProperty.value)
+                    )
                 }
 
                 dragTarget.setOnMouseDragged { event ->
@@ -171,3 +176,5 @@ fun EventTarget.verse_markers_layer(
 }
 
 class NarrationMarkerChangedEvent(val index: Int, val delta: Int) : FXEvent()
+
+class NarrationMovingMarkerEvent(val index: Int) : FXEvent()

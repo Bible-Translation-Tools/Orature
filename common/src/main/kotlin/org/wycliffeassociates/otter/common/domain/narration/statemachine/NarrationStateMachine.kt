@@ -142,13 +142,31 @@ class NarrationStateMachine(
                     verseIndex
                 )
 
-                NarrationStateTransition.PAUSE_AUDIO_PLAYBACK_WHILE_BOUNCING -> PausePlaybackWhileBouncingAction.apply(
+                NarrationStateTransition.PAUSE_PLAYBACK_WHILE_MODIFYING_AUDIO -> PausePlaybackWhileModifyingAudioAction.apply(
                     globalContext,
                     verseContexts,
                     verseIndex
                 )
 
                 NarrationStateTransition.SAVE_FINISHED -> SaveFinished.apply(globalContext, verseContexts, verseIndex)
+
+                NarrationStateTransition.MOVING_MARKER -> MovingMarkerAction.apply(
+                    globalContext,
+                    verseContexts,
+                    verseIndex
+                )
+
+                NarrationStateTransition.PLACE_MARKER -> PlaceMarkerAction.apply(
+                    globalContext,
+                    verseContexts,
+                    verseIndex
+                )
+
+                NarrationStateTransition.PLACE_MARKER_WHILE_MODIFYING_AUDIO -> PlaceMarkerWhileModifyingAudioAction.apply(
+                    globalContext,
+                    verseContexts,
+                    verseIndex
+                )
             }
 
             updateGlobalContext(newGlobalContext)
@@ -182,7 +200,7 @@ class NarrationStateMachine(
         val isRecordingAgain = globalContext.type == NarrationStateType.RECORDING_AGAIN
         val isRecordAgainPaused = globalContext.type == NarrationStateType.RECORDING_AGAIN_PAUSED
         val isPlaying = globalContext.type == NarrationStateType.PLAYING
-        val isBouncing = globalContext.type == NarrationStateType.BOUNCING_AUDIO
+        val isModifyingAudio = globalContext.type == NarrationStateType.MODIFYING_AUDIO_FILE
 
 
         return verseContexts.map {
@@ -207,7 +225,7 @@ class NarrationStateMachine(
                     && !isRecordingAgain
                     && !isRecordAgainPaused
                     && !isPlaying
-                    && !isBouncing
+                    && !isModifyingAudio
 
             val isRecordAgainOptionEnabled = hasRecording
                     && !isRecording

@@ -127,8 +127,9 @@ class NarrationHeader : View() {
                                         || viewModel.narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN
                                         || viewModel.narrationStateProperty.value == NarrationStateType.RECORDING
 
-                            val isBouncing = viewModel.narrationStateProperty.value == NarrationStateType.BOUNCING_AUDIO
-                            isRecording || isBouncing
+                            val isModifyingAudio =
+                                viewModel.narrationStateProperty.value == NarrationStateType.MODIFYING_AUDIO_FILE
+                            isRecording || isModifyingAudio
                         },
                         viewModel.narrationStateProperty
                     )
