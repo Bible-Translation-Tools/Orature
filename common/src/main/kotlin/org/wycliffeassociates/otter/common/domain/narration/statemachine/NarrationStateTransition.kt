@@ -138,7 +138,6 @@ object SaveAction {
             SaveVerseRecordingAction.apply(verseContexts, index)
         }
 
-
         val allVersesRecorded = verseContexts.all { it.state == RecordAgainState }
 
         return if (allVersesRecorded) {
@@ -209,7 +208,9 @@ object PausePlaybackAction {
     ): NarrationState {
 
         val wasRecordingPaused = verseContexts.any { it.state == PlayingWhileRecordingPausedState }
-        val allVersesRecorded = !verseContexts.any { it.state == RecordDisabledState }
+        val allVersesRecorded =
+            !verseContexts.any { it.state == RecordDisabledState }
+                    && verseContexts.last().state.type != VerseItemState.PLAYING_WHILE_RECORDING_PAUSED
 
         val newGlobalStateRequest = if (wasRecordingPaused) {
             NarrationStateType.RECORDING_PAUSED
@@ -287,8 +288,11 @@ object PlaceMarkerAction {
     ): NarrationState {
 
         // TODO note: I should transition the individual marker back to not moving
+
         val allVersesRecorded =
-            !verseContexts.any { it.state.type == VerseItemState.RECORD_DISABLED || it.state.type == VerseItemState.RECORD }
+            !verseContexts.any {
+                it.state.type == VerseItemState.RECORD_DISABLED || it.state.type == VerseItemState.RECORD
+            }
 
         return if (allVersesRecorded) {
             globalContext.changeState(NarrationStateType.IDLE_FINISHED)
