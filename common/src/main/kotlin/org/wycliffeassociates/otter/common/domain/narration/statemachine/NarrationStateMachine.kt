@@ -43,8 +43,8 @@ class NarrationStateMachine(
         currentState.connect()
     }
 
-    fun getNarrationContext(): NarrationState {
-        return narrationContext
+    fun getNarrationContext(): NarrationStateType {
+        return narrationContext.type
     }
 
     fun getVerseItemStates(): List<NarratableItem> {

@@ -859,11 +859,11 @@ class NarrationViewModel : ViewModel() {
                     isModifyingTakeAudioProperty.set(!isIdle)
                     navigator.blockNavigationEvents.set(!isIdle)
 
-                    if (isIdle && narrationStateMachine.getNarrationContext().type == NarrationStateType.MODIFYING_AUDIO_FILE) {
+                    if (isIdle && narrationStateMachine.getNarrationContext() == NarrationStateType.MODIFYING_AUDIO_FILE) {
                         performNarrationStateMachineTransition(NarrationStateTransition.SAVE_FINISHED)
                     }
 
-                    if (!isIdle && narrationStateMachine.getNarrationContext().type == NarrationStateType.IDLE_FINISHED) {
+                    if (!isIdle && narrationStateMachine.getNarrationContext() == NarrationStateType.IDLE_FINISHED) {
                         performNarrationStateMachineTransition(NarrationStateTransition.SAVE)
                     }
 
