@@ -281,9 +281,6 @@ object MovingMarkerAction {
         index: Int
     ): NarrationState {
 
-
-        // TODO note: I should transition the individual marker to MOVING
-
         return globalContext.changeState(NarrationStateType.MOVING_MARKER)
     }
 
@@ -296,8 +293,6 @@ object PlaceMarkerAction {
         verseContexts: MutableList<VerseStateContext>,
         index: Int
     ): NarrationState {
-
-        // TODO note: I should transition the individual marker back to not moving
 
         val allVersesRecorded =
             !verseContexts.any {
@@ -319,8 +314,6 @@ object PlaceMarkerWhileModifyingAudioAction {
         verseContexts: MutableList<VerseStateContext>,
         index: Int
     ): NarrationState {
-
-        // TODO note: I should transition the individual marker back to not moving
 
         return globalContext.changeState(NarrationStateType.MODIFYING_AUDIO_FILE)
     }

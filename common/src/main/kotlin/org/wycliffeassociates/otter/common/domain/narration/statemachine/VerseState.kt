@@ -261,9 +261,6 @@ object PlayingDisabledState : VerseState {
 }
 
 
-// TODO: add a state for playback paused eventually
-
-
 object RecordAgainState : VerseState {
     override val type = VerseItemState.RECORD_AGAIN
 
