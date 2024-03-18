@@ -190,6 +190,16 @@ object PlayAction {
         if (index >= 0) {
             PlayVerseAction.apply(verseContexts, index)
         } else {
+
+            val recordingPausedVerse = verseContexts.firstOrNull { it.state.type == VerseItemState.RECORDING_PAUSED }
+            if (recordingPausedVerse != null) {
+                throw IllegalStateException(
+                    "Tried to play all verses while verse $recordingPausedVerse " +
+                            "is recording paused"
+                )
+            }
+
+
             verseContexts.forEach {
                 it.disable()
             }
