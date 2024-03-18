@@ -13,7 +13,7 @@ ext {
     jacocoToolVer = "0.8.11"
 
     // Libraries
-    kotlinVer = '1.8.0'
+    kotlinVer = '1.9.23'
     javafxVer = '21'
     javaVer = '21'
     javaGridviewVer = '1.0.0'

@@ -182,7 +182,7 @@ dependencies {
     integrationTestImplementation group: 'junit', name: 'junit', version: "$junitVer"
     integrationTestImplementation "org.mockito:mockito-core:$mockitoVer"
     integrationTestImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVer"
-    integrationTestImplementation sourceSets.main.compileClasspath
+//    integrationTestImplementation sourceSets.main.compileClasspath // FIXME integration tests have compile errors
     integrationTestImplementation sourceSets.main.output
 
     //WA Libraries
