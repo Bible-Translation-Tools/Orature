@@ -15,7 +15,7 @@ ext {
     // Libraries
     kotlinVer = '1.8.0'
     javafxVer = '21'
-    javaVer = '17'
+    javaVer = '21'
     javaGridviewVer = '1.0.0'
     tornadofxVer = '2.1.1-WA-fork'
     rxkotlinVer = '2.4.0'

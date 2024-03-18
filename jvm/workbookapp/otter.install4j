@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="10.0.5" transformSequenceNumber="10">
   <directoryPresets config="." />
-  <application name="Orature" applicationId="8057-9807-3529-9982" mediaDir=".exec" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-${compiler:sys.version}" shortName="orature" version="0.1" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="82fd10b9f6e2b1b5" javaMinVersion="17" javaMaxVersion="17">
+  <application name="Orature" applicationId="8057-9807-3529-9982" mediaDir=".exec" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-${compiler:sys.version}" shortName="orature" version="0.1" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="82fd10b9f6e2b1b5" javaMinVersion="21" javaMaxVersion="21">
     <codeSigning windowsEnabled="true" windowsPkcs12File="~/signing.p12" />
-    <jreBundles jdkProviderId="Liberica" release="17/latest">
+    <jreBundles jdkProviderId="Liberica" release="21/latest">
       <modules>
         <defaultModules set="all" />
       </modules>
@@ -877,10 +877,10 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
       <excludedBeans>
         <bean refId="414" />
       </excludedBeans>
-      <jreBundle jdkProviderId="Liberica" release="17/latest" />
+      <jreBundle jdkProviderId="Liberica" release="21/latest" />
     </windows>
     <linuxDeb name="Linux Deb Archive" id="158" description="Orature is a modular suite of Oral Translation libraries and distributable software." maintainerEmail="wycliffeassociates.org">
-      <jreBundle jdkProviderId="Liberica" release="17/latest" />
+      <jreBundle jdkProviderId="Liberica" release="21/latest" />
       <postInstallScript>for desktop in /home/*/Desktop; do
     USER=$(stat -c "%U" "$desktop")
     sudo -u $USER cp /opt/${compiler:sys.shortName}/orature.desktop "$desktop"
@@ -892,7 +892,7 @@ for desktop in /home/*/Desktop; do
 done</postUninstallScript>
     </linuxDeb>
     <macosArchive name="macOS Single Bundle Archive" id="415" architecture="universal" launcherId="59">
-      <jreBundle jdkProviderId="Liberica" release="17/latest" />
+      <jreBundle jdkProviderId="Liberica" release="21/latest" />
       <topLevelFiles>
         <symlink name="&quot; &quot;" target="/Applications" />
         <file name=".background/orature-dmg-bg.png" file="./orature-dmg-bg.png" />
