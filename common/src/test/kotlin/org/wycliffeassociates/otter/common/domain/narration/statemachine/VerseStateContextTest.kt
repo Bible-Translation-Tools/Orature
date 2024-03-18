@@ -38,6 +38,9 @@ class VerseStateContextTest {
             Pair(VerseItemState.RECORD_AGAIN_ACTIVE, true),
             Pair(VerseItemState.RECORD_AGAIN_PAUSED, true),
             Pair(VerseItemState.RECORD_AGAIN_DISABLED, true),
+            Pair(VerseItemState.PLAYING, true),
+            Pair(VerseItemState.PLAYING_DISABLED, true),
+            Pair(VerseItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
         )
 
         // Verifies that exceptions are thrown when invalid states are requested
@@ -83,6 +86,9 @@ class VerseStateContextTest {
             Pair(VerseItemState.RECORD_AGAIN_ACTIVE, true),
             Pair(VerseItemState.RECORD_AGAIN_PAUSED, true),
             Pair(VerseItemState.RECORD_AGAIN_DISABLED, true),
+            Pair(VerseItemState.PLAYING, false),
+            Pair(VerseItemState.PLAYING_DISABLED, false),
+            Pair(VerseItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
         )
 
         // Verifies that exceptions are thrown when invalid states are requested
@@ -135,6 +141,9 @@ class VerseStateContextTest {
             Pair(VerseItemState.RECORD_AGAIN_ACTIVE, true),
             Pair(VerseItemState.RECORD_AGAIN_PAUSED, true),
             Pair(VerseItemState.RECORD_AGAIN_DISABLED, true),
+            Pair(VerseItemState.PLAYING, true),
+            Pair(VerseItemState.PLAYING_DISABLED, true),
+            Pair(VerseItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
         )
 
         // Verifies that exceptions are thrown when invalid states are requested
@@ -180,7 +189,11 @@ class VerseStateContextTest {
             Pair(VerseItemState.RECORD_AGAIN_ACTIVE, true),
             Pair(VerseItemState.RECORD_AGAIN_PAUSED, true),
             Pair(VerseItemState.RECORD_AGAIN_DISABLED, false),
-        )
+            Pair(VerseItemState.PLAYING, true),
+            Pair(VerseItemState.PLAYING_DISABLED, true),
+            Pair(VerseItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
+
+            )
 
         // Verifies that exceptions are thrown when invalid states are requested
         for (transition in stateTransitions) {
@@ -226,6 +239,9 @@ class VerseStateContextTest {
             Pair(VerseItemState.RECORD_AGAIN_ACTIVE, true),
             Pair(VerseItemState.RECORD_AGAIN_PAUSED, true),
             Pair(VerseItemState.RECORD_AGAIN_DISABLED, false),
+            Pair(VerseItemState.PLAYING, true),
+            Pair(VerseItemState.PLAYING_DISABLED, true),
+            Pair(VerseItemState.PLAYING_WHILE_RECORDING_PAUSED, false),
         )
 
         // Verifies that exceptions are thrown when invalid states are requested
@@ -266,6 +282,127 @@ class VerseStateContextTest {
 
 
     @Test
+    fun `PlayingWhileRecordingPausedState changeState and all possible state transitions`() {
+        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        val stateTransitions = mutableListOf(
+            Pair(VerseItemState.BEGIN_RECORDING, true),
+            Pair(VerseItemState.RECORD, true),
+            Pair(VerseItemState.RECORDING_PAUSED, false),
+            Pair(VerseItemState.RECORD_DISABLED, true),
+            Pair(VerseItemState.RECORD_ACTIVE, true),
+            Pair(VerseItemState.RECORD_AGAIN, true),
+            Pair(VerseItemState.RECORD_AGAIN_ACTIVE, true),
+            Pair(VerseItemState.RECORD_AGAIN_PAUSED, true),
+            Pair(VerseItemState.RECORD_AGAIN_DISABLED, true),
+            Pair(VerseItemState.PLAYING, true),
+            Pair(VerseItemState.PLAYING_DISABLED, true),
+            Pair(VerseItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
+        )
+
+        // Verifies that exceptions are thrown when invalid states are requested
+        for (transition in stateTransitions) {
+            try {
+                PlayingWhileRecordingPausedState.changeState(transition.first)
+                if (transition.second) {
+                    Assert.fail("Error: expected an exception for state transition: ${transition.first}")
+                }
+            } catch (illegalState: IllegalStateException) {
+                if (!transition.second) {
+                    Assert.fail("Error: not expecting exception for state transition: ${transition.first}")
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `PlayingWhileRecordingPausedState changeState to RecordPausedState`() {
+        val newState = PlayingWhileRecordingPausedState.changeState(VerseItemState.RECORDING_PAUSED)
+        Assert.assertEquals(RecordPausedState, newState)
+    }
+
+
+    @Test
+    fun `PlayingState changeState and all possible state transitions`() {
+        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        val stateTransitions = mutableListOf(
+            Pair(VerseItemState.BEGIN_RECORDING, true),
+            Pair(VerseItemState.RECORD, false),
+            Pair(VerseItemState.RECORDING_PAUSED, true),
+            Pair(VerseItemState.RECORD_DISABLED, true),
+            Pair(VerseItemState.RECORD_ACTIVE, true),
+            Pair(VerseItemState.RECORD_AGAIN, false),
+            Pair(VerseItemState.RECORD_AGAIN_ACTIVE, true),
+            Pair(VerseItemState.RECORD_AGAIN_PAUSED, true),
+            Pair(VerseItemState.RECORD_AGAIN_DISABLED, true),
+            Pair(VerseItemState.PLAYING, true),
+            Pair(VerseItemState.PLAYING_DISABLED, true),
+            Pair(VerseItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
+        )
+
+        // Verifies that exceptions are thrown when invalid states are requested
+        for (transition in stateTransitions) {
+            try {
+                PlayingState.changeState(transition.first)
+                if (transition.second) {
+                    Assert.fail("Error: expected an exception for state transition: ${transition.first}")
+                }
+            } catch (illegalState: IllegalStateException) {
+                if (!transition.second) {
+                    Assert.fail("Error: not expecting exception for state transition: ${transition.first}")
+                }
+            }
+        }
+    }
+
+
+    @Test
+    fun `Playing changeState to RecordState`() {
+        val newState = PlayingState.changeState(VerseItemState.RECORD)
+        Assert.assertEquals(RecordState, newState)
+    }
+
+
+    @Test
+    fun `Playing changeState to RecordAgainState`() {
+        val newState = PlayingState.changeState(VerseItemState.RECORD_AGAIN)
+        Assert.assertEquals(RecordAgainState, newState)
+    }
+
+
+    @Test
+    fun `PlayingDisabledState changeState and all possible state transitions`() {
+        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        val stateTransitions = mutableListOf(
+            Pair(VerseItemState.BEGIN_RECORDING, true),
+            Pair(VerseItemState.RECORD, false),
+            Pair(VerseItemState.RECORDING_PAUSED, true),
+            Pair(VerseItemState.RECORD_DISABLED, false),
+            Pair(VerseItemState.RECORD_ACTIVE, true),
+            Pair(VerseItemState.RECORD_AGAIN, false),
+            Pair(VerseItemState.RECORD_AGAIN_ACTIVE, true),
+            Pair(VerseItemState.RECORD_AGAIN_PAUSED, true),
+            Pair(VerseItemState.RECORD_AGAIN_DISABLED, false),
+            Pair(VerseItemState.PLAYING, true),
+            Pair(VerseItemState.PLAYING_DISABLED, true),
+            Pair(VerseItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
+        )
+
+        // Verifies that exceptions are thrown when invalid states are requested
+        for (transition in stateTransitions) {
+            try {
+                PlayingDisabledState.changeState(transition.first)
+                if (transition.second) {
+                    Assert.fail("Error: expected an exception for state transition: ${transition.first}")
+                }
+            } catch (illegalState: IllegalStateException) {
+                if (!transition.second) {
+                    Assert.fail("Error: not expecting exception for state transition: ${transition.first}")
+                }
+            }
+        }
+    }
+
+    @Test
     fun `RecordAgainState changeState and all possible state transitions`() {
 
         // Pair.first = TeleprompterItemState, Pair.second = throws exception
@@ -279,6 +416,9 @@ class VerseStateContextTest {
             Pair(VerseItemState.RECORD_AGAIN_ACTIVE, false),
             Pair(VerseItemState.RECORD_AGAIN_PAUSED, true),
             Pair(VerseItemState.RECORD_AGAIN_DISABLED, false),
+            Pair(VerseItemState.PLAYING, false),
+            Pair(VerseItemState.PLAYING_DISABLED, false),
+            Pair(VerseItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
         )
 
         // Verifies that exceptions are thrown when invalid states are requested
@@ -324,6 +464,9 @@ class VerseStateContextTest {
             Pair(VerseItemState.RECORD_AGAIN_ACTIVE, true),
             Pair(VerseItemState.RECORD_AGAIN_PAUSED, true),
             Pair(VerseItemState.RECORD_AGAIN_DISABLED, true),
+            Pair(VerseItemState.PLAYING, true),
+            Pair(VerseItemState.PLAYING_DISABLED, false),
+            Pair(VerseItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
         )
 
         // Verifies that exceptions are thrown when invalid states are requested
@@ -362,6 +505,9 @@ class VerseStateContextTest {
             Pair(VerseItemState.RECORD_AGAIN_ACTIVE, true),
             Pair(VerseItemState.RECORD_AGAIN_PAUSED, false),
             Pair(VerseItemState.RECORD_AGAIN_DISABLED, true),
+            Pair(VerseItemState.PLAYING, true),
+            Pair(VerseItemState.PLAYING_DISABLED, true),
+            Pair(VerseItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
         )
 
         // Verifies that exceptions are thrown when invalid states are requested
@@ -408,6 +554,9 @@ class VerseStateContextTest {
             Pair(VerseItemState.RECORD_AGAIN_ACTIVE, false),
             Pair(VerseItemState.RECORD_AGAIN_PAUSED, true),
             Pair(VerseItemState.RECORD_AGAIN_DISABLED, false),
+            Pair(VerseItemState.PLAYING, true),
+            Pair(VerseItemState.PLAYING_DISABLED, true),
+            Pair(VerseItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
         )
 
         // Verifies that exceptions are thrown when invalid states are requested
