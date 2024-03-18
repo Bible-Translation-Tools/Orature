@@ -505,7 +505,7 @@ class NarrationStateTest {
             Pair(NarrationStateType.IDLE_EMPTY, true),
             Pair(NarrationStateType.IDLE_IN_PROGRESS, false),
             Pair(NarrationStateType.IDLE_FINISHED, false),
-            Pair(NarrationStateType.MODIFYING_AUDIO_FILE, false),
+            Pair(NarrationStateType.MODIFYING_AUDIO_FILE, true),
             Pair(NarrationStateType.MOVING_MARKER, false),
         )
 
@@ -547,13 +547,6 @@ class NarrationStateTest {
     fun `ModifyingAudioState changeState to PlayingAudioState`() {
         val newState = ModifyingAudioState.changeState(NarrationStateType.PLAYING)
         Assert.assertEquals(newState.type, NarrationStateType.PLAYING)
-    }
-
-
-    @Test
-    fun `ModifyingAudioState changeState to ModifyingAudioState`() {
-        val newState = ModifyingAudioState.changeState(NarrationStateType.MODIFYING_AUDIO_FILE)
-        Assert.assertEquals(newState.type, NarrationStateType.MODIFYING_AUDIO_FILE)
     }
 
 

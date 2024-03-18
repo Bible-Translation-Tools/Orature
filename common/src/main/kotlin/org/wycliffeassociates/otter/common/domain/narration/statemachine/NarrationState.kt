@@ -84,9 +84,9 @@ object RecordingAgainState : NarrationState {
 
     override val validStateTransitions: Set<NarrationStateType> =
         setOf(
-            NarrationStateType.MODIFYING_AUDIO_FILE, // Save
+            NarrationStateType.MODIFYING_AUDIO_FILE, // Save with all verses recorded
             NarrationStateType.RECORDING_AGAIN_PAUSED, // Pause
-            NarrationStateType.IDLE_IN_PROGRESS
+            NarrationStateType.IDLE_IN_PROGRESS, // Save without all verses recorded
         )
 
     override fun changeState(request: NarrationStateType): NarrationState {
@@ -199,7 +199,7 @@ object IdleInProgressState : NarrationState {
             NarrationStateType.MODIFYING_AUDIO_FILE, // Open plugin
             NarrationStateType.IDLE_EMPTY, // Undo record,
             NarrationStateType.PLAYING, // Play verse/chapter
-            NarrationStateType.MOVING_MARKER,
+            NarrationStateType.MOVING_MARKER, // Moving verse marker
         )
 
     override fun changeState(request: NarrationStateType): NarrationState {
@@ -232,7 +232,7 @@ object IdleFinishedState : NarrationState {
             NarrationStateType.IDLE_EMPTY, // Restart chapter
             NarrationStateType.IDLE_IN_PROGRESS, // Undo record
             NarrationStateType.PLAYING, // Play verse/chapter
-            NarrationStateType.MOVING_MARKER,
+            NarrationStateType.MOVING_MARKER, // Moving verse marker
         )
 
     override fun changeState(request: NarrationStateType): NarrationState {
@@ -264,7 +264,6 @@ object ModifyingAudioState : NarrationState {
             NarrationStateType.IDLE_FINISHED, // After record again/undo/redo
             NarrationStateType.RECORDING_AGAIN, // Starts recording again while bouncing audio
             NarrationStateType.PLAYING, // Plays verse/chapter while bouncing audio
-            NarrationStateType.MODIFYING_AUDIO_FILE, // TODO: remove this transition once I have MOVING_MARKER state finished
             NarrationStateType.MOVING_MARKER, // Moving markers while bouncing
         )
 
