@@ -54,8 +54,8 @@ interface IWaveformViewModel {
 
     fun computeImageWidth(width: Int, secondsOnScreen: Int = SECONDS_ON_SCREEN): Double {
         val samplesPerScreenWidth = sampleRate * secondsOnScreen
-        val samplesPerPixel = samplesPerScreenWidth / width.toDouble()
-        return waveformAudioPlayerProperty.value.getDurationInFrames() / samplesPerPixel
+        val samplesPerPixel = samplesPerScreenWidth / width
+        return waveformAudioPlayerProperty.value.getDurationInFrames() / samplesPerPixel.toDouble()
     }
 
     fun calculatePosition() {
