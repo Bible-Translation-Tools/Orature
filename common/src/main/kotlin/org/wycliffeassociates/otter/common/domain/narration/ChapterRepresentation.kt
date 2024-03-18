@@ -68,7 +68,7 @@ internal class ChapterRepresentation(
 
     @get:Synchronized
     val totalFrames: Int
-        get() = activeVerses.sumOf { it.length }
+        get() = activeVerses.sumOf { it.length / frameSizeInBytes }
 
     @get:Synchronized
     internal val activeVerses: List<VerseNode>
@@ -155,7 +155,6 @@ internal class ChapterRepresentation(
         val endIndex = scratchAudio.totalFrames * frameSizeInBytes
 
         history?.finalizeVerse(endIndex, totalVerses)
-
         onVersesUpdated()
         return endIndex
     }
@@ -174,8 +173,6 @@ internal class ChapterRepresentation(
                 true, updatedMarker, totalVerses[idx].sectors
             )
         }
-        logger.info("Active Verses: $activeVerses")
-        logger.info("Total Verses: $totalVerses")
     }
 
     private fun serializeVerses() {
@@ -282,7 +279,7 @@ internal class ChapterRepresentation(
             val index = verses.indexOf(verse)
             var rel = 0
             for (idx in 0 until index) {
-                rel += verses[idx].length
+                rel += verses[idx].length / frameSizeInBytes
             }
             rel += it.indicesToPosition(absoluteFrame * frameSizeInBytes)
             return rel

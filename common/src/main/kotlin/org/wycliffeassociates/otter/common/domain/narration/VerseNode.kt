@@ -227,27 +227,6 @@ internal data class VerseNode(
         return indexOffset
     }
 
-    fun absoluteFrameFromOffset(framesFromStart: Int): Int {
-        if (framesFromStart > length) {
-            throw IndexOutOfBoundsException("Frame offset: $framesFromStart exceeds the boundaries within ranges $sectors")
-        }
-
-        var remaining = framesFromStart
-        sectors.forEach { sector ->
-            if (remaining > sector.length()) {
-                remaining -= sector.length()
-            } else {
-                return sector.first +  remaining - 1 // Add - 1 to account for inclusive start
-                // Depending on in the intended functionality, remove the - 1.
-                //  If the question this is answering is "Get the next frame after some offset?", then
-                //  remove the - 1, if the question this is answering is "Offset by some amount, then get me that frame?"
-                //  then we want to keep the -1
-            }
-        }
-
-        throw IndexOutOfBoundsException("Requested offset $framesFromStart exceeded boundaries within ranges $sectors")
-    }
-
     fun getSectorsFromOffset(index: Int, btr: Int): List<IntRange> {
         if (btr <= 0 || index !in this) return listOf()
 
