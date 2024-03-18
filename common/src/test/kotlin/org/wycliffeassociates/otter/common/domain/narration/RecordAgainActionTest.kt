@@ -26,6 +26,8 @@ import org.junit.Test
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 
+const val frameSizeInBytes = 2
+
 class RecordAgainActionTest {
 
     private val totalVerses: MutableList<VerseNode> = mutableListOf()
@@ -62,7 +64,7 @@ class RecordAgainActionTest {
     @Test
     fun `execute with valid working audio, 31 total verses, and no placed verses`() {
         val verseIndex = 0
-        val recordAgainAction = RecordAgainAction(verseIndex)
+        val recordAgainAction = RecordAgainAction(verseIndex, frameSizeInBytes)
 
         Assert.assertEquals(0, totalVerses[verseIndex].sectors.size)
         Assert.assertFalse(totalVerses[verseIndex].placed)
@@ -92,7 +94,7 @@ class RecordAgainActionTest {
         placeFirstVerseWithOneSecondAudio()
 
         val verseIndex = 0
-        val recordAgainAction = RecordAgainAction(verseIndex)
+        val recordAgainAction = RecordAgainAction(verseIndex, frameSizeInBytes)
 
         val previousNode = totalVerses[verseIndex].copy()
 
@@ -121,7 +123,7 @@ class RecordAgainActionTest {
     @Test
     fun `execute with invalid index`() {
         val verseIndex = -1
-        val recordAgainAction = RecordAgainAction(verseIndex)
+        val recordAgainAction = RecordAgainAction(verseIndex, frameSizeInBytes)
 
         try {
             recordAgainAction.execute(totalVerses, workingAudioFile)
@@ -137,7 +139,7 @@ class RecordAgainActionTest {
         placeFirstVerseWithOneSecondAudio()
 
         val verseIndex = 0
-        val recordAgainAction = RecordAgainAction(verseIndex)
+        val recordAgainAction = RecordAgainAction(verseIndex, frameSizeInBytes)
         val previousNode = totalVerses[verseIndex].copy()
 
         recordAgainAction.undo(totalVerses)
@@ -152,7 +154,7 @@ class RecordAgainActionTest {
         placeFirstVerseWithOneSecondAudio()
 
         val verseIndex = 0
-        val recordAgainAction = RecordAgainAction(verseIndex)
+        val recordAgainAction = RecordAgainAction(verseIndex, frameSizeInBytes)
         val previousNode = totalVerses[verseIndex].copy()
 
         recordAgainAction.execute(totalVerses, workingAudioFile)
@@ -175,7 +177,7 @@ class RecordAgainActionTest {
         placeFirstVerseWithOneSecondAudio()
 
         val verseIndex = 0
-        val recordAgainAction = RecordAgainAction(verseIndex)
+        val recordAgainAction = RecordAgainAction(verseIndex, frameSizeInBytes)
         val previousNode = totalVerses[verseIndex].copy()
 
         recordAgainAction.execute(totalVerses, workingAudioFile)
@@ -204,7 +206,7 @@ class RecordAgainActionTest {
         placeFirstVerseWithOneSecondAudio()
 
         val verseIndex = 0
-        val recordAgainAction = RecordAgainAction(verseIndex)
+        val recordAgainAction = RecordAgainAction(verseIndex, frameSizeInBytes)
         val previousNode = totalVerses[verseIndex].copy()
 
         recordAgainAction.finalize(88200, totalVerses)
@@ -222,7 +224,7 @@ class RecordAgainActionTest {
         placeFirstVerseWithOneSecondAudio()
 
         val verseIndex = 0
-        val recordAgainAction = RecordAgainAction(verseIndex)
+        val recordAgainAction = RecordAgainAction(verseIndex, frameSizeInBytes)
         val previousNode = totalVerses[verseIndex].copy()
 
         recordAgainAction.execute(totalVerses, workingAudioFile)
