@@ -90,17 +90,16 @@ class TestInitializeUlb {
     @Test
     fun `test en_ulb import skipped when already imported`() {
         val importer = Mockito.mock(ImportProjectUseCase::class.java)
-        val importerSpy = Mockito.spy(importer)
         val mockProgressEmitter = mock<ObservableEmitter<ProgressStatus>>{
             on { onNext(any()) } doAnswer { }
         }
 
-        doReturn(true).`when`(importerSpy).isAlreadyImported(any())
+        doReturn(true).`when`(importer).isAlreadyImported(any())
 
         val init = InitializeUlb(
             directoryProvider,
             installedEntityRepo,
-            importerSpy
+            importer
         )
         val testSub = TestObserver<Completable>()
 
@@ -110,8 +109,8 @@ class TestInitializeUlb {
         testSub.assertComplete()
         testSub.assertNoErrors()
 
-        verify(importerSpy).isAlreadyImported(any())
-        verify(importerSpy, never()).import(any(), any(), any())
-        verify(importerSpy, never()).import(any())
+        verify(importer).isAlreadyImported(any())
+        verify(importer, never()).import(any(), any(), any())
+        verify(importer, never()).import(any())
     }
 }
