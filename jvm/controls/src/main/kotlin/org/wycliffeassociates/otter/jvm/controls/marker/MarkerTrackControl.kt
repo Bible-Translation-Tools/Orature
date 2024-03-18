@@ -24,8 +24,8 @@ import com.sun.javafx.scene.traversal.TraversalMethod
 import com.sun.javafx.util.Utils
 import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.geometry.Point2D
-import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
@@ -33,19 +33,23 @@ import java.util.concurrent.Callable
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
+import javafx.scene.layout.Pane
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
+import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 
 const val MOVE_MARKER_INTERVAL = 0.001
 const val MARKER_COUNT = 500
 
-open class MarkerTrackControl : Region() {
+open class MarkerTrackControl : Pane() {
 
     val markers = observableListOf<MarkerItem>()
     val canMoveMarkerProperty = SimpleBooleanProperty(true)
@@ -55,6 +59,7 @@ open class MarkerTrackControl : Region() {
     val onSeekNextProperty = SimpleObjectProperty<() -> Unit>()
     val onSeekProperty = SimpleObjectProperty<(Int) -> Unit>()
     val onLocationRequestProperty = SimpleObjectProperty<() -> Int>()
+    val audioPositionProperty = SimpleIntegerProperty()
 
     fun setOnPositionChanged(op: (Int, Double) -> Unit) {
         onPositionChangedProperty.set(op)
@@ -77,15 +82,14 @@ open class MarkerTrackControl : Region() {
         resetState()
         preallocateMarkers()
 
-        highlights.forEach { add(it) }
-        _markers.forEach { add(it) }
         refreshMarkers()
         refreshHighlights()
+        renderMarkers()
 
-        markers.onChangeAndDoNowWithDisposer {
-            it.sortedBy { it.frame }
+        markers.onChangeWithDisposer {
             refreshMarkers()
             refreshHighlights()
+            renderMarkers()
         }.also(listeners::add)
     }
 
@@ -282,6 +286,10 @@ open class MarkerTrackControl : Region() {
     init {
         initialize()
 
+        audioPositionProperty.onChange {
+            renderMarkers()
+        }
+
         // Makes the region mouse transparent but not children
         pickOnBoundsProperty().set(false)
 
@@ -308,6 +316,31 @@ open class MarkerTrackControl : Region() {
             when (it.code) {
                 KeyCode.ENTER, KeyCode.SPACE -> it.consume()
                 else -> {}
+            }
+        }
+    }
+
+    /**
+     * Uses a sliding-window to render only the marker nodes that are within
+     * a specified viewport. This reduces the number of unnecessary nodes attached
+     * to the scene and improves performance as a result.
+     */
+    private fun renderMarkers() {
+        val framesOnScreen = SECONDS_ON_SCREEN * DEFAULT_SAMPLE_RATE
+        val start = (audioPositionProperty.value - framesOnScreen).coerceAtLeast(0)
+        val end = (audioPositionProperty.value + framesOnScreen)
+        if (start == end) {
+            return
+        }
+        val bufferRange = IntRange(
+            audioPositionProperty.value - framesOnScreen,
+            audioPositionProperty.value + framesOnScreen
+        )
+        children.clear()
+        markers.forEachIndexed { index, markerItem ->
+            children.add(highlights[index])
+            if (markerItem.frame in bufferRange) {
+                children.add(_markers[index])
             }
         }
     }

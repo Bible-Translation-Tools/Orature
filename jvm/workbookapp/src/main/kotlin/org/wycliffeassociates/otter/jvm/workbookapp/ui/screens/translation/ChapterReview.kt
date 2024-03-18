@@ -23,6 +23,7 @@ import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.animation.AnimationTimer
+import javafx.beans.binding.BooleanBinding
 import javafx.geometry.Side
 import javafx.scene.control.Tooltip
 import javafx.scene.layout.Priority
@@ -41,9 +42,11 @@ import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.OpenInPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
+import org.wycliffeassociates.otter.jvm.controls.marker.MARKER_WIDTH_APPROX
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
+import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
@@ -96,6 +99,7 @@ class ChapterReview : View() {
                 vgrow = Priority.ALWAYS
                 themeProperty.bind(settingsViewModel.appColorMode)
                 positionProperty.bind(viewModel.positionProperty)
+                audioPositionProperty.bind(viewModel.audioPositionProperty)
                 clip = Rectangle().apply {
                     widthProperty().bind(container.widthProperty())
                     heightProperty().bind(container.heightProperty())
@@ -126,6 +130,7 @@ class ChapterReview : View() {
                     graphic = FontIcon(MaterialDesign.MDI_PLUS)
                     disableWhen {
                         viewModel.markersPlacedCountProperty.isEqualTo(viewModel.totalMarkersProperty)
+                            .or(isOverlappingNearbyMarker())
                     }
 
                     action {
@@ -314,5 +319,16 @@ class ChapterReview : View() {
                 }
                 SnackbarHandler.showNotification(notification, root)
             }
+    }
+
+    private fun isOverlappingNearbyMarker(): BooleanBinding {
+        return booleanBinding(viewModel.positionProperty, viewModel.markers) {
+            viewModel.markers.any {
+                framesToPixels(it.frame) in IntRange(
+                    (viewModel.positionProperty.value - MARKER_WIDTH_APPROX).toInt(),
+                    (viewModel.positionProperty.value + MARKER_WIDTH_APPROX).toInt()
+                )
+            }
+        }
     }
 }

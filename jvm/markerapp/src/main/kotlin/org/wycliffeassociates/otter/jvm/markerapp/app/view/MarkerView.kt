@@ -97,6 +97,7 @@ class MarkerView : PluginEntrypoint() {
                 addClass("vm-marker-waveform")
                 themeProperty.bind(viewModel.themeColorProperty)
                 positionProperty.bind(viewModel.positionProperty)
+                audioPositionProperty.bind(viewModel.audioPositionProperty)
 
                 setOnSeekNext { viewModel.seekNext() }
                 setOnSeekPrevious { viewModel.seekPrevious() }
