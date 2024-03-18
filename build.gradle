@@ -82,7 +82,7 @@ subprojects {
 
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of("$javaVer")
+            languageVersion = JavaLanguageVersion.of(javaVer)
         }
     }
 
