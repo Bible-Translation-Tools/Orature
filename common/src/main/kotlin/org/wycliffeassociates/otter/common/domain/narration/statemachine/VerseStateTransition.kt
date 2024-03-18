@@ -174,6 +174,12 @@ object PlayVerseAction {
 
         if (isVerseBeingRecorded) {
             contexts[index].changeState(VerseItemState.PLAYING_WHILE_RECORDING_PAUSED)
+
+            contexts.forEachIndexed { i, verseContext ->
+                if (i != index) {
+                    contexts[i].disable()
+                }
+            }
         } else {
             contexts[index].changeState(VerseItemState.PLAYING)
 
