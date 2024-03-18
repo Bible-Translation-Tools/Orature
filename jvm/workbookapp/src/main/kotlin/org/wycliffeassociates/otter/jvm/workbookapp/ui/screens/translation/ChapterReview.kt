@@ -99,6 +99,7 @@ class ChapterReview : View() {
                 vgrow = Priority.ALWAYS
                 themeProperty.bind(settingsViewModel.appColorMode)
                 positionProperty.bind(viewModel.positionProperty)
+                audioPositionProperty.bind(viewModel.audioPositionProperty)
                 clip = Rectangle().apply {
                     widthProperty().bind(container.widthProperty())
                     heightProperty().bind(container.heightProperty())

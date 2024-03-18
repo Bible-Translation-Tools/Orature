@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
@@ -39,6 +40,7 @@ class MarkerPlacementWaveform : StackPane() {
     val markers = observableListOf<MarkerItem>()
     val imageWidthProperty = SimpleDoubleProperty()
     val positionProperty = SimpleDoubleProperty(0.0)
+    val audioPositionProperty = SimpleIntegerProperty(0)
     val canMoveMarkerProperty = SimpleBooleanProperty(true)
 
     private val onPositionChanged = SimpleObjectProperty<(Int, Double) -> Unit> { _, _ -> }
@@ -128,6 +130,7 @@ class MarkerPlacementWaveform : StackPane() {
         val topTrack = MarkerTrackControl().apply {
             top = this
             markers.bind(this@MarkerPlacementWaveform.markers, { it })
+            audioPositionProperty.bind(this@MarkerPlacementWaveform.audioPositionProperty)
             canMoveMarkerProperty.bind(this@MarkerPlacementWaveform.canMoveMarkerProperty)
             onPositionChangedProperty.bind(onPositionChanged)
             onLocationRequestProperty.bind(onLocationRequest)

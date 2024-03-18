@@ -79,6 +79,7 @@ class Chunking : View() {
                     }
                     themeProperty.bind(settingsViewModel.appColorMode)
                     positionProperty.bind(viewModel.positionProperty)
+                    audioPositionProperty.bind(viewModel.audioPositionProperty)
                     canMoveMarkerProperty.set(true)
                     canDeleteMarkerProperty.set(true)
 
