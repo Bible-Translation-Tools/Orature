@@ -37,22 +37,22 @@ class NarrationStateMachine(
     }.publish()
 
     private var verseContexts: MutableList<VerseStateContext>
-    private var globalContext: NarrationState = IdleEmptyState
+    private var narrationContext: NarrationState = IdleEmptyState
 
     init {
         currentState.connect()
     }
 
-    fun getGlobalContext(): NarrationState {
-        return globalContext
+    fun getNarrationContext(): NarrationState {
+        return narrationContext
     }
 
     fun getVerseItemStates(): List<NarratableItem> {
         return getNarratableItemsList(verseContexts)
     }
 
-    private fun updateGlobalContext(newContext: NarrationState) {
-        globalContext = newContext
+    private fun updateNarrationContext(newContext: NarrationState) {
+        narrationContext = newContext
         currentStateEmitter.onNext(newContext)
     }
 
@@ -85,7 +85,7 @@ class NarrationStateMachine(
             IdleInProgressState
         }
 
-        updateGlobalContext(newGlobalContext)
+        updateNarrationContext(newGlobalContext)
     }
 
 
@@ -94,82 +94,86 @@ class NarrationStateMachine(
             val verseIndex = requestIndex ?: -1
             val newGlobalContext = when (request) {
 
-                NarrationStateTransition.RECORD -> RecordAction.apply(globalContext, verseContexts, verseIndex)
+                NarrationStateTransition.RECORD -> RecordAction.apply(narrationContext, verseContexts, verseIndex)
                 NarrationStateTransition.PAUSE_RECORDING -> PauseRecordingAction.apply(
-                    globalContext,
+                    narrationContext,
                     verseContexts,
                     verseIndex
                 )
 
                 NarrationStateTransition.RESUME_RECORDING -> ResumeRecordAction.apply(
-                    globalContext,
+                    narrationContext,
                     verseContexts,
                     verseIndex
                 )
 
-                NarrationStateTransition.NEXT -> NextAction.apply(globalContext, verseContexts, verseIndex)
+                NarrationStateTransition.NEXT -> NextAction.apply(narrationContext, verseContexts, verseIndex)
 
 
                 NarrationStateTransition.RECORD_AGAIN -> {
                     if (verseContexts.any { it.state.type == VerseItemState.RECORDING_PAUSED }) {
                         completePausedRecording()
                     }
-                    RecordAgain.apply(globalContext, verseContexts, verseIndex)
+                    RecordAgain.apply(narrationContext, verseContexts, verseIndex)
                 }
 
 
                 NarrationStateTransition.PAUSE_RECORD_AGAIN -> PauseRecordAgain.apply(
-                    globalContext,
+                    narrationContext,
                     verseContexts,
                     verseIndex
                 )
 
 
                 NarrationStateTransition.RESUME_RECORD_AGAIN -> ResumeRecordAgain.apply(
-                    globalContext,
+                    narrationContext,
                     verseContexts,
                     verseIndex
                 )
 
 
-                NarrationStateTransition.SAVE -> SaveAction.apply(globalContext, verseContexts, verseIndex)
+                NarrationStateTransition.SAVE -> SaveAction.apply(narrationContext, verseContexts, verseIndex)
 
-                NarrationStateTransition.PLAY_AUDIO -> PlayAction.apply(globalContext, verseContexts, verseIndex)
+                NarrationStateTransition.PLAY_AUDIO -> PlayAction.apply(narrationContext, verseContexts, verseIndex)
 
                 NarrationStateTransition.PAUSE_AUDIO_PLAYBACK -> PausePlaybackAction.apply(
-                    globalContext,
+                    narrationContext,
                     verseContexts,
                     verseIndex
                 )
 
                 NarrationStateTransition.PAUSE_PLAYBACK_WHILE_MODIFYING_AUDIO -> PausePlaybackWhileModifyingAudioAction.apply(
-                    globalContext,
+                    narrationContext,
                     verseContexts,
                     verseIndex
                 )
 
-                NarrationStateTransition.SAVE_FINISHED -> SaveFinished.apply(globalContext, verseContexts, verseIndex)
+                NarrationStateTransition.SAVE_FINISHED -> SaveFinished.apply(
+                    narrationContext,
+                    verseContexts,
+                    verseIndex
+                )
 
                 NarrationStateTransition.MOVING_MARKER -> MovingMarkerAction.apply(
-                    globalContext,
+                    narrationContext,
                     verseContexts,
                     verseIndex
                 )
 
                 NarrationStateTransition.PLACE_MARKER -> PlaceMarkerAction.apply(
-                    globalContext,
+                    narrationContext,
                     verseContexts,
                     verseIndex
                 )
 
                 NarrationStateTransition.PLACE_MARKER_WHILE_MODIFYING_AUDIO -> PlaceMarkerWhileModifyingAudioAction.apply(
-                    globalContext,
+                    narrationContext,
                     verseContexts,
                     verseIndex
                 )
             }
 
-            updateGlobalContext(newGlobalContext)
+            updateNarrationContext(newGlobalContext)
         } catch (e: java.lang.IllegalStateException) {
             logger.error("Error in state transition for requestIndex: $requestIndex, action $request", e)
             throw e
@@ -195,12 +199,12 @@ class NarrationStateMachine(
 
     private fun getNarratableItemsList(verseContexts: List<VerseStateContext>): List<NarratableItem> {
 
-        val isRecording = globalContext.type == NarrationStateType.RECORDING
-        val isRecordingPaused = globalContext.type == NarrationStateType.RECORDING_PAUSED
-        val isRecordingAgain = globalContext.type == NarrationStateType.RECORDING_AGAIN
-        val isRecordAgainPaused = globalContext.type == NarrationStateType.RECORDING_AGAIN_PAUSED
-        val isPlaying = globalContext.type == NarrationStateType.PLAYING
-        val isModifyingAudio = globalContext.type == NarrationStateType.MODIFYING_AUDIO_FILE
+        val isRecording = narrationContext.type == NarrationStateType.RECORDING
+        val isRecordingPaused = narrationContext.type == NarrationStateType.RECORDING_PAUSED
+        val isRecordingAgain = narrationContext.type == NarrationStateType.RECORDING_AGAIN
+        val isRecordAgainPaused = narrationContext.type == NarrationStateType.RECORDING_AGAIN_PAUSED
+        val isPlaying = narrationContext.type == NarrationStateType.PLAYING
+        val isModifyingAudio = narrationContext.type == NarrationStateType.MODIFYING_AUDIO_FILE
 
 
         return verseContexts.map {
