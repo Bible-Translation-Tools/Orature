@@ -27,7 +27,7 @@ class VerseStateContextTest {
     @Test
     fun `BeginReocrdingState changeState and all possible state transitions`() {
 
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(VerseItemState.BEGIN_RECORDING, true),
             Pair(VerseItemState.RECORD, false),
@@ -75,7 +75,7 @@ class VerseStateContextTest {
     @Test
     fun `RecordState changeState and all possible state transitions`() {
 
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(VerseItemState.BEGIN_RECORDING, true),
             Pair(VerseItemState.RECORD, false),
@@ -130,7 +130,7 @@ class VerseStateContextTest {
     @Test
     fun `RecordDisabledState changeState and all possible state transitions`() {
 
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(VerseItemState.BEGIN_RECORDING, true),
             Pair(VerseItemState.RECORD, false),
@@ -178,7 +178,7 @@ class VerseStateContextTest {
     @Test
     fun `RecordActiveState changeState and all possible state transitions`() {
 
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(VerseItemState.BEGIN_RECORDING, true),
             Pair(VerseItemState.RECORD, true),
@@ -228,7 +228,7 @@ class VerseStateContextTest {
     @Test
     fun `RecordPausedState changeState and all possible state transitions`() {
 
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(VerseItemState.BEGIN_RECORDING, true),
             Pair(VerseItemState.RECORD, true),
@@ -283,7 +283,7 @@ class VerseStateContextTest {
 
     @Test
     fun `PlayingWhileRecordingPausedState changeState and all possible state transitions`() {
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(VerseItemState.BEGIN_RECORDING, true),
             Pair(VerseItemState.RECORD, true),
@@ -323,7 +323,7 @@ class VerseStateContextTest {
 
     @Test
     fun `PlayingState changeState and all possible state transitions`() {
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(VerseItemState.BEGIN_RECORDING, true),
             Pair(VerseItemState.RECORD, false),
@@ -371,7 +371,7 @@ class VerseStateContextTest {
 
     @Test
     fun `PlayingDisabledState changeState and all possible state transitions`() {
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(VerseItemState.BEGIN_RECORDING, true),
             Pair(VerseItemState.RECORD, false),
@@ -405,7 +405,7 @@ class VerseStateContextTest {
     @Test
     fun `RecordAgainState changeState and all possible state transitions`() {
 
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(VerseItemState.BEGIN_RECORDING, true),
             Pair(VerseItemState.RECORD, true),
@@ -453,7 +453,7 @@ class VerseStateContextTest {
     @Test
     fun `RecordAgainDisabledState changeState and all possible state transitions`() {
 
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(VerseItemState.BEGIN_RECORDING, true),
             Pair(VerseItemState.RECORD, true),
@@ -494,7 +494,7 @@ class VerseStateContextTest {
     @Test
     fun `RecordAgainActiveState changeState and all possible state transitions`() {
 
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(VerseItemState.BEGIN_RECORDING, true),
             Pair(VerseItemState.RECORD, true),
@@ -543,7 +543,7 @@ class VerseStateContextTest {
     @Test
     fun `RecordAgainPausedState changeState and all possible state transitions`() {
 
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(VerseItemState.BEGIN_RECORDING, true),
             Pair(VerseItemState.RECORD, true),
