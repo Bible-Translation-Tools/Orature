@@ -29,6 +29,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import java.util.*
 
+const val RENDERER_BUFFER_SIZE = 1024
+
 class ActiveRecordingRenderer(
     stream: Observable<ByteArray>,
     recordingStatus: Observable<Boolean>,
@@ -43,7 +45,7 @@ class ActiveRecordingRenderer(
     // double the width as for each pixel there will be a min and max value
     val floatBuffer = FloatRingBuffer(width * 2)
     private val pcmCompressor = PCMCompressor(floatBuffer, framesToCompress(width, secondsOnScreen))
-    val bb = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE)
+    val bb = ByteBuffer.allocate(RENDERER_BUFFER_SIZE)
 
     val compositeDisposable = CompositeDisposable()
 
