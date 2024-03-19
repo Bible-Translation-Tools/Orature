@@ -1,0 +1,10 @@
+[
+  {
+    "name": "fr_ulb",
+    "artifact": "wa-catalog:fr_ulb:master@zip"
+  },
+  {
+    "name": "or_ulb",
+    "artifact": "wa-catalog:or_ulb:master@zip"
+  }
+]

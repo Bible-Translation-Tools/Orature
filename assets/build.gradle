@@ -1,3 +1,5 @@
+import groovy.json.JsonSlurper
+
 group 'org.wycliffeassociates.otter'
 version '0.0.1'
 
@@ -37,14 +39,6 @@ configurations {
 }
 
 dependencies {
-
-    /**
-     * Commented out Bible artwork to reduce file size as new design doesn't use it
-     */
-    // content 'bible-translation-tools:en_art_wa:2.0.0@zip'
-    // content 'bible-translation-tools:en_art_sp:2.0.0@zip'
-    // content 'bible-translation-tools:bible_artwork@zip'
-
     content 'wa-catalog:en_ulb:V21-05@zip'
     content 'bibleineverylanguage:langnames@json'
 
@@ -54,8 +48,29 @@ dependencies {
     implementation "com.google.dagger:dagger:$daggerVer"
 }
 
-task copyToResources(type: Copy) {
-    dependsOn configurations.content
+tasks.register('installGLSources') {
+    doLast {
+        def jsonFilePath = "src/main/resources/gl_sources.json"
+        def jsonFile = file(jsonFilePath)
+
+        if (!jsonFile.exists()) {
+            return
+        }
+
+        def parser = new JsonSlurper()
+        def jsonData = parser.parse(jsonFile) as List<Map<String, String>>
+
+        jsonData.each { dependency ->
+            def artifactName = dependency["artifact"]
+            dependencies {
+                content artifactName
+            }
+        }
+    }
+}
+
+tasks.register('copyToResources', Copy) {
+    dependsOn configurations.content, 'installGLSources'
     from configurations.content
     into 'src/main/resources/content'
     rename {
