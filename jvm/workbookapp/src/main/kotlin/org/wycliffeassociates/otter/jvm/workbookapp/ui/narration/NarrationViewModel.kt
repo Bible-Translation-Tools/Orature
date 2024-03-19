@@ -655,9 +655,6 @@ class NarrationViewModel : ViewModel() {
 
         narration.onSaveRecording(verseIndex)
 
-        recordAgainVerseIndex = null
-        recordingVerseIndex.set(-1)
-
         renderer.clearActiveRecordingData()
     }
 
@@ -1066,6 +1063,9 @@ class NarrationViewModel : ViewModel() {
         performNarrationStateMachineTransition(transition, index)
 
         if (transition == NarrationStateTransition.SAVE) {
+            recordAgainVerseIndex = null
+            recordingVerseIndex.set(-1)
+
             createPotentiallyFinishedChapterTake()
         }
     }
