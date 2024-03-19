@@ -242,14 +242,17 @@ class AudioWorkspaceViewModel : ViewModel() {
         isScrollEnabledProperty.bind(
             Bindings.createBooleanBinding(
                 {
-                    narrationStateProperty.value?.let {
+                    val isScrollEnabled = if (narrationStateProperty.value != null) {
+                        narrationStateProperty.value != NarrationStateType.RECORDING
+                                && narrationStateProperty.value != NarrationStateType.RECORDING_AGAIN
+                                && narrationStateProperty.value != NarrationStateType.RECORDING_AGAIN_PAUSED
+                                && narrationStateProperty.value != NarrationStateType.PLAYING
+                                && narrationStateProperty.value != NarrationStateType.PLAYING
+                    } else {
+                        false
+                    }
 
-                        it != NarrationStateType.RECORDING
-                                && it != NarrationStateType.RECORDING_AGAIN
-                                && it != NarrationStateType.RECORDING_AGAIN_PAUSED
-                                && it != NarrationStateType.PLAYING
-
-                    } ?: false
+                    isScrollEnabled
                 },
                 narrationStateProperty
 

@@ -21,14 +21,12 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.narration.statemachine.*
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -47,18 +45,7 @@ class NarrationToolBar : View() {
             tooltip { textProperty().bind(this@button.textProperty()) }
 
             disableWhen {
-                Bindings.createBooleanBinding(
-                    {
-                        viewModel.narrationStateProperty.value?.let {
-                            it == NarrationStateType.RECORDING
-                                    || it == NarrationStateType.RECORDING_AGAIN
-                                    || it == NarrationStateType.IDLE_EMPTY
-                                    || it == NarrationStateType.RECORDING_PAUSED
-                                    || it == NarrationStateType.RECORDING_AGAIN_PAUSED
-                        } ?: false
-                    },
-                    viewModel.narrationStateProperty
-                )
+                viewModel.isPlayPauseButtonDisabled
             }
 
             viewModel.narrationStateProperty.onChangeAndDoNow {
@@ -93,19 +80,7 @@ class NarrationToolBar : View() {
                 viewModel.seekToPrevious()
             }
             disableWhen {
-
-                Bindings.createBooleanBinding(
-                    {
-                        viewModel.narrationStateProperty.value?.let {
-                            it == NarrationStateType.RECORDING
-                                    || it == NarrationStateType.RECORDING_AGAIN
-                                    || it == NarrationStateType.IDLE_EMPTY
-                                    || it == NarrationStateType.RECORDING_AGAIN_PAUSED
-                                    || it == NarrationStateType.PLAYING
-                        } ?: false
-                    },
-                    viewModel.narrationStateProperty
-                )
+                viewModel.isVerseNavigationDisabled
             }
         }
         button {
@@ -116,18 +91,7 @@ class NarrationToolBar : View() {
                 viewModel.seekToNext()
             }
             disableWhen {
-                Bindings.createBooleanBinding(
-                    {
-                        viewModel.narrationStateProperty.value?.let {
-                            it == NarrationStateType.RECORDING
-                                    || it == NarrationStateType.RECORDING_AGAIN
-                                    || it == NarrationStateType.IDLE_EMPTY
-                                    || it == NarrationStateType.RECORDING_AGAIN_PAUSED
-                                    || it == NarrationStateType.PLAYING
-                        } ?: false
-                    },
-                    viewModel.narrationStateProperty
-                )
+                viewModel.isVerseNavigationDisabled
             }
         }
     }
@@ -149,33 +113,47 @@ class NarrationToolbarViewModel : ViewModel() {
     }
 
     val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
-    val chapterTitleProperty = SimpleStringProperty()
 
-    val hasNextChapter = SimpleBooleanProperty()
-    val hasPreviousChapter = SimpleBooleanProperty()
-    val hasVersesProperty = SimpleBooleanProperty()
-
-    val chapterTakeProperty = SimpleObjectProperty<Take>()
-
-    val hasUndoProperty = SimpleBooleanProperty()
-    val hasRedoProperty = SimpleBooleanProperty()
-
+    val isVerseNavigationDisabled = SimpleBooleanProperty()
+    val isPlayPauseButtonDisabled = SimpleBooleanProperty()
 
     private val chapterList: ObservableList<Chapter> = observableListOf()
 
     init {
         chapterList.bind(narrationViewModel.chapterList) { it }
-
-        chapterTakeProperty.bind(narrationViewModel.chapterTakeProperty)
-        chapterTitleProperty.bind(narrationViewModel.chapterTitleProperty)
-        hasNextChapter.bind(narrationViewModel.hasNextChapter)
-        hasPreviousChapter.bind(narrationViewModel.hasPreviousChapter)
-
-        hasUndoProperty.bind(narrationViewModel.hasUndoProperty)
-        hasRedoProperty.bind(narrationViewModel.hasRedoProperty)
-        hasVersesProperty.bind(narrationViewModel.hasVersesProperty)
-
         narrationStateProperty.bind(narrationViewModel.narrationStateProperty)
+
+        isVerseNavigationDisabled.bind(
+            Bindings.createBooleanBinding(
+                {
+                    narrationViewModel.narrationStateProperty.value?.let {
+                        it == NarrationStateType.RECORDING
+                                || it == NarrationStateType.RECORDING_AGAIN
+                                || it == NarrationStateType.IDLE_EMPTY
+                                || it == NarrationStateType.RECORDING_AGAIN_PAUSED
+                                || it == NarrationStateType.PLAYING
+                    } ?: false
+                },
+                narrationViewModel.narrationStateProperty
+            )
+        )
+
+        isPlayPauseButtonDisabled.bind(
+            Bindings.createBooleanBinding(
+                {
+                    narrationViewModel.narrationStateProperty.value?.let {
+                        it == NarrationStateType.RECORDING
+                                || it == NarrationStateType.RECORDING_AGAIN
+                                || it == NarrationStateType.IDLE_EMPTY
+                                || it == NarrationStateType.RECORDING_PAUSED
+                                || it == NarrationStateType.RECORDING_AGAIN_PAUSED
+                    } ?: false
+                },
+                narrationViewModel.narrationStateProperty
+            )
+        )
+
+
     }
 
 
