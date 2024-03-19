@@ -73,6 +73,7 @@ tasks.register('downloadGLSources') {
                 download.run {
                     src artifactUrl
                     dest outputPath
+                    overwrite false
                 }
             } catch (Exception _) {
             }
