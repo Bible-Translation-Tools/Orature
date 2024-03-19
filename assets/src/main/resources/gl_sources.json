@@ -1,382 +1,382 @@
 [
   {
-    "name": "abs_ulb",
-    "artifact": "wa-catalog:abs_ulb:master@zip"
+    "name":"abs_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/abs_ulb/archive/master.zip"
   },
   {
-    "name": "aju_ulb",
-    "artifact": "wa-catalog:aju_ulb:master@zip"
+    "name":"aju_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/aju_ulb/archive/master.zip"
   },
   {
-    "name": "am_ulb",
-    "artifact": "wa-catalog:am_ulb:master@zip"
+    "name":"am_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/am_ulb/archive/master.zip"
   },
   {
-    "name": "apd_ulb",
-    "artifact": "wa-catalog:apd_ulb:master@zip"
+    "name":"apd_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/apd_ulb/archive/master.zip"
   },
   {
-    "name": "ar_ulb",
-    "artifact": "wa-catalog:ar_ulb:master@zip"
+    "name":"ar_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/ar_ulb/archive/master.zip"
   },
   {
-    "name": "ar-x-dcv_ulb",
-    "artifact": "wa-catalog:ar-x-dcv_ulb:master@zip"
+    "name":"ar-x-dcv_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/ar-x-dcv_ulb/archive/master.zip"
   },
   {
-    "name": "ary_ulb",
-    "artifact": "wa-catalog:ary_ulb:master@zip"
+    "name":"ary_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/ary_ulb/archive/master.zip"
   },
   {
-    "name": "arz_ulb",
-    "artifact": "wa-catalog:arz_ulb:master@zip"
+    "name":"arz_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/arz_ulb/archive/master.zip"
   },
   {
-    "name": "as_ulb",
-    "artifact": "wa-catalog:as_ulb:master@zip"
+    "name":"as_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/as_ulb/archive/master.zip"
   },
   {
-    "name": "ase_ulb",
-    "artifact": "wa-catalog:ase_ulb:master@zip"
+    "name":"ase_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/ase_ulb/archive/master.zip"
   },
   {
-    "name": "bem_ulb",
-    "artifact": "wa-catalog:bem_ulb:master@zip"
+    "name":"bem_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/bem_ulb/archive/master.zip"
   },
   {
-    "name": "bg_ulb",
-    "artifact": "wa-catalog:bg_ulb:master@zip"
+    "name":"bg_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/bg_ulb/archive/master.zip"
   },
   {
-    "name": "bgw_ulb",
-    "artifact": "wa-catalog:bgw_ulb:master@zip"
+    "name":"bgw_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/bgw_ulb/archive/master.zip"
   },
   {
-    "name": "bi_ulb",
-    "artifact": "wa-catalog:bi_ulb:master@zip"
+    "name":"bi_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/bi_ulb/archive/master.zip"
   },
   {
-    "name": "bn_ulb",
-    "artifact": "wa-catalog:bn_ulb:master@zip"
+    "name":"bn_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/bn_ulb/archive/master.zip"
   },
   {
-    "name": "ceb_ulb",
-    "artifact": "wa-catalog:ceb_ulb:master@zip"
+    "name":"ceb_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/ceb_ulb/archive/master.zip"
   },
   {
-    "name": "cmn_ulb",
-    "artifact": "wa-catalog:cmn_ulb:master@zip"
+    "name":"cmn_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/cmn_ulb/archive/master.zip"
   },
   {
-    "name": "cmn-x-omc_ulb",
-    "artifact": "wa-catalog:cmn-x-omc_ulb:master@zip"
+    "name":"cmn-x-omc_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/cmn-x-omc_ulb/archive/master.zip"
   },
   {
-    "name": "csl_ulb",
-    "artifact": "wa-catalog:csl_ulb:master@zip"
+    "name":"csl_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/csl_ulb/archive/master.zip"
   },
   {
-    "name": "dz_ulb",
-    "artifact": "wa-catalog:dz_ulb:master@zip"
+    "name":"dz_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/dz_ulb/archive/master.zip"
   },
   {
-    "name": "es_ulb",
-    "artifact": "wa-catalog:es_ulb:master@zip"
+    "name":"es_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/es_ulb/archive/master.zip"
   },
   {
-    "name": "es-419_ulb",
-    "artifact": "wa-catalog:es-419_ulb:master@zip"
+    "name":"es-419_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/es-419_ulb/archive/master.zip"
   },
   {
-    "name": "fa_ulb",
-    "artifact": "wa-catalog:fa_ulb:master@zip"
+    "name":"fa_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/fa_ulb/archive/master.zip"
   },
   {
-    "name": "fil_ulb",
-    "artifact": "wa-catalog:fil_ulb:master@zip"
+    "name":"fil_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/fil_ulb/archive/master.zip"
   },
   {
-    "name": "fr_ulb",
-    "artifact": "wa-catalog:fr_ulb:master@zip"
+    "name":"fr_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/fr_ulb/archive/master.zip"
   },
   {
-    "name": "grt_ulb",
-    "artifact": "wa-catalog:grt_ulb:master@zip"
+    "name":"grt_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/grt_ulb/archive/master.zip"
   },
   {
-    "name": "gu_ulb",
-    "artifact": "wa-catalog:gu_ulb:master@zip"
+    "name":"gu_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/gu_ulb/archive/master.zip"
   },
   {
-    "name": "gug_ulb",
-    "artifact": "wa-catalog:gug_ulb:master@zip"
+    "name":"gug_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/gug_ulb/archive/master.zip"
   },
   {
-    "name": "ha_ulb",
-    "artifact": "wa-catalog:ha_ulb:master@zip"
+    "name":"ha_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/ha_ulb/archive/master.zip"
   },
   {
-    "name": "hbs_ulb",
-    "artifact": "wa-catalog:hbs_ulb:master@zip"
+    "name":"hbs_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/hbs_ulb/archive/master.zip"
   },
   {
-    "name": "hca_ulb",
-    "artifact": "wa-catalog:hca_ulb:master@zip"
+    "name":"hca_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/hca_ulb/archive/master.zip"
   },
   {
-    "name": "he_ulb",
-    "artifact": "wa-catalog:he_ulb:master@zip"
+    "name":"he_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/he_ulb/archive/master.zip"
   },
   {
-    "name": "hi_ulb",
-    "artifact": "wa-catalog:hi_ulb:master@zip"
+    "name":"hi_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/hi_ulb/archive/master.zip"
   },
   {
-    "name": "hne_ulb",
-    "artifact": "wa-catalog:hne_ulb:master@zip"
+    "name":"hne_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/hne_ulb/archive/master.zip"
   },
   {
-    "name": "hu_ulb",
-    "artifact": "wa-catalog:hu_ulb:master@zip"
+    "name":"hu_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/hu_ulb/archive/master.zip"
   },
   {
-    "name": "id_ayt",
-    "artifact": "wa-catalog:id_ayt:master@zip"
+    "name":"id_ayt",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/id_ayt/archive/master.zip"
   },
   {
-    "name": "idb_ulb",
-    "artifact": "wa-catalog:idb_ulb:master@zip"
+    "name":"idb_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/idb_ulb/archive/master.zip"
   },
   {
-    "name": "id-x-dcv_ulb",
-    "artifact": "wa-catalog:id-x-dcv_ulb:master@zip"
+    "name":"id-x-dcv_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/id-x-dcv_ulb/archive/master.zip"
   },
   {
-    "name": "ilo_ulb",
-    "artifact": "wa-catalog:ilo_ulb:master@zip"
+    "name":"ilo_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/ilo_ulb/archive/master.zip"
   },
   {
-    "name": "ins_ulb",
-    "artifact": "wa-catalog:ins_ulb:master@zip"
+    "name":"ins_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/ins_ulb/archive/master.zip"
   },
   {
-    "name": "ja_ulb",
-    "artifact": "wa-catalog:ja_ulb:master@zip"
+    "name":"ja_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/ja_ulb/archive/master.zip"
   },
   {
-    "name": "jv_ulb",
-    "artifact": "wa-catalog:jv_ulb:master@zip"
+    "name":"jv_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/jv_ulb/archive/master.zip"
   },
   {
-    "name": "kas_ulb",
-    "artifact": "wa-catalog:kas_ulb:master@zip"
+    "name":"kas_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/kas_ulb/archive/master.zip"
   },
   {
-    "name": "km_ulb",
-    "artifact": "wa-catalog:km_ulb:master@zip"
+    "name":"km_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/km_ulb/archive/master.zip"
   },
   {
-    "name": "kn_ulb",
-    "artifact": "wa-catalog:kn_ulb:master@zip"
+    "name":"kn_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/kn_ulb/archive/master.zip"
   },
   {
-    "name": "lbj_ulb",
-    "artifact": "wa-catalog:lbj_ulb:master@zip"
+    "name":"lbj_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/lbj_ulb/archive/master.zip"
   },
   {
-    "name": "ln_ulb",
-    "artifact": "wa-catalog:ln_ulb:master@zip"
+    "name":"ln_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/ln_ulb/archive/master.zip"
   },
   {
-    "name": "lo_ulb",
-    "artifact": "wa-catalog:lo_ulb:master@zip"
+    "name":"lo_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/lo_ulb/archive/master.zip"
   },
   {
-    "name": "mai_ulb",
-    "artifact": "wa-catalog:mai_ulb:master@zip"
+    "name":"mai_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/mai_ulb/archive/master.zip"
   },
   {
-    "name": "mg_ulb",
-    "artifact": "wa-catalog:mg_ulb:master@zip"
+    "name":"mg_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/mg_ulb/archive/master.zip"
   },
   {
-    "name": "ml_ulb",
-    "artifact": "wa-catalog:ml_ulb:master@zip"
+    "name":"ml_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/ml_ulb/archive/master.zip"
   },
   {
-    "name": "mn_ulb",
-    "artifact": "wa-catalog:mn_ulb:master@zip"
+    "name":"mn_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/mn_ulb/archive/master.zip"
   },
   {
-    "name": "mni_ulb",
-    "artifact": "wa-catalog:mni_ulb:master@zip"
+    "name":"mni_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/mni_ulb/archive/master.zip"
   },
   {
-    "name": "mnk_ulb",
-    "artifact": "wa-catalog:mnk_ulb:master@zip"
+    "name":"mnk_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/mnk_ulb/archive/master.zip"
   },
   {
-    "name": "mr_ulb",
-    "artifact": "wa-catalog:mr_ulb:master@zip"
+    "name":"mr_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/mr_ulb/archive/master.zip"
   },
   {
-    "name": "ms_ulb",
-    "artifact": "wa-catalog:ms_ulb:master@zip"
+    "name":"ms_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/ms_ulb/archive/master.zip"
   },
   {
-    "name": "my_ulb",
-    "artifact": "wa-catalog:my_ulb:master@zip"
+    "name":"my_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/my_ulb/archive/master.zip"
   },
   {
-    "name": "ne_ulb",
-    "artifact": "wa-catalog:ne_ulb:master@zip"
+    "name":"ne_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/ne_ulb/archive/master.zip"
   },
   {
-    "name": "nl_ulb",
-    "artifact": "wa-catalog:nl_ulb:master@zip"
+    "name":"nl_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/nl_ulb/archive/master.zip"
   },
   {
-    "name": "npi_ulb",
-    "artifact": "wa-catalog:npi_ulb:master@zip"
+    "name":"npi_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/npi_ulb/archive/master.zip"
   },
   {
-    "name": "or_ulb",
-    "artifact": "wa-catalog:or_ulb:master@zip"
+    "name":"or_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/or_ulb/archive/master.zip"
   },
   {
-    "name": "pa_ulb",
-    "artifact": "wa-catalog:pa_ulb:master@zip"
+    "name":"pa_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/pa_ulb/archive/master.zip"
   },
   {
-    "name": "pbt_ulb",
-    "artifact": "wa-catalog:pbt_ulb:master@zip"
+    "name":"pbt_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/pbt_ulb/archive/master.zip"
   },
   {
-    "name": "pes_ulb",
-    "artifact": "wa-catalog:pes_ulb:master@zip"
+    "name":"pes_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/pes_ulb/archive/master.zip"
   },
   {
-    "name": "pis_ulb",
-    "artifact": "wa-catalog:pis_ulb:master@zip"
+    "name":"pis_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/pis_ulb/archive/master.zip"
   },
   {
-    "name": "plt_ulb",
-    "artifact": "wa-catalog:plt_ulb:master@zip"
+    "name":"plt_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/plt_ulb/archive/master.zip"
   },
   {
-    "name": "pmy_ulb",
-    "artifact": "wa-catalog:pmy_ulb:master@zip"
+    "name":"pmy_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/pmy_ulb/archive/master.zip"
   },
   {
-    "name": "pnb_ulb",
-    "artifact": "wa-catalog:pnb_ulb:master@zip"
+    "name":"pnb_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/pnb_ulb/archive/master.zip"
   },
   {
-    "name": "prs_ulb",
-    "artifact": "wa-catalog:prs_ulb:master@zip"
+    "name":"prs_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/prs_ulb/archive/master.zip"
   },
   {
-    "name": "ps_ulb",
-    "artifact": "wa-catalog:ps_ulb:master@zip"
+    "name":"ps_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/ps_ulb/archive/master.zip"
   },
   {
-    "name": "psr_ulb",
-    "artifact": "wa-catalog:psr_ulb:master@zip"
+    "name":"psr_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/psr_ulb/archive/master.zip"
   },
   {
-    "name": "pt_ulb",
-    "artifact": "wa-catalog:pt_ulb:master@zip"
+    "name":"pt_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/pt_ulb/archive/master.zip"
   },
   {
-    "name": "pt-br_ulb",
-    "artifact": "wa-catalog:pt-br_ulb:master@zip"
+    "name":"pt-br_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/pt-br_ulb/archive/master.zip"
   },
   {
-    "name": "raj_ulb",
-    "artifact": "wa-catalog:raj_ulb:master@zip"
+    "name":"raj_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/raj_ulb/archive/master.zip"
   },
   {
-    "name": "rsl_ulb",
-    "artifact": "wa-catalog:rsl_ulb:master@zip"
+    "name":"rsl_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/rsl_ulb/archive/master.zip"
   },
   {
-    "name": "ru_ulb",
-    "artifact": "wa-catalog:ru_ulb:master@zip"
+    "name":"ru_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/ru_ulb/archive/master.zip"
   },
   {
-    "name": "rwr_ulb",
-    "artifact": "wa-catalog:rwr_ulb:master@zip"
+    "name":"rwr_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/rwr_ulb/archive/master.zip"
   },
   {
-    "name": "sn_ulb",
-    "artifact": "wa-catalog:sn_ulb:master@zip"
+    "name":"sn_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/sn_ulb/archive/master.zip"
   },
   {
-    "name": "sw_ulb",
-    "artifact": "wa-catalog:sw_ulb:master@zip"
+    "name":"sw_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/sw_ulb/archive/master.zip"
   },
   {
-    "name": "swc_ulb",
-    "artifact": "wa-catalog:swc_ulb:master@zip"
+    "name":"swc_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/swc_ulb/archive/master.zip"
   },
   {
-    "name": "swh_ulb",
-    "artifact": "wa-catalog:swh_ulb:master@zip"
+    "name":"swh_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/swh_ulb/archive/master.zip"
   },
   {
-    "name": "ta_ulb",
-    "artifact": "wa-catalog:ta_ulb:master@zip"
+    "name":"ta_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/ta_ulb/archive/master.zip"
   },
   {
-    "name": "te_ulb",
-    "artifact": "wa-catalog:te_ulb:master@zip"
+    "name":"te_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/te_ulb/archive/master.zip"
   },
   {
-    "name": "th_ulb",
-    "artifact": "wa-catalog:th_ulb:master@zip"
+    "name":"th_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/th_ulb/archive/master.zip"
   },
   {
-    "name": "ti_ulb",
-    "artifact": "wa-catalog:ti_ulb:master@zip"
+    "name":"ti_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/ti_ulb/archive/master.zip"
   },
   {
-    "name": "tl_ulb",
-    "artifact": "wa-catalog:tl_ulb:master@zip"
+    "name":"tl_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/tl_ulb/archive/master.zip"
   },
   {
-    "name": "tn_ulb",
-    "artifact": "wa-catalog:tn_ulb:master@zip"
+    "name":"tn_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/tn_ulb/archive/master.zip"
   },
   {
-    "name": "tpi_ulb",
-    "artifact": "wa-catalog:tpi_ulb:master@zip"
+    "name":"tpi_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/tpi_ulb/archive/master.zip"
   },
   {
-    "name": "tr_ulb",
-    "artifact": "wa-catalog:tr_ulb:master@zip"
+    "name":"tr_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/tr_ulb/archive/master.zip"
   },
   {
-    "name": "tsg_ulb",
-    "artifact": "wa-catalog:tsg_ulb:master@zip"
+    "name":"tsg_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/tsg_ulb/archive/master.zip"
   },
   {
-    "name": "ug_ulb",
-    "artifact": "wa-catalog:ug_ulb:master@zip"
+    "name":"ug_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/ug_ulb/archive/master.zip"
   },
   {
-    "name": "ur_ulb",
-    "artifact": "wa-catalog:ur_ulb:master@zip"
+    "name":"ur_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/ur_ulb/archive/master.zip"
   },
   {
-    "name": "vi_ulb",
-    "artifact": "wa-catalog:vi_ulb:master@zip"
+    "name":"vi_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/vi_ulb/archive/master.zip"
   },
   {
-    "name": "zh_ulb",
-    "artifact": "wa-catalog:zh_ulb:master@zip"
+    "name":"zh_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/zh_ulb/archive/master.zip"
   },
   {
-    "name": "zlm_ulb",
-    "artifact": "wa-catalog:zlm_ulb:master@zip"
+    "name":"zlm_ulb",
+    "url":"https://content.bibletranslationtools.org/wa-catalog/zlm_ulb/archive/master.zip"
   }
 ]

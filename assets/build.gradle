@@ -63,11 +63,10 @@ tasks.register('downloadGLSources') {
 
         def parser = new JsonSlurper()
         def jsonData = parser.parse(jsonFile) as List<Map<String, String>>
-        def baseUrl = 'https://content.bibletranslationtools.org/wa-catalog/'
 
         jsonData.each { dependency ->
             def artifactName = dependency["name"]
-            def artifactUrl = "${baseUrl}${artifactName}/archive/master.zip"
+            def artifactUrl = dependency["url"]
             def outputPath = "${layout.buildDirectory.dir("resources/content").get().asFile}/${artifactName}.zip"
 
             try {
