@@ -80,10 +80,6 @@
     "artifact": "wa-catalog:dz_ulb:master@zip"
   },
   {
-    "name": "en_ulb",
-    "artifact": "wa-catalog:en_ulb:master@zip"
-  },
-  {
     "name": "es_ulb",
     "artifact": "wa-catalog:es_ulb:master@zip"
   },
