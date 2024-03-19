@@ -68,5 +68,6 @@ task copyToResources(type: Copy) {
     }
 }
 
+licenseMain.dependsOn copyToResources
 compileJava.dependsOn copyToResources
 processResources.dependsOn(copyToResources)
