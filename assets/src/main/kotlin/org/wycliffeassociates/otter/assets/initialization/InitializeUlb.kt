@@ -18,6 +18,10 @@
  */
 package org.wycliffeassociates.otter.assets.initialization
 
+import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.Completable
 import io.reactivex.ObservableEmitter
 import org.slf4j.LoggerFactory
@@ -32,6 +36,7 @@ import java.io.File
 import javax.inject.Inject
 
 const val EN_ULB_FILENAME = "en_ulb"
+private const val SOURCE_PATH_TEMPLATE = "content/%s.zip"
 private const val EN_ULB_PATH = "content/$EN_ULB_FILENAME.zip"
 
 class InitializeUlb @Inject constructor(
@@ -46,6 +51,8 @@ class InitializeUlb @Inject constructor(
     private val log = LoggerFactory.getLogger(InitializeUlb::class.java)
 
     override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
+        val callback = setupImportCallback(progressEmitter)
+
         return Completable
             .fromCallable {
                 val installedVersion = installedEntityRepo.getInstalledVersion(this)
@@ -64,7 +71,6 @@ class InitializeUlb @Inject constructor(
                             subTitleMessage = name
                         )
                     )
-                    val callback = setupImportCallback(progressEmitter)
                     importer
                         .import(enUlbFile, callback)
                         .toObservable()
@@ -78,6 +84,13 @@ class InitializeUlb @Inject constructor(
                             } else {
                                 throw ImportException(result)
                             }
+                        }
+
+                    getSourcesToPreload()
+                        .forEach { file ->
+                            val res = importer
+                                .import(file, callback)
+                                .blockingGet()
                         }
                 } else {
                     log.info("$name up to date with version: $version")
@@ -100,4 +113,20 @@ class InitializeUlb @Inject constructor(
         }
         return tempFile
     }
+
+    private fun getSourcesToPreload(): List<File> {
+        val sourcesJson = javaClass.classLoader.getResource("gl_sources.json").let { File(it.file) }
+        val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
+        val resources: List<ResourceInfo> = mapper.readValue(sourcesJson)
+
+        return resources.mapNotNull { res ->
+            val resourcePath = SOURCE_PATH_TEMPLATE.format(res.name)
+            val fileToImport = javaClass.classLoader.getResource(resourcePath)
+                ?.let { File(it.file) }
+
+            fileToImport
+        }
+    }
 }
+
+private data class ResourceInfo(val name: String, val url: String)
