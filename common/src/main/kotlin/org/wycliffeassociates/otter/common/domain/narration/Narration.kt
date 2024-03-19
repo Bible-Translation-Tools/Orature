@@ -635,8 +635,8 @@ class Narration @AssistedInject constructor(
             }
             ?: chapterRepresentation.apply {
                 if (activeVerses.isNotEmpty()) {
-                    logger.info("Next marker not found, seeking to end of audio")
-                    val lastFrame = absoluteFrameToRelativeChapterFrame(activeVerses.last().lastIndex())
+                    val lastFrame = absoluteFrameToRelativeChapterFrame(activeVerses.last().lastIndex() / frameSizeInBytes)
+                    logger.info("Next marker not found, seeking to end of audio; frame: $lastFrame")
                     seek(lastFrame)
                 }
             }

@@ -281,7 +281,7 @@ internal class ChapterRepresentation(
             for (idx in 0 until index) {
                 rel += verses[idx].length / frameSizeInBytes
             }
-            rel += it.indicesToPosition(absoluteFrame * frameSizeInBytes)
+            rel += it.indicesToPosition(absoluteFrame * frameSizeInBytes) / frameSizeInBytes
             return rel
         }
         return 0
@@ -438,7 +438,7 @@ internal class ChapterRepresentation(
             val verse = activeVerses.getOrNull(verseIndex)
             var rel = 0
             verse?.let {
-                rel = it.indicesToPosition(absoluteFrame * frameSizeInBytes)
+                rel = it.indicesToPosition(absoluteFrame * frameSizeInBytes) / frameSizeInBytes
             }
             return rel
         }
