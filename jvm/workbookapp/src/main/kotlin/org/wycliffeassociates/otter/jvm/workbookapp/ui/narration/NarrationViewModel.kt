@@ -654,8 +654,6 @@ class NarrationViewModel : ViewModel() {
         stopPlayer()
 
         narration.onSaveRecording(verseIndex)
-
-        renderer.clearActiveRecordingData()
     }
 
     fun openInAudioPlugin(index: Int) {
@@ -1065,6 +1063,7 @@ class NarrationViewModel : ViewModel() {
         if (transition == NarrationStateTransition.SAVE) {
             recordAgainVerseIndex = null
             recordingVerseIndex.set(-1)
+            renderer.clearActiveRecordingData()
 
             createPotentiallyFinishedChapterTake()
         }
