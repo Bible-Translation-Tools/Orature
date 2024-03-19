@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.controls.skins
 
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.Priority
+import javafx.scene.layout.Region.USE_PREF_SIZE
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
@@ -48,6 +49,7 @@ class MarkerNodeSkin(val control: MarkerNode) : SkinBase<MarkerNode>(control) {
                 label(control.markerNumberProperty) {
                     addClass("normal-text")
                     graphic = FontIcon(Material.BOOKMARK_OUTLINE).addClass("wa-icon")
+                    minWidth = USE_PREF_SIZE
                 }
                 button {
                     addClass("btn", "btn--icon", "btn--borderless", "normal-text")

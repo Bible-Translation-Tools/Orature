@@ -99,6 +99,7 @@ class Consume : View() {
                     }
                     themeProperty.bind(settingsViewModel.appColorMode)
                     positionProperty.bind(viewModel.positionProperty)
+                    audioPositionProperty.bind(viewModel.audioPositionProperty)
                     canMoveMarkerProperty.set(false)
                     canDeleteMarkerProperty.set(false)
 

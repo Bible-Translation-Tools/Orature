@@ -30,7 +30,7 @@ class ChunkMarker : MarkerControl() {
         styleClass.add("chunk-marker")
         visibleProperty().bind(isPlacedProperty)
 
-        onMouseClickedProperty().bind(onDragStartProperty)
+        onMousePressedProperty().bind(onDragStartProperty)
         onMouseDraggedProperty().bind(onDragProperty)
         onMouseReleasedProperty().bind(onDragFinishProperty)
     }
