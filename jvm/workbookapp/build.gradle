@@ -182,7 +182,8 @@ dependencies {
     integrationTestImplementation group: 'junit', name: 'junit', version: "$junitVer"
     integrationTestImplementation "org.mockito:mockito-core:$mockitoVer"
     integrationTestImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVer"
-    integrationTestImplementation sourceSets.main.compileClasspath
+    integrationTestImplementation files(sourceSets.main.compileClasspath)
+    integrationTestImplementation files(sourceSets.main.runtimeClasspath)
     integrationTestImplementation sourceSets.main.output
 
     //WA Libraries
@@ -232,10 +233,15 @@ shadowJar {
     }
 }
 
+kapt {
+    correctErrorTypes true // https://stackoverflow.com/questions/45099688/error-error-nonexistentclass-kotlin-in-multi-module-dagger-project
+}
+
 task integrationTest(type: Test) {
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
     outputs.upToDateWhen { false }
+    systemProperty "net.bytebuddy.experimental", "true" // https://github.com/raphw/byte-buddy/issues/1396#issuecomment-1405066509
 }
 
 configure(integrationTest) {

@@ -13,9 +13,9 @@ ext {
     jacocoToolVer = "0.8.11"
 
     // Libraries
-    kotlinVer = '1.8.0'
+    kotlinVer = '1.9.23'
     javafxVer = '21'
-    javaVer = '17'
+    javaVer = '21'
     javaGridviewVer = '1.0.0'
     tornadofxVer = '2.1.1-WA-fork'
     rxkotlinVer = '2.4.0'
@@ -34,7 +34,7 @@ ext {
     daggerVer = '2.47'
     junitVer = '4.12'
     mockkVer = '1.13.5'
-    mockitoVer = '2.+'
+    mockitoVer = '5.11.0'
     mockitoKotlinVer = '2.1.0'
     commonmarkVer = '0.12.1'
     clapperJavaUtilVer = '3.2.0'
