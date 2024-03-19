@@ -9,8 +9,8 @@ enum class NarrationStateTransition {
     RECORD_AGAIN,
     RESUME_RECORD_AGAIN,
     PAUSE_RECORD_AGAIN,
-    SAVE,
-    SAVE_FINISHED,
+    START_SAVE,
+    FINISH_SAVE,
     PLAY_AUDIO,
     PAUSE_AUDIO_PLAYBACK,
     PAUSE_PLAYBACK_WHILE_MODIFYING_AUDIO,
@@ -127,7 +127,7 @@ object ResumeRecordAgain {
 }
 
 
-object SaveAction {
+object StartSaveAction {
     fun apply(
         globalContext: NarrationState,
         verseContexts: MutableList<VerseStateContext>,
@@ -150,7 +150,7 @@ object SaveAction {
 }
 
 
-object SaveFinished {
+object FinishSave {
     fun apply(
         globalContext: NarrationState,
         verseContexts: MutableList<VerseStateContext>,

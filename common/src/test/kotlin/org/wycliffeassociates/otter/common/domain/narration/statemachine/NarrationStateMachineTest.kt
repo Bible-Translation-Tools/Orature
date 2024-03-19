@@ -595,7 +595,7 @@ class NarrationStateMachineTest {
         Assert.assertEquals(NarrationStateType.RECORDING_PAUSED, narrationStateMachine.getNarrationContext())
 
         // Saves
-        newContext = narrationStateMachine.transition(NarrationStateTransition.SAVE, numMarkers - 1)
+        newContext = narrationStateMachine.transition(NarrationStateTransition.START_SAVE, numMarkers - 1)
 
         Assert.assertEquals(NarrationStateType.MODIFYING_AUDIO_FILE, narrationStateMachine.getNarrationContext())
 
@@ -814,7 +814,7 @@ class NarrationStateMachineTest {
         narrationStateMachine.initialize(activeVerses)
         Assert.assertEquals(NarrationStateType.IDLE_FINISHED, narrationStateMachine.getNarrationContext())
 
-        narrationStateMachine.transition(NarrationStateTransition.SAVE)
+        narrationStateMachine.transition(NarrationStateTransition.START_SAVE)
         Assert.assertEquals(NarrationStateType.MODIFYING_AUDIO_FILE, narrationStateMachine.getNarrationContext())
 
         narrationStateMachine.transition(NarrationStateTransition.PLAY_AUDIO)
@@ -844,7 +844,7 @@ class NarrationStateMachineTest {
         narrationStateMachine.initialize(activeVerses)
         Assert.assertEquals(NarrationStateType.IDLE_FINISHED, narrationStateMachine.getNarrationContext())
 
-        narrationStateMachine.transition(NarrationStateTransition.SAVE)
+        narrationStateMachine.transition(NarrationStateTransition.START_SAVE)
         Assert.assertEquals(NarrationStateType.MODIFYING_AUDIO_FILE, narrationStateMachine.getNarrationContext())
 
         narrationStateMachine.transition(NarrationStateTransition.PLAY_AUDIO)
@@ -874,7 +874,7 @@ class NarrationStateMachineTest {
         narrationStateMachine.initialize(activeVerses)
         Assert.assertEquals(NarrationStateType.IDLE_FINISHED, narrationStateMachine.getNarrationContext())
 
-        narrationStateMachine.transition(NarrationStateTransition.SAVE)
+        narrationStateMachine.transition(NarrationStateTransition.START_SAVE)
         Assert.assertEquals(NarrationStateType.MODIFYING_AUDIO_FILE, narrationStateMachine.getNarrationContext())
 
         narrationStateMachine.transition(NarrationStateTransition.MOVING_MARKER)
@@ -904,7 +904,7 @@ class NarrationStateMachineTest {
         narrationStateMachine.initialize(activeVerses)
         Assert.assertEquals(NarrationStateType.IDLE_FINISHED, narrationStateMachine.getNarrationContext())
 
-        narrationStateMachine.transition(NarrationStateTransition.SAVE)
+        narrationStateMachine.transition(NarrationStateTransition.START_SAVE)
         Assert.assertEquals(NarrationStateType.MODIFYING_AUDIO_FILE, narrationStateMachine.getNarrationContext())
 
         narrationStateMachine.transition(NarrationStateTransition.MOVING_MARKER)

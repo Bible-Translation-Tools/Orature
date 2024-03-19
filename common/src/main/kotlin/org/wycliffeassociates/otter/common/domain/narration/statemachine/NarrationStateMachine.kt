@@ -132,7 +132,11 @@ class NarrationStateMachine(
                 )
 
 
-                NarrationStateTransition.SAVE -> SaveAction.apply(narrationContext, verseContexts, verseIndex)
+                NarrationStateTransition.START_SAVE -> StartSaveAction.apply(
+                    narrationContext,
+                    verseContexts,
+                    verseIndex
+                )
 
                 NarrationStateTransition.PLAY_AUDIO -> PlayAction.apply(narrationContext, verseContexts, verseIndex)
 
@@ -148,7 +152,7 @@ class NarrationStateMachine(
                     verseIndex
                 )
 
-                NarrationStateTransition.SAVE_FINISHED -> SaveFinished.apply(
+                NarrationStateTransition.FINISH_SAVE -> FinishSave.apply(
                     narrationContext,
                     verseContexts,
                     verseIndex

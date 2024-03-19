@@ -855,11 +855,11 @@ class NarrationViewModel : ViewModel() {
                     navigator.blockNavigationEvents.set(!isIdle)
 
                     if (isIdle && narrationStateMachine.getNarrationContext() == NarrationStateType.MODIFYING_AUDIO_FILE) {
-                        performNarrationStateMachineTransition(NarrationStateTransition.SAVE_FINISHED)
+                        performNarrationStateMachineTransition(NarrationStateTransition.FINISH_SAVE)
                     }
 
                     if (!isIdle && narrationStateMachine.getNarrationContext() == NarrationStateType.IDLE_FINISHED) {
-                        performNarrationStateMachineTransition(NarrationStateTransition.SAVE)
+                        performNarrationStateMachineTransition(NarrationStateTransition.START_SAVE)
                     }
 
                     // Indicates that we have opened the saving model to interrupt either a chapter navigation or
@@ -1050,7 +1050,7 @@ class NarrationViewModel : ViewModel() {
             is SaveRecordingEvent -> {
                 saveRecording(event.index)
                 index = event.index
-                NarrationStateTransition.SAVE
+                NarrationStateTransition.START_SAVE
             }
 
             else -> {
@@ -1060,7 +1060,7 @@ class NarrationViewModel : ViewModel() {
 
         performNarrationStateMachineTransition(transition, index)
 
-        if (transition == NarrationStateTransition.SAVE) {
+        if (transition == NarrationStateTransition.START_SAVE) {
             recordAgainVerseIndex = null
             recordingVerseIndex.set(-1)
             renderer.clearActiveRecordingData()
