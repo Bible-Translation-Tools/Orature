@@ -103,10 +103,6 @@ class NewSourceImporter @Inject constructor(
                     }
                 }
 
-            callback?.onNotifyProgress(
-                localizeKey = "importingSource", percent = 50.0
-            )
-
             if (versificationTree != null) {
                 importTree(container, preallocationTree, fileToImport)
                     .flatMap {
