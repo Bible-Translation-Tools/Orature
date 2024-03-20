@@ -60,9 +60,11 @@ class InitializeUlb @Inject constructor(
             .fromAction {
                 val installedVersion = installedEntityRepo.getInstalledVersion(this)
                 if (installedVersion != version) {
+                    log.info("Initializing $name version: $version...")
                     installEnULB(progressEmitter, callback)
                     installGLSources(callback)
                     installedEntityRepo.install(this)
+                    log.info("$name version: $version installed!")
                 } else {
                     log.info("$name up to date with version: $version")
                 }
@@ -80,7 +82,6 @@ class InitializeUlb @Inject constructor(
         if (importer.isAlreadyImported(enUlbFile)) {
             log.info("$EN_ULB_FILENAME already exists, skipped.")
         } else {
-            log.info("Initializing $name version: $version...")
             progressEmitter.onNext(
                 ProgressStatus(
                     titleKey = "initializingSources",
@@ -97,7 +98,6 @@ class InitializeUlb @Inject constructor(
                 .blockingSubscribe { result ->
                     if (result == ImportResult.SUCCESS) {
                         installedEntityRepo.install(this)
-                        log.info("$name version: $version installed!")
                     } else {
                         throw ImportException(result)
                     }
