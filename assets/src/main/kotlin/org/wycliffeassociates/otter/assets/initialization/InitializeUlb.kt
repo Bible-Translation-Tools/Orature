@@ -48,7 +48,7 @@ class InitializeUlb @Inject constructor(
 ) : Installable {
 
     override val name = "EN_ULB"
-    override val version = 1
+    override val version = 2
 
     private val log = LoggerFactory.getLogger(InitializeUlb::class.java)
 
@@ -61,6 +61,7 @@ class InitializeUlb @Inject constructor(
                 if (installedVersion != version) {
                     installEnULB(progressEmitter, callback)
                     installGLSources(callback)
+                    installedEntityRepo.install(this)
                 } else {
                     log.info("$name up to date with version: $version")
                 }
