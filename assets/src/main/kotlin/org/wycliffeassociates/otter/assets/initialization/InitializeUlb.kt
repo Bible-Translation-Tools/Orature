@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.Completable
-import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
@@ -35,9 +34,11 @@ import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import java.io.File
+import java.net.URL
 import javax.inject.Inject
 
 const val EN_ULB_FILENAME = "en_ulb"
+private const val SOURCES_JSON_FILE = "gl_sources.json"
 private const val SOURCE_PATH_TEMPLATE = "content/%s.zip"
 private const val EN_ULB_PATH = "content/$EN_ULB_FILENAME.zip"
 
@@ -137,20 +138,44 @@ class InitializeUlb @Inject constructor(
     }
 
     private fun getSourcesToPreload(): List<File> {
-        val sourcesJsonFile = javaClass.classLoader.getResource("gl_sources.json")
-            ?.let { File(it.file) }
+        val sourcesJson = javaClass.classLoader.getResource(SOURCES_JSON_FILE)
             ?: return listOf()
 
+        val sourcesJsonFile = directoryProvider.createTempFile("gl_sources", ".json")
+            .also(File::deleteOnExit)
+
+        sourcesJson.openStream().use { input ->
+            sourcesJsonFile.outputStream().use { output ->
+                input.transferTo(output)
+            }
+        }
+
         val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
-        val resources: List<ResourceInfo> = mapper.readValue(sourcesJsonFile)
+        val resources: List<ResourceInfo> = mapper.readValue(sourcesJson)
 
         return resources.mapNotNull { res ->
             val resourcePath = SOURCE_PATH_TEMPLATE.format(res.name)
-            val fileToImport = javaClass.classLoader.getResource(resourcePath)
-                ?.let { File(it.file) }
-
-            fileToImport
+            javaClass.classLoader.getResource(resourcePath)
+                ?.let { resource ->
+                    val fileToImport = copyResourceToFile(resource)
+                    fileToImport
+                }
         }
+    }
+
+    private fun copyResourceToFile(resource: URL): File {
+        val fileToImport = directoryProvider.tempDirectory.resolve(File(resource.file).name)
+            .apply {
+                createNewFile()
+                deleteOnExit()
+            }
+
+        resource.openStream().use { input ->
+            fileToImport.outputStream().use { output ->
+                input.transferTo(output)
+            }
+        }
+        return fileToImport
     }
 }
 

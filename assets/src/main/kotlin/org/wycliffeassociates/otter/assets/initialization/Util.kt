@@ -24,7 +24,6 @@ import org.wycliffeassociates.otter.common.domain.project.importer.ImportCallbac
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.data.ProgressStatus
-import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 
 /**

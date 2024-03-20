@@ -19,6 +19,7 @@
 package integrationtest.initialization
 
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.atLeastOnce
 import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.mock
 import integrationtest.di.DaggerTestPersistenceComponent
@@ -109,7 +110,7 @@ class TestInitializeUlb {
         testSub.assertComplete()
         testSub.assertNoErrors()
 
-        verify(importer).isAlreadyImported(any())
+        verify(importer, atLeastOnce()).isAlreadyImported(any())
         verify(importer, never()).import(any(), any(), any())
         verify(importer, never()).import(any())
     }
