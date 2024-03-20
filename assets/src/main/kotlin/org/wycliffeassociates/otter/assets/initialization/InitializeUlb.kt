@@ -31,6 +31,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.config.Installable
 import org.wycliffeassociates.otter.common.data.ProgressStatus
+import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import java.io.File
 import javax.inject.Inject
@@ -86,18 +87,28 @@ class InitializeUlb @Inject constructor(
                             }
                         }
 
-                    getSourcesToPreload()
-                        .forEach { file ->
-                            val res = importer
-                                .import(file, callback)
-                                .blockingGet()
-                        }
+                    installGLSources(callback)
                 } else {
                     log.info("$name up to date with version: $version")
                 }
             }
             .doOnError { e ->
                 log.error("Error in initializeUlb", e)
+            }
+    }
+
+    private fun installGLSources(callback: ProjectImporterCallback) {
+        getSourcesToPreload()
+            .forEach { file ->
+                val result = importer
+                    .import(file, callback)
+                    .blockingGet()
+
+                if (result == ImportResult.SUCCESS) {
+                    log.info("Source loaded: $file")
+                } else {
+                    log.error("Could not import $file")
+                }
             }
     }
 
@@ -115,9 +126,12 @@ class InitializeUlb @Inject constructor(
     }
 
     private fun getSourcesToPreload(): List<File> {
-        val sourcesJson = javaClass.classLoader.getResource("gl_sources.json").let { File(it.file) }
+        val sourcesJsonFile = javaClass.classLoader.getResource("gl_sources.json")
+            ?.let { File(it.file) }
+            ?: return listOf()
+
         val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
-        val resources: List<ResourceInfo> = mapper.readValue(sourcesJson)
+        val resources: List<ResourceInfo> = mapper.readValue(sourcesJsonFile)
 
         return resources.mapNotNull { res ->
             val resourcePath = SOURCE_PATH_TEMPLATE.format(res.name)
