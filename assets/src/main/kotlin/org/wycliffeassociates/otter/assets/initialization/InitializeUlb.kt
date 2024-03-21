@@ -37,10 +37,8 @@ import java.io.File
 import java.net.URL
 import javax.inject.Inject
 
-const val EN_ULB_FILENAME = "en_ulb"
 const val SOURCES_JSON_FILE = "gl_sources.json"
 private const val SOURCE_PATH_TEMPLATE = "content/%s.zip"
-private const val EN_ULB_PATH = "content/$EN_ULB_FILENAME.zip"
 
 class InitializeUlb @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
@@ -48,8 +46,8 @@ class InitializeUlb @Inject constructor(
     private val importer: ImportProjectUseCase
 ) : Installable {
 
-    override val name = "EN_ULB"
-    override val version = 2
+    override val name = "GL_SOURCES"
+    override val version = 1
 
     private val log = LoggerFactory.getLogger(InitializeUlb::class.java)
 
@@ -61,7 +59,9 @@ class InitializeUlb @Inject constructor(
                 val installedVersion = installedEntityRepo.getInstalledVersion(this)
                 if (installedVersion != version) {
                     log.info("Initializing $name version: $version...")
-                    installEnULB(progressEmitter, callback)
+                    progressEmitter.onNext(
+                        ProgressStatus(titleKey = "initializingSources")
+                    )
                     installGLSources(callback)
                     installedEntityRepo.install(this)
                     log.info("$name version: $version installed!")
@@ -74,38 +74,7 @@ class InitializeUlb @Inject constructor(
             }
     }
 
-    private fun installEnULB(
-        progressEmitter: ObservableEmitter<ProgressStatus>,
-        callback: ProjectImporterCallback
-    ) {
-        val enUlbFile = prepareImportFile()
-        if (importer.isAlreadyImported(enUlbFile)) {
-            log.info("$EN_ULB_FILENAME already exists, skipped.")
-        } else {
-            progressEmitter.onNext(
-                ProgressStatus(
-                    titleKey = "initializingSources",
-                    subTitleKey = "loadingSomething",
-                    subTitleMessage = name
-                )
-            )
-            importer
-                .import(enUlbFile, callback)
-                .toObservable()
-                .doOnError { e ->
-                    log.error("Error importing $EN_ULB_FILENAME.", e)
-                }
-                .blockingSubscribe { result ->
-                    if (result == ImportResult.SUCCESS) {
-                        installedEntityRepo.install(this)
-                    } else {
-                        throw ImportException(result)
-                    }
-                }
-        }
-    }
-
-    fun installGLSources(callback: ProjectImporterCallback) {
+    private fun installGLSources(callback: ProjectImporterCallback) {
         getSourcesToPreload()
             .filter { !importer.isAlreadyImported(it) }
             .forEach { file ->
@@ -122,19 +91,6 @@ class InitializeUlb @Inject constructor(
                     log.error("Could not import $file")
                 }
             }
-    }
-
-    private fun prepareImportFile(): File {
-        val enUlbResource = javaClass.classLoader.getResource(EN_ULB_PATH)!!
-        val tempFile = directoryProvider.createTempFile("en_ulb-default", ".zip")
-            .also(File::deleteOnExit)
-
-        enUlbResource.openStream().use { input ->
-            tempFile.outputStream().use { output ->
-                input.transferTo(output)
-            }
-        }
-        return tempFile
     }
 
     private fun getSourcesToPreload(): List<File> {
@@ -163,6 +119,9 @@ class InitializeUlb @Inject constructor(
         }
     }
 
+    /**
+     * Source files in jar must be copied to a temp file before it can be accessed
+     */
     private fun copyResourceToFile(resource: URL): File {
         val fileToImport = directoryProvider.tempDirectory.resolve(File(resource.file).name)
             .apply {

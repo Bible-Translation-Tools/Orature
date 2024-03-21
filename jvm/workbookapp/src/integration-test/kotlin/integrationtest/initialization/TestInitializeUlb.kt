@@ -22,17 +22,14 @@ import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.nhaarman.mockitokotlin2.anyOrNull
 import integrationtest.di.DaggerTestPersistenceComponent
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.spyk
 import io.mockk.verify
 import io.reactivex.Completable
 import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 import io.reactivex.observers.TestObserver
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.wycliffeassociates.otter.assets.initialization.InitializeUlb
@@ -79,65 +76,16 @@ class TestInitializeUlb {
     }
 
     @Test
-    fun testImportEnUlb() {
-        val testSub = TestObserver<Completable>()
-        val mockProgressEmitter = mockk<ObservableEmitter<ProgressStatus>>{
-            every { onNext(any()) } answers { }
-        }
-
-        val init = spyk(initUlbProvider.get())
-        every { init.installGLSources(any()) } returns Unit // skip the GLs installations
-
-        init.exec(mockProgressEmitter)
-            .subscribe(testSub)
-
-        testSub.assertComplete()
-        testSub.assertNoErrors()
-
-        Assert.assertEquals(init.version, database.installedEntityDao.fetchVersion(init))
-    }
-
-    @Test
-    fun `test en_ulb import skipped when already imported`() {
-        val testSub = TestObserver<Completable>()
-        val mockProgressEmitter = mockk<ObservableEmitter<ProgressStatus>>{
-            every { onNext(any()) } answers { }
-        }
-        val importer = mockk<ImportProjectUseCase> {
-            every { isAlreadyImported(any()) } returns true
-        }
-
-        val init = spyk(
-            InitializeUlb(
-                directoryProvider,
-                installedEntityRepo,
-                importer
-            )
-        )
-        every { init.installGLSources(any()) } returns Unit // skip the GLs installations
-
-        init.exec(mockProgressEmitter)
-            .subscribe(testSub)
-
-        testSub.assertComplete()
-        testSub.assertNoErrors()
-
-        verify { importer.isAlreadyImported(any()) }
-        verify(exactly = 0) { importer.import(any(), any(), any()) }
-        verify(exactly = 0) { importer.import(any()) }
-    }
-
-    @Test
-    fun testImportGLSources() {
+    fun testInitializeGLSources() {
         val testSub = TestObserver<Completable>()
         val mockProgressEmitter = mockk<ObservableEmitter<ProgressStatus>>{
             every { onNext(any()) } answers { }
         }
         val sourceCount = countAvailableSources()
 
-        val importSpy = mockk<ImportProjectUseCase>() {
+        val importSpy = mockk<ImportProjectUseCase> {
             every { isAlreadyImported(any()) } returns false
-            every { import(any(), any(), anyOrNull()) } returns Single.just(ImportResult.SUCCESS)
+            every { import(any(), any(), any()) } returns Single.just(ImportResult.SUCCESS)
         }
         val init = InitializeUlb(
             directoryProvider,
@@ -149,7 +97,7 @@ class TestInitializeUlb {
 
         testSub.assertComplete()
         testSub.assertNoErrors()
-        verify(exactly = sourceCount + 1) { importSpy.import(any(), any(), any()) } // sources + en
+        verify(exactly = sourceCount) { importSpy.import(any(), any(), any()) }
     }
 
     private fun countAvailableSources(): Int {
@@ -171,6 +119,9 @@ class TestInitializeUlb {
         return availableSourceCount
     }
 
+    /**
+     * "Pings" the endpoint URL to see if they are available.
+     */
     private fun urlExists(url: String): Boolean {
         val connection = URL(url).openConnection() as HttpURLConnection
         connection.requestMethod = "HEAD"

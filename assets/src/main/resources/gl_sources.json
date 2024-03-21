@@ -80,6 +80,10 @@
     "url":"https://content.bibletranslationtools.org/wa-catalog/dz_ulb/archive/master.zip"
   },
   {
+    "name":"en_ulb",
+    "url":"https://content.bibletranslationtools.org/WA-Catalog/en_ulb/archive/V21-05.zip"
+  },
+  {
     "name":"es_ulb",
     "url":"https://content.bibletranslationtools.org/wa-catalog/es_ulb/archive/master.zip"
   },

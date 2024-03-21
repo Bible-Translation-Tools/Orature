@@ -43,7 +43,6 @@ configurations {
 }
 
 dependencies {
-    content 'wa-catalog:en_ulb:V21-05@zip'
     content 'bibleineverylanguage:langnames@json'
 
     implementation project(":common")
@@ -92,8 +91,6 @@ tasks.register('copyToResources', Copy) {
         String filename ->
             if (filename.matches(".*.json\$")) {
                 filename.replaceAll('-\\.json$', '.json')
-            } else {
-                filename.replaceAll('-V21-05\\.zip\$', '.zip')
             }
     }
 }
