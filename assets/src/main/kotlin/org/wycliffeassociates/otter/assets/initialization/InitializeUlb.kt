@@ -105,7 +105,7 @@ class InitializeUlb @Inject constructor(
         }
     }
 
-    private fun installGLSources(callback: ProjectImporterCallback) {
+    fun installGLSources(callback: ProjectImporterCallback) {
         getSourcesToPreload()
             .filter { !importer.isAlreadyImported(it) }
             .forEach { file ->

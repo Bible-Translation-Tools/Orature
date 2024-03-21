@@ -18,21 +18,17 @@
  */
 package integrationtest.initialization
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.atLeastOnce
-import com.nhaarman.mockitokotlin2.doAnswer
-import com.nhaarman.mockitokotlin2.mock
 import integrationtest.di.DaggerTestPersistenceComponent
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
 import io.reactivex.Completable
 import io.reactivex.ObservableEmitter
 import io.reactivex.observers.TestObserver
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito
-import org.mockito.Mockito.doReturn
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
 import org.wycliffeassociates.otter.assets.initialization.InitializeUlb
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
@@ -74,11 +70,13 @@ class TestInitializeUlb {
     @Test
     fun testImportEnUlb() {
         val testSub = TestObserver<Completable>()
-        val mockProgressEmitter = mock<ObservableEmitter<ProgressStatus>>{
-            on { onNext(any()) } doAnswer { }
+        val mockProgressEmitter = mockk<ObservableEmitter<ProgressStatus>>{
+            every { onNext(any()) } answers { }
         }
 
-        val init = initUlbProvider.get()
+        val init = spyk(initUlbProvider.get())
+        every { init.installGLSources(any()) } returns Unit // skip the GLs installations
+
         init.exec(mockProgressEmitter)
             .subscribe(testSub)
 
@@ -90,19 +88,22 @@ class TestInitializeUlb {
 
     @Test
     fun `test en_ulb import skipped when already imported`() {
-        val importer = Mockito.mock(ImportProjectUseCase::class.java)
-        val mockProgressEmitter = mock<ObservableEmitter<ProgressStatus>>{
-            on { onNext(any()) } doAnswer { }
+        val testSub = TestObserver<Completable>()
+        val mockProgressEmitter = mockk<ObservableEmitter<ProgressStatus>>{
+            every { onNext(any()) } answers { }
+        }
+        val importer = mockk<ImportProjectUseCase> {
+            every { isAlreadyImported(any()) } returns true
         }
 
-        doReturn(true).`when`(importer).isAlreadyImported(any())
-
-        val init = InitializeUlb(
-            directoryProvider,
-            installedEntityRepo,
-            importer
+        val init = spyk(
+            InitializeUlb(
+                directoryProvider,
+                installedEntityRepo,
+                importer
+            )
         )
-        val testSub = TestObserver<Completable>()
+        every { init.installGLSources(any()) } returns Unit // skip the GLs installations
 
         init.exec(mockProgressEmitter)
             .subscribe(testSub)
@@ -110,8 +111,8 @@ class TestInitializeUlb {
         testSub.assertComplete()
         testSub.assertNoErrors()
 
-        verify(importer, atLeastOnce()).isAlreadyImported(any())
-        verify(importer, never()).import(any(), any(), any())
-        verify(importer, never()).import(any())
+        verify { importer.isAlreadyImported(any()) }
+        verify(exactly = 0) { importer.import(any(), any(), any()) }
+        verify(exactly = 0) { importer.import(any()) }
     }
 }
