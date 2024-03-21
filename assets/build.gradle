@@ -93,7 +93,7 @@ tasks.register('copyToResources', Copy) {
             if (filename.matches(".*.json\$")) {
                 filename.replaceAll('-\\.json$', '.json')
             } else {
-                filename.replaceAll('-.*.zip$', '.zip')
+                filename.replaceAll('-V21-05\\.zip\$', '.zip')
             }
     }
 }

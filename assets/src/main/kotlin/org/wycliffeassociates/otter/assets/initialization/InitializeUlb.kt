@@ -38,7 +38,7 @@ import java.net.URL
 import javax.inject.Inject
 
 const val EN_ULB_FILENAME = "en_ulb"
-private const val SOURCES_JSON_FILE = "gl_sources.json"
+const val SOURCES_JSON_FILE = "gl_sources.json"
 private const val SOURCE_PATH_TEMPLATE = "content/%s.zip"
 private const val EN_ULB_PATH = "content/$EN_ULB_FILENAME.zip"
 
@@ -151,7 +151,7 @@ class InitializeUlb @Inject constructor(
         }
 
         val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
-        val resources: List<ResourceInfo> = mapper.readValue(sourcesJson)
+        val resources: List<ResourceInfoSerializable> = mapper.readValue(sourcesJson)
 
         return resources.mapNotNull { res ->
             val resourcePath = SOURCE_PATH_TEMPLATE.format(res.name)
@@ -179,4 +179,4 @@ class InitializeUlb @Inject constructor(
     }
 }
 
-private data class ResourceInfo(val name: String, val url: String)
+data class ResourceInfoSerializable(val name: String, val url: String)
