@@ -288,7 +288,7 @@ class NarrationViewModel : ViewModel() {
                 rendererAudioReader,
                 narration.getRecorderAudioStream(),
                 isRecordingProperty.toObservable(),
-                Screen.getMainScreen().width - 25 - 88,
+                Screen.getMainScreen().width,
                 10,
                 DEFAULT_SAMPLE_RATE
             )
