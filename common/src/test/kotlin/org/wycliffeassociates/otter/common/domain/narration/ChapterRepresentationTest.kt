@@ -38,7 +38,6 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.math.exp
 
 
 val testDataRootFilePath: String = System.getProperty("user.home")
@@ -370,7 +369,7 @@ class ChapterRepresentationTest {
     fun `audioLocationToLocationInChapter with activeVerses, non-sequential sectors, padding between sectors, and non-null verse`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses, 44100)
-        addSectorsToEnd(chapterRepresentation.totalVerses, 44100, 0)
+        addSectorsToEnd(chapterRepresentation.totalVerses, 44100 * chapterRepresentation.frameSizeInBytes, 0)
 
         val relativePosition = chapterRepresentation.absoluteFrameToRelativeChapterFrame(2690100)
 
@@ -456,13 +455,13 @@ class ChapterRepresentationTest {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
-        addSectorsToEnd(chapterRepresentation.totalVerses, 44100, 0)
+        addSectorsToEnd(chapterRepresentation.totalVerses, 44100 * chapterRepresentation.frameSizeInBytes, 0)
 
         // sets relative position to 1.5 seconds worth of frames
         val relativePosition = 66150
 
         val absolutePosition = chapterRepresentation.relativeChapterFrameToAbsoluteIndex(relativePosition)
-        val expectedAbsolutePosition = 1389150
+        val expectedAbsolutePosition = 2778300
         Assert.assertEquals(expectedAbsolutePosition, absolutePosition)
     }
 
@@ -472,7 +471,7 @@ class ChapterRepresentationTest {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
-        addSectorsToEnd(chapterRepresentation.totalVerses, 44100, 0)
+        addSectorsToEnd(chapterRepresentation.totalVerses, 44100 * chapterRepresentation.frameSizeInBytes, 0)
 
         val relativePosition = 44100 * 2
 
@@ -487,7 +486,7 @@ class ChapterRepresentationTest {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
-        addSectorsToEnd(chapterRepresentation.totalVerses, 44100, 0)
+        addSectorsToEnd(chapterRepresentation.totalVerses, 44100 * chapterRepresentation.frameSizeInBytes, 0)
 
         val relativePosition = 44100 * 4 - 1
 
@@ -501,7 +500,7 @@ class ChapterRepresentationTest {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
-        addSectorsToEnd(chapterRepresentation.totalVerses, 44100, 0)
+        addSectorsToEnd(chapterRepresentation.totalVerses, 44100 * chapterRepresentation.frameSizeInBytes, 0)
 
         // sets relative position to 13.5 seconds worth of frames
         val relativePosition = 595350
@@ -518,7 +517,7 @@ class ChapterRepresentationTest {
 
         // 44100 frames are added between newly added sectors, as specified by the value for spaceBetweenSectors
         val spaceBetweenSectors = 44100
-        addSectorsToEnd(chapterRepresentation.totalVerses, 44100, spaceBetweenSectors)
+        addSectorsToEnd(chapterRepresentation.totalVerses, 44100 * chapterRepresentation.frameSizeInBytes, spaceBetweenSectors)
 
         // sets relative position to 13.5 seconds worth of frames
         val relativePosition = 44100 * 4 - 1
@@ -535,7 +534,7 @@ class ChapterRepresentationTest {
 
         // 44100 frames are added between newly added sectors, as specified by the value for spaceBetweenSectors
         val spaceBetweenSectors = 44100
-        addSectorsToEnd(chapterRepresentation.totalVerses, 44100, spaceBetweenSectors)
+        addSectorsToEnd(chapterRepresentation.totalVerses, 44100 * chapterRepresentation.frameSizeInBytes, spaceBetweenSectors)
 
         // sets relative position to 13.5 seconds worth of frames
         val relativePosition = 595350
@@ -827,7 +826,7 @@ class ChapterRepresentationTest {
     fun `ChapterRepresentationConnection's seek with sample in range of relative chapter space, empty spaces, and non-sequential sectors`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses, 44100)
-        addSectorsToEnd(chapterRepresentation.totalVerses, 44100, 0)
+        addSectorsToEnd(chapterRepresentation.totalVerses, 44100 * chapterRepresentation.frameSizeInBytes, 0)
         val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
 
 
