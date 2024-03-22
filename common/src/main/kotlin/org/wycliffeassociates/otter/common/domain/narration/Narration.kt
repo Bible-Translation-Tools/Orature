@@ -257,7 +257,7 @@ class Narration @AssistedInject constructor(
     }
 
     fun onVerseMarkerMoved(verseIndex: Int, deltaFrames: Int) {
-        val deltaIndexes = deltaFrames / chapterRepresentation.frameSizeInBytes
+        val deltaIndexes = deltaFrames * chapterRepresentation.frameSizeInBytes
         val action = MoveMarkerAction(verseIndex, deltaIndexes)
         execute(action)
 
@@ -450,7 +450,6 @@ class Narration @AssistedInject constructor(
             nodes.add(node)
             start = end
         }
-
 
         for (i in segments.size until chapterRepresentation.totalVerses.size) {
             nodes.add(chapterRepresentation.totalVerses[i])
