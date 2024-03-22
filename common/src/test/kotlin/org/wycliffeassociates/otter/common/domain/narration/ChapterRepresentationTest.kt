@@ -569,9 +569,11 @@ class ChapterRepresentationTest {
         initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         val verseNumber = 7
-        val markerRange = chapterRepresentation.getRangeOfMarker(VerseMarker(verseNumber, verseNumber, 0))
+        val verseMarker = VerseMarker(verseNumber, verseNumber, 0)
+        val markerRange = chapterRepresentation.getRangeOfMarker(verseMarker)
+        val expectedRange = 44100 * (verseNumber - 1) until 44100 * verseNumber - 1 // last index is not inclusive
 
-        Assert.assertEquals(44100 * (verseNumber - 1) until 44100 * verseNumber, markerRange)
+        Assert.assertEquals(expectedRange, markerRange)
     }
 
 
@@ -618,7 +620,9 @@ class ChapterRepresentationTest {
 
         val verseIndex = 3
         val offsetIntoVerse = 500
-        val absoluteFrame = chapterRepresentation.activeVerses[verseIndex].firstIndex() + offsetIntoVerse
+        val absoluteFrame =
+            chapterRepresentation.activeVerses[verseIndex].firstIndex() / chapterRepresentation.frameSizeInBytes + offsetIntoVerse
+
         val actualRelativeVersePosition = chapterRepresentationConnection
             .absoluteFrameToRelativeVerseFrame(absoluteFrame, verseIndex)
         // Verify that the relativeVerse position is equal to the number of frames from the first frame, to the
@@ -674,7 +678,7 @@ class ChapterRepresentationTest {
         chapterRepresentationConnection.lockToVerse(verseIndex)
 
         val actualRelativePos = chapterRepresentationConnection.absoluteFrameToRelativeFrame(absoluteFrame)
-        val expectedRelativePos = absoluteFrame - chapterRepresentation.activeVerses[verseIndex].firstIndex()
+        val expectedRelativePos = absoluteFrame - chapterRepresentation.activeVerses[verseIndex].firstIndex() / chapterRepresentation.frameSizeInBytes
         Assert.assertEquals(expectedRelativePos, actualRelativePos)
     }
     // TODO: add test for absoluteToRelative
@@ -773,9 +777,10 @@ class ChapterRepresentationTest {
         // Verify that the framePosition is in the relative verse space
         Assert.assertEquals(0, chapterRepresentationConnection.framePosition)
 
+        val expectedFrame = chapterRepresentation.activeVerses[5].firstIndex() / chapterRepresentation.frameSizeInBytes
         // Verify that the absoluteFrame position is in the absolute chapter space
         Assert.assertEquals(
-            chapterRepresentation.activeVerses[5].firstIndex(),
+            expectedFrame,
             chapterRepresentationConnection.absoluteFramePosition
         )
 
@@ -791,8 +796,9 @@ class ChapterRepresentationTest {
         val verseIndex = 3
         val sampleInVerseSpace = 500
 
-        // Verify that the verse is starting at the expected actual position
-        Assert.assertEquals(framesPerVerse * verseIndex, chapterRepresentation.activeVerses[verseIndex].firstIndex())
+        // Verify that the verse is starting at the correct index
+        val expectedStartIndex = framesPerVerse * verseIndex * chapterRepresentation.frameSizeInBytes
+        Assert.assertEquals(expectedStartIndex, chapterRepresentation.activeVerses[verseIndex].firstIndex())
 
         // Verify that the given relativeVerse position maps to the correct relativeChapter location
         val expectedRelativeChapterPos = sampleInVerseSpace + framesPerVerse * verseIndex
@@ -841,8 +847,9 @@ class ChapterRepresentationTest {
 
         // Check if positions are correct. In this case they are the same due to sequential sectors
         Assert.assertEquals(sample, chapterRepresentationConnection.framePosition)
+        val expectedFrame = chapterRepresentation.activeVerses[4].sectors[1].first / chapterRepresentation.frameSizeInBytes
         Assert.assertEquals(
-            chapterRepresentation.activeVerses[4].sectors[1].first,
+            expectedFrame,
             chapterRepresentationConnection.absoluteFramePosition
         )
     }
@@ -869,8 +876,11 @@ class ChapterRepresentationTest {
 
         // Check if positions are correct. In this case they are the same due to sequential sectors
         Assert.assertEquals(sample, chapterRepresentationConnection.framePosition)
+
+        val expectedIndex = chapterRepresentation.activeVerses[verseIndexToLockTo].firstIndex()
+        val expectedFrame = expectedIndex / chapterRepresentation.frameSizeInBytes  + sample
         Assert.assertEquals(
-            chapterRepresentation.activeVerses[verseIndexToLockTo].firstIndex() + sample,
+            expectedFrame,
             chapterRepresentationConnection.absoluteFramePosition
         )
     }
