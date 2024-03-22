@@ -38,6 +38,7 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.file.Files
 import java.nio.file.Paths
+import kotlin.math.exp
 
 
 val testDataRootFilePath: String = System.getProperty("user.home")
@@ -128,8 +129,8 @@ class ChapterRepresentationTest {
             val verseMarker = VerseMarker((i + 1), (i + 1), 0)
             val sectors = mutableListOf<IntRange>()
             val verseNode = VerseNode(true, verseMarker, sectors)
-            sectors.add(start + 1..start + framesPerVerse)
-            start += framesPerVerse + paddingLength
+            sectors.add(start + 1..start + framesPerVerse * frameSizeInBytes)
+            start += framesPerVerse * frameSizeInBytes + paddingLength * frameSizeInBytes
             verseNodeList.add(i + numTitles, verseNode)
         }
     }
@@ -384,9 +385,12 @@ class ChapterRepresentationTest {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
-        val absolutePositionFromRelativePosition = chapterRepresentation.relativeChapterFrameToAbsoluteIndex(relativePosition)
+        val absoluteIndexFromRelativePosition = chapterRepresentation.relativeChapterFrameToAbsoluteIndex(relativePosition)
 
-        Assert.assertEquals(500, absolutePositionFromRelativePosition)
+        Assert.assertEquals(
+            500 * chapterRepresentation.frameSizeInBytes,
+            absoluteIndexFromRelativePosition
+        )
     }
 
     @Test
@@ -395,9 +399,12 @@ class ChapterRepresentationTest {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
-        val absolutePositionFromRelativePosition = chapterRepresentation.relativeChapterFrameToAbsoluteIndex(relativePosition)
+        val absoluteIndexFromRelativePosition = chapterRepresentation.relativeChapterFrameToAbsoluteIndex(relativePosition)
 
-        Assert.assertEquals(44099, absolutePositionFromRelativePosition)
+        Assert.assertEquals(
+            44099 * chapterRepresentation.frameSizeInBytes,
+            absoluteIndexFromRelativePosition
+        )
     }
 
     @Test
@@ -406,9 +413,12 @@ class ChapterRepresentationTest {
         initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         val secondNodesStart = 44100
-        val absolutePositionFromRelativePosition = chapterRepresentation.relativeChapterFrameToAbsoluteIndex(secondNodesStart)
+        val absoluteIndexFromRelativePosition = chapterRepresentation.relativeChapterFrameToAbsoluteIndex(secondNodesStart)
 
-        Assert.assertEquals(secondNodesStart, absolutePositionFromRelativePosition)
+        Assert.assertEquals(
+            44100 * chapterRepresentation.frameSizeInBytes,
+            absoluteIndexFromRelativePosition
+        )
     }
 
     @Test
@@ -417,9 +427,13 @@ class ChapterRepresentationTest {
         initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         val secondNodesStart = 44100 * 2 + 31
-        val absolutePositionFromRelativePosition = chapterRepresentation.relativeChapterFrameToAbsoluteIndex(secondNodesStart)
+        val expectedIndex = secondNodesStart * chapterRepresentation.frameSizeInBytes
+        val absoluteIndexFromRelativePosition = chapterRepresentation.relativeChapterFrameToAbsoluteIndex(secondNodesStart)
 
-        Assert.assertEquals(secondNodesStart, absolutePositionFromRelativePosition)
+        Assert.assertEquals(
+            expectedIndex,
+            absoluteIndexFromRelativePosition
+        )
     }
 
     @Test
@@ -428,9 +442,13 @@ class ChapterRepresentationTest {
         initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         val secondNodesStart = 44100 * 2 - 1
+        val expectedIndex = secondNodesStart * chapterRepresentation.frameSizeInBytes
         val absolutePositionFromRelativePosition = chapterRepresentation.relativeChapterFrameToAbsoluteIndex(secondNodesStart)
 
-        Assert.assertEquals(secondNodesStart, absolutePositionFromRelativePosition)
+        Assert.assertEquals(
+            expectedIndex,
+            absolutePositionFromRelativePosition
+        )
     }
 
     @Test
