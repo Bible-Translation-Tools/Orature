@@ -95,11 +95,12 @@ class NewVerseActionTest {
         newVerseAction.execute(totalVerses, workingAudioFile)
 
         // verify that NewVerseAction.node is valid
-        Assert.assertEquals(totalFramesInTestAudio + 1..totalFramesInTestAudio + 1, newVerseAction.node?.sectors?.last())
+        val expectedIndexRange = (totalFramesInTestAudio + 1) * frameSizeInBytes..(totalFramesInTestAudio + 1) * frameSizeInBytes
+        Assert.assertEquals(expectedIndexRange, newVerseAction.node?.sectors?.last())
         Assert.assertEquals(true, newVerseAction?.node?.placed)
 
         // verify that totalVerses[verseIndex] is valid
-        Assert.assertEquals(totalFramesInTestAudio + 1..totalFramesInTestAudio + 1, totalVerses[verseIndex].sectors.last())
+        Assert.assertEquals(expectedIndexRange, totalVerses[verseIndex].sectors.last())
         Assert.assertTrue(totalVerses[verseIndex].placed)
     }
 

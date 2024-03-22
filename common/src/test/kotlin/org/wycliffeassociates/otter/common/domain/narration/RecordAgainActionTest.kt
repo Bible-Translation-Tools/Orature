@@ -75,7 +75,10 @@ class RecordAgainActionTest {
 
         // verify that RecordAgainAction.node is valid
         val expectedEnd = workingAudioFile.totalFrames + 1
-        Assert.assertEquals(expectedEnd..expectedEnd, recordAgainAction.node?.sectors?.last())
+        Assert.assertEquals(
+            expectedEnd * frameSizeInBytes..expectedEnd * frameSizeInBytes,
+            recordAgainAction.node?.sectors?.last()
+        )
         Assert.assertEquals(true, recordAgainAction?.node?.placed)
 
         // verify that RecordAgainAction.previous is valid
@@ -83,7 +86,10 @@ class RecordAgainActionTest {
         Assert.assertEquals(false, recordAgainAction?.previous?.placed)
 
         // verify that totalVerses[verseIndex] is valid
-        Assert.assertEquals(expectedEnd..expectedEnd, totalVerses[verseIndex].sectors.last())
+        Assert.assertEquals(
+            expectedEnd * frameSizeInBytes..expectedEnd * frameSizeInBytes,
+            totalVerses[verseIndex].sectors.last()
+        )
         Assert.assertTrue(totalVerses[verseIndex].placed)
     }
 
@@ -107,7 +113,10 @@ class RecordAgainActionTest {
 
         // verify that RecordAgainAction.node is valid
         val expectedEnd = workingAudioFile.totalFrames + 1
-        Assert.assertEquals(expectedEnd..expectedEnd, recordAgainAction.node?.sectors?.last())
+        Assert.assertEquals(
+            expectedEnd * frameSizeInBytes..expectedEnd * frameSizeInBytes,
+            recordAgainAction.node?.sectors?.last()
+        )
         Assert.assertEquals(true, recordAgainAction?.node?.placed)
 
         // verify that RecordAgainAction.previous is valid
@@ -115,7 +124,10 @@ class RecordAgainActionTest {
         Assert.assertEquals(true, recordAgainAction?.previous?.placed)
 
         // verify that totalVerses[verseIndex] is valid
-        Assert.assertEquals(expectedEnd..expectedEnd, totalVerses[verseIndex].sectors.last())
+        Assert.assertEquals(
+            expectedEnd * frameSizeInBytes..expectedEnd * frameSizeInBytes,
+            totalVerses[verseIndex].sectors.last()
+        )
         Assert.assertTrue(totalVerses[verseIndex].placed)
     }
 
@@ -161,7 +173,10 @@ class RecordAgainActionTest {
 
         // verify that totalVerses[verseIndex] is valid
         val expectedEnd = workingAudioFile.totalFrames + 1
-        Assert.assertEquals(expectedEnd..expectedEnd, totalVerses[verseIndex].sectors.last())
+        Assert.assertEquals(
+            expectedEnd * frameSizeInBytes..expectedEnd * frameSizeInBytes,
+            totalVerses[verseIndex].sectors.last()
+        )
         Assert.assertTrue(totalVerses[verseIndex].placed)
 
         recordAgainAction.undo(totalVerses)
@@ -184,7 +199,10 @@ class RecordAgainActionTest {
 
         // verify that totalVerses[verseIndex] is valid
         val expectedEnd = workingAudioFile.totalFrames + 1
-        Assert.assertEquals(expectedEnd..expectedEnd, totalVerses[verseIndex].sectors.last())
+        Assert.assertEquals(
+            expectedEnd * frameSizeInBytes..expectedEnd * frameSizeInBytes,
+            totalVerses[verseIndex].sectors.last()
+        )
         Assert.assertTrue(totalVerses[verseIndex].placed)
 
         recordAgainAction.undo(totalVerses)
@@ -196,7 +214,10 @@ class RecordAgainActionTest {
         recordAgainAction.redo(totalVerses)
 
         // verify that totalVerses[verseIndex] is redone
-        Assert.assertEquals(expectedEnd..expectedEnd, totalVerses[verseIndex].sectors.last())
+        Assert.assertEquals(
+            expectedEnd * frameSizeInBytes..expectedEnd * frameSizeInBytes
+            , totalVerses[verseIndex].sectors.last()
+        )
         Assert.assertTrue(totalVerses[verseIndex].placed)
     }
 
@@ -231,13 +252,19 @@ class RecordAgainActionTest {
 
         // Verify that totalVerse[verseIndex] has been updated
         val expectedEnd = workingAudioFile.totalFrames + 1
-        Assert.assertEquals(expectedEnd..expectedEnd, totalVerses[verseIndex].sectors.last())
+        Assert.assertEquals(
+            expectedEnd * frameSizeInBytes..expectedEnd * frameSizeInBytes,
+            totalVerses[verseIndex].sectors.last()
+        )
         Assert.assertTrue(previousNode.placed)
 
         recordAgainAction.finalize(882000, totalVerses)
 
         // Verify that totalVerse[verseIndex] has been finalized
-        Assert.assertEquals(expectedEnd .. 882000, totalVerses[verseIndex].sectors.last())
+        Assert.assertEquals(
+            expectedEnd * frameSizeInBytes .. 882000 * frameSizeInBytes,
+            totalVerses[verseIndex].sectors.last()
+        )
         Assert.assertTrue(previousNode.placed)
     }
 }
