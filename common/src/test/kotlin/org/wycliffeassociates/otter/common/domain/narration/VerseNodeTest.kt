@@ -65,7 +65,7 @@ class VerseNodeTest {
 
         val verseNode = VerseNode(true, verseMarker, sectors)
 
-        Assert.assertEquals(0, verseNode.firstFrame())
+        Assert.assertEquals(0, verseNode.firstIndex())
     }
 
     @Test
@@ -76,7 +76,7 @@ class VerseNodeTest {
 
         val verseNode = VerseNode(true, verseMarker, sectors)
 
-        Assert.assertEquals(1000, verseNode.firstFrame())
+        Assert.assertEquals(1000, verseNode.firstIndex())
     }
 
     @Test
@@ -88,7 +88,7 @@ class VerseNodeTest {
 
         val verseNode = VerseNode(true, verseMarker, sectors)
 
-        Assert.assertEquals(3000, verseNode.firstFrame())
+        Assert.assertEquals(3000, verseNode.firstIndex())
     }
 
     @Test
@@ -98,7 +98,7 @@ class VerseNodeTest {
 
         val verseNode = VerseNode(true, verseMarker, sectors)
 
-        Assert.assertEquals(0, verseNode.lastFrame())
+        Assert.assertEquals(0, verseNode.lastIndex())
     }
 
     @Test
@@ -109,7 +109,7 @@ class VerseNodeTest {
 
         val verseNode = VerseNode(true, verseMarker, sectors)
 
-        Assert.assertEquals(2999, verseNode.lastFrame())
+        Assert.assertEquals(2999, verseNode.lastIndex())
     }
 
     @Test
@@ -121,7 +121,7 @@ class VerseNodeTest {
 
         val verseNode = VerseNode(true, verseMarker, sectors)
 
-        Assert.assertEquals(1999, verseNode.lastFrame())
+        Assert.assertEquals(1999, verseNode.lastIndex())
     }
 
 
@@ -186,7 +186,7 @@ class VerseNodeTest {
 
         try {
             verseNode.finalize(500)
-            Assert.assertEquals(0..500, sectors.last())
+            Assert.assertEquals(0 until 500, sectors.last())
         } catch (ise: IllegalStateException) {
             Assert.fail("Not expecting illegal state exception")
         }
@@ -200,7 +200,7 @@ class VerseNodeTest {
         val verseNode = VerseNode(true, verseMarker, sectors)
 
         try {
-            verseNode.finalize(1999)
+            verseNode.finalize(2000)
             Assert.assertEquals(1000..1999, sectors.last())
         } catch (ise: IllegalStateException) {
             Assert.fail("Not expecting illegal state exception")
@@ -215,7 +215,7 @@ class VerseNodeTest {
 
         try {
             // TODO: See if we want this throwing an exception or returning an empty list
-            val sectorsTaken = verseNode.takeFramesFromStart(1000)
+            val sectorsTaken = verseNode.takeIndicesFromStart(1000)
             Assert.fail("Expecting NoSuchElementException")
         } catch (NoSuchElement: NoSuchElementException) {
             // Success: expecting exception
@@ -231,7 +231,7 @@ class VerseNodeTest {
 
         val verseNode = VerseNode(true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromStart(2000)
+        val sectorsTaken = verseNode.takeIndicesFromStart(2000)
 
         Assert.assertEquals(1, sectorsTaken.size)
         Assert.assertEquals(1000 .. 1998, sectorsTaken[0])
@@ -249,7 +249,7 @@ class VerseNodeTest {
         sectors.add(3000 .. 3999)
         val verseNode = VerseNode(true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromStart(3000)
+        val sectorsTaken = verseNode.takeIndicesFromStart(3000)
 
         val expectedSectorsTaken = mutableListOf<IntRange>()
         expectedSectorsTaken.add(1000.. 1999)
@@ -275,7 +275,7 @@ class VerseNodeTest {
         sectors.add(3000 .. 3999)
         val verseNode = VerseNode(true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromStart(2000)
+        val sectorsTaken = verseNode.takeIndicesFromStart(2000)
 
         val expectedSectorsTaken = mutableListOf<IntRange>()
         expectedSectorsTaken.add(1000.. 1999)
@@ -298,7 +298,7 @@ class VerseNodeTest {
         sectors.add(3000 .. 3999)
         val verseNode = VerseNode(true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromStart(2500)
+        val sectorsTaken = verseNode.takeIndicesFromStart(2500)
 
         val expectedSectorsTaken = mutableListOf<IntRange>()
         expectedSectorsTaken.add(1000.. 1999)
@@ -321,7 +321,7 @@ class VerseNodeTest {
 
         // TODO: See if we want this throwing an exception or returning an empty list
         try {
-            val sectorsTaken = verseNode.takeFramesFromEnd(1000)
+            val sectorsTaken = verseNode.takeIndicesFromEnd(1000)
             Assert.fail("Expecting NoSuchElementException")
         } catch (NoSuchElement: NoSuchElementException) {
             // Success: expecting exception
@@ -334,7 +334,7 @@ class VerseNodeTest {
         sectors.add(1000.. 1999)
         val verseNode = VerseNode(true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromEnd(2000)
+        val sectorsTaken = verseNode.takeIndicesFromEnd(2000)
 
         Assert.assertEquals(1, sectorsTaken.size)
         Assert.assertEquals(1001 .. 1999, sectorsTaken[0])
@@ -351,7 +351,7 @@ class VerseNodeTest {
         sectors.add(3000 .. 3999)
         val verseNode = VerseNode(true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromEnd(3000)
+        val sectorsTaken = verseNode.takeIndicesFromEnd(3000)
 
         val expectedSectorsTaken = mutableListOf<IntRange>()
         expectedSectorsTaken.add(1001.. 1999)
@@ -374,7 +374,7 @@ class VerseNodeTest {
         sectors.add(3000 .. 3999)
         val verseNode = VerseNode(true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromEnd(2000)
+        val sectorsTaken = verseNode.takeIndicesFromEnd(2000)
 
         val expectedSectorsTaken = mutableListOf<IntRange>()
         expectedSectorsTaken.add(2000 .. 2999)
@@ -398,7 +398,7 @@ class VerseNodeTest {
         sectors.add(3000 .. 3999)
         val verseNode = VerseNode(true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromEnd(2500)
+        val sectorsTaken = verseNode.takeIndicesFromEnd(2500)
 
         val expectedSectorsTaken = mutableListOf<IntRange>()
         expectedSectorsTaken.add(1500 .. 1999)
@@ -590,7 +590,7 @@ class VerseNodeTest {
 
 
         try {
-            verseNode.framesToPosition(10000)
+            verseNode.indicesToPosition(10000)
             Assert.fail("expecting IndexOutOfBoundsException")
         } catch (ise: IndexOutOfBoundsException) {
             // Success: expecting IndexOutOfBoundsException
@@ -608,7 +608,7 @@ class VerseNodeTest {
 
 
         try {
-            val framesToPosition = verseNode.framesToPosition(2499)
+            val framesToPosition = verseNode.indicesToPosition(2499)
             Assert.assertEquals(499, framesToPosition)
         } catch (ise: IndexOutOfBoundsException) {
             Assert.fail("Not expecting IndexOutOfBoundsException")
@@ -626,84 +626,11 @@ class VerseNodeTest {
 
 
         try {
-            Assert.assertEquals(2499, verseNode.framesToPosition(6499))
+            Assert.assertEquals(2499, verseNode.indicesToPosition(6499))
         } catch (ise: IndexOutOfBoundsException) {
             Assert.fail("Not expecting IndexOutOfBoundsException")
         }
     }
-
-    @Test
-    fun `absolute frame from offset with one sector and out of bounds frames from start`() {
-        val verseMarker = VerseMarker(1, 1, 0)
-        val sectors = mutableListOf<IntRange>()
-        sectors.add(1000.. 1999)
-        val verseNode = VerseNode(true, verseMarker, sectors)
-
-
-        try {
-            verseNode.absoluteFrameFromOffset(2000)
-            Assert.fail("Expecting IndexOutOfBoundsException")
-        } catch (ise: IndexOutOfBoundsException) {
-            // Success: expecting IndexOutOfBoundsException
-        }
-    }
-
-
-    @Test
-    fun `absolute frame from offset with one sector and in bounds frames from start`() {
-        val verseMarker = VerseMarker(1, 1, 0)
-        val sectors = mutableListOf<IntRange>()
-        sectors.add(1000.. 1999)
-        val verseNode = VerseNode( true, verseMarker, sectors)
-
-
-        try {
-            val absoluteFrame = verseNode.absoluteFrameFromOffset(500)
-            Assert.assertEquals(1499, absoluteFrame)
-        } catch (ise: IndexOutOfBoundsException) {
-            Assert.fail("Not expecting IndexOutOfBoundsException")
-        }
-    }
-
-
-    @Test
-    fun `absolute frame from offset with multiple in order sectors and in bounds frames from start`() {
-        val verseMarker = VerseMarker(1, 1, 0)
-        val sectors = mutableListOf<IntRange>()
-        sectors.add(1000.. 1999)
-        sectors.add(5000.. 5999)
-        sectors.add(8000.. 8999)
-
-        val verseNode = VerseNode(true, verseMarker, sectors)
-
-        try {
-            val absoluteFrame = verseNode.absoluteFrameFromOffset(1500)
-            Assert.assertEquals(5499, absoluteFrame)
-        } catch (ise: IndexOutOfBoundsException) {
-            Assert.fail("Not expecting IndexOutOfBoundsException")
-        }
-    }
-
-    @Test
-    fun `absolute frame from offset with multiple out of order sectors and in bounds frames from start`() {
-        val verseMarker = VerseMarker(1, 1, 0)
-        val sectors = mutableListOf<IntRange>()
-        sectors.add(1000.. 1999)
-        sectors.add(8000.. 8999)
-        sectors.add(5000.. 5999)
-
-        val verseNode = VerseNode(true, verseMarker, sectors)
-
-
-        try {
-            val absoluteFrame = verseNode.absoluteFrameFromOffset(1500)
-            Assert.assertEquals(8499, absoluteFrame)
-        } catch (ise: IndexOutOfBoundsException) {
-            Assert.fail("Not expecting IndexOutOfBoundsException")
-        }
-    }
-
-
 
     @Test
     fun `get sectors from offset with no sectors`() {

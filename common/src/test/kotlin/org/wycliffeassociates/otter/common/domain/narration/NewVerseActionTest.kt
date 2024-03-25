@@ -61,7 +61,7 @@ class NewVerseActionTest {
     @Test
     fun `execute with empty working audio, 31 total verses, and no placed verses`() {
         val verseIndex = 0
-        val newVerseAction = NewVerseAction(verseIndex)
+        val newVerseAction = NewVerseAction(verseIndex, frameSizeInBytes)
 
         Assert.assertEquals(0, totalVerses[verseIndex].sectors.size)
         Assert.assertFalse(totalVerses[verseIndex].placed)
@@ -83,7 +83,7 @@ class NewVerseActionTest {
     @Test
     fun `execute with valid working audio, 31 total verses, and placed verses`() {
         val verseIndex = 0
-        val newVerseAction = NewVerseAction(verseIndex)
+        val newVerseAction = NewVerseAction(verseIndex, frameSizeInBytes)
 
         totalVerses[verseIndex].placed = true
 
@@ -95,18 +95,19 @@ class NewVerseActionTest {
         newVerseAction.execute(totalVerses, workingAudioFile)
 
         // verify that NewVerseAction.node is valid
-        Assert.assertEquals(totalFramesInTestAudio + 1..totalFramesInTestAudio + 1, newVerseAction.node?.sectors?.last())
+        val expectedIndexRange = (totalFramesInTestAudio + 1) * frameSizeInBytes..(totalFramesInTestAudio + 1) * frameSizeInBytes
+        Assert.assertEquals(expectedIndexRange, newVerseAction.node?.sectors?.last())
         Assert.assertEquals(true, newVerseAction?.node?.placed)
 
         // verify that totalVerses[verseIndex] is valid
-        Assert.assertEquals(totalFramesInTestAudio + 1..totalFramesInTestAudio + 1, totalVerses[verseIndex].sectors.last())
+        Assert.assertEquals(expectedIndexRange, totalVerses[verseIndex].sectors.last())
         Assert.assertTrue(totalVerses[verseIndex].placed)
     }
 
     @Test
     fun `undo with invalid verseIndex`() {
         val verseIndex = -1
-        val newVerseAction = NewVerseAction(verseIndex)
+        val newVerseAction = NewVerseAction(verseIndex, frameSizeInBytes)
 
         try {
             newVerseAction.undo(totalVerses)
@@ -121,7 +122,7 @@ class NewVerseActionTest {
         val verseIndex = 0
 
         // place verse
-        val newVerseAction = NewVerseAction(verseIndex)
+        val newVerseAction = NewVerseAction(verseIndex, frameSizeInBytes)
 
         newVerseAction.execute(totalVerses, workingAudioFile)
 
@@ -141,7 +142,7 @@ class NewVerseActionTest {
         val verseIndex = 0
 
         // place verse
-        val newVerseAction = NewVerseAction(verseIndex)
+        val newVerseAction = NewVerseAction(verseIndex, frameSizeInBytes)
 
         newVerseAction.execute(totalVerses, workingAudioFile)
 
@@ -166,7 +167,7 @@ class NewVerseActionTest {
         val verseIndex = 0
 
         // place verse
-        val newVerseAction = NewVerseAction(verseIndex)
+        val newVerseAction = NewVerseAction(verseIndex, frameSizeInBytes)
 
         // redo
         newVerseAction.redo(totalVerses)
@@ -181,7 +182,7 @@ class NewVerseActionTest {
         val verseIndex = 0
 
         // place verse
-        val newVerseAction = NewVerseAction(verseIndex)
+        val newVerseAction = NewVerseAction(verseIndex, frameSizeInBytes)
 
         // redo
         newVerseAction.finalize(88200, totalVerses)
@@ -198,7 +199,7 @@ class NewVerseActionTest {
         val verseIndex = 0
 
         // place/start verse
-        val newVerseAction = NewVerseAction(verseIndex)
+        val newVerseAction = NewVerseAction(verseIndex, frameSizeInBytes)
 
         newVerseAction.execute(totalVerses, workingAudioFile)
 

@@ -230,8 +230,6 @@ class AudioWorkspaceViewModel : ViewModel() {
     fun onDock() {
         narrationStateProperty.bind(narrationViewModel.narrationStateProperty)
         totalAudioSizeProperty.bind(narrationViewModel.totalAudioSizeProperty)
-        audioPositionProperty.bind(narrationViewModel.audioPositionProperty)
-
         narrationViewModel.narratableList.onChange {
             val verseMarkersList = narrationViewModel.narratableList.filter {
                 it.hasRecording && it.marker != null
@@ -258,6 +256,8 @@ class AudioWorkspaceViewModel : ViewModel() {
 
             )
         )
+        audioPositionProperty.bind(narrationViewModel.audioFramePositionProperty)
+        recordedVerses.bind(narrationViewModel.recordedVerses) { it }
     }
 
     fun onUndock() {
