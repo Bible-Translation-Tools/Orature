@@ -700,13 +700,16 @@ class NarrationViewModel : ViewModel() {
         }
     }
 
-    fun onNext(index: Int) {
+    fun onNext(currentIndex: Int) {
+        val nextIndex = totalVerses.indexOfFirst { item ->
+            item.sort > totalVerses[currentIndex].sort && item !in recordedVerses
+        }
         when {
             isRecording -> {
-                narration.finalizeVerse(max(index - 1, 0))
-                narration.onNewVerse(index)
+                narration.finalizeVerse(max(currentIndex, 0))
+                narration.onNewVerse(nextIndex)
                 renderer.clearActiveRecordingData()
-                recordingVerseIndex.set(index)
+                recordingVerseIndex.set(nextIndex)
             }
 
             recordPause -> {
@@ -718,7 +721,7 @@ class NarrationViewModel : ViewModel() {
         }
 
         if (isPrependRecordingProperty.value) {
-            prependRecordingVerseIndex.set(index)
+            prependRecordingVerseIndex.set(nextIndex)
         }
         refreshTeleprompter()
     }
@@ -1065,8 +1068,8 @@ class NarrationViewModel : ViewModel() {
             }
 
             is NextVerseEvent -> {
-                onNext(event.index)
-                teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, event.index)
+                onNext(event.currentIndex)
+                teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, event.currentIndex)
             }
 
             is PauseRecordingEvent -> {

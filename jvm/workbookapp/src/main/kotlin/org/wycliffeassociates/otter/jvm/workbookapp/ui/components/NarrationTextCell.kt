@@ -119,12 +119,7 @@ class NarrationTextCell(
                         logger.error("Error in selecting and scrolling to a Teleprompter item", e)
                     }
 
-                    val nextVerseIndex = index + 1
-                    val nextVerse = items.getOrNull(nextVerseIndex)
-                    nextVerse?.let {
-                        FX.eventbus.fire(NextVerseEvent(nextVerseIndex, nextVerse.chunk))
-                    }
-                        ?: logger.error("Tried to select an invalid next verse! Tried to select: $nextVerseIndex from index $index")
+                    FX.eventbus.fire(NextVerseEvent(index))
                 }
             })
 

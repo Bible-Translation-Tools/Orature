@@ -22,7 +22,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import tornadofx.FXEvent
 
 class BeginRecordingEvent(val index: Int, val chunk: Chunk) : FXEvent()
-class NextVerseEvent(val index: Int, val chunk: Chunk) : FXEvent()
+class NextVerseEvent(val currentIndex: Int) : FXEvent()
 class PauseRecordingEvent(val index: Int, val chunk: Chunk): FXEvent()
 class PauseRecordAgainEvent(val index: Int, val chunk: Chunk): FXEvent()
 class ResumeRecordingEvent(val index: Int, val chunk: Chunk) : FXEvent()
