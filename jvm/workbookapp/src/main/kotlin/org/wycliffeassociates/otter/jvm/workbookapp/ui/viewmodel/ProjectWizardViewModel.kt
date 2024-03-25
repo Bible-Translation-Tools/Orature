@@ -180,12 +180,18 @@ class ProjectWizardViewModel : ViewModel() {
             .startWith(prepareSource) // must run after deletion and before creation
             .startWith(waitForProjectDeletionFinishes()) // this must run first
             .observeOnFx()
-            .subscribe {
-                logger.info("Project group created: ${sourceLanguage.name} - ${targetLanguage.name}")
-                existingLanguagePairs.add(Pair(sourceLanguage, targetLanguage))
-                reset()
-                onNavigateBack()
-            }
+            .subscribe(
+                {
+                    logger.info("Project group created: ${sourceLanguage.name} - ${targetLanguage.name}")
+                    existingLanguagePairs.add(Pair(sourceLanguage, targetLanguage))
+                    reset()
+                    onNavigateBack()
+                },
+                {
+                    logger.error("Could not create project for ${sourceLanguage.name} - ${targetLanguage.slug} ${selectedModeProperty.value}")
+                    find<HomePageViewModel2>().isLoadingProperty.set(false)
+                }
+            )
     }
 
     fun dock() {
