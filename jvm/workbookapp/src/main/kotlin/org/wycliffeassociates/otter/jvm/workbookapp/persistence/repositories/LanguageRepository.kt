@@ -112,6 +112,19 @@ class LanguageRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
+    override fun getAvailableGatewaySources(): Single<List<Language>> {
+        return Single
+            .fromCallable {
+                languageDao.fetchGateway()
+                    .filter { it.slug in availableSourceGLs }
+                    .map { mapper.mapFromEntity(it) }
+            }
+            .doOnError { e ->
+                logger.error("Error in getAvailableGatewaySources", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
     /**
      * Gets the list of Target (Heart) languages
      */
@@ -231,4 +244,10 @@ class LanguageRepository @Inject constructor(
             }
             .subscribeOn(Schedulers.io())
     }
+
+    private val availableSourceGLs = listOf(
+        "am", "as", "bn", "ceb", "es-419", "fr", "gu", "ha", "hi", "id", "ilo",
+        "km", "kn", "lo", "ml", "mr", "ne", "or", "pa", "plt", "pt-br", "ru",
+        "sw", "ta", "te", "th", "tl", "tpi", "vi"
+    )
 }

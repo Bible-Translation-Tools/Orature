@@ -110,15 +110,19 @@ class ProjectWizardViewModel : ViewModel() {
             .getRootSources()
             .observeOnFx()
             .map { collections ->
-                collections
+                val sourceLanguagesFromRoot = collections
                     .mapNotNull { collection -> collection.resourceContainer }
-                    .distinctBy { it.language }
+                    .map { it.language }
+                    .distinct()
+
+                val availableGLs = languageRepo.getAvailableGatewaySources().blockingGet()
+                sourceLanguagesFromRoot.union(availableGLs)
             }
             .doOnError { e ->
                 logger.error("Error in initializing source languages", e)
             }
-            .subscribe { collections ->
-                sourceLanguages.setAll(collections.map { it.language })
+            .subscribe { languages ->
+                sourceLanguages.setAll(languages)
                 updateExistingLanguagePairs()
             }
     }
