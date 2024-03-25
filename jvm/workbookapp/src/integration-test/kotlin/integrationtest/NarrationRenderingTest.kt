@@ -52,7 +52,6 @@ class NarrationRenderingTest {
         chapter = mockChapter()
 
         narration = narrationFactory.create(workbookWithAudio, chapter)
-        println(narration.totalVerses)
     }
 
     @Test
@@ -62,7 +61,6 @@ class NarrationRenderingTest {
             for (i in 1 until seconds) {
                 val bytes = ByteArray(88200)
                 it.getPcmBuffer(bytes)
-                println(bytes.count { it.toInt() == i })
                 Assert.assertTrue("Not all bytes matched for ${i}", bytes.all { it.toInt() == i })
             }
         }
@@ -85,9 +83,8 @@ class NarrationRenderingTest {
                     fis.transferTo(fos)
                 }
             }
-            println(versesFile.length())
         } catch (e: Exception) {
-            println("Failed to create test audio folders' at '$testDataRootFilePath': ${e.message}")
+            System.err.println("Failed to create test audio folders' at '$testDataRootFilePath': ${e.message}")
         }
     }
 
