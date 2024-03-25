@@ -160,11 +160,11 @@ class ProjectWizardViewModel : ViewModel() {
     ) {
         logger.info("Creating project group: ${sourceLanguage.name} - ${targetLanguage.name}")
 
-        val prepareSource = if (
-            collectionRepo.getRootSources().blockingGet()
-                .find { it.resourceContainer?.language == sourceLanguage } == null
-        ) {
-            // source not imported, attempt to find & import
+        // check if source metadata exists for the requested language
+        val sourceExists = collectionRepo.getRootSources().blockingGet()
+            .any { it.resourceContainer!!.language == sourceLanguage }
+
+        val prepareSource = if (!sourceExists) {
             logger.info("Sideloading source for language: ${sourceLanguage.name}")
             importer.sideloadSource(sourceLanguage)
         } else {
@@ -177,8 +177,8 @@ class ProjectWizardViewModel : ViewModel() {
                 targetLanguage,
                 selectedModeProperty.value
             )
-            .startWith(prepareSource)
-            .startWith(waitForProjectDeletionFinishes())
+            .startWith(prepareSource) // must run after deletion and before creation
+            .startWith(waitForProjectDeletionFinishes()) // this must run first
             .observeOnFx()
             .subscribe {
                 logger.info("Project group created: ${sourceLanguage.name} - ${targetLanguage.name}")

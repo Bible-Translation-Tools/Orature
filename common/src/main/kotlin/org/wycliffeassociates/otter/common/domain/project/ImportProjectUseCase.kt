@@ -25,6 +25,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
@@ -38,6 +39,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
+import java.io.IOException
 import java.lang.IllegalArgumentException
 import javax.inject.Inject
 import javax.inject.Provider
@@ -86,10 +88,16 @@ class ImportProjectUseCase @Inject constructor() {
     }
 
     fun sideloadSource(language: Language): Completable {
-        val sourceFile = getEmbeddedSource(language)
-        return import(sourceFile, null, null)
+        return Single
+            .fromCallable {
+                getEmbeddedSource(language)
+            }
+            .subscribeOn(Schedulers.io())
+            .doOnError { logger.error("Failed to get embedded source file for ${language.slug}", it) }
+            .flatMap { sourceFile ->
+                import(sourceFile, null, null)
+            }
             .ignoreElement()
-
     }
 
     private fun getEmbeddedSource(language: Language): File {
