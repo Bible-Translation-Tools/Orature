@@ -72,13 +72,12 @@ class NarrationWaveformRenderer(
         drawImageDataToImage()
 
         runLater {
+            // due to the renderer (PCM compressor, etc) being initialized with the screen width, don't scale the image
+            // however, this means the image needs to be translated by the half the delta between the screen and canvas
             context.drawImage(
                 writableImage,
-                0.0,
-                0.0,
-                //DEFAULT_SCREEN_WIDTH.toDouble(),
-                canvas.width + ((APP_BAR_WIDTH + VOLUME_BAR_WIDTH) * (canvas.width / DEFAULT_SCREEN_WIDTH.toDouble())),
-                DEFAULT_SCREEN_HEIGHT.toDouble()
+                (canvas.width - DEFAULT_SCREEN_WIDTH) / 2.0,
+                0.0
             )
 
             context.stroke = javafx.scene.paint.Color.RED

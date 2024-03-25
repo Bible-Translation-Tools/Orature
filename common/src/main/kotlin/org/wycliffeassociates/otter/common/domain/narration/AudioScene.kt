@@ -22,6 +22,7 @@ import io.reactivex.Observable
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import java.util.*
+import kotlin.math.roundToInt
 
 class AudioScene(
     private val existingAudioReader: AudioFileReader,
@@ -161,6 +162,6 @@ class AudioScene(
 }
 
 fun framesToPixels(frames: Int, width: Int, framesOnScreen: Int): Int {
-    val framesInPixel = framesOnScreen / width.toFloat()
-    return (frames / framesInPixel).toInt()
+    val framesInPixel = framesOnScreen / width
+    return (frames / framesInPixel.toFloat()).roundToInt()
 }

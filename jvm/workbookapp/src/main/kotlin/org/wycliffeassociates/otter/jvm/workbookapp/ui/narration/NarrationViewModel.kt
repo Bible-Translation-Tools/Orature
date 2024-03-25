@@ -137,7 +137,7 @@ class NarrationViewModel : ViewModel() {
     val recordedVerses = observableListOf<AudioMarker>()
     val hasVersesProperty = SimpleBooleanProperty()
     val lastRecordedVerseProperty = SimpleIntegerProperty()
-    val audioPositionProperty = SimpleIntegerProperty()
+    val audioFramePositionProperty = SimpleIntegerProperty()
     val totalAudioSizeProperty = SimpleIntegerProperty()
     private var onTaskRunnerIdle: () -> Unit = { }
 
@@ -241,8 +241,8 @@ class NarrationViewModel : ViewModel() {
             )
             .let { disposables.add(it) }
 
-        audioPositionProperty.onChangeWithDisposer { pos ->
-            if (pos != null) updateHighlightedItem(pos.toInt())
+        audioFramePositionProperty.onChangeWithDisposer { frame ->
+            if (frame != null) updateHighlightedItem(frame.toInt())
         }.also { disposers.add(it) }
 
         appPreferencesRepo.sourceTextZoomRate()
@@ -262,6 +262,7 @@ class NarrationViewModel : ViewModel() {
 
     private fun initializeNarration(chapter: Chapter) {
         narration = narrationFactory.create(workbookDataStore.workbook, chapter)
+        narration.startMicrophone()
         audioPlayer = narration.getPlayer()
         audioPlayer.addEventListener { event: AudioPlayerEvent ->
             runLater {
@@ -287,7 +288,7 @@ class NarrationViewModel : ViewModel() {
                 rendererAudioReader,
                 narration.getRecorderAudioStream(),
                 isRecordingProperty.toObservable(),
-                Screen.getMainScreen().width - 25 - 88,
+                Screen.getMainScreen().width,
                 10,
                 DEFAULT_SAMPLE_RATE
             )
@@ -346,7 +347,7 @@ class NarrationViewModel : ViewModel() {
         highlightedVerseIndex.set(-1)
         hasUndoProperty.set(false)
         hasRedoProperty.set(false)
-        audioPositionProperty.set(0)
+        audioFramePositionProperty.set(0)
         totalAudioSizeProperty.set(0)
     }
 
@@ -919,9 +920,9 @@ class NarrationViewModel : ViewModel() {
     ) {
         if (::renderer.isInitialized) {
             try {
-                val position = narration.getLocationInFrames()
+                val frame = narration.getLocationInFrames()
                 runLater {
-                    audioPositionProperty.set(position)
+                    audioFramePositionProperty.set(frame)
                 }
                 var reRecordLoc: Int? = null
                 var nextVerseLoc: Int? = null
@@ -934,11 +935,11 @@ class NarrationViewModel : ViewModel() {
                 val viewports = renderer.draw(
                     context,
                     canvas,
-                    position,
+                    frame,
                     reRecordLoc,
                     nextVerseLoc
                 )
-                adjustMarkers(markerNodes, viewports, canvas.width.toInt())
+                adjustMarkers(markerNodes, viewports, Screen.getMainScreen().width, canvas.width.toInt())
             } catch (e: Exception) {
                 logger.error("", e)
             }
@@ -956,10 +957,11 @@ class NarrationViewModel : ViewModel() {
     private fun adjustMarkers(
         markerNodes: ObservableList<VerseMarkerControl>,
         viewports: List<IntRange>,
-        width: Int
+        screenWidth: Int,
+        canvasWidth: Int
     ) {
         val checkpointRAVI = recordAgainVerseIndex
-        val adjustedWidth = if (checkpointRAVI == null) width else width / viewports.size
+        val adjustedWidth = if (checkpointRAVI == null) screenWidth else screenWidth / viewports.size
         for (i in markerNodes.indices) {
             val marker = markerNodes[i]
             if (marker.userIsDraggingProperty.value == true) continue
@@ -976,7 +978,7 @@ class NarrationViewModel : ViewModel() {
                 }
 
                 if (verse.location in viewport) {
-                    val viewportOffset = (width / viewports.size) * viewPortIndex
+                    val viewportOffset = (screenWidth / viewports.size) * viewPortIndex + (canvasWidth - screenWidth) / 2.0
                     val newPos = framesToPixels(
                         verse.location - viewport.first,
                         adjustedWidth,
@@ -1076,14 +1078,14 @@ class NarrationViewModel : ViewModel() {
         refreshTeleprompter()
     }
 
-    private fun updateHighlightedItem(audioPosition: Int) {
+    private fun updateHighlightedItem(audioFrame: Int) {
         when {
             isRecording -> highlightedVerseIndex.set(recordingVerseIndex.value)
 
             isRecordingAgain -> highlightedVerseIndex.set(recordAgainVerseIndex!!)
 
             else -> {
-                val marker = narration.findMarkerAtPosition(audioPosition)
+                val marker = narration.findMarkerAtFrame(audioFrame)
                 val index = narratableList.indexOfFirst { it.marker == marker }
                 highlightedVerseIndex.set(index)
             }

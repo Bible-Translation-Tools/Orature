@@ -36,12 +36,12 @@ internal data class VerseNode(
     val length: Int
         get() = sectors.sumOf { it.length() }
 
-    fun firstFrame(): Int {
+    fun firstIndex(): Int {
         if (sectors.isEmpty()) return 0
         return sectors.first().first
     }
 
-    fun lastFrame(): Int {
+    fun lastIndex(): Int {
         if (sectors.isEmpty()) return 0
         return sectors.last().last
     }
@@ -54,7 +54,7 @@ internal data class VerseNode(
     }
 
     /**
-     * Completes a VerseNode by setting the end value to the last audio frame range sector.
+     * Completes a VerseNode by setting the end value to the last audio index range sector.
      *
      * @throws Throws an illegalStateException if the last sector is already finalized.
      */
@@ -63,7 +63,7 @@ internal data class VerseNode(
         if (sectors.isNotEmpty()) {
             val last = sectors.last()
             sectors.removeLast()
-            sectors.add(last.first..end)
+            sectors.add(last.first until end)
         } else {
             throw IllegalStateException("Tried to finalize VerseNode ${marker.label} that was not started!")
         }
@@ -74,11 +74,11 @@ internal data class VerseNode(
      *
      * This function takes audio samples from the start of the VerseNode range
      *
-     * @param framesToTake The number of audio samples to donate to another VerseNode
+     * @param indicesToTake The number of audio samples to donate to another VerseNode
      * @return a list of frame ranges to donate
      */
-    fun takeFramesFromStart(framesToTake: Int): List<IntRange> {
-        var remaining = framesToTake
+    fun takeIndicesFromStart(indicesToTake: Int): List<IntRange> {
+        var remaining = indicesToTake
         val toGive = mutableListOf<IntRange>()
         while (remaining > 0) {
             when {
@@ -119,11 +119,11 @@ internal data class VerseNode(
      *
      * This function takes audio samples from the end of the VerseNode range
      *
-     * @param framesToTake The number of audio samples to donate to another VerseNode
+     * @param indicesToTake The number of audio samples to donate to another VerseNode
      * @return a list of frame ranges to donate
      */
-    fun takeFramesFromEnd(framesToTake: Int): List<IntRange> {
-        var remaining = framesToTake
+    fun takeIndicesFromEnd(indicesToTake: Int): List<IntRange> {
+        var remaining = indicesToTake
         val toGive = mutableListOf<IntRange>()
         while (remaining > 0) {
             when {
@@ -207,85 +207,64 @@ internal data class VerseNode(
     }
 
     /**
-     * Returns the number of frames from the beginning of this verse node to the given absolute frame
+     * Returns the number of indices from the beginning of this verse node to the given absolute index
      */
-    fun framesToPosition(absoluteFrame: Int): Int {
-        if (absoluteFrame !in this) {
-            throw IndexOutOfBoundsException("Frame $absoluteFrame is not in ranges of $sectors")
+    fun indicesToPosition(absoluteIndex: Int): Int {
+        if (absoluteIndex !in this) {
+            throw IndexOutOfBoundsException("Frame $absoluteIndex is not in ranges of $sectors")
         }
 
-        var frameOffset = 0
+        var indexOffset = 0
         for (sector in sectors) {
-            if (absoluteFrame in sector) {
+            if (absoluteIndex in sector) {
                 //  NOTE: The question this function is answering is "how many frames are behind my current position?"
-                frameOffset += absoluteFrame - sector.first
+                indexOffset += absoluteIndex - sector.first
                 break
             } else {
-                frameOffset += sector.length()
+                indexOffset += sector.length()
             }
         }
-        return frameOffset
+        return indexOffset
     }
 
-    fun absoluteFrameFromOffset(framesFromStart: Int): Int {
-        if (framesFromStart > length) {
-            throw IndexOutOfBoundsException("Frame offset: $framesFromStart exceeds the boundaries within ranges $sectors")
-        }
+    fun getSectorsFromOffset(index: Int, btr: Int): List<IntRange> {
+        if (btr <= 0 || index !in this) return listOf()
 
-        var remaining = framesFromStart
-        sectors.forEach { sector ->
-            if (remaining > sector.length()) {
-                remaining -= sector.length()
-            } else {
-                return sector.first +  remaining - 1 // Add - 1 to account for inclusive start
-                // Depending on in the intended functionality, remove the - 1.
-                //  If the question this is answering is "Get the next frame after some offset?", then
-                //  remove the - 1, if the question this is answering is "Offset by some amount, then get me that frame?"
-                //  then we want to keep the -1
-            }
-        }
-
-        throw IndexOutOfBoundsException("Requested offset $framesFromStart exceeded boundaries within ranges $sectors")
-    }
-
-    fun getSectorsFromOffset(framePosition: Int, ftr: Int): List<IntRange> {
-        if (ftr <= 0 || framePosition !in this) return listOf()
-
-        var framesToRead = ftr
+        var bytesToRead = btr
         val stuff = mutableListOf<IntRange>()
 
-        val startIndex = sectors.indexOfFirst { framePosition in it }
+        val startIndex = sectors.indexOfFirst { index in it }
 
-        var start = framePosition
-        val end = min(sectors[startIndex].last, start + framesToRead - 1)
+        var start = index
+        val end = min(sectors[startIndex].last, start + bytesToRead - 1)
         val firstRange = start..end
         stuff.add(firstRange)
-        framesToRead -= firstRange.length()
+        bytesToRead -= firstRange.length()
 
         for (idx in startIndex + 1 until sectors.size) {
-            if (framesToRead <= 0) break
+            if (bytesToRead <= 0) break
             val sector = sectors[idx]
             val start = sector.first
-            val end = min(sectors[idx].last, start + framesToRead - 1)
+            val end = min(sectors[idx].last, start + bytesToRead - 1)
             val range = (sector.first..end)
-            framesToRead -= range.length()
+            bytesToRead -= range.length()
             stuff.add(range)
         }
 
         return stuff
     }
 
-    fun copyMarker(location: Int): AudioMarker {
+    fun copyMarker(frame: Int): AudioMarker {
         return when (marker) {
-            is ChapterMarker -> marker.copy(location = location)
-            is BookMarker -> marker.copy(location = location)
-            is VerseMarker -> marker.copy(location = location)
-            is UnknownMarker -> marker.copy(location = location)
+            is ChapterMarker -> marker.copy(location = frame)
+            is BookMarker -> marker.copy(location = frame)
+            is VerseMarker -> marker.copy(location = frame)
+            is UnknownMarker -> marker.copy(location = frame)
             else -> { throw UnsupportedOperationException("Copy is not supported for marker $marker") }
         }
     }
 }
 
 internal fun IntRange.length(): Int {
-    return last - first + 1
+    return if (first != last) last - first + 1 else 0
 }
