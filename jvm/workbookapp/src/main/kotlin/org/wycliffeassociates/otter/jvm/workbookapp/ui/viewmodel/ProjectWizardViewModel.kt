@@ -142,26 +142,34 @@ class ProjectWizardViewModel : ViewModel() {
     fun onLanguageSelected(language: Language, onNavigateBack: () -> Unit) {
         val sourceLanguage = selectedSourceLanguageProperty.value
         if (sourceLanguage != null) {
-            logger.info("Creating project group: ${sourceLanguage.name} - ${language.name}")
-            creationUseCase
-                .createAllBooks(
-                    sourceLanguage,
-                    language,
-                    selectedModeProperty.value
-                )
-                .startWith(waitForProjectDeletionFinishes())
-                .observeOnFx()
-                .subscribe {
-                    logger.info("Project group created: ${sourceLanguage.name} - ${language.name}")
-                    existingLanguagePairs.add(Pair(sourceLanguage, language))
-                    reset()
-                    onNavigateBack()
-                }
+            createProject(sourceLanguage, language, onNavigateBack)
         }
         else {
             // source language selected
             selectedSourceLanguageProperty.set(language)
         }
+    }
+
+    private fun createProject(
+        sourceLanguage: Language,
+        language: Language,
+        onNavigateBack: () -> Unit
+    ) {
+        logger.info("Creating project group: ${sourceLanguage.name} - ${language.name}")
+        creationUseCase
+            .createAllBooks(
+                sourceLanguage,
+                language,
+                selectedModeProperty.value
+            )
+            .startWith(waitForProjectDeletionFinishes())
+            .observeOnFx()
+            .subscribe {
+                logger.info("Project group created: ${sourceLanguage.name} - ${language.name}")
+                existingLanguagePairs.add(Pair(sourceLanguage, language))
+                reset()
+                onNavigateBack()
+            }
     }
 
     fun dock() {
