@@ -45,7 +45,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 const val SOURCES_JSON_FILE = "gl_sources.json"
-private const val SOURCE_PATH_TEMPLATE = "content/%s.zip"
+const val SOURCE_PATH_TEMPLATE = "content/%s.zip"
 
 class ImportProjectUseCase @Inject constructor() {
 

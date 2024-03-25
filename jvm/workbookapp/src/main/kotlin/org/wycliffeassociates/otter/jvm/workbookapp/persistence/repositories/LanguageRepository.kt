@@ -18,12 +18,19 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories
 
+import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.workbook.Translation
+import org.wycliffeassociates.otter.common.domain.project.ResourceInfoSerializable
+import org.wycliffeassociates.otter.common.domain.project.SOURCES_JSON_FILE
+import org.wycliffeassociates.otter.common.domain.project.SOURCE_PATH_TEMPLATE
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
@@ -115,6 +122,7 @@ class LanguageRepository @Inject constructor(
     override fun getAvailableGatewaySources(): Single<List<Language>> {
         return Single
             .fromCallable {
+                val availableSourceGLs = listEmbeddedSourceLanguages()
                 languageDao.fetchGateway()
                     .filter { it.slug in availableSourceGLs }
                     .map { mapper.mapFromEntity(it) }
@@ -245,9 +253,25 @@ class LanguageRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
-    private val availableSourceGLs = listOf(
-        "am", "as", "bn", "ceb", "es-419", "fr", "gu", "ha", "hi", "id", "ilo",
-        "km", "kn", "lo", "ml", "mr", "ne", "or", "pa", "plt", "pt-br", "ru",
-        "sw", "ta", "te", "th", "tl", "tpi", "vi"
-    )
+    /**
+     * Returns a list of source languages (slug) that have the resource container embedded in the jar.
+     */
+    private fun listEmbeddedSourceLanguages(): List<String> {
+        val sources = javaClass.classLoader.getResource(SOURCES_JSON_FILE)!!
+            .openStream().use { stream ->
+                val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
+                val sources: List<ResourceInfoSerializable> = mapper.readValue(stream)
+                sources
+            }
+
+        return sources
+            .filter {
+                val path = SOURCE_PATH_TEMPLATE.format(it.name)
+                val exists = javaClass.classLoader.getResource(path) != null
+                exists
+            }
+            .map {
+                it.languageCode
+            }
+    }
 }
