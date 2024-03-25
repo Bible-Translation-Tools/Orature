@@ -939,7 +939,7 @@ class NarrationViewModel : ViewModel() {
                     reRecordLoc,
                     nextVerseLoc
                 )
-                adjustMarkers(markerNodes, viewports, canvas.width.toInt())
+                adjustMarkers(markerNodes, viewports, Screen.getMainScreen().width, canvas.width.toInt())
             } catch (e: Exception) {
                 logger.error("", e)
             }
@@ -957,10 +957,11 @@ class NarrationViewModel : ViewModel() {
     private fun adjustMarkers(
         markerNodes: ObservableList<VerseMarkerControl>,
         viewports: List<IntRange>,
-        width: Int
+        screenWidth: Int,
+        canvasWidth: Int
     ) {
         val checkpointRAVI = recordAgainVerseIndex
-        val adjustedWidth = if (checkpointRAVI == null) width else width / viewports.size
+        val adjustedWidth = if (checkpointRAVI == null) screenWidth else screenWidth / viewports.size
         for (i in markerNodes.indices) {
             val marker = markerNodes[i]
             if (marker.userIsDraggingProperty.value == true) continue
@@ -977,7 +978,7 @@ class NarrationViewModel : ViewModel() {
                 }
 
                 if (verse.location in viewport) {
-                    val viewportOffset = (width / viewports.size) * viewPortIndex
+                    val viewportOffset = (screenWidth / viewports.size) * viewPortIndex + (canvasWidth - screenWidth) / 2.0
                     val newPos = framesToPixels(
                         verse.location - viewport.first,
                         adjustedWidth,
