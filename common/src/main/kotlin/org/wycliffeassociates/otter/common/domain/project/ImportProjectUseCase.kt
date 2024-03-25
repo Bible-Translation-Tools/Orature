@@ -39,7 +39,6 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
-import java.io.IOException
 import java.lang.IllegalArgumentException
 import javax.inject.Inject
 import javax.inject.Provider
@@ -101,14 +100,7 @@ class ImportProjectUseCase @Inject constructor() {
     }
 
     private fun getEmbeddedSource(language: Language): File {
-        val sources = javaClass.classLoader.getResource(SOURCES_JSON_FILE)!!
-            .openStream().use { stream ->
-                val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
-                val sources: List<ResourceInfoSerializable> = mapper.readValue(stream)
-                sources
-            }
-
-        val resourceName = sources.find { it.languageCode == language.slug }?.name
+        val resourceName = glSources.find { it.languageCode == language.slug }?.name
         val pathToSource = SOURCE_PATH_TEMPLATE.format(resourceName)
 
         val sourceFile = javaClass.classLoader.getResource(pathToSource).openStream().use { input ->
@@ -153,6 +145,17 @@ class ImportProjectUseCase @Inject constructor() {
         */
         val factory: IProjectImporterFactory = rcFactoryProvider.get()
         return factory.makeImporter()
+    }
+
+    companion object {
+        val glSources: List<ResourceInfoSerializable> by lazy {
+            javaClass.classLoader.getResource(SOURCES_JSON_FILE)!!
+                .openStream().use { stream ->
+                    val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
+                    val sources: List<ResourceInfoSerializable> = mapper.readValue(stream)
+                    sources
+                }
+        }
     }
 }
 

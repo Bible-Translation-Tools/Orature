@@ -28,6 +28,8 @@ import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.workbook.Translation
+import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
+import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase.Companion.glSources
 import org.wycliffeassociates.otter.common.domain.project.ResourceInfoSerializable
 import org.wycliffeassociates.otter.common.domain.project.SOURCES_JSON_FILE
 import org.wycliffeassociates.otter.common.domain.project.SOURCE_PATH_TEMPLATE
@@ -254,17 +256,11 @@ class LanguageRepository @Inject constructor(
     }
 
     /**
-     * Returns a list of source languages (slug) that have the resource container embedded in the jar.
+     * Returns a list of source languages (slug) that have the matching resource container
+     * embedded inside the jar.
      */
     private fun listEmbeddedSourceLanguages(): List<String> {
-        val sources = javaClass.classLoader.getResource(SOURCES_JSON_FILE)!!
-            .openStream().use { stream ->
-                val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
-                val sources: List<ResourceInfoSerializable> = mapper.readValue(stream)
-                sources
-            }
-
-        return sources
+        return glSources
             .filter {
                 val path = SOURCE_PATH_TEMPLATE.format(it.name)
                 val exists = javaClass.classLoader.getResource(path) != null
