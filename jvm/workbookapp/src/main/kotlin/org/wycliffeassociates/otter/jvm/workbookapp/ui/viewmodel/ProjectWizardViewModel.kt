@@ -32,6 +32,7 @@ import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
+import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
@@ -54,6 +55,8 @@ class ProjectWizardViewModel : ViewModel() {
     lateinit var languageRepo: ILanguageRepository
     @Inject
     lateinit var collectionRepo: ICollectionRepository
+    @Inject
+    lateinit var importer: ImportProjectUseCase
 
     private val sourceLanguages = observableListOf<Language>()
     private val targetLanguages = observableListOf<Language>()
@@ -142,7 +145,7 @@ class ProjectWizardViewModel : ViewModel() {
     fun onLanguageSelected(language: Language, onNavigateBack: () -> Unit) {
         val sourceLanguage = selectedSourceLanguageProperty.value
         if (sourceLanguage != null) {
-            createProject(sourceLanguage, language, onNavigateBack)
+            createProject(sourceLanguage, targetLanguage = language, onNavigateBack)
         }
         else {
             // source language selected
@@ -152,21 +155,34 @@ class ProjectWizardViewModel : ViewModel() {
 
     private fun createProject(
         sourceLanguage: Language,
-        language: Language,
+        targetLanguage: Language,
         onNavigateBack: () -> Unit
     ) {
-        logger.info("Creating project group: ${sourceLanguage.name} - ${language.name}")
+        logger.info("Creating project group: ${sourceLanguage.name} - ${targetLanguage.name}")
+
+        val prepareSource = if (
+            collectionRepo.getRootSources().blockingGet()
+                .find { it.resourceContainer?.language == sourceLanguage } == null
+        ) {
+            // source not imported, attempt to find & import
+            logger.info("Sideloading source for language: ${sourceLanguage.name}")
+            importer.sideloadSource(sourceLanguage)
+        } else {
+            Completable.complete()
+        }
+
         creationUseCase
             .createAllBooks(
                 sourceLanguage,
-                language,
+                targetLanguage,
                 selectedModeProperty.value
             )
+            .startWith(prepareSource)
             .startWith(waitForProjectDeletionFinishes())
             .observeOnFx()
             .subscribe {
-                logger.info("Project group created: ${sourceLanguage.name} - ${language.name}")
-                existingLanguagePairs.add(Pair(sourceLanguage, language))
+                logger.info("Project group created: ${sourceLanguage.name} - ${targetLanguage.name}")
+                existingLanguagePairs.add(Pair(sourceLanguage, targetLanguage))
                 reset()
                 onNavigateBack()
             }

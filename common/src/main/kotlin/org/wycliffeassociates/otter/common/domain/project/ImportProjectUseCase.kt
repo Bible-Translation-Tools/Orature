@@ -18,9 +18,15 @@
  */
 package org.wycliffeassociates.otter.common.domain.project
 
+import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.project.importer.IProjectImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.IProjectImporterFactory
@@ -35,6 +41,9 @@ import java.io.File
 import java.lang.IllegalArgumentException
 import javax.inject.Inject
 import javax.inject.Provider
+
+const val SOURCES_JSON_FILE = "gl_sources.json"
+private const val SOURCE_PATH_TEMPLATE = "content/%s.zip"
 
 class ImportProjectUseCase @Inject constructor() {
 
@@ -76,6 +85,35 @@ class ImportProjectUseCase @Inject constructor() {
         return import(file, null, null)
     }
 
+    fun sideloadSource(language: Language): Completable {
+        val sourceFile = getEmbeddedSource(language)
+        return import(sourceFile, null, null)
+            .ignoreElement()
+
+    }
+
+    private fun getEmbeddedSource(language: Language): File {
+        val sources = javaClass.classLoader.getResource(SOURCES_JSON_FILE)!!
+            .openStream().use { stream ->
+                val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
+                val sources: List<ResourceInfoSerializable> = mapper.readValue(stream)
+                sources
+            }
+
+        val resourceName = sources.find { it.languageCode == language.slug }?.name
+        val pathToSource = SOURCE_PATH_TEMPLATE.format(resourceName)
+
+        val sourceFile = javaClass.classLoader.getResource(pathToSource).openStream().use { input ->
+            val tempFile = File.createTempFile(resourceName, ".zip", directoryProvider.tempDirectory)
+            tempFile.outputStream().use { output ->
+                input.transferTo(output)
+            }
+            tempFile
+        }
+
+        return sourceFile
+    }
+
     fun isAlreadyImported(file: File): Boolean {
         return rcFactoryProvider.get()
             .makeImporter()
@@ -109,3 +147,5 @@ class ImportProjectUseCase @Inject constructor() {
         return factory.makeImporter()
     }
 }
+
+data class ResourceInfoSerializable(val name: String, val languageCode: String, val url: String)
