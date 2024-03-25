@@ -80,7 +80,7 @@ class NarrationTextCell(
         view.isLastVerseProperty.set(isLast)
 
         graphic = view.apply {
-            prefHeight = if (view.isLastVerseProperty.value) listView.height else -1.0 // extra space at the end
+            prefHeight = if (index == listView.items.lastIndex) listView.height else -1.0 // extra space at the end
             
             val title = if (item.chunk.label == "verse") item.chunk.title else ""
 
