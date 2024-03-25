@@ -68,7 +68,7 @@ internal class ChapterRepresentation(
 
     @get:Synchronized
     val totalFrames: Int
-        get() = activeVerses.sumOf { it.length / frameSizeInBytes }
+        get() = activeVerses.sumOf { indexToFrame(it.length) }
 
     @get:Synchronized
     internal val activeVerses: List<VerseNode>
@@ -79,7 +79,7 @@ internal class ChapterRepresentation(
         val verses = activeVerses
             .map {
                 it.copyMarker(
-                    frame = absoluteFrameToRelativeChapterFrame(it.firstIndex() / frameSizeInBytes)
+                    frame = absoluteFrameToRelativeChapterFrame(indexToFrame(it.firstIndex()))
                 )
             }
         return verses
@@ -152,7 +152,7 @@ internal class ChapterRepresentation(
     }
 
     fun finalizeVerse(verseIndex: Int, history: NarrationHistory? = null): Int {
-        val endIndex = scratchAudio.totalFrames * frameSizeInBytes
+        val endIndex = frameToIndex(scratchAudio.totalFrames)
 
         history?.finalizeVerse(endIndex, totalVerses)
         onVersesUpdated()
@@ -167,7 +167,7 @@ internal class ChapterRepresentation(
 
     private fun updateTotalVerses() {
         activeVerses.forEachIndexed { idx, verseNode ->
-            val newFrame = absoluteFrameToRelativeChapterFrame(verseNode.firstIndex() / frameSizeInBytes)
+            val newFrame = absoluteFrameToRelativeChapterFrame(indexToFrame(verseNode.firstIndex()))
             val updatedMarker = verseNode.copyMarker(frame = newFrame)
             totalVerses[idx] = VerseNode(
                 true, updatedMarker, totalVerses[idx].sectors
@@ -183,7 +183,7 @@ internal class ChapterRepresentation(
     private fun publishActiveVerses() {
         val updatedVerses = if (activeVerses.isNotEmpty()) {
             activeVerses.map {
-                val newFrame = absoluteFrameToRelativeChapterFrame(it.firstIndex() / frameSizeInBytes)
+                val newFrame = absoluteFrameToRelativeChapterFrame(indexToFrame(it.firstIndex()))
                 it.copyMarker(frame = newFrame)
             }
         } else listOf()
@@ -279,16 +279,16 @@ internal class ChapterRepresentation(
             val index = verses.indexOf(verse)
             var rel = 0
             for (idx in 0 until index) {
-                rel += verses[idx].length / frameSizeInBytes
+                rel += indexToFrame(verses[idx].length)
             }
-            rel += it.indicesToPosition(absoluteFrame * frameSizeInBytes) / frameSizeInBytes
+            rel += indexToFrame(it.indicesToPosition(frameToIndex(absoluteFrame)))
             return rel
         }
         return 0
     }
 
     fun findVerse(absoluteFrame: Int): VerseNode? {
-        val absoluteIndex = absoluteFrame * frameSizeInBytes
+        val absoluteIndex = frameToIndex(absoluteFrame)
         return activeVerses.find { node ->
             absoluteIndex in node
         }
@@ -300,11 +300,11 @@ internal class ChapterRepresentation(
      * the range of each active verse.
      */
     internal fun relativeChapterFrameToAbsoluteIndex(relativeFrame: Int): Int {
-        val relativeIdx = relativeFrame * frameSizeInBytes
+        val relativeIdx = frameToIndex(relativeFrame)
         var remaining = relativeIdx + 1
         val verses = activeVerses
         if (relativeIdx <= 0 && activeVerses.isEmpty()) {
-            return if (scratchAudio.totalFrames == 0) 0 else (scratchAudio.totalFrames * frameSizeInBytes) + 1
+            return if (scratchAudio.totalFrames == 0) 0 else (frameToIndex(scratchAudio.totalFrames)) + 1
         }
         if (relativeIdx <= 0) return activeVerses.first().firstIndex()
 
@@ -321,7 +321,7 @@ internal class ChapterRepresentation(
         }
 
         // logger.error("RelativeToAbsolute did not resolve before iterating over active verses. Relative index: ${relativeIdx}")
-        return if (verses.isNotEmpty()) verses.last().lastIndex() else scratchAudio.totalFrames * frameSizeInBytes
+        return if (verses.isNotEmpty()) verses.last().lastIndex() else frameToIndex(scratchAudio.totalFrames)
     }
 
     /**
@@ -336,7 +336,7 @@ internal class ChapterRepresentation(
         verses
             .find { it.marker.label == verse.label }
             ?.let { _verse ->
-                return _verse.firstIndex() / frameSizeInBytes .. _verse.lastIndex() / frameSizeInBytes
+                return indexToFrame(_verse.firstIndex()) .. indexToFrame(_verse.lastIndex())
             }
         return null
     }
@@ -407,7 +407,7 @@ internal class ChapterRepresentation(
 
         @get:Synchronized
         val absoluteFramePosition: Int
-            get() = position / frameSizeInBytes
+            get() = indexToFrame(position)
 
         override val framePosition: Int
             get() = absoluteFrameToRelativeFrame(absoluteFramePosition)
@@ -438,7 +438,7 @@ internal class ChapterRepresentation(
             val verse = activeVerses.getOrNull(verseIndex)
             var rel = 0
             verse?.let {
-                rel = it.indicesToPosition(absoluteFrame * frameSizeInBytes) / frameSizeInBytes
+                rel = indexToFrame(it.indicesToPosition(frameToIndex(absoluteFrame)))
             }
             return rel
         }
@@ -451,7 +451,7 @@ internal class ChapterRepresentation(
                 return if (lockedVerse == CHAPTER_UNLOCKED) {
                     this@ChapterRepresentation.totalFrames
                 } else {
-                    activeVerses.get(lockedVerse).length / frameSizeInBytes
+                    indexToFrame(activeVerses[lockedVerse].length)
                 }
             }
 
@@ -595,7 +595,7 @@ internal class ChapterRepresentation(
 
         fun frameInVerseToFrameInChapter(frame: Int, verseIndex: Int): Int {
             val verse = activeVerses[verseIndex]
-            return frame + absoluteFrameToRelativeChapterFrame(verse.firstIndex() / frameSizeInBytes)
+            return frame + absoluteFrameToRelativeChapterFrame(indexToFrame(verse.firstIndex()))
         }
 
         @Synchronized
@@ -629,4 +629,7 @@ internal class ChapterRepresentation(
             release()
         }
     }
+
+    private fun frameToIndex(frame: Int) = frame * frameSizeInBytes
+    private fun indexToFrame(index: Int) = index / frameSizeInBytes
 }
