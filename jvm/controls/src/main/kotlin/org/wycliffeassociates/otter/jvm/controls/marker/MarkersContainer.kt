@@ -22,6 +22,8 @@ import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import tornadofx.*
 
+const val MARKER_WIDTH_APPROX = 120.0
+
 class MarkersContainer : MarkerTrackControl() {
     override fun createMarker(): MarkerControl {
         return MarkerNode().apply {
