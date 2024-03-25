@@ -336,7 +336,7 @@ internal class ChapterRepresentation(
         verses
             .find { it.marker.label == verse.label }
             ?.let { _verse ->
-                return _verse.firstIndex() / frameSizeInBytes until _verse.lastIndex() / frameSizeInBytes
+                return _verse.firstIndex() / frameSizeInBytes .. _verse.lastIndex() / frameSizeInBytes
             }
         return null
     }

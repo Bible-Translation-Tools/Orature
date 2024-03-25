@@ -571,7 +571,7 @@ class ChapterRepresentationTest {
         val verseNumber = 7
         val verseMarker = VerseMarker(verseNumber, verseNumber, 0)
         val markerRange = chapterRepresentation.getRangeOfMarker(verseMarker)
-        val expectedRange = 44100 * (verseNumber - 1) until 44100 * verseNumber - 1 // last index is not inclusive
+        val expectedRange = 44100 * (verseNumber - 1) until 44100 * verseNumber
 
         Assert.assertEquals(expectedRange, markerRange)
     }
