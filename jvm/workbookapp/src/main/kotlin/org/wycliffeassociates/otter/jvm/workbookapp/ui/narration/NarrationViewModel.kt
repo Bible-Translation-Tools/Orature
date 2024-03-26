@@ -749,6 +749,7 @@ class NarrationViewModel : ViewModel() {
         teleprompterStateMachine.initialize(narration.versesWithRecordings())
         recordPause = false
 
+        renderer.clearActiveRecordingData()
         resetTeleprompter()
     }
 
