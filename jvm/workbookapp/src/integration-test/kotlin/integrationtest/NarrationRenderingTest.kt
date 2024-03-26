@@ -109,8 +109,11 @@ class NarrationRenderingTest {
 
     private fun mockChunkList(): List<Chunk> {
         return buildList {
-            for (i in 0 until 10) {
-                add(mockChunk(i - 2))
+            repeat(2) { i ->
+                add(mockChunk(i - 2)) // titles
+            }
+            repeat(8) { i ->
+                add(mockChunk(i + 1)) // verses
             }
         }
     }
