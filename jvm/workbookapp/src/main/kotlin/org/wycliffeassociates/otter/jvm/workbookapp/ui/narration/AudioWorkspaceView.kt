@@ -230,12 +230,6 @@ class AudioWorkspaceViewModel : ViewModel() {
     fun onDock() {
         narrationStateProperty.bind(narrationViewModel.narrationStateProperty)
         totalAudioSizeProperty.bind(narrationViewModel.totalAudioSizeProperty)
-        narrationViewModel.narratableList.onChange {
-            val verseMarkersList = narrationViewModel.narratableList.filter {
-                it.hasRecording && it.marker != null
-            }
-            recordedVerses.setAll(verseMarkersList)
-        }
 
         isScrollEnabledProperty.bind(
             Bindings.createBooleanBinding(
