@@ -315,13 +315,15 @@ class Narration @AssistedInject constructor(
     }
 
     fun resumeRecording(index: Int) {
-
         // Ensures that the entire chapter is loaded into the player
         lockToVerse(null)
         audioLoaded = false
         loadChapterIntoPlayer()
 
-        seek(chapterRepresentation.absoluteFrameToRelativeChapterFrame(chapterRepresentation.totalVerses[index].lastIndex()))
+        val lastAbsoluteFrame = chapterRepresentation.totalVerses[index].lastIndex() / chapterRepresentation.frameSizeInBytes
+        val seekFrame = chapterRepresentation.absoluteFrameToRelativeChapterFrame(lastAbsoluteFrame)
+        seek(seekFrame)
+
         writer?.start()
         isRecording.set(true)
     }
