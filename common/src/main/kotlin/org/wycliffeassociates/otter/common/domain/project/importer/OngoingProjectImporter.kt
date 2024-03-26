@@ -819,7 +819,8 @@ class OngoingProjectImporter @Inject constructor(
             chapterSort = chapterNumber
         )
         val fileName = fileNamer.generateName(1, AudioFileFormat.WAV)
-        val compiled = concatAudioUseCase.execute(takeFiles, includeMarkers = true).blockingGet()
+        val filesToCompile = takeFiles.sortedBy { parseNumbers(it.name)!!.contentSignature.verse } // sort by verse order
+        val compiled = concatAudioUseCase.execute(filesToCompile, includeMarkers = true).blockingGet()
         val chapterFile = takeFiles.first().parentFile.resolve(fileName)
             .apply {
                 createNewFile()
