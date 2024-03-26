@@ -257,7 +257,12 @@ class AudioWorkspaceViewModel : ViewModel() {
             )
         )
         audioPositionProperty.bind(narrationViewModel.audioFramePositionProperty)
-        recordedVerses.bind(narrationViewModel.recordedVerses) { it }
+        narrationViewModel.narratableList.onChange {
+            val verseMarkersList = narrationViewModel.narratableList.filter {
+                it.hasRecording && it.marker != null
+            }
+            recordedVerses.setAll(verseMarkersList)
+        }
     }
 
     fun onUndock() {
