@@ -710,6 +710,9 @@ class NarrationViewModel : ViewModel() {
                 narration.onNewVerse(nextIndex)
                 renderer.clearActiveRecordingData()
                 recordingVerseIndex.set(nextIndex)
+
+                val anyRecordedAfter = recordedVerses.any { it.sort > totalVerses[nextIndex].sort }
+                isPrependRecordingProperty.set(anyRecordedAfter)
             }
 
             recordPause -> {
@@ -722,7 +725,10 @@ class NarrationViewModel : ViewModel() {
 
         if (isPrependRecordingProperty.value) {
             prependRecordingVerseIndex.set(nextIndex)
+        } else {
+            prependRecordingVerseIndex.set(null)
         }
+
         refreshTeleprompter()
     }
 
