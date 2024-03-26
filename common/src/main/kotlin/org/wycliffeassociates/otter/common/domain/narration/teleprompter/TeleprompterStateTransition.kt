@@ -113,15 +113,15 @@ object ResumeRecordAction {
 }
 
 object NextVerseAction {
-    fun apply(contexts: MutableList<TeleprompterStateContext>, index: Int) {
-        val wasActive = contexts[index - 1].state.type == TeleprompterItemState.RECORD_ACTIVE
+    fun apply(contexts: MutableList<TeleprompterStateContext>, currentIndex: Int) {
+        val wasActive = contexts[currentIndex].state.type == TeleprompterItemState.RECORD_ACTIVE
 
         if (wasActive) {
-            contexts[index - 1].changeState(TeleprompterItemState.RECORD_AGAIN_DISABLED)
-            contexts[index].changeState(TeleprompterItemState.RECORD_ACTIVE)
+            contexts[currentIndex].changeState(TeleprompterItemState.RECORD_AGAIN_DISABLED)
+            contexts.firstOrNull { it.state.type == TeleprompterItemState.RECORD_DISABLED }?.changeState(TeleprompterItemState.RECORD_ACTIVE)
         } else {
-            contexts[index - 1].changeState(TeleprompterItemState.RECORD_AGAIN)
-            contexts[index].changeState(TeleprompterItemState.RECORD)
+            contexts[currentIndex].changeState(TeleprompterItemState.RECORD_AGAIN)
+            contexts.firstOrNull { it.state.type == TeleprompterItemState.RECORD_DISABLED }?.changeState(TeleprompterItemState.RECORD)
         }
     }
 }

@@ -159,7 +159,7 @@ class TeleprompterStateMachineTest {
         teleprompterStateMachine.transition(TeleprompterStateTransition.RESUME_RECORDING, index)
 
         // Next
-        val newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, index + 1)
+        val newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, index)
 
         for (i in newContext.indices) {
             if (i == index) {
@@ -184,12 +184,12 @@ class TeleprompterStateMachineTest {
         // Records verse 1
         teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, 0)
         teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORDING, 0)
-        teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, 1)
+        teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, 0)
 
         // Records verse 2
         teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, 1)
         teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORDING, 1)
-        teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, 2)
+        teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, 1)
 
         // Starts recording for verse 3
         teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, 2)
@@ -225,7 +225,7 @@ class TeleprompterStateMachineTest {
         teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORDING, index)
 
         // Next
-        val newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, index + 1)
+        val newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, index)
 
         for (i in newContext.indices) {
             if (i == index) {
@@ -255,7 +255,7 @@ class TeleprompterStateMachineTest {
         teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORDING, index)
 
         // Next
-        var newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, index + 1)
+        var newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, index)
 
         // Verify that newContext[index] is in teh RECORD_AGAIN state
         Assert.assertEquals(TeleprompterItemState.RECORD_AGAIN, newContext[index])
@@ -288,7 +288,7 @@ class TeleprompterStateMachineTest {
         teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORDING, index)
 
         // Next
-        var newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, index + 1)
+        var newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, index)
 
         newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD_AGAIN, index)
 
@@ -324,7 +324,7 @@ class TeleprompterStateMachineTest {
         teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORDING, index)
 
         // Next
-        teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, index + 1)
+        teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, index)
 
         teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD_AGAIN, index)
 
@@ -363,7 +363,7 @@ class TeleprompterStateMachineTest {
             teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORDING, i)
 
             // Next
-            newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, i + 1)
+            newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, i)
         }
 
         // Records the last verse

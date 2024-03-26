@@ -224,7 +224,10 @@ class AudioWorkspaceViewModel : ViewModel() {
     }
 
     fun onDock() {
-        isRecordingProperty.bind(narrationViewModel.isRecordingProperty.or(narrationViewModel.isRecordingAgainProperty))
+        val recordingBinding = narrationViewModel.isRecordingProperty
+            .or(narrationViewModel.isRecordingAgainProperty)
+            .or(narrationViewModel.isPrependRecordingProperty)
+        isRecordingProperty.bind(recordingBinding)
         isPlayingProperty.bind(narrationViewModel.isPlayingProperty)
         totalAudioSizeProperty.bind(narrationViewModel.totalAudioSizeProperty)
         audioPositionProperty.bind(narrationViewModel.audioFramePositionProperty)
