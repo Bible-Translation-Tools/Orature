@@ -20,6 +20,7 @@ package integrationtest.di
 
 import integrationtest.projects.importer.MergeMediaTest
 import dagger.Component
+import integrationtest.NarrationRenderingTest
 import integrationtest.initialization.TestInitializeProjects
 import integrationtest.initialization.TestInitializeSources
 import integrationtest.initialization.TestInitializeUlb
@@ -65,4 +66,5 @@ interface TestPersistenceComponent : AppDependencyGraph {
     fun inject(test: TestBackupProjectExporter)
     fun inject(test: TestAudioProjectExporter)
     fun inject(test: MergeMediaTest)
+    fun inject(test: NarrationRenderingTest)
 }

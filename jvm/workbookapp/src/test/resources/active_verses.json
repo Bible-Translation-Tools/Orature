@@ -1,0 +1,187 @@
+[
+  {
+    "placed": true,
+    "marker": {
+      "type": "BookMarker",
+      "bookSlug": "gen",
+      "location": 0,
+      "type": "TITLE",
+      "sort": 0
+    },
+    "sectors": [
+      {
+        "start": 0,
+        "end": 88199
+      }
+    ]
+  },
+  {
+    "placed": true,
+    "marker": {
+      "type": "ChapterMarker",
+      "chapterNumber": 1,
+      "location": 88200,
+      "type": "TITLE",
+      "sort": 1001
+    },
+    "sectors": [
+      {
+        "start": 88200,
+        "end": 176399
+      }
+    ]
+  },
+  {
+    "placed": true,
+    "marker": {
+      "type": "VerseMarker",
+      "start": 1,
+      "end": 1,
+      "location": 176400,
+      "type": "CONTENT",
+      "sort": 10001
+    },
+    "sectors": [
+      {
+        "start": 176400,
+        "end": 264599
+      }
+    ]
+  },
+  {
+    "placed": true,
+    "marker": {
+      "type": "VerseMarker",
+      "start": 2,
+      "end": 2,
+      "location": 264600,
+      "type": "CONTENT",
+      "sort": 10002
+    },
+    "sectors": [
+      {
+        "start": 264600,
+        "end": 352799
+      }
+    ]
+  },
+  {
+    "placed": true,
+    "marker": {
+      "type": "VerseMarker",
+      "start": 3,
+      "end": 3,
+      "location": 352800,
+      "type": "CONTENT",
+      "sort": 10003
+    },
+    "sectors": [
+      {
+        "start": 352800,
+        "end": 440999
+      }
+    ]
+  },
+  {
+    "placed": true,
+    "marker": {
+      "type": "VerseMarker",
+      "start": 4,
+      "end": 4,
+      "location": 441000,
+      "type": "CONTENT",
+      "sort": 10004
+    },
+    "sectors": [
+      {
+        "start": 441000,
+        "end": 529199
+      }
+    ]
+  },
+  {
+    "placed": true,
+    "marker": {
+      "type": "VerseMarker",
+      "start": 5,
+      "end": 5,
+      "location": 529200,
+      "type": "CONTENT",
+      "sort": 10005
+    },
+    "sectors": [
+      {
+        "start": 529200,
+        "end": 617399
+      }
+    ]
+  },
+  {
+    "placed": true,
+    "marker": {
+      "type": "VerseMarker",
+      "start": 6,
+      "end": 6,
+      "location": 617400,
+      "type": "CONTENT",
+      "sort": 10006
+    },
+    "sectors": [
+      {
+        "start": 617400,
+        "end": 705599
+      }
+    ]
+  },
+  {
+    "placed": true,
+    "marker": {
+      "type": "VerseMarker",
+      "start": 7,
+      "end": 7,
+      "location": 705600,
+      "type": "CONTENT",
+      "sort": 10007
+    },
+    "sectors": [
+      {
+        "start": 705600,
+        "end": 793799
+      }
+    ]
+  },
+  {
+    "placed": true,
+    "marker": {
+      "type": "VerseMarker",
+      "start": 8,
+      "end": 8,
+      "location": 793800,
+      "type": "CONTENT",
+      "sort": 10007
+    },
+    "sectors": [
+      {
+        "start": 793800,
+        "end": 881999
+      }
+    ]
+  },
+  {
+    "placed": true,
+    "marker": {
+      "type": "VerseMarker",
+      "start": 9,
+      "end": 9,
+      "location": 882000,
+      "type": "CONTENT",
+      "sort": 10007
+    },
+    "sectors": [
+      {
+        "start": 882000,
+        "end": 970199
+      }
+    ]
+  }
+]

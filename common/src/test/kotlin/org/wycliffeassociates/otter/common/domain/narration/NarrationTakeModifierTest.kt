@@ -2,6 +2,8 @@ package org.wycliffeassociates.otter.common.domain.narration
 
 import io.mockk.every
 import io.mockk.mockk
+import io.reactivex.observables.ConnectableObservable
+import io.reactivex.observers.TestObserver
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -21,13 +23,13 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 
-val chapterTakeAudioFile = File(testDirWithAudio, "testChapterTake.wav")
-val tempAudioFile = File(testDirWithAudio, "tempAudio.pcm")
-
 class NarrationTakeModifierTest {
     lateinit var chapterTake: Take
     val testBookSlug = "gen"
     val testChapterNumber = 1
+
+    private lateinit var chapterTakeAudioFile: File
+    private lateinit var tempAudioFile: File
 
     private fun mockTake(): Take {
         return mockk<Take> {
@@ -47,6 +49,9 @@ class NarrationTakeModifierTest {
 
     @Before
     fun setup() {
+        testDirWithAudio.mkdirs()
+        chapterTakeAudioFile = File.createTempFile("testChapterTake",".wav", testDirWithAudio)
+        tempAudioFile = File.createTempFile("tempAudio", ".pcm", testDirWithAudio)
         createTestAudioFolders()
         chapterTake = mockTake()
     }
@@ -188,9 +193,9 @@ class NarrationTakeModifierTest {
         // Simulates moving each marker by 400 samples
         val newAudioMarkers = moveAllAudioMarkers(originalAudioMarkers, 400)
 
-
         var oldBusyStatus: TaskRunnerStatus? = null
         NarrationTakeModifier.status
+            .take(2) // MODIFYING_METADATA & IDLE
             .subscribe {
                 // Begins check after the takeModifier has been busy
                 if (oldBusyStatus == TaskRunnerStatus.MODIFYING_METADATA && it == TaskRunnerStatus.IDLE) {
@@ -239,6 +244,7 @@ class NarrationTakeModifierTest {
 
         var oldBusyStatus: TaskRunnerStatus? = null
         NarrationTakeModifier.status
+            .take(2) // MODIFYING_METADATA & IDLE
             .subscribe {
                 // Begins check after the takeModifier has been busy
                 if (oldBusyStatus == TaskRunnerStatus.MODIFYING_METADATA && it == TaskRunnerStatus.IDLE) {
