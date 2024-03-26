@@ -32,6 +32,7 @@ import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
+import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
@@ -54,6 +55,8 @@ class ProjectWizardViewModel : ViewModel() {
     lateinit var languageRepo: ILanguageRepository
     @Inject
     lateinit var collectionRepo: ICollectionRepository
+    @Inject
+    lateinit var importer: ImportProjectUseCase
 
     private val sourceLanguages = observableListOf<Language>()
     private val targetLanguages = observableListOf<Language>()
@@ -110,15 +113,19 @@ class ProjectWizardViewModel : ViewModel() {
             .getRootSources()
             .observeOnFx()
             .map { collections ->
-                collections
+                val sourceLanguagesFromRoot = collections
                     .mapNotNull { collection -> collection.resourceContainer }
-                    .distinctBy { it.language }
+                    .map { it.language }
+                    .distinct()
+
+                val availableGLs = languageRepo.getAvailableGatewaySources().blockingGet()
+                sourceLanguagesFromRoot.union(availableGLs)
             }
             .doOnError { e ->
                 logger.error("Error in initializing source languages", e)
             }
-            .subscribe { collections ->
-                sourceLanguages.setAll(collections.map { it.language })
+            .subscribe { languages ->
+                sourceLanguages.setAll(languages)
                 updateExistingLanguagePairs()
             }
     }
@@ -138,26 +145,53 @@ class ProjectWizardViewModel : ViewModel() {
     fun onLanguageSelected(language: Language, onNavigateBack: () -> Unit) {
         val sourceLanguage = selectedSourceLanguageProperty.value
         if (sourceLanguage != null) {
-            logger.info("Creating project group: ${sourceLanguage.name} - ${language.name}")
-            creationUseCase
-                .createAllBooks(
-                    sourceLanguage,
-                    language,
-                    selectedModeProperty.value
-                )
-                .startWith(waitForProjectDeletionFinishes())
-                .observeOnFx()
-                .subscribe {
-                    logger.info("Project group created: ${sourceLanguage.name} - ${language.name}")
-                    existingLanguagePairs.add(Pair(sourceLanguage, language))
-                    reset()
-                    onNavigateBack()
-                }
+            createProject(sourceLanguage, targetLanguage = language, onNavigateBack)
         }
         else {
             // source language selected
             selectedSourceLanguageProperty.set(language)
         }
+    }
+
+    private fun createProject(
+        sourceLanguage: Language,
+        targetLanguage: Language,
+        onNavigateBack: () -> Unit
+    ) {
+        logger.info("Creating project group: ${sourceLanguage.name} - ${targetLanguage.name}")
+
+        // check if source metadata exists for the requested language
+        val sourceExists = collectionRepo.getRootSources().blockingGet()
+            .any { it.resourceContainer!!.language == sourceLanguage }
+
+        val prepareSource = if (!sourceExists) {
+            logger.info("Sideloading source for language: ${sourceLanguage.name}")
+            importer.sideloadSource(sourceLanguage)
+        } else {
+            Completable.complete()
+        }
+
+        creationUseCase
+            .createAllBooks(
+                sourceLanguage,
+                targetLanguage,
+                selectedModeProperty.value
+            )
+            .startWith(prepareSource) // must run after deletion and before creation
+            .startWith(waitForProjectDeletionFinishes()) // this must run first
+            .observeOnFx()
+            .subscribe(
+                {
+                    logger.info("Project group created: ${sourceLanguage.name} - ${targetLanguage.name}")
+                    existingLanguagePairs.add(Pair(sourceLanguage, targetLanguage))
+                    reset()
+                    onNavigateBack()
+                },
+                {
+                    logger.error("Could not create project for ${sourceLanguage.name} - ${targetLanguage.slug} ${selectedModeProperty.value}")
+                    find<HomePageViewModel2>().isLoadingProperty.set(false)
+                }
+            )
     }
 
     fun dock() {
