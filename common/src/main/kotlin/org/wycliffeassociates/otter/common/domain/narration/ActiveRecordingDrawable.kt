@@ -51,9 +51,9 @@ class ActiveRecordingDrawable(
         val activeData = activeRenderer.floatBuffer
         val activeSize = activeData.size()
 
-        val totalSamplesToRead = secondsOnScreen * recordingSampleRate
+        val totalFramesToRead = secondsOnScreen * recordingSampleRate
 
-        val samplesFromActive = min(totalSamplesToRead, activeSize)
+        val samplesFromActive = min(totalFramesToRead, activeSize)
         for (i in 0 until samplesFromActive) {
             waveformDrawable[i] = activeData[i]
         }

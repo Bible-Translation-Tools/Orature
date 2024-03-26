@@ -46,7 +46,6 @@ import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.math.min
 
 class AudioWorkspaceView : View() {
     private val userIsDraggingProperty = SimpleBooleanProperty(false)
@@ -228,7 +227,7 @@ class AudioWorkspaceViewModel : ViewModel() {
         isRecordingProperty.bind(narrationViewModel.isRecordingProperty.or(narrationViewModel.isRecordingAgainProperty))
         isPlayingProperty.bind(narrationViewModel.isPlayingProperty)
         totalAudioSizeProperty.bind(narrationViewModel.totalAudioSizeProperty)
-        audioPositionProperty.bind(narrationViewModel.audioPositionProperty)
+        audioPositionProperty.bind(narrationViewModel.audioFramePositionProperty)
         recordedVerses.bind(narrationViewModel.recordedVerses) { it }
         Bindings.bindContent(totalVerses, narrationViewModel.totalVerses)
     }
