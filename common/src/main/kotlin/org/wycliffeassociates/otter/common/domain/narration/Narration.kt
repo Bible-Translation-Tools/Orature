@@ -218,7 +218,8 @@ class Narration @AssistedInject constructor(
         audioLoaded = false
         loadChapterIntoPlayer()
 
-        player.seek(player.getDurationInFrames())
+        seek(totalVerses[verseIndex].location)
+
         writer?.start()
         isRecording.set(true)
     }
@@ -230,7 +231,7 @@ class Narration @AssistedInject constructor(
         audioLoaded = false
         loadChapterIntoPlayer()
 
-        seek(activeVerses[verseIndex].location)
+        seek(totalVerses[verseIndex].location)
         writer?.start()
         isRecording.set(true)
     }
@@ -266,7 +267,7 @@ class Narration @AssistedInject constructor(
 
     fun onEditVerse(verseIndex: Int, editedFile: File) {
 
-        loadSectionIntoPlayer(activeVerses[verseIndex])
+        loadSectionIntoPlayer(totalVerses[verseIndex])
 
         val scratchAudio = chapterRepresentation.scratchAudio
         val start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1
@@ -313,14 +314,16 @@ class Narration @AssistedInject constructor(
         isRecording.set(false)
     }
 
-    fun resumeRecording() {
-
+    fun resumeRecording(index: Int) {
         // Ensures that the entire chapter is loaded into the player
         lockToVerse(null)
         audioLoaded = false
         loadChapterIntoPlayer()
 
-        seek(player.getDurationInFrames())
+        val lastAbsoluteFrame = chapterRepresentation.totalVerses[index].lastIndex() / chapterRepresentation.frameSizeInBytes
+        val seekFrame = chapterRepresentation.absoluteFrameToRelativeChapterFrame(lastAbsoluteFrame)
+        seek(seekFrame)
+
         writer?.start()
         isRecording.set(true)
     }
@@ -424,6 +427,9 @@ class Narration @AssistedInject constructor(
             val segments = splitAudioOnCues.execute(chapterFile!!, firstVerse)
             val verseNodes = createVersesFromVerseSegments(segments)
             onChapterEdited(verseNodes)
+            if (!forceUpdate) {
+                history.clear()
+            }
             appendVerseSegmentsToScratchAudio(segments)
         }
     }
@@ -439,6 +445,19 @@ class Narration @AssistedInject constructor(
         var start = chapterRepresentation.scratchAudio.totalFrames * chapterRepresentation.frameSizeInBytes
         var end = start
 
+        val segmentLabels = segments.keys.map { it.formattedLabel }
+        totalVerses
+            .filter { marker -> marker.formattedLabel !in segmentLabels }
+            .forEach {
+                // inserts inactive nodes
+                nodes.add(
+                    VerseNode(
+                        placed = false,
+                        marker = it
+                    )
+                )
+            }
+
         segments.forEach { (marker, file) ->
             val verseAudio = AudioFile(file)
             end += verseAudio.totalFrames * chapterRepresentation.frameSizeInBytes
@@ -451,11 +470,7 @@ class Narration @AssistedInject constructor(
             start = end
         }
 
-        for (i in segments.size until chapterRepresentation.totalVerses.size) {
-            nodes.add(chapterRepresentation.totalVerses[i])
-        }
-
-        return nodes
+        return nodes.sortedBy { it.marker.sort } // sort order of book-chapter-verse
     }
 
 

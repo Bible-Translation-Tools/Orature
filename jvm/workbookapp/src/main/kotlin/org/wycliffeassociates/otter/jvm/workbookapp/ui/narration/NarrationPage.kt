@@ -207,7 +207,7 @@ class NarrationPage : View() {
         }.let { eventSubscriptions.add(it) }
 
         subscribe<PlayVerseEvent> {
-            viewModel.play(it.verse)
+            viewModel.play(it.index)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<PlayChapterEvent> {

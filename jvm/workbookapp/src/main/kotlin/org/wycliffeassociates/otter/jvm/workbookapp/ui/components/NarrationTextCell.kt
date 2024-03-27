@@ -56,13 +56,13 @@ class NarrationTextCell(
             return
         }
 
-        val isLast = index == listView.items.lastIndex
+        val isLast = index == listView.items.lastIndex || listView.items.all { (it as NarratableItemModel).hasRecording }
 
         view.isSelectedProperty.set(isSelected)
         view.isLastVerseProperty.set(isLast)
 
         graphic = view.apply {
-            prefHeight = if (view.isLastVerseProperty.value) listView.height else -1.0 // extra space at the end
+            prefHeight = if (index == listView.items.lastIndex) listView.height else -1.0 // extra space at the end
 
             val title = if (item.chunk.label == "verse") item.chunk.title else ""
 
@@ -97,12 +97,7 @@ class NarrationTextCell(
                         logger.error("Error in selecting and scrolling to a Teleprompter item", e)
                     }
 
-                    val nextVerseIndex = index + 1
-                    val nextVerse = items.getOrNull(nextVerseIndex)
-                    nextVerse?.let {
-                        FX.eventbus.fire(NextVerseEvent(nextVerseIndex, nextVerse.chunk))
-                    }
-                        ?: logger.error("Tried to select an invalid next verse! Tried to select: $nextVerseIndex from index $index")
+                    FX.eventbus.fire(NextVerseEvent(index))
                 }
             })
 
@@ -112,7 +107,7 @@ class NarrationTextCell(
 
             onPlayActionProperty.set(DebouncedEventHandler {
                 item.marker?.let {
-                    FX.eventbus.fire(PlayVerseEvent(it))
+                    FX.eventbus.fire(PlayVerseEvent(index))
                 }
             })
 

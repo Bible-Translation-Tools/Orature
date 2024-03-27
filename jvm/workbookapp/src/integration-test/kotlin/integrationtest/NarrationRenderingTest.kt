@@ -109,8 +109,8 @@ class NarrationRenderingTest {
 
     private fun mockChunkList(): List<Chunk> {
         return buildList {
-            for (i in 0 until 10) {
-                add(mockChunk(i - 2))
+            for (i in -2..8) {
+                if (i != 0) add(mockChunk(i))
             }
         }
     }

@@ -45,7 +45,7 @@ class VerseMarkerControl : BorderPane() {
     val verseProperty = SimpleObjectProperty<AudioMarker>()
     val verseIndexProperty = SimpleIntegerProperty()
     val labelProperty = SimpleStringProperty()
-    val canBeMovedProperty: BooleanBinding = verseIndexProperty.greaterThan(0)
+    val canBeMovedProperty = SimpleBooleanProperty()
     val userIsDraggingProperty = SimpleBooleanProperty(false)
 
     val isPlayingEnabledProperty = SimpleBooleanProperty()
