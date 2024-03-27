@@ -24,7 +24,7 @@ import javafx.event.Event
 import javafx.event.EventHandler
 import javafx.scene.control.ListCell
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.narration.statemachine.NarrationStateType
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
 import org.wycliffeassociates.otter.jvm.controls.event.*
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.NarratableItemModel
@@ -63,7 +63,7 @@ class NarrationTextCell(
 
         graphic = view.apply {
             prefHeight = if (view.isLastVerseProperty.value) listView.height else -1.0 // extra space at the end
-            
+
             val title = if (item.chunk.label == "verse") item.chunk.title else ""
 
             verseLabelProperty.set(title)

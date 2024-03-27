@@ -21,7 +21,7 @@ package org.wycliffeassociates.otter.common.domain.narration.statemachine
 import org.junit.Assert
 import org.junit.Test
 
-class VerseStateContextTest {
+class TeleprompterStateContextTest {
 
 
     @Test

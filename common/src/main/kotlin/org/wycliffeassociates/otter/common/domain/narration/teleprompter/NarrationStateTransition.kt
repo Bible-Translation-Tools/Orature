@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.domain.narration.statemachine
+package org.wycliffeassociates.otter.common.domain.narration.teleprompter
 
 
 enum class NarrationStateTransition {
@@ -23,7 +23,7 @@ enum class NarrationStateTransition {
 object RecordAction {
     fun apply(
         globalContext: NarrationState,
-        verseContexts: MutableList<VerseStateContext>,
+        verseContexts: MutableList<TeleprompterStateContext>,
         index: Int
     ): NarrationState {
 
@@ -37,7 +37,7 @@ object RecordAction {
 object PauseRecordingAction {
     fun apply(
         globalContext: NarrationState,
-        verseContexts: MutableList<VerseStateContext>,
+        verseContexts: MutableList<TeleprompterStateContext>,
         index: Int
     ): NarrationState {
 
@@ -51,7 +51,7 @@ object PauseRecordingAction {
 object ResumeRecordAction {
     fun apply(
         globalContext: NarrationState,
-        verseContexts: MutableList<VerseStateContext>,
+        verseContexts: MutableList<TeleprompterStateContext>,
         index: Int
     ): NarrationState {
 
@@ -65,7 +65,7 @@ object ResumeRecordAction {
 object NextAction {
     fun apply(
         globalContext: NarrationState,
-        verseContexts: MutableList<VerseStateContext>,
+        verseContexts: MutableList<TeleprompterStateContext>,
         index: Int
     ): NarrationState {
 
@@ -87,7 +87,7 @@ object NextAction {
 object RecordAgain {
     fun apply(
         globalContext: NarrationState,
-        verseContexts: MutableList<VerseStateContext>,
+        verseContexts: MutableList<TeleprompterStateContext>,
         index: Int
     ): NarrationState {
 
@@ -102,7 +102,7 @@ object RecordAgain {
 object PauseRecordAgain {
     fun apply(
         globalContext: NarrationState,
-        verseContexts: MutableList<VerseStateContext>,
+        verseContexts: MutableList<TeleprompterStateContext>,
         index: Int
     ): NarrationState {
 
@@ -116,7 +116,7 @@ object PauseRecordAgain {
 object ResumeRecordAgain {
     fun apply(
         globalContext: NarrationState,
-        verseContexts: MutableList<VerseStateContext>,
+        verseContexts: MutableList<TeleprompterStateContext>,
         index: Int
     ): NarrationState {
 
@@ -130,7 +130,7 @@ object ResumeRecordAgain {
 object StartSaveAction {
     fun apply(
         globalContext: NarrationState,
-        verseContexts: MutableList<VerseStateContext>,
+        verseContexts: MutableList<TeleprompterStateContext>,
         index: Int
     ): NarrationState {
 
@@ -153,7 +153,7 @@ object StartSaveAction {
 object FinishSave {
     fun apply(
         globalContext: NarrationState,
-        verseContexts: MutableList<VerseStateContext>,
+        verseContexts: MutableList<TeleprompterStateContext>,
         index: Int
     ): NarrationState {
 
@@ -182,7 +182,7 @@ object FinishSave {
 object PlayAction {
     fun apply(
         globalContext: NarrationState,
-        verseContexts: MutableList<VerseStateContext>,
+        verseContexts: MutableList<TeleprompterStateContext>,
         index: Int
     ): NarrationState {
 
@@ -191,7 +191,8 @@ object PlayAction {
             PlayVerseAction.apply(verseContexts, index)
         } else {
 
-            val recordingPausedVerse = verseContexts.firstOrNull { it.state.type == VerseItemState.RECORDING_PAUSED }
+            val recordingPausedVerse =
+                verseContexts.firstOrNull { it.state.type == TeleprompterItemState.RECORDING_PAUSED }
             if (recordingPausedVerse != null) {
                 throw IllegalStateException(
                     "Tried to play all verses while verse $recordingPausedVerse " +
@@ -213,14 +214,14 @@ object PlayAction {
 object PausePlaybackAction {
     fun apply(
         globalContext: NarrationState,
-        verseContexts: MutableList<VerseStateContext>,
+        verseContexts: MutableList<TeleprompterStateContext>,
         index: Int
     ): NarrationState {
 
         val wasRecordingPaused = verseContexts.any { it.state == PlayingWhileRecordingPausedState }
         val allVersesRecorded =
             !verseContexts.any { it.state == RecordDisabledState }
-                    && verseContexts.last().state.type != VerseItemState.PLAYING_WHILE_RECORDING_PAUSED
+                    && verseContexts.last().state.type != TeleprompterItemState.PLAYING_WHILE_RECORDING_PAUSED
 
         val newGlobalStateRequest = if (wasRecordingPaused) {
             NarrationStateType.RECORDING_PAUSED
@@ -232,8 +233,8 @@ object PausePlaybackAction {
 
 
         val playingVerse = verseContexts.indexOfFirst {
-            it.state.type == VerseItemState.PLAYING
-                    || it.state.type == VerseItemState.PLAYING_WHILE_RECORDING_PAUSED
+            it.state.type == TeleprompterItemState.PLAYING
+                    || it.state.type == TeleprompterItemState.PLAYING_WHILE_RECORDING_PAUSED
         }
 
         if (playingVerse >= 0) {
@@ -252,13 +253,13 @@ object PausePlaybackAction {
 object PausePlaybackWhileModifyingAudioAction {
     fun apply(
         globalContext: NarrationState,
-        verseContexts: MutableList<VerseStateContext>,
+        verseContexts: MutableList<TeleprompterStateContext>,
         index: Int
     ): NarrationState {
 
         val playingVerse = verseContexts.indexOfFirst {
-            it.state.type == VerseItemState.PLAYING
-                    || it.state.type == VerseItemState.PLAYING_WHILE_RECORDING_PAUSED
+            it.state.type == TeleprompterItemState.PLAYING
+                    || it.state.type == TeleprompterItemState.PLAYING_WHILE_RECORDING_PAUSED
         }
 
         if (playingVerse >= 0) {
@@ -277,7 +278,7 @@ object PausePlaybackWhileModifyingAudioAction {
 object MovingMarkerAction {
     fun apply(
         globalContext: NarrationState,
-        verseContexts: MutableList<VerseStateContext>,
+        verseContexts: MutableList<TeleprompterStateContext>,
         index: Int
     ): NarrationState {
 
@@ -290,13 +291,13 @@ object MovingMarkerAction {
 object PlaceMarkerAction {
     fun apply(
         globalContext: NarrationState,
-        verseContexts: MutableList<VerseStateContext>,
+        verseContexts: MutableList<TeleprompterStateContext>,
         index: Int
     ): NarrationState {
 
         val allVersesRecorded =
             !verseContexts.any {
-                it.state.type == VerseItemState.RECORD_DISABLED || it.state.type == VerseItemState.RECORD
+                it.state.type == TeleprompterItemState.RECORD_DISABLED || it.state.type == TeleprompterItemState.RECORD
             }
 
         return if (allVersesRecorded) {
@@ -311,7 +312,7 @@ object PlaceMarkerAction {
 object PlaceMarkerWhileModifyingAudioAction {
     fun apply(
         globalContext: NarrationState,
-        verseContexts: MutableList<VerseStateContext>,
+        verseContexts: MutableList<TeleprompterStateContext>,
         index: Int
     ): NarrationState {
 

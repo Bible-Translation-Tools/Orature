@@ -22,9 +22,12 @@ import io.mockk.mockk
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarratableItem
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateTransition
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
 import java.lang.IllegalStateException
 
-class NarrationStateMachineTest {
+class TeleprompterStateMachineTest {
 
     fun mockAudioMarker(): AudioMarker {
         return mockk<AudioMarker> {}

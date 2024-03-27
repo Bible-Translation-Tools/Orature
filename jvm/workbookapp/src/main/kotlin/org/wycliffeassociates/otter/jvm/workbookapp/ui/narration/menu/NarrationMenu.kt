@@ -26,7 +26,7 @@ import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.domain.narration.statemachine.NarrationStateType
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import tornadofx.*
 import tornadofx.FX.Companion.messages

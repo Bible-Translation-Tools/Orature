@@ -2,8 +2,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.model
 
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
-import org.wycliffeassociates.otter.common.domain.narration.statemachine.NarratableItem
-import org.wycliffeassociates.otter.common.domain.narration.statemachine.VerseItemState
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarratableItem
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
 
 
 class NarratableItemModel(
@@ -31,7 +31,7 @@ class NarratableItemModel(
     val isRecordAgainOptionEnabled: Boolean
         get() = narratableItem.isRecordAgainOptionEnabled
 
-    var verseState: VerseItemState = narratableItem.verseState
+    var verseState: TeleprompterItemState = narratableItem.verseState
         get() = narratableItem.verseState
         set(value) {
             narratableItem.verseState = value

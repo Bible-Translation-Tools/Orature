@@ -51,7 +51,7 @@ import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.*
-import org.wycliffeassociates.otter.common.domain.narration.statemachine.*
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.*
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.event.*
@@ -92,7 +92,7 @@ class NarrationViewModel : ViewModel() {
 
     private lateinit var narration: Narration
     private lateinit var renderer: NarrationWaveformRenderer
-    private lateinit var narrationStateMachine: NarrationStateMachine
+    private lateinit var narrationStateMachine: TeleprompterStateMachine
     val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
 
     private lateinit var volumeBar: VolumeBar
@@ -189,7 +189,7 @@ class NarrationViewModel : ViewModel() {
                 }
 
                 val verseState =
-                    if (hasRecording) VerseItemState.RECORD_AGAIN else VerseItemState.RECORD_DISABLED
+                    if (hasRecording) TeleprompterItemState.RECORD_AGAIN else TeleprompterItemState.RECORD_DISABLED
 
 
                 NarratableItemModel(
@@ -201,10 +201,10 @@ class NarrationViewModel : ViewModel() {
             }
 
             val firstUnrecordedVerse =
-                newNarratableItems.indexOfFirst { it.verseState == VerseItemState.RECORD_DISABLED }
+                newNarratableItems.indexOfFirst { it.verseState == TeleprompterItemState.RECORD_DISABLED }
 
             if (firstUnrecordedVerse >= 0) {
-                newNarratableItems[firstUnrecordedVerse].verseState = VerseItemState.RECORD
+                newNarratableItems[firstUnrecordedVerse].verseState = TeleprompterItemState.RECORD
             }
 
             narratableList.setAll(newNarratableItems)
@@ -296,7 +296,7 @@ class NarrationViewModel : ViewModel() {
             )
         )
         totalAudioSizeProperty.set(rendererAudioReader.totalFrames)
-        narrationStateMachine = NarrationStateMachine(narration.totalVerses)
+        narrationStateMachine = TeleprompterStateMachine(narration.totalVerses)
         subscribeNarrationStateChanged()
         narrationStateMachine.initialize(narration.versesWithRecordings())
     }
@@ -571,7 +571,7 @@ class NarrationViewModel : ViewModel() {
         var scrollToVerse = 0
 
         if (lastIndex != -1) {
-            updatedNarratableList[lastIndex].verseState = VerseItemState.RECORD
+            updatedNarratableList[lastIndex].verseState = TeleprompterItemState.RECORD
             scrollToVerse = lastIndex
         }
 
@@ -952,7 +952,8 @@ class NarrationViewModel : ViewModel() {
                 }
 
                 if (verse.location in viewport) {
-                    val viewportOffset = (screenWidth / viewports.size) * viewPortIndex + (canvasWidth - screenWidth) / 2.0
+                    val viewportOffset =
+                        (screenWidth / viewports.size) * viewPortIndex + (canvasWidth - screenWidth) / 2.0
                     val newPos = framesToPixels(
                         verse.location - viewport.first,
                         adjustedWidth,

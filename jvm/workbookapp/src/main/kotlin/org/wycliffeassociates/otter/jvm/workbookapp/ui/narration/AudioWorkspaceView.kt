@@ -31,7 +31,7 @@ import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.ScrollBar
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
-import org.wycliffeassociates.otter.common.domain.narration.statemachine.NarrationStateType
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
 import org.wycliffeassociates.otter.jvm.controls.SCROLL_INCREMENT_UNIT
 import org.wycliffeassociates.otter.jvm.controls.SCROLL_JUMP_UNIT
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin

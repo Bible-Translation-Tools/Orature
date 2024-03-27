@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.common.domain.narration.statemachine
 
 import org.junit.Assert
 import org.junit.Test
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.*
 
 class NarrationStateTest {
 

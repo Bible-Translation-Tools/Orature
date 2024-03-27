@@ -18,49 +18,172 @@
  */
 package org.wycliffeassociates.otter.common.domain.narration.teleprompter
 
+import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
+import io.reactivex.observables.ConnectableObservable
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
+
 
 class TeleprompterStateMachine(
     val total: List<AudioMarker>
 ) {
     private val logger = LoggerFactory.getLogger(TeleprompterStateMachine::class.java)
-    private var contexts: MutableList<TeleprompterStateContext>
+
+    private lateinit var currentStateEmitter: ObservableEmitter<NarrationState>
+
+    val currentState: ConnectableObservable<NarrationState> = Observable.create { emitter ->
+        currentStateEmitter = emitter
+        emitter.onNext(IdleEmptyState)
+    }.publish()
+
+    private var verseContexts: MutableList<TeleprompterStateContext>
+    private var narrationContext: NarrationState = IdleEmptyState
 
     init {
-        contexts = total.map { TeleprompterStateContext() }.toMutableList()
+        currentState.connect()
+    }
+
+    fun getNarrationContext(): NarrationStateType {
+        return narrationContext.type
+    }
+
+    fun getVerseItemStates(): List<NarratableItem> {
+        return getNarratableItemsList(verseContexts)
+    }
+
+    private fun updateNarrationContext(newContext: NarrationState) {
+        narrationContext = newContext
+        currentStateEmitter.onNext(newContext)
+    }
+
+    init {
+        verseContexts = total.map { TeleprompterStateContext() }.toMutableList()
     }
 
     fun initialize(active: List<Boolean>) {
-        contexts = total.map { TeleprompterStateContext() }.toMutableList()
+        verseContexts = total.map { TeleprompterStateContext() }.toMutableList()
+
+        var hasAllItemsRecorded = true
+        var hasNoItemsRecorded = true
+
         active.forEachIndexed { index, hasRecording ->
-            contexts[index].state = if (hasRecording) RecordAgainState else RecordDisabledState
+            verseContexts[index].state = if (hasRecording) {
+                hasNoItemsRecorded = false
+                RecordAgainState
+            } else {
+                hasAllItemsRecorded = false
+                RecordDisabledState
+            }
         }
-        contexts.firstOrNull { it.state.type == TeleprompterItemState.RECORD_DISABLED }?.state = RecordState
+        verseContexts.firstOrNull { it.state.type == TeleprompterItemState.RECORD_DISABLED }?.state = RecordState
+
+        val newGlobalContext = if (hasAllItemsRecorded) {
+            IdleFinishedState
+        } else if (hasNoItemsRecorded) {
+            IdleEmptyState
+        } else {
+            IdleInProgressState
+        }
+
+        updateNarrationContext(newGlobalContext)
     }
 
-    fun transition(request: TeleprompterStateTransition, requestIndex: Int): List<TeleprompterItemState> {
+
+    fun transition(request: NarrationStateTransition, requestIndex: Int? = null): List<NarratableItem> {
         try {
-            when (request) {
-                TeleprompterStateTransition.RECORD -> RecordAction.apply(contexts, requestIndex)
-                TeleprompterStateTransition.PAUSE_RECORDING -> PauseRecordingAction.apply(contexts, requestIndex)
-                TeleprompterStateTransition.RESUME_RECORDING -> ResumeRecordAction.apply(contexts, requestIndex)
-                TeleprompterStateTransition.NEXT -> NextVerseAction.apply(contexts, requestIndex)
-                TeleprompterStateTransition.RECORD_AGAIN -> {
-                    if (contexts.any { it.state.type == TeleprompterItemState.RECORDING_PAUSED }) {
+            val verseIndex = requestIndex ?: -1
+            val newGlobalContext = when (request) {
+
+                NarrationStateTransition.RECORD -> RecordAction.apply(narrationContext, verseContexts, verseIndex)
+                NarrationStateTransition.PAUSE_RECORDING -> PauseRecordingAction.apply(
+                    narrationContext,
+                    verseContexts,
+                    verseIndex
+                )
+
+                NarrationStateTransition.RESUME_RECORDING -> ResumeRecordAction.apply(
+                    narrationContext,
+                    verseContexts,
+                    verseIndex
+                )
+
+                NarrationStateTransition.NEXT -> NextAction.apply(narrationContext, verseContexts, verseIndex)
+
+
+                NarrationStateTransition.RECORD_AGAIN -> {
+                    if (verseContexts.any { it.state.type == TeleprompterItemState.RECORDING_PAUSED }) {
                         completePausedRecording()
                     }
-                    RecordAgainAction.apply(contexts, requestIndex)
+                    RecordAgain.apply(narrationContext, verseContexts, verseIndex)
                 }
-                TeleprompterStateTransition.PAUSE_RECORD_AGAIN -> PauseRecordAgainAction.apply(contexts, requestIndex)
-                TeleprompterStateTransition.RESUME_RECORD_AGAIN -> ResumeRecordAgainAction.apply(contexts, requestIndex)
-                TeleprompterStateTransition.SAVE -> SaveRecordingAction.apply(contexts, requestIndex)
+
+
+                NarrationStateTransition.PAUSE_RECORD_AGAIN -> PauseRecordAgain.apply(
+                    narrationContext,
+                    verseContexts,
+                    verseIndex
+                )
+
+
+                NarrationStateTransition.RESUME_RECORD_AGAIN -> ResumeRecordAgain.apply(
+                    narrationContext,
+                    verseContexts,
+                    verseIndex
+                )
+
+
+                NarrationStateTransition.START_SAVE -> StartSaveAction.apply(
+                    narrationContext,
+                    verseContexts,
+                    verseIndex
+                )
+
+                NarrationStateTransition.PLAY_AUDIO -> PlayAction.apply(narrationContext, verseContexts, verseIndex)
+
+                NarrationStateTransition.PAUSE_AUDIO_PLAYBACK -> PausePlaybackAction.apply(
+                    narrationContext,
+                    verseContexts,
+                    verseIndex
+                )
+
+                NarrationStateTransition.PAUSE_PLAYBACK_WHILE_MODIFYING_AUDIO -> PausePlaybackWhileModifyingAudioAction.apply(
+                    narrationContext,
+                    verseContexts,
+                    verseIndex
+                )
+
+                NarrationStateTransition.FINISH_SAVE -> FinishSave.apply(
+                    narrationContext,
+                    verseContexts,
+                    verseIndex
+                )
+
+                NarrationStateTransition.MOVING_MARKER -> MovingMarkerAction.apply(
+                    narrationContext,
+                    verseContexts,
+                    verseIndex
+                )
+
+                NarrationStateTransition.PLACE_MARKER -> PlaceMarkerAction.apply(
+                    narrationContext,
+                    verseContexts,
+                    verseIndex
+                )
+
+                NarrationStateTransition.PLACE_MARKER_WHILE_MODIFYING_AUDIO -> PlaceMarkerWhileModifyingAudioAction.apply(
+                    narrationContext,
+                    verseContexts,
+                    verseIndex
+                )
             }
+
+            updateNarrationContext(newGlobalContext)
         } catch (e: java.lang.IllegalStateException) {
             logger.error("Error in state transition for requestIndex: $requestIndex, action $request", e)
             throw e
         }
-        return contexts.map { it.state.type }
+        return getNarratableItemsList(verseContexts)
     }
 
     /**
@@ -69,12 +192,60 @@ class TeleprompterStateMachine(
      * state to re-record and enabling recording of the next verse.
      */
     private fun completePausedRecording() {
-        val pausedRecordingIndex = contexts.indexOfFirst { it.state.type == TeleprompterItemState.RECORDING_PAUSED}
+        val pausedRecordingIndex =
+            verseContexts.indexOfFirst { it.state.type == TeleprompterItemState.RECORDING_PAUSED }
         if (pausedRecordingIndex < 0) return
 
-        contexts[pausedRecordingIndex].changeState(TeleprompterItemState.RECORD_AGAIN)
-        if (pausedRecordingIndex != contexts.lastIndex) {
-            contexts[pausedRecordingIndex + 1].changeState(TeleprompterItemState.RECORD)
+        verseContexts[pausedRecordingIndex].changeState(TeleprompterItemState.RECORD_AGAIN)
+        if (pausedRecordingIndex != verseContexts.lastIndex) {
+            verseContexts[pausedRecordingIndex + 1].changeState(TeleprompterItemState.RECORD)
         }
     }
+
+    private fun getNarratableItemsList(verseContexts: List<TeleprompterStateContext>): List<NarratableItem> {
+
+        val isRecording = narrationContext.type == NarrationStateType.RECORDING
+        val isRecordingPaused = narrationContext.type == NarrationStateType.RECORDING_PAUSED
+        val isRecordingAgain = narrationContext.type == NarrationStateType.RECORDING_AGAIN
+        val isRecordAgainPaused = narrationContext.type == NarrationStateType.RECORDING_AGAIN_PAUSED
+        val isPlaying = narrationContext.type == NarrationStateType.PLAYING
+        val isModifyingAudio = narrationContext.type == NarrationStateType.MODIFYING_AUDIO_FILE
+
+
+        return verseContexts.map {
+            val isAnotherVerseRecordingPaused =
+                isRecordingPaused && it.state.type != TeleprompterItemState.RECORDING_PAUSED
+
+            val hasRecording = it.state.type == TeleprompterItemState.RECORD_AGAIN_PAUSED
+                    || it.state.type == TeleprompterItemState.RECORDING_PAUSED || it.state.type == TeleprompterItemState.RECORD_AGAIN
+
+            val isVerseRecordingPaused = it.state.type == TeleprompterItemState.RECORDING_PAUSED
+
+
+            val isPlayOptionEnabled = hasRecording
+                    && !isRecording
+                    && !isRecordingAgain
+                    && !isRecordAgainPaused
+                    && !isPlaying
+                    && !isAnotherVerseRecordingPaused
+
+            val isEditVerseOptionEnabled = hasRecording
+                    && !isRecording
+                    && !isRecordingPaused
+                    && !isRecordingAgain
+                    && !isRecordAgainPaused
+                    && !isPlaying
+                    && !isModifyingAudio
+
+            val isRecordAgainOptionEnabled = hasRecording
+                    && !isRecording
+                    && !isRecordingAgain
+                    && !isRecordAgainPaused
+                    && !isPlaying
+                    && !isVerseRecordingPaused
+
+            NarratableItem(it.state.type, isPlayOptionEnabled, isEditVerseOptionEnabled, isRecordAgainOptionEnabled)
+        }
+    }
+
 }

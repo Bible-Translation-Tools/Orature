@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.domain.narration.statemachine
+package org.wycliffeassociates.otter.common.domain.narration.teleprompter
 
 enum class NarrationStateType {
     RECORDING,
@@ -33,7 +33,7 @@ object RecordingState : NarrationState {
 
     override fun changeState(request: NarrationStateType): NarrationState {
         if (request !in validStateTransitions) {
-            throw IllegalStateException("State: ${type} tried to transition to state: $request")
+            throw IllegalStateException("State: $type tried to transition to state: $request")
         }
 
         return when (request) {
@@ -41,7 +41,7 @@ object RecordingState : NarrationState {
             NarrationStateType.MODIFYING_AUDIO_FILE -> ModifyingAudioState
             NarrationStateType.RECORDING -> RecordingState
             else -> {
-                throw IllegalStateException("State: ${type} tried to transition to state: $request")
+                throw IllegalStateException("State: $type tried to transition to state: $request")
             }
         }
     }
@@ -62,7 +62,7 @@ object RecordingPausedState : NarrationState {
 
     override fun changeState(request: NarrationStateType): NarrationState {
         if (request !in validStateTransitions) {
-            throw IllegalStateException("State: ${type} tried to transition to state: $request")
+            throw IllegalStateException("State: $type tried to transition to state: $request")
         }
 
         return when (request) {
@@ -72,7 +72,7 @@ object RecordingPausedState : NarrationState {
             NarrationStateType.PLAYING -> PlayingAudioState
             NarrationStateType.RECORDING_AGAIN -> RecordingAgainState
             else -> {
-                throw IllegalStateException("State: ${type} tried to transition to state: $request")
+                throw IllegalStateException("State: $type tried to transition to state: $request")
             }
         }
     }
@@ -91,7 +91,7 @@ object RecordingAgainState : NarrationState {
 
     override fun changeState(request: NarrationStateType): NarrationState {
         if (request !in validStateTransitions) {
-            throw IllegalStateException("State: ${type} tried to transition to state: $request")
+            throw IllegalStateException("State: $type tried to transition to state: $request")
         }
 
         return when (request) {
@@ -99,7 +99,7 @@ object RecordingAgainState : NarrationState {
             NarrationStateType.RECORDING_AGAIN_PAUSED -> RecordingAgainPausedState
             NarrationStateType.IDLE_IN_PROGRESS -> IdleInProgressState
             else -> {
-                throw IllegalStateException("State: ${type} tried to transition to state: $request")
+                throw IllegalStateException("State: $type tried to transition to state: $request")
             }
         }
     }
@@ -118,7 +118,7 @@ object RecordingAgainPausedState : NarrationState {
 
     override fun changeState(request: NarrationStateType): NarrationState {
         if (request !in validStateTransitions) {
-            throw IllegalStateException("State: ${type} tried to transition to state: $request")
+            throw IllegalStateException("State: $type tried to transition to state: $request")
         }
 
         return when (request) {
@@ -126,7 +126,7 @@ object RecordingAgainPausedState : NarrationState {
             NarrationStateType.RECORDING_AGAIN -> RecordingAgainState
             NarrationStateType.IDLE_IN_PROGRESS -> IdleInProgressState
             else -> {
-                throw IllegalStateException("State: ${type} tried to transition to state: $request")
+                throw IllegalStateException("State: $type tried to transition to state: $request")
             }
         }
     }
@@ -146,7 +146,7 @@ object PlayingAudioState : NarrationState {
 
     override fun changeState(request: NarrationStateType): NarrationState {
         if (request !in validStateTransitions) {
-            throw IllegalStateException("State: ${type} tried to transition to state: $request")
+            throw IllegalStateException("State: $type tried to transition to state: $request")
         }
 
         return when (request) {
@@ -155,7 +155,7 @@ object PlayingAudioState : NarrationState {
             NarrationStateType.IDLE_FINISHED -> IdleFinishedState
             NarrationStateType.MODIFYING_AUDIO_FILE -> ModifyingAudioState
             else -> {
-                throw IllegalStateException("State: ${type} tried to transition to state: $request")
+                throw IllegalStateException("State: $type tried to transition to state: $request")
             }
         }
     }
@@ -174,7 +174,7 @@ object IdleEmptyState : NarrationState {
 
     override fun changeState(request: NarrationStateType): NarrationState {
         if (request !in validStateTransitions) {
-            throw IllegalStateException("State: ${type} tried to transition to state: $request")
+            throw IllegalStateException("State: $type tried to transition to state: $request")
         }
 
         return when (request) {
@@ -182,7 +182,7 @@ object IdleEmptyState : NarrationState {
             NarrationStateType.IDLE_FINISHED -> IdleFinishedState
             NarrationStateType.IDLE_IN_PROGRESS -> IdleInProgressState
             else -> {
-                throw IllegalStateException("State: ${type} tried to transition to state: $request")
+                throw IllegalStateException("State: $type tried to transition to state: $request")
             }
         }
     }
@@ -204,7 +204,7 @@ object IdleInProgressState : NarrationState {
 
     override fun changeState(request: NarrationStateType): NarrationState {
         if (request !in validStateTransitions) {
-            throw IllegalStateException("State: ${type} tried to transition to state: $request")
+            throw IllegalStateException("State: $type tried to transition to state: $request")
         }
 
         return when (request) {
@@ -215,7 +215,7 @@ object IdleInProgressState : NarrationState {
             NarrationStateType.PLAYING -> PlayingAudioState
             NarrationStateType.MOVING_MARKER -> MovingMarkerState
             else -> {
-                throw IllegalStateException("State: ${type} tried to transition to state: $request")
+                throw IllegalStateException("State: $type tried to transition to state: $request")
             }
         }
     }
@@ -237,7 +237,7 @@ object IdleFinishedState : NarrationState {
 
     override fun changeState(request: NarrationStateType): NarrationState {
         if (request !in validStateTransitions) {
-            throw IllegalStateException("State: ${type} tried to transition to state: $request")
+            throw IllegalStateException("State: $type tried to transition to state: $request")
         }
 
         return when (request) {
@@ -248,7 +248,7 @@ object IdleFinishedState : NarrationState {
             NarrationStateType.PLAYING -> PlayingAudioState
             NarrationStateType.MOVING_MARKER -> MovingMarkerState
             else -> {
-                throw IllegalStateException("State: ${type} tried to transition to state: $request")
+                throw IllegalStateException("State: $type tried to transition to state: $request")
             }
         }
     }
@@ -269,7 +269,7 @@ object ModifyingAudioState : NarrationState {
 
     override fun changeState(request: NarrationStateType): NarrationState {
         if (request !in validStateTransitions) {
-            throw IllegalStateException("State: ${type} tried to transition to state: $request")
+            throw IllegalStateException("State: $type tried to transition to state: $request")
         }
 
         return when (request) {
@@ -280,7 +280,7 @@ object ModifyingAudioState : NarrationState {
             NarrationStateType.MODIFYING_AUDIO_FILE -> ModifyingAudioState
             NarrationStateType.MOVING_MARKER -> MovingMarkerState
             else -> {
-                throw IllegalStateException("State: ${type} tried to transition to state: $request")
+                throw IllegalStateException("State: $type tried to transition to state: $request")
             }
         }
     }
@@ -299,7 +299,7 @@ object MovingMarkerState : NarrationState {
 
     override fun changeState(request: NarrationStateType): NarrationState {
         if (request !in validStateTransitions) {
-            throw IllegalStateException("State: ${type} tried to transition to state: $request")
+            throw IllegalStateException("State: $type tried to transition to state: $request")
         }
 
         return when (request) {
@@ -307,7 +307,7 @@ object MovingMarkerState : NarrationState {
             NarrationStateType.IDLE_FINISHED -> IdleFinishedState
             NarrationStateType.MODIFYING_AUDIO_FILE -> ModifyingAudioState
             else -> {
-                throw IllegalStateException("State: ${type} tried to transition to state: $request")
+                throw IllegalStateException("State: $type tried to transition to state: $request")
             }
         }
     }
