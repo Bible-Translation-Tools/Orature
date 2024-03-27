@@ -307,7 +307,7 @@ class TeleprompterStateMachineTest {
         Assert.assertEquals(NarrationStateType.RECORDING, TeleprompterStateMachine.getNarrationContext())
 
         // Next
-        val newContext = TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, index + 1)
+        val newContext = TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, index)
 
         Assert.assertEquals(NarrationStateType.RECORDING, TeleprompterStateMachine.getNarrationContext())
 
@@ -339,7 +339,7 @@ class TeleprompterStateMachineTest {
         Assert.assertEquals(NarrationStateType.RECORDING, TeleprompterStateMachine.getNarrationContext())
         TeleprompterStateMachine.transition(NarrationStateTransition.PAUSE_RECORDING, 0)
         Assert.assertEquals(NarrationStateType.RECORDING_PAUSED, TeleprompterStateMachine.getNarrationContext())
-        TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, 1)
+        TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, 0)
 
         Assert.assertEquals(NarrationStateType.HAS_RECORDINGS, TeleprompterStateMachine.getNarrationContext())
 
@@ -348,7 +348,7 @@ class TeleprompterStateMachineTest {
         Assert.assertEquals(NarrationStateType.RECORDING, TeleprompterStateMachine.getNarrationContext())
         TeleprompterStateMachine.transition(NarrationStateTransition.PAUSE_RECORDING, 1)
         Assert.assertEquals(NarrationStateType.RECORDING_PAUSED, TeleprompterStateMachine.getNarrationContext())
-        TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, 2)
+        TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, 1)
 
         Assert.assertEquals(NarrationStateType.HAS_RECORDINGS, TeleprompterStateMachine.getNarrationContext())
 
@@ -396,7 +396,7 @@ class TeleprompterStateMachineTest {
         Assert.assertEquals(NarrationStateType.RECORDING_PAUSED, TeleprompterStateMachine.getNarrationContext())
 
         // Next
-        val newContext = TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, index + 1)
+        val newContext = TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, index)
 
         for (i in newContext.indices) {
             if (i == index) {
@@ -436,7 +436,7 @@ class TeleprompterStateMachineTest {
         Assert.assertEquals(NarrationStateType.RECORDING_PAUSED, TeleprompterStateMachine.getNarrationContext())
 
         // Next
-        var newContext = TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, index + 1)
+        var newContext = TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, index)
 
         // Verifies that the narration context is in an IDLE_IN_PROGRESS state
         Assert.assertEquals(NarrationStateType.HAS_RECORDINGS, TeleprompterStateMachine.getNarrationContext())
@@ -479,7 +479,7 @@ class TeleprompterStateMachineTest {
         Assert.assertEquals(NarrationStateType.RECORDING_PAUSED, TeleprompterStateMachine.getNarrationContext())
 
         // Next
-        var newContext = TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, index + 1)
+        var newContext = TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, index)
 
         newContext = TeleprompterStateMachine.transition(NarrationStateTransition.RECORD_AGAIN, index)
 
@@ -526,7 +526,7 @@ class TeleprompterStateMachineTest {
         Assert.assertEquals(NarrationStateType.RECORDING_PAUSED, TeleprompterStateMachine.getNarrationContext())
 
         // Next
-        TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, index + 1)
+        TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, index)
 
         Assert.assertEquals(NarrationStateType.HAS_RECORDINGS, TeleprompterStateMachine.getNarrationContext())
 
@@ -580,7 +580,7 @@ class TeleprompterStateMachineTest {
             Assert.assertEquals(NarrationStateType.RECORDING_PAUSED, TeleprompterStateMachine.getNarrationContext())
 
             // Next
-            newContext = TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, i + 1)
+            newContext = TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, i)
 
             Assert.assertEquals(NarrationStateType.HAS_RECORDINGS, TeleprompterStateMachine.getNarrationContext())
         }
