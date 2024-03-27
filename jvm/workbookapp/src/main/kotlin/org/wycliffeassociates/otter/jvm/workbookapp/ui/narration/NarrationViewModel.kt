@@ -109,8 +109,11 @@ class NarrationViewModel : ViewModel() {
     var isRecordingAgain by isRecordingAgainProperty
     val recordAgainVerseIndexProperty = SimpleObjectProperty<Int?>()
     var recordAgainVerseIndex by recordAgainVerseIndexProperty
-    val isPlayingProperty = SimpleBooleanProperty(false)
+    val isPrependRecordingProperty = SimpleBooleanProperty(false)
+    var isPrependRecording by isPrependRecordingProperty
+    val prependRecordingVerseIndex = SimpleObjectProperty<Int?>()
     val recordingVerseIndex = SimpleIntegerProperty()
+    val isPlayingProperty = SimpleBooleanProperty(false)
 
     val playingVerseProperty = SimpleObjectProperty<VerseMarker?>()
     var playingVerse by playingVerseProperty
@@ -134,6 +137,7 @@ class NarrationViewModel : ViewModel() {
     val chunkTotalProperty = SimpleIntegerProperty(0)
     val chunksList: ObservableList<Chunk> = observableListOf()
     val narratableList: ObservableList<NarrationTextItemData> = observableListOf()
+    val totalVerses = observableListOf<AudioMarker>()
     val recordedVerses = observableListOf<AudioMarker>()
     val hasVersesProperty = SimpleBooleanProperty()
     val lastRecordedVerseProperty = SimpleIntegerProperty()
@@ -184,9 +188,9 @@ class NarrationViewModel : ViewModel() {
         narratableList.bind(chunksList) { chunk ->
 
             val marker = when (chunk.sort) {
-                BOOK_TITLE_SORT -> recordedVerses.firstOrNull { it is BookMarker }
-                CHAPTER_TITLE_SORT -> recordedVerses.firstOrNull { it is ChapterMarker }
-                else -> recordedVerses.firstOrNull {
+                BOOK_TITLE_SORT -> totalVerses.firstOrNull { it is BookMarker }
+                CHAPTER_TITLE_SORT -> totalVerses.firstOrNull { it is ChapterMarker }
+                else -> totalVerses.firstOrNull {
                     it.label == chunk.title && it is VerseMarker
                 }
             }
@@ -207,6 +211,7 @@ class NarrationViewModel : ViewModel() {
         }
 
         recordedVerses.onChange {
+            totalVerses.setAll(narration.totalVerses)
             narratableList.forEachIndexed { idx, chunk ->
 
                 val hasRecording = when (chunk.chunk.sort) {
@@ -223,7 +228,7 @@ class NarrationViewModel : ViewModel() {
 
                 chunk.hasRecording = hasRecording
                 chunk.previousChunksRecorded = chunk.chunk.sort + sortPadding - 1 <= recordedVerses.size
-                chunk.marker = recordedVerses.getOrNull(idx)
+                chunk.marker = totalVerses.getOrNull(idx)
             }
         }
     }
@@ -340,6 +345,8 @@ class NarrationViewModel : ViewModel() {
         isRecordingProperty.set(false)
         isRecordingAgainProperty.set(false)
         recordAgainVerseIndexProperty.set(null)
+        isPrependRecordingProperty.set(false)
+        prependRecordingVerseIndex.set(null)
         isPlayingProperty.set(false)
         recordingVerseIndex.set(-1)
         playingVerseProperty.set(null)
@@ -612,12 +619,12 @@ class NarrationViewModel : ViewModel() {
         snackBarObservable.onNext(message)
     }
 
-    fun play(verse: AudioMarker) {
-        playingVerseIndex.set(recordedVerses.indexOf(verse))
+    fun play(verseIndex: Int) {
+        playingVerseIndex.set(verseIndex)
         renderer.clearActiveRecordingData()
         audioPlayer.pause()
 
-        narration.loadSectionIntoPlayer(verse)
+        narration.loadSectionIntoPlayer(totalVerses[verseIndex])
 
         // audioPlayer.seek(0)
         audioPlayer.play()
@@ -661,9 +668,11 @@ class NarrationViewModel : ViewModel() {
         narration.onSaveRecording(verseIndex)
 
         recordAgainVerseIndex = null
+        prependRecordingVerseIndex.set(null)
         recordingVerseIndex.set(verseIndex)
         isRecording = false
         isRecordingAgain = false
+        isPrependRecording = false
         recordPause = false
 
         renderer.clearActiveRecordingData()
@@ -692,13 +701,19 @@ class NarrationViewModel : ViewModel() {
         }
     }
 
-    fun onNext(index: Int) {
+    fun onNext(currentIndex: Int) {
+        val nextIndex = totalVerses.indexOfFirst { item ->
+            item.sort > totalVerses[currentIndex].sort && item !in recordedVerses
+        }
         when {
             isRecording -> {
-                narration.finalizeVerse(max(index - 1, 0))
-                narration.onNewVerse(index)
+                narration.finalizeVerse(max(currentIndex, 0))
+                narration.onNewVerse(nextIndex)
                 renderer.clearActiveRecordingData()
-                recordingVerseIndex.set(index)
+                recordingVerseIndex.set(nextIndex)
+
+                val anyRecordedAfter = recordedVerses.any { it.sort > totalVerses[nextIndex].sort }
+                isPrependRecordingProperty.set(anyRecordedAfter)
             }
 
             recordPause -> {
@@ -707,6 +722,12 @@ class NarrationViewModel : ViewModel() {
             }
 
             else -> {}
+        }
+
+        if (isPrependRecordingProperty.value) {
+            prependRecordingVerseIndex.set(nextIndex)
+        } else {
+            prependRecordingVerseIndex.set(null)
         }
 
         refreshTeleprompter()
@@ -735,6 +756,7 @@ class NarrationViewModel : ViewModel() {
         teleprompterStateMachine.initialize(narration.versesWithRecordings())
         recordPause = false
 
+        renderer.clearActiveRecordingData()
         resetTeleprompter()
     }
 
@@ -754,6 +776,12 @@ class NarrationViewModel : ViewModel() {
         recordResume = false
         recordingVerseIndex.set(index)
 
+        val anyRecordedAfter = recordedVerses.any { it.sort > totalVerses[index].sort }
+        if (anyRecordedAfter) {
+            prependRecordingVerseIndex.set(index)
+        }
+        isPrependRecordingProperty.set(anyRecordedAfter)
+
         refreshTeleprompter()
     }
 
@@ -765,7 +793,10 @@ class NarrationViewModel : ViewModel() {
 
         narration.pauseRecording()
         narration.finalizeVerse(index)
-        renderer.clearActiveRecordingData()
+
+        if (!isPrependRecording) {
+            renderer.clearActiveRecordingData()
+        }
 
         refreshTeleprompter()
     }
@@ -799,8 +830,7 @@ class NarrationViewModel : ViewModel() {
 
         stopPlayer()
 
-        narration.resumeRecording()
-
+        narration.resumeRecording(recordingVerseIndex.value)
         isRecording = true
         recordPause = false
 
@@ -854,6 +884,7 @@ class NarrationViewModel : ViewModel() {
 
     private fun subscribeActiveVersesChanged() {
         recordedVerses.setAll(narration.activeVerses)
+        totalVerses.setAll(narration.totalVerses)
         hasUndo = narration.hasUndo()
         hasRedo = narration.hasRedo()
 
@@ -866,6 +897,7 @@ class NarrationViewModel : ViewModel() {
                     val verseWasAdded = recordedVerses.size != verses.size
 
                     recordedVerses.setAll(verses)
+                    totalVerses.setAll(narration.totalVerses)
 
                     hasUndo = narration.hasUndo()
                     hasRedo = narration.hasRedo()
@@ -926,10 +958,26 @@ class NarrationViewModel : ViewModel() {
                 }
                 var reRecordLoc: Int? = null
                 var nextVerseLoc: Int? = null
+
                 if (isRecordingAgain) {
                     val reRecordingIndex = recordingVerseIndex.value
-                    nextVerseLoc = recordedVerses.getOrNull(reRecordingIndex + 1)?.location
-                    reRecordLoc = recordedVerses[reRecordingIndex].location
+                    nextVerseLoc = totalVerses.getOrNull(reRecordingIndex + 1)?.let { marker ->
+                        if (marker in recordedVerses) {
+                            marker.location
+                        } else {
+                            null
+                        }
+                    }
+                    reRecordLoc = totalVerses[reRecordingIndex].location
+                } else if (isPrependRecording) {
+                    val currentMarker = totalVerses[recordingVerseIndex.value]
+                    recordedVerses
+                        .find { it.sort > currentMarker.sort } // finds the next active verse (recorded)
+                        ?.let { nextActive ->
+                            // set reRecord location to render as "reRecord mode" (split view)
+                            reRecordLoc = currentMarker.location
+                            nextVerseLoc = nextActive.location
+                        }
                 }
 
                 val viewports = renderer.draw(
@@ -960,21 +1008,21 @@ class NarrationViewModel : ViewModel() {
         screenWidth: Int,
         canvasWidth: Int
     ) {
-        val checkpointRAVI = recordAgainVerseIndex
+        val checkpointRAVI = recordAgainVerseIndex ?: prependRecordingVerseIndex.value
         val adjustedWidth = if (checkpointRAVI == null) screenWidth else screenWidth / viewports.size
-        for (i in markerNodes.indices) {
-            val marker = markerNodes[i]
+
+        for (marker in markerNodes) {
             if (marker.userIsDraggingProperty.value == true) continue
 
             val verse = marker.verseProperty.value
+            val verseIndex = marker.verseIndexProperty.value
             var found = false
             for (viewPortIndex in viewports.indices) {
                 val viewport = viewports[viewPortIndex]
 
-                val checkpointRAVI = recordAgainVerseIndex
-                if (checkpointRAVI != null) {
-                    if (viewPortIndex != viewports.lastIndex && i > checkpointRAVI) continue
-                    if (viewPortIndex == viewports.lastIndex && i <= checkpointRAVI) continue
+                if (checkpointRAVI != null && viewports.size > 1) {
+                    if (viewPortIndex != viewports.lastIndex && verseIndex > checkpointRAVI) continue
+                    if (viewPortIndex == viewports.lastIndex && verseIndex <= checkpointRAVI) continue
                 }
 
                 if (verse.location in viewport) {
@@ -1029,8 +1077,8 @@ class NarrationViewModel : ViewModel() {
             }
 
             is NextVerseEvent -> {
-                onNext(event.index)
-                teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, event.index)
+                onNext(event.currentIndex)
+                teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, event.currentIndex)
             }
 
             is PauseRecordingEvent -> {
@@ -1086,7 +1134,7 @@ class NarrationViewModel : ViewModel() {
 
             else -> {
                 val marker = narration.findMarkerAtFrame(audioFrame)
-                val index = narratableList.indexOfFirst { it.marker == marker }
+                val index = totalVerses.indexOfFirst { it == marker }
                 highlightedVerseIndex.set(index)
             }
         }

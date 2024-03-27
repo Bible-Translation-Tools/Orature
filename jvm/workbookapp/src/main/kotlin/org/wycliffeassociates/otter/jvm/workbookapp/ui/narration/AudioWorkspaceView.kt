@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
+import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
@@ -183,7 +184,7 @@ class AudioWorkspaceView : View() {
                 }
 
                 verseProperty.set(marker)
-                verseIndexProperty.set(viewModel.recordedVerses.indexOf(marker))
+                verseIndexProperty.set(viewModel.totalVerses.indexOf(marker))
                 labelProperty.set(markerLabel)
                 isRecordingProperty.bind(viewModel.isRecordingProperty)
             }
@@ -206,6 +207,7 @@ class AudioWorkspaceViewModel : ViewModel() {
 
     val isRecordingProperty = SimpleBooleanProperty()
     val isPlayingProperty = SimpleBooleanProperty()
+    val totalVerses = observableListOf<AudioMarker>()
     var recordedVerses = observableListOf<AudioMarker>()
 
     val audioPositionProperty = SimpleIntegerProperty()
@@ -222,11 +224,15 @@ class AudioWorkspaceViewModel : ViewModel() {
     }
 
     fun onDock() {
-        isRecordingProperty.bind(narrationViewModel.isRecordingProperty.or(narrationViewModel.isRecordingAgainProperty))
+        val recordingBinding = narrationViewModel.isRecordingProperty
+            .or(narrationViewModel.isRecordingAgainProperty)
+            .or(narrationViewModel.isPrependRecordingProperty)
+        isRecordingProperty.bind(recordingBinding)
         isPlayingProperty.bind(narrationViewModel.isPlayingProperty)
         totalAudioSizeProperty.bind(narrationViewModel.totalAudioSizeProperty)
         audioPositionProperty.bind(narrationViewModel.audioFramePositionProperty)
         recordedVerses.bind(narrationViewModel.recordedVerses) { it }
+        Bindings.bindContent(totalVerses, narrationViewModel.totalVerses)
     }
 
     fun onUndock() {
