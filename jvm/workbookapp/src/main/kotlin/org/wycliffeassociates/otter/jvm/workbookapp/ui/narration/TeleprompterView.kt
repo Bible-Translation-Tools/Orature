@@ -26,6 +26,7 @@ import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.scene.layout.Priority
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
@@ -35,6 +36,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.*
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextItemData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.text.MessageFormat
 import kotlin.math.max
@@ -44,11 +46,13 @@ class TeleprompterSeekEvent(val index: Int) : FXEvent()
 
 class TeleprompterViewModel : ViewModel() {
     private val narrationViewModel: NarrationViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
 
     val chunks = narrationViewModel.narratableList
 
     val stickyVerseProperty = SimpleObjectProperty<NarrationTextItemData>()
     val showStickyVerseProperty = SimpleBooleanProperty(false)
+    val licenseProperty = SimpleStringProperty()
 
     private val recordStartProperty = SimpleBooleanProperty()
     private var recordStart by recordStartProperty
@@ -86,6 +90,11 @@ class TeleprompterViewModel : ViewModel() {
         recordingVerseProperty.bind(narrationViewModel.recordingVerseIndex)
         playingVerseProperty.bind(narrationViewModel.playingVerseIndex)
         highlightedVerseProperty.bind(narrationViewModel.highlightedVerseIndex)
+        licenseProperty.bind(workbookDataStore.sourceLicenseProperty.stringBinding {
+            it?.let {
+                MessageFormat.format(FX.messages["licenseStatement"], it)
+            } ?: ""
+        })
     }
 
     fun currentVerseTextBinding(): StringBinding {
@@ -238,6 +247,7 @@ class TeleprompterView : View() {
                 NarrationTextCell(
                     messages["nextVerse"],
                     viewModel.recordButtonTextBinding(),
+                    viewModel.licenseProperty,
                     viewModel.isRecordingProperty,
                     viewModel.isRecordingAgainProperty,
                     viewModel.isPlayingProperty,
