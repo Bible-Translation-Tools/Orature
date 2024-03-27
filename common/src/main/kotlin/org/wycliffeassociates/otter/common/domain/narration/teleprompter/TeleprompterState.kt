@@ -85,7 +85,6 @@ object RecordState : TeleprompterState {
             TeleprompterItemState.RECORD -> RecordState
             TeleprompterItemState.RECORD_ACTIVE -> RecordActiveState
             TeleprompterItemState.RECORD_DISABLED -> RecordDisabledState
-            TeleprompterItemState.PLAYING -> PlayingState
             else -> {
                 throw IllegalStateException("State: $type tried to transition to state: $request")
             }
