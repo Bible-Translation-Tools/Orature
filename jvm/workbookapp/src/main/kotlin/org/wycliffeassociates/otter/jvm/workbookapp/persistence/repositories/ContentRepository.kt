@@ -189,8 +189,11 @@ class ContentRepository @Inject constructor(
                     )
                     content.id = id
                 }
-                activeConnections.getOrDefault(collection, null)?.accept(contentList)
-                contentList
+                val contentsAfterInsertion = getByCollection(collection).blockingGet()
+                activeConnections.getOrDefault(collection, null)
+                    ?.accept(contentsAfterInsertion)
+
+                contentsAfterInsertion
             }
             .doOnError { e ->
                 logger.error("Error in insertForCollection for collection: $collection", e)

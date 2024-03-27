@@ -30,6 +30,7 @@ import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.ScrollBar
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
 import org.wycliffeassociates.otter.jvm.controls.SCROLL_INCREMENT_UNIT
@@ -186,7 +187,7 @@ class AudioWorkspaceView : View() {
                 }
 
                 verseProperty.set(marker)
-                verseIndexProperty.set(viewModel.recordedVerses.indexOfFirst { it.marker == marker })
+                verseIndexProperty.set(viewModel.totalVerses.indexOf(marker))
                 labelProperty.set(markerLabel)
                 isPlayingEnabledProperty.set(verseItem.isPlayOptionEnabled)
                 isEditVerseEnabledProperty.set(verseItem.isEditVerseOptionEnabled)
@@ -211,6 +212,7 @@ class AudioWorkspaceViewModel : ViewModel() {
 
     val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
     var recordedVerses = observableListOf<NarratableItemModel>()
+    val totalVerses = observableListOf<AudioMarker>()
 
     val audioPositionProperty = SimpleIntegerProperty()
     val totalAudioSizeProperty = SimpleIntegerProperty()
@@ -240,23 +242,30 @@ class AudioWorkspaceViewModel : ViewModel() {
                                 && narrationStateProperty.value != NarrationStateType.RECORDING_AGAIN_PAUSED
                                 && narrationStateProperty.value != NarrationStateType.PLAYING
                                 && narrationStateProperty.value != NarrationStateType.PLAYING
+                                && narrationViewModel.isPrependRecordingProperty.value.not()
                     } else {
                         false
                     }
 
                     isScrollEnabled
                 },
-                narrationStateProperty
-
+                narrationStateProperty,
+                narrationViewModel.isPrependRecordingProperty
             )
         )
         audioPositionProperty.bind(narrationViewModel.audioFramePositionProperty)
-        narrationViewModel.narratableList.onChange {
-            val verseMarkersList = narrationViewModel.narratableList.filter {
-                it.hasRecording && it.marker != null
-            }
-            recordedVerses.setAll(verseMarkersList)
-        }
+        // TODO: Resolve merge conflict here
+//<<<<<<< HEAD
+//        narrationViewModel.narratableList.onChange {
+//            val verseMarkersList = narrationViewModel.narratableList.filter {
+//                it.hasRecording && it.marker != null
+//            }
+//            recordedVerses.setAll(verseMarkersList)
+//        }
+//=======
+//        recordedVerses.bind(narrationViewModel.recordedVerses) { it }
+//        Bindings.bindContent(totalVerses, narrationViewModel.totalVerses)
+//>>>>>>> dev
     }
 
     fun onUndock() {

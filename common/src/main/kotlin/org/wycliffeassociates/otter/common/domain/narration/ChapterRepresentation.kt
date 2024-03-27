@@ -140,11 +140,19 @@ internal class ChapterRepresentation(
         val reference = object : TypeReference<List<VerseNode>>() {}
 
         try {
-            val nodes = activeVersesMapper.readValue(json, reference)
-            logger.info("Loading ${nodes.size} audio markers from serialized data")
-            totalVerses.forEach { it.clear() }
-            totalVerses.forEachIndexed { idx, _ ->
-                nodes.getOrNull(idx)?.let { totalVerses[idx] = it }
+            val activeNodes = activeVersesMapper.readValue(json, reference)
+            logger.info("Loading ${activeNodes.size} audio markers from serialized data")
+            totalVerses.forEach {
+                it.clear() // reset the node's sectors
+            }
+            activeNodes.forEach { node ->
+                // find node position in totalVerses
+                val index = totalVerses.indexOfFirst {
+                    it.marker.formattedLabel == node.marker.formattedLabel
+                }
+                if (index != -1) {
+                    totalVerses[index] = node
+                }
             }
         } catch (e: JsonMappingException) {
             logger.error("Error in loadFromSerializedVerses: ${e.message}")
@@ -166,12 +174,19 @@ internal class ChapterRepresentation(
     }
 
     private fun updateTotalVerses() {
-        activeVerses.forEachIndexed { idx, verseNode ->
+        activeVerses.forEach { verseNode ->
             val newFrame = absoluteFrameToRelativeChapterFrame(indexToFrame(verseNode.firstIndex()))
             val updatedMarker = verseNode.copyMarker(frame = newFrame)
-            totalVerses[idx] = VerseNode(
-                true, updatedMarker, totalVerses[idx].sectors
-            )
+
+            // find node position in totalVerses
+            val index = totalVerses.indexOfFirst {
+                it.marker.formattedLabel == verseNode.marker.formattedLabel
+            }
+            if (index != -1) {
+                totalVerses[index] = VerseNode(
+                    true, updatedMarker, totalVerses[index].sectors
+                )
+            }
         }
     }
 

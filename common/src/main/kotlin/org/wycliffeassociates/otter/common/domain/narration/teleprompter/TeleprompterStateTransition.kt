@@ -31,11 +31,22 @@ object RecordVerseAction {
 
         contexts[index].changeState(TeleprompterItemState.RECORD_ACTIVE)
 
-        // Make next item available to record
         if (index < contexts.lastIndex) {
-            contexts[index + 1].changeState(TeleprompterItemState.RECORD)
-            for (i in index + 1..contexts.lastIndex) {
+            var i = index + 1
+
+            while (i < contexts.size) {
+                // enable the next unrecorded node
+                if (contexts[i].state.type == TeleprompterItemState.RECORD_DISABLED) {
+                    contexts[i].changeState(TeleprompterItemState.RECORD)
+                    break
+                }
                 contexts[i].disable()
+                i++
+            }
+
+            // disable the remaining nodes
+            (i until contexts.size).forEach {
+                contexts[it].disable()
             }
         }
     }
@@ -70,26 +81,37 @@ object ResumeVerseRecordAction {
 
         contexts[index].changeState(TeleprompterItemState.RECORD_ACTIVE)
 
-        // Make next item available to record
         if (index < contexts.lastIndex) {
-            contexts[index + 1].changeState(TeleprompterItemState.RECORD)
-            for (i in index + 1..contexts.lastIndex) {
+            var i = index + 1
+
+            while (i < contexts.size) {
+                // enable the next unrecorded node
+                if (contexts[i].state.type == TeleprompterItemState.RECORD_DISABLED) {
+                    contexts[i].changeState(TeleprompterItemState.RECORD)
+                    break
+                }
                 contexts[i].disable()
+                i++
+            }
+
+            // disable the remaining nodes
+            (i until contexts.size).forEach {
+                contexts[it].disable()
             }
         }
     }
 }
 
 object NextVerseAction {
-    fun apply(contexts: MutableList<TeleprompterStateContext>, index: Int) {
-        val wasActive = contexts[index - 1].state.type == TeleprompterItemState.RECORD_ACTIVE
+    fun apply(contexts: MutableList<TeleprompterStateContext>, currentIndex: Int) {
+        val wasActive = contexts[currentIndex].state.type == TeleprompterItemState.RECORD_ACTIVE
 
         if (wasActive) {
-            contexts[index - 1].changeState(TeleprompterItemState.RECORD_AGAIN_DISABLED)
-            contexts[index].changeState(TeleprompterItemState.RECORD_ACTIVE)
+            contexts[currentIndex].changeState(TeleprompterItemState.RECORD_AGAIN_DISABLED)
+            contexts.firstOrNull { it.state.type == TeleprompterItemState.RECORD_DISABLED }?.changeState(TeleprompterItemState.RECORD_ACTIVE)
         } else {
-            contexts[index - 1].changeState(TeleprompterItemState.RECORD_AGAIN)
-            contexts[index].changeState(TeleprompterItemState.RECORD)
+            contexts[currentIndex].changeState(TeleprompterItemState.RECORD_AGAIN)
+            contexts.firstOrNull { it.state.type == TeleprompterItemState.RECORD_DISABLED }?.changeState(TeleprompterItemState.RECORD)
         }
     }
 }
@@ -150,8 +172,6 @@ object SaveVerseRecordingAction {
                 contexts[i].restore()
                 if (contexts[i].state.type == TeleprompterItemState.RECORD_AGAIN_DISABLED) {
                     contexts[i].changeState(TeleprompterItemState.RECORD_AGAIN)
-                } else if (contexts[i].state.type == TeleprompterItemState.RECORD_DISABLED) {
-                    contexts[i].changeState(TeleprompterItemState.RECORD)
                 }
             }
         }

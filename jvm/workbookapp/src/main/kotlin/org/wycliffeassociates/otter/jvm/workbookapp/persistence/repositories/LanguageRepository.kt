@@ -18,12 +18,21 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories
 
+import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.workbook.Translation
+import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
+import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase.Companion.glSources
+import org.wycliffeassociates.otter.common.domain.project.ResourceInfoSerializable
+import org.wycliffeassociates.otter.common.domain.project.SOURCES_JSON_FILE
+import org.wycliffeassociates.otter.common.domain.project.SOURCE_PATH_TEMPLATE
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
@@ -108,6 +117,20 @@ class LanguageRepository @Inject constructor(
             }
             .doOnError { e ->
                 logger.error("Error in getGateway", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
+    override fun getAvailableGatewaySources(): Single<List<Language>> {
+        return Single
+            .fromCallable {
+                val availableSourceGLs = listEmbeddedSourceLanguages()
+                languageDao.fetchGateway()
+                    .filter { it.slug in availableSourceGLs }
+                    .map { mapper.mapFromEntity(it) }
+            }
+            .doOnError { e ->
+                logger.error("Error in getAvailableGatewaySources", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -230,5 +253,21 @@ class LanguageRepository @Inject constructor(
                 logger.error("Error in delete translation: $translation", e)
             }
             .subscribeOn(Schedulers.io())
+    }
+
+    /**
+     * Returns a list of source languages (slug) that have the matching resource container
+     * embedded inside the jar.
+     */
+    private fun listEmbeddedSourceLanguages(): List<String> {
+        return glSources
+            .filter {
+                val path = SOURCE_PATH_TEMPLATE.format(it.name)
+                val exists = javaClass.classLoader.getResource(path) != null
+                exists
+            }
+            .map {
+                it.languageCode
+            }
     }
 }
