@@ -76,7 +76,7 @@ object NextAction {
         return if (isRecording) {
             globalContext.changeState(NarrationStateType.RECORDING)
         } else {
-            globalContext.changeState(NarrationStateType.IDLE_IN_PROGRESS)
+            globalContext.changeState(NarrationStateType.HAS_RECORDINGS)
         }
 
     }
@@ -143,7 +143,7 @@ object StartSaveAction {
         return if (allVersesRecorded) {
             globalContext.changeState(NarrationStateType.MODIFYING_AUDIO_FILE)
         } else {
-            globalContext.changeState(NarrationStateType.IDLE_IN_PROGRESS)
+            globalContext.changeState(NarrationStateType.HAS_RECORDINGS)
         }
 
     }
@@ -169,7 +169,7 @@ object FinishSave {
         val isRecordAgainPaused = verseContexts.any { it.state == RecordAgainPausedState }
 
         return if (allVersesRecorded && !isRecordingAgain && !isRecordAgainPaused) {
-            globalContext.changeState(NarrationStateType.IDLE_FINISHED)
+            globalContext.changeState(NarrationStateType.FINISHED)
         } else if (isRecordingAgain) {
             globalContext.changeState(NarrationStateType.RECORDING_AGAIN)
         } else {
@@ -226,9 +226,9 @@ object PausePlaybackAction {
         val newGlobalStateRequest = if (wasRecordingPaused) {
             NarrationStateType.RECORDING_PAUSED
         } else if (allVersesRecorded) {
-            NarrationStateType.IDLE_FINISHED
+            NarrationStateType.FINISHED
         } else {
-            NarrationStateType.IDLE_IN_PROGRESS
+            NarrationStateType.HAS_RECORDINGS
         }
 
 
@@ -301,9 +301,9 @@ object PlaceMarkerAction {
             }
 
         return if (allVersesRecorded) {
-            globalContext.changeState(NarrationStateType.IDLE_FINISHED)
+            globalContext.changeState(NarrationStateType.FINISHED)
         } else {
-            globalContext.changeState(NarrationStateType.IDLE_IN_PROGRESS)
+            globalContext.changeState(NarrationStateType.HAS_RECORDINGS)
         }
     }
 }

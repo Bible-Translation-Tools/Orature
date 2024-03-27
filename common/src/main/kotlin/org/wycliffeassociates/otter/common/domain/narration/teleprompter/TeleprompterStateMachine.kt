@@ -34,11 +34,11 @@ class TeleprompterStateMachine(
 
     val currentState: ConnectableObservable<NarrationState> = Observable.create { emitter ->
         currentStateEmitter = emitter
-        emitter.onNext(IdleEmptyState)
+        emitter.onNext(NotStartedState)
     }.publish()
 
     private var verseContexts = total.map { TeleprompterStateContext() }.toMutableList()
-    private var narrationContext: NarrationState = IdleEmptyState
+    private var narrationContext: NarrationState = NotStartedState
 
     init {
         currentState.connect()
@@ -75,11 +75,11 @@ class TeleprompterStateMachine(
         verseContexts.firstOrNull { it.state.type == TeleprompterItemState.RECORD_DISABLED }?.state = RecordState
 
         val newGlobalContext = if (hasAllItemsRecorded) {
-            IdleFinishedState
+            FinishedState
         } else if (hasNoItemsRecorded) {
-            IdleEmptyState
+            NotStartedState
         } else {
-            IdleInProgressState
+            HasRecordingState
         }
 
         updateNarrationContext(newGlobalContext)

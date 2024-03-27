@@ -129,7 +129,7 @@ class NarrationToolbarViewModel : ViewModel() {
                     narrationViewModel.narrationStateProperty.value?.let {
                         it == NarrationStateType.RECORDING
                                 || it == NarrationStateType.RECORDING_AGAIN
-                                || it == NarrationStateType.IDLE_EMPTY
+                                || it == NarrationStateType.NOT_STARTED
                                 || it == NarrationStateType.RECORDING_AGAIN_PAUSED
                                 || it == NarrationStateType.PLAYING
                     } ?: false
@@ -144,7 +144,7 @@ class NarrationToolbarViewModel : ViewModel() {
                     narrationViewModel.narrationStateProperty.value?.let {
                         it == NarrationStateType.RECORDING
                                 || it == NarrationStateType.RECORDING_AGAIN
-                                || it == NarrationStateType.IDLE_EMPTY
+                                || it == NarrationStateType.NOT_STARTED
                                 || it == NarrationStateType.RECORDING_PAUSED
                                 || it == NarrationStateType.RECORDING_AGAIN_PAUSED
                     } ?: false

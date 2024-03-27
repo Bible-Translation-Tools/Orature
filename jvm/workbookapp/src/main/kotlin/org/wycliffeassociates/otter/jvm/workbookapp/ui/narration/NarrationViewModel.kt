@@ -859,7 +859,7 @@ class NarrationViewModel : ViewModel() {
                         performNarrationStateMachineTransition(NarrationStateTransition.FINISH_SAVE)
                     }
 
-                    if (!isIdle && narrationStateMachine.getNarrationContext() == NarrationStateType.IDLE_FINISHED) {
+                    if (!isIdle && narrationStateMachine.getNarrationContext() == NarrationStateType.FINISHED) {
                         performNarrationStateMachineTransition(NarrationStateTransition.START_SAVE)
                     }
 

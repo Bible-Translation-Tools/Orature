@@ -48,8 +48,8 @@ class NarrationMenu : ContextMenu() {
                 FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.EDITOR))
             }
             enableWhen(
-                narrationStateProperty.isEqualTo(NarrationStateType.IDLE_FINISHED)
-                    .or(narrationStateProperty.isEqualTo(NarrationStateType.IDLE_IN_PROGRESS))
+                narrationStateProperty.isEqualTo(NarrationStateType.FINISHED)
+                    .or(narrationStateProperty.isEqualTo(NarrationStateType.HAS_RECORDINGS))
             )
         }
         val verseMarkerOpt = MenuItem().apply {
@@ -60,7 +60,7 @@ class NarrationMenu : ContextMenu() {
             action {
                 FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.MARKER))
             }
-            enableWhen(narrationStateProperty.isEqualTo(NarrationStateType.IDLE_FINISHED))
+            enableWhen(narrationStateProperty.isEqualTo(NarrationStateType.FINISHED))
         }
         val restartChapterOpt = MenuItem().apply {
             graphic = label(messages["restartChapter"]) {
@@ -71,8 +71,8 @@ class NarrationMenu : ContextMenu() {
                 FX.eventbus.fire(NarrationRestartChapterEvent())
             }
             enableWhen(
-                narrationStateProperty.isEqualTo(NarrationStateType.IDLE_FINISHED)
-                    .or(narrationStateProperty.isEqualTo(NarrationStateType.IDLE_IN_PROGRESS))
+                narrationStateProperty.isEqualTo(NarrationStateType.FINISHED)
+                    .or(narrationStateProperty.isEqualTo(NarrationStateType.HAS_RECORDINGS))
             )
         }
 
