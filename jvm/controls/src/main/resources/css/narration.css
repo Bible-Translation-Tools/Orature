@@ -264,3 +264,11 @@
 .narration-list__buttons .recording-btn {
     -fx-background-color: -wa-primary-dark;
 }
+
+.narration__license-text {
+    -fx-padding: 5;
+    -fx-font-size: 16px;
+    -fx-font-style: italic;
+    -fx-text-fill: -wa-note-text;
+    -fx-wrap-text: true;
+}

@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.beans.property.IntegerProperty
+import javafx.beans.property.StringProperty
 import javafx.beans.value.ObservableValue
 import javafx.event.Event
 import javafx.event.EventHandler
@@ -32,6 +33,7 @@ import tornadofx.*
 
 class NarrationTextCell(
     private val nextChunkText: String,
+    private val licenseInfoProperty: StringProperty,
     private val narrationStateProperty: ObservableValue<NarrationStateType>,
     highlightedVerseProperty: IntegerProperty,
 ) : ListCell<NarratableItemModel>() {
@@ -62,13 +64,15 @@ class NarrationTextCell(
         view.isLastVerseProperty.set(isLast)
 
         graphic = view.apply {
-            prefHeight = if (index == listView.items.lastIndex) listView.height else -1.0 // extra space at the end
-
+            val isLastItemInView = index == listView.items.lastIndex
+            isLastIndexProperty.set(isLastItemInView)
+            prefHeight = if (isLastItemInView) listView.height else -1.0 // extra space at the end
+            
             val title = if (item.chunk.label == "verse") item.chunk.title else ""
 
             verseLabelProperty.set(title)
-
             verseTextProperty.set(item.chunk.textItem.text)
+            licenseProperty.set(licenseInfoProperty.value)
 
             isHighlightedProperty.bind(shouldHighlight)
 

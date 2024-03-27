@@ -26,6 +26,7 @@ import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.scene.layout.Priority
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
@@ -44,12 +45,14 @@ class TeleprompterSeekEvent(val index: Int) : FXEvent()
 
 class TeleprompterViewModel : ViewModel() {
     private val narrationViewModel: NarrationViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
 
     val chunks = narrationViewModel.narratableList
     var narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
 
     val stickyVerseProperty = SimpleObjectProperty<NarratableItemModel>()
     val showStickyVerseProperty = SimpleBooleanProperty(false)
+    val licenseProperty = SimpleStringProperty()
 
     val lastRecordedVerseProperty = SimpleIntegerProperty(0)
 
@@ -63,6 +66,11 @@ class TeleprompterViewModel : ViewModel() {
         playingVerseProperty.bind(narrationViewModel.playingVerseIndex)
         highlightedVerseProperty.bind(narrationViewModel.highlightedVerseIndex)
         narrationStateProperty.bind(narrationViewModel.narrationStateProperty)
+        licenseProperty.bind(workbookDataStore.sourceLicenseProperty.stringBinding {
+            it?.let {
+                MessageFormat.format(FX.messages["licenseStatement"], it)
+            } ?: ""
+        })
     }
 
     fun currentVerseTextBinding(): StringBinding {
@@ -190,6 +198,7 @@ class TeleprompterView : View() {
             setCellFactory {
                 NarrationTextCell(
                     messages["nextVerse"],
+                    viewModel.licenseProperty,
                     viewModel.narrationStateProperty,
                     viewModel.highlightedVerseProperty,
                 )
