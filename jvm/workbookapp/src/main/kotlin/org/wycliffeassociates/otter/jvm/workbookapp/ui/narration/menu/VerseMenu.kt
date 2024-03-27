@@ -18,22 +18,14 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu
 
-import javafx.beans.property.BooleanProperty
-import javafx.beans.property.IntegerProperty
-import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
-import javafx.event.EventTarget
-import javafx.scene.control.Button
 import javafx.scene.control.ContextMenu
-import javafx.scene.control.MenuButton
 import javafx.scene.control.MenuItem
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
-import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.event.OpenInAudioPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
@@ -44,7 +36,10 @@ class VerseMenu : ContextMenu() {
 
     val verseProperty = SimpleObjectProperty<AudioMarker>()
     val verseIndexProperty = SimpleIntegerProperty()
-    val isRecordingProperty = SimpleBooleanProperty()
+
+    val isPlayingEnabledProperty = SimpleBooleanProperty()
+    val isEditVerseEnabledProperty = SimpleBooleanProperty()
+    val isRecordAgainEnabledProperty = SimpleBooleanProperty()
 
     init {
         addClass("wa-context-menu")
@@ -57,8 +52,8 @@ class VerseMenu : ContextMenu() {
             action {
                 FX.eventbus.fire(PlayVerseEvent(verseIndexProperty.value))
             }
-            disableWhen {
-                isRecordingProperty
+            enableWhen {
+                isPlayingEnabledProperty
             }
         }
         val recordAgainOpt = MenuItem().apply {
@@ -69,19 +64,10 @@ class VerseMenu : ContextMenu() {
             action {
                 FX.eventbus.fire(RecordAgainEvent(verseIndexProperty.value))
             }
-            disableWhen {
-                isRecordingProperty
+            enableWhen {
+                isRecordAgainEnabledProperty
             }
         }
-//        item(importVerseTextProperty.value) {
-//            graphic = FontIcon(MaterialDesign.MDI_DOWNLOAD)
-//            action {
-//                FX.eventbus.fire(ImportVerseEvent(verseProperty.value))
-//            }
-//            disableWhen {
-//                isRecordingProperty
-//            }
-//        }
         val editVerseOpt = MenuItem().apply {
             graphic = label(messages["openIn"]) {
                 graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
@@ -90,8 +76,8 @@ class VerseMenu : ContextMenu() {
             action {
                 FX.eventbus.fire(OpenInAudioPluginEvent(verseIndexProperty.value))
             }
-            disableWhen {
-                isRecordingProperty
+            enableWhen {
+                isEditVerseEnabledProperty
             }
         }
 

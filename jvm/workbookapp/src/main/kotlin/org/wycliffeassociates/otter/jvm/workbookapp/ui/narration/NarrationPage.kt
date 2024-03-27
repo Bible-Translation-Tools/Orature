@@ -47,6 +47,7 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.NarrationMarkerChangedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.NarrationMovingMarkerEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRestartChapterEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationUndoEvent
@@ -193,7 +194,12 @@ class NarrationPage : View() {
 
         subscribe<NarrationMarkerChangedEvent> {
             logger.info("Received Narration Moved event")
-            viewModel.moveMarker(it.index, it.delta)
+            viewModel.finishMoveMarker(it.index, it.delta)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<NarrationMovingMarkerEvent> {
+            logger.info("Received moving marker event")
+            viewModel.startMoveMarker(it.index)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<NextVerseEvent> {

@@ -66,7 +66,13 @@ object NarrationTakeModifier {
     @Synchronized
     fun modifyAudioData(take: Take?, reader: AudioFileReader, markers: List<AudioMarker>) {
 
-        if (take == null) return
+        if (take == null) {
+            // Cancels any previous modify audio requests, but does not bounce audio since no take was given
+            cancelMarkerUpdateTask()
+            cancelPreviousAudioBounceTask()
+            updateStatus(TaskRunnerStatus.IDLE)
+            return
+        }
 
         val takeFile = take.file
 
