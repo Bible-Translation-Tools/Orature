@@ -202,6 +202,11 @@ object PauseVersePlaybackAction {
 
         if (isVerseBeingRecorded) {
             contexts[index].changeState(TeleprompterItemState.RECORDING_PAUSED)
+
+
+            for (i in 0 until index) {
+                contexts[i].restore()
+            }
         } else {
             contexts[index].changeState(TeleprompterItemState.RECORD_AGAIN)
 
