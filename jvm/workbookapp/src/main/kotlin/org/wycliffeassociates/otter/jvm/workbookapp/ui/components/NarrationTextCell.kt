@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.beans.property.IntegerProperty
+import javafx.beans.property.StringProperty
 import javafx.beans.value.ObservableValue
 import javafx.event.Event
 import javafx.event.EventHandler
@@ -46,6 +47,7 @@ class NarrationTextItemData(
 class NarrationTextCell(
     private val nextChunkText: String,
     private val recordButtonTextProperty: ObservableValue<String>,
+    private val licenseInfoProperty: StringProperty,
     private val isRecordingProperty: ObservableValue<Boolean>,
     private val isRecordingAgainProperty: ObservableValue<Boolean>,
     private val isPlayingProperty: ObservableValue<Boolean>,
@@ -80,13 +82,15 @@ class NarrationTextCell(
         view.isLastVerseProperty.set(isLast)
 
         graphic = view.apply {
-            prefHeight = if (index == listView.items.lastIndex) listView.height else -1.0 // extra space at the end
+            val isLastItemInView = index == listView.items.lastIndex
+            isLastIndexProperty.set(isLastItemInView)
+            prefHeight = if (isLastItemInView) listView.height else -1.0 // extra space at the end
             
             val title = if (item.chunk.label == "verse") item.chunk.title else ""
 
             verseLabelProperty.set(title)
-
             verseTextProperty.set(item.chunk.textItem.text)
+            licenseProperty.set(licenseInfoProperty.value)
 
             hasRecordingProperty.set(item.hasRecording)
             recordButtonTextProperty.bind(this@NarrationTextCell.recordButtonTextProperty)

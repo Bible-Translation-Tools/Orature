@@ -29,6 +29,7 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.Tooltip
+import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
@@ -60,9 +61,11 @@ class NarrationTextItem : VBox() {
     val isRecordingAgain by isRecordingAgainProperty
     val isSelectedProperty = SimpleBooleanProperty(false)
     val isLastVerseProperty = SimpleBooleanProperty()
+    val isLastIndexProperty = SimpleBooleanProperty()
 
     val recordButtonTextProperty = SimpleStringProperty()
     val nextChunkTextProperty = SimpleStringProperty()
+    val licenseProperty = SimpleStringProperty()
 
     val onBeginRecordingAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onPauseRecordingAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
@@ -349,6 +352,16 @@ class NarrationTextItem : VBox() {
                     }
                     visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORD_AGAIN_PAUSED))
                 }
+            }
+        }
+        hbox {
+            alignment = Pos.CENTER
+            vgrow = Priority.ALWAYS
+            label(licenseProperty) {
+                visibleWhen { isLastIndexProperty }
+                managedWhen { visibleProperty() }
+                addClass("narration__license-text")
+                tooltip(text)
             }
         }
     }
