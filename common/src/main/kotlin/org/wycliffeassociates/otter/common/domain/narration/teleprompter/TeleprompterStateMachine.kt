@@ -37,7 +37,7 @@ class TeleprompterStateMachine(
         emitter.onNext(IdleEmptyState)
     }.publish()
 
-    private var verseContexts: MutableList<TeleprompterStateContext>
+    private var verseContexts = total.map { TeleprompterStateContext() }.toMutableList()
     private var narrationContext: NarrationState = IdleEmptyState
 
     init {
@@ -55,10 +55,6 @@ class TeleprompterStateMachine(
     private fun updateNarrationContext(newContext: NarrationState) {
         narrationContext = newContext
         currentStateEmitter.onNext(newContext)
-    }
-
-    init {
-        verseContexts = total.map { TeleprompterStateContext() }.toMutableList()
     }
 
     fun initialize(active: List<Boolean>) {
