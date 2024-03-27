@@ -254,18 +254,14 @@ class AudioWorkspaceViewModel : ViewModel() {
             )
         )
         audioPositionProperty.bind(narrationViewModel.audioFramePositionProperty)
-        // TODO: Resolve merge conflict here
-//<<<<<<< HEAD
-//        narrationViewModel.narratableList.onChange {
-//            val verseMarkersList = narrationViewModel.narratableList.filter {
-//                it.hasRecording && it.marker != null
-//            }
-//            recordedVerses.setAll(verseMarkersList)
-//        }
-//=======
-//        recordedVerses.bind(narrationViewModel.recordedVerses) { it }
-//        Bindings.bindContent(totalVerses, narrationViewModel.totalVerses)
-//>>>>>>> dev
+
+        Bindings.bindContent(totalVerses, narrationViewModel.totalVerses)
+        narrationViewModel.narratableList.onChange {
+            val verseMarkersList = narrationViewModel.narratableList.filter {
+                it.hasRecording && it.marker != null
+            }
+            recordedVerses.setAll(verseMarkersList)
+        }
     }
 
     fun onUndock() {
