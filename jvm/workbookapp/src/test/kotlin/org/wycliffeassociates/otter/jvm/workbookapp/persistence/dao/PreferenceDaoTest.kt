@@ -18,20 +18,27 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.dao
 
+import io.mockk.every
+import io.mockk.mockk
 import jooq.Tables.PREFERENCES
 import org.jooq.exception.DataAccessException
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.PreferenceEntity
 import java.io.File
+import kotlin.io.path.createTempDirectory
 
 class PreferenceDaoTest {
     private val testDatabaseFile = File.createTempFile(
         "test-preference-dao", ".sqlite"
     ).also(File::deleteOnExit)
+    private val directoryProvider = mockk<IDirectoryProvider> {
+        every { tempDirectory } returns createTempDirectory().toFile().apply { deleteOnExit() }
+    }
     private lateinit var database: AppDatabase
     private val dao by lazy { database.preferenceDao }
 
@@ -42,7 +49,7 @@ class PreferenceDaoTest {
 
     @Before
     fun setup() {
-        database = AppDatabase(testDatabaseFile)
+        database = AppDatabase(testDatabaseFile, directoryProvider)
         prefs.forEach(dao::insert)
     }
 
