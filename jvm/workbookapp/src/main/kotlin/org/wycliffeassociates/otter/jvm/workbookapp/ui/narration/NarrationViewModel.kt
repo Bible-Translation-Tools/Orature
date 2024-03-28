@@ -933,29 +933,8 @@ class NarrationViewModel : ViewModel() {
                 runLater {
                     audioFramePositionProperty.set(frame)
                 }
-                var reRecordLoc: Int? = null
-                var nextVerseLoc: Int? = null
 
-                if (isPrependRecording) {
-                    val currentMarker = totalVerses[recordingVerseIndex.value]
-                    recordedVerses
-                        .find { it.sort > currentMarker.sort } // finds the next active verse (recorded)
-                        ?.let { nextActive ->
-                            // set reRecord location to render as "reRecord mode" (split view)
-                            reRecordLoc = currentMarker.location
-                            nextVerseLoc = nextActive.location
-                        }
-                } else if (narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN || narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN_PAUSED) {
-                    val reRecordingIndex = recordingVerseIndex.value
-                    nextVerseLoc = totalVerses.getOrNull(reRecordingIndex + 1)?.let { marker ->
-                        if (marker in recordedVerses) {
-                            marker.location
-                        } else {
-                            null
-                        }
-                    }
-                    reRecordLoc = totalVerses[reRecordingIndex].location
-                }
+                val (reRecordLoc, nextVerseLoc) = selectRenderer(frame)
 
                 val viewports = renderer.draw(
                     context,
@@ -969,6 +948,41 @@ class NarrationViewModel : ViewModel() {
                 logger.error("", e)
             }
         }
+    }
+
+    data class RendererParameters(val reRecordFrame: Int?, val nextVerseFrame: Int?)
+
+    /**
+     * Selects whether to use the normal renderer or re-recording renderer based on if the recording is
+     * either recording again or "prepending" an earlier verse recording. This will set the re-record frames
+     * and next verse frames to render subsequent verses in a second viewport. If these values are null,
+     * the renderer will render normally with one viewport.
+     */
+    private fun selectRenderer(frame: Int): RendererParameters {
+        var reRecordLoc: Int? = null
+        var nextVerseLoc: Int? = null
+        val narrationState = narrationStateProperty.value
+        if (isPrependRecording) {
+            val currentMarker = totalVerses[recordingVerseIndex.value]
+            recordedVerses
+                .find { it.sort > currentMarker.sort } // finds the next active verse (recorded)
+                ?.let { nextActive ->
+                    // set reRecord location to render as "reRecord mode" (split view)
+                    reRecordLoc = currentMarker.location
+                    nextVerseLoc = nextActive.location
+                }
+        } else if (narrationState in listOf(NarrationStateType.RECORDING_AGAIN, NarrationStateType.RECORDING_AGAIN_PAUSED)) {
+            val reRecordingIndex = recordingVerseIndex.value
+            nextVerseLoc = totalVerses.getOrNull(reRecordingIndex + 1)?.let { marker ->
+                if (marker in recordedVerses) {
+                    marker.location
+                } else {
+                    null
+                }
+            }
+            reRecordLoc = totalVerses[reRecordingIndex].location
+        }
+        return RendererParameters(reRecordLoc, nextVerseLoc)
     }
 
     fun drawVolumebar(context: GraphicsContext, canvas: Canvas) {
