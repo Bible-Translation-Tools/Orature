@@ -26,6 +26,7 @@ import org.jooq.impl.SQLDataType
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.assets.initialization.InitializeProjects
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.utils.SELECTED_TAKES_FROM_DB
 import java.io.File
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus as CheckingStatusEnum
 
@@ -98,7 +99,7 @@ class DatabaseMigrator(
             .fetch(TakeEntity.TAKE_ENTITY.PATH.name)
 
         val filePathsToSave = pathsToSelected.map { File(it.toString()).canonicalPath }
-        directoryProvider.tempDirectory.resolve("selectedTakesInDatabase.txt")
+        directoryProvider.tempDirectory.resolve(SELECTED_TAKES_FROM_DB)
             .writeText(filePathsToSave.joinToString("\n"))
     }
 

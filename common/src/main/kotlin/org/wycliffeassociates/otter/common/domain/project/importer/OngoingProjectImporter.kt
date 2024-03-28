@@ -67,6 +67,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRep
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import org.wycliffeassociates.otter.common.utils.SELECTED_TAKES_FROM_DB
 import org.wycliffeassociates.otter.common.utils.computeFileChecksum
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Manifest
@@ -101,7 +102,7 @@ class OngoingProjectImporter @Inject constructor(
     private var completedChapters: List<Int>? = null
     private var takesCheckingMap: TakeCheckingStatusMap = mapOf()
     private var takesToCompile = mutableMapOf<Int, List<File>>() // for migration from Ot1 - narration projects
-    private var migratedSelectedTakes = listOf<String>() // list of selected file paths extracted from Ot1 database
+    private var migratedSelectedTakes = listOf<String>() // list of selected take paths extracted from Ot1 database
 
     override fun import(
         file: File,
@@ -326,7 +327,9 @@ class OngoingProjectImporter @Inject constructor(
                 ?.toList()
 
             deriveChapterContentFromVerses(derivedProject, projectFilesAccessor)
-            migratedSelectedTakes = directoryProvider.tempDirectory.resolve("selectedTakesInDatabase.txt").readLines()
+            migratedSelectedTakes = directoryProvider.tempDirectory.resolve(SELECTED_TAKES_FROM_DB).let {
+                if (it.exists()) it.readLines() else listOf()
+            }
         }
         importContributorInfo(metadata, projectFilesAccessor)
         importChunks(
