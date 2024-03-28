@@ -22,6 +22,7 @@ import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ProgressStatus
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import javax.inject.Inject
 
 class InitializeApp @Inject constructor(
@@ -34,7 +35,8 @@ class InitializeApp @Inject constructor(
     private val initializePlugins: InitializePlugins,
     private val initializeTakeRepository: InitializeTakeRepository,
     private val initializeProjects: InitializeProjects,
-    private val initializeTranslations: InitializeTranslations
+    private val initializeTranslations: InitializeTranslations,
+    private val directoryProvider: IDirectoryProvider
 ) {
 
     private val logger = LoggerFactory.getLogger(InitializeApp::class.java)
@@ -68,6 +70,9 @@ class InitializeApp @Inject constructor(
             }
             .doOnError { e ->
                 logger.error("Error in initApp", e)
+            }
+            .doFinally {
+                directoryProvider.cleanTempDirectory() // clears out temp files after migration & init
             }
             .subscribeOn(Schedulers.io())
 

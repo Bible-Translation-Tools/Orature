@@ -70,7 +70,6 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
             DirectoryProvider(OratureInfo.SUITE_NAME)
         ).initialize()
         dependencyGraph.inject(this)
-        directoryProvider.cleanTempDirectory()
         Thread.setDefaultUncaughtExceptionHandler(OtterExceptionHandler(directoryProvider, localeLanguage))
         initializeLogger(directoryProvider)
         initializeAppLocale()
@@ -136,5 +135,10 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
 
     override fun shouldShowPrimaryStage(): Boolean {
         return false
+    }
+
+    override fun stop() {
+        super.stop()
+        directoryProvider.cleanTempDirectory()
     }
 }

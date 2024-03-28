@@ -24,13 +24,17 @@ import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.jooq.impl.SQLDataType
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.assets.initialization.InitializeProjects
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import java.io.File
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus as CheckingStatusEnum
 
 const val SCHEMA_VERSION = 13
 const val DATABASE_INSTALLABLE_NAME = "DATABASE"
 
-class DatabaseMigrator {
+class DatabaseMigrator(
+    private val directoryProvider: IDirectoryProvider
+) {
     val logger = LoggerFactory.getLogger(DatabaseMigrator::class.java)
 
     fun migrate(dsl: DSLContext) {
@@ -82,25 +86,20 @@ class DatabaseMigrator {
             .execute()
     }
 
+    /**
+     * Extracts the selected take files from Ot1 database due to potentially out-of-date selected.txt.
+     */
     private fun extractSelectedTakeInfo(dsl: DSLContext) {
-//        val pathsToSelected = dsl
-//            .select()
-//            .from(ContentEntity.CONTENT_ENTITY)
-//            .join(TakeEntity.TAKE_ENTITY)
-//            .on(ContentEntity.CONTENT_ENTITY.SELECTED_TAKE_FK.eq(TakeEntity.TAKE_ENTITY.ID))
-//            .fetch(TakeEntity.TAKE_ENTITY.PATH)
+        val pathsToSelected = dsl
+            .select()
+            .from(ContentEntity.CONTENT_ENTITY.name)
+            .join(TakeEntity.TAKE_ENTITY.name)
+            .on("${ContentEntity.CONTENT_ENTITY.SELECTED_TAKE_FK.name} = ${TakeEntity.TAKE_ENTITY.name}.id")
+            .fetch(TakeEntity.TAKE_ENTITY.PATH.name)
 
-        val res = dsl
-            .fetch("""
-                select take_entity.path 
-                from content_entity 
-                join take_entity 
-                on content_entity.selected_take_fk = take_entity.id
-                """.trimIndent()
-            )
-            .getValues(TakeEntity.TAKE_ENTITY.PATH.name)
-
-        println(res)
+        val filePathsToSave = pathsToSelected.map { File(it.toString()).canonicalPath }
+        directoryProvider.tempDirectory.resolve("selectedTakesInDatabase.txt")
+            .writeText(filePathsToSave.joinToString("\n"))
     }
 
     /**
@@ -551,10 +550,5 @@ class DatabaseMigrator {
         dsl
             .deleteFrom(DublinCoreEntity.DUBLIN_CORE_ENTITY)
             .execute()
-    }
-
-    companion object {
-        var selectedTakeFiles = listOf<String>()
-            private set
     }
 }

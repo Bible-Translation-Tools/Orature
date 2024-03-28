@@ -101,6 +101,7 @@ class OngoingProjectImporter @Inject constructor(
     private var completedChapters: List<Int>? = null
     private var takesCheckingMap: TakeCheckingStatusMap = mapOf()
     private var takesToCompile = mutableMapOf<Int, List<File>>() // for migration from Ot1 - narration projects
+    private var migratedSelectedTakes = listOf<String>() // list of selected file paths extracted from Ot1 database
 
     override fun import(
         file: File,
@@ -114,6 +115,9 @@ class OngoingProjectImporter @Inject constructor(
         projectName = ""
         takesInChapterFilter = null
         completedChapters = null
+        takesCheckingMap = mapOf()
+        takesToCompile = mutableMapOf()
+        migratedSelectedTakes = listOf()
         contentCache.clear()
 
         return Single
@@ -322,6 +326,7 @@ class OngoingProjectImporter @Inject constructor(
                 ?.toList()
 
             deriveChapterContentFromVerses(derivedProject, projectFilesAccessor)
+            migratedSelectedTakes = directoryProvider.tempDirectory.resolve("selectedTakesInDatabase.txt").readLines()
         }
         importContributorInfo(metadata, projectFilesAccessor)
         importChunks(
@@ -585,6 +590,7 @@ class OngoingProjectImporter @Inject constructor(
                 val now = LocalDate.now()
                 val file = File(filepath).canonicalFile
                 val relativeFile = file.relativeTo(projectAudioDir.canonicalFile)
+                val isSelected = relativeFile.invariantSeparatorsPath in selectedTakes || filepath in migratedSelectedTakes
 
                 val checkingStatus = when {
                     projectAppVersion.ordinal >= ProjectAppVersion.THREE.ordinal -> takesCheckingMap[relativeFile.name]
@@ -595,7 +601,7 @@ class OngoingProjectImporter @Inject constructor(
 
                     else -> {
                         // store (verse) takes of incomplete chapter to compile later
-                        if (projectMode == ProjectMode.NARRATION && relativeFile.invariantSeparatorsPath in selectedTakes) {
+                        if (projectMode == ProjectMode.NARRATION && isSelected) {
                             val existingFiles = takesToCompile.getOrDefault(sig.chapter, listOf())
                             takesToCompile[sig.chapter] = existingFiles.plus(file)
                         }
@@ -617,7 +623,7 @@ class OngoingProjectImporter @Inject constructor(
                 val insertedId = takeRepository.insertForContent(take, chunk).blockingGet()
                 take.id = insertedId
 
-                if (relativeFile.invariantSeparatorsPath in selectedTakes) {
+                if (isSelected) {
                     chunk.selectedTake = take
                     contentRepository.update(chunk).blockingAwait()
                 }
