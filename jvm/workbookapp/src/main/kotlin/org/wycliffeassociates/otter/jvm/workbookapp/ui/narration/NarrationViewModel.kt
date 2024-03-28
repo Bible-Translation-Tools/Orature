@@ -934,7 +934,7 @@ class NarrationViewModel : ViewModel() {
                     audioFramePositionProperty.set(frame)
                 }
 
-                val (reRecordLoc, nextVerseLoc) = selectRenderer(frame)
+                val (reRecordLoc, nextVerseLoc) = selectRenderer()
 
                 val viewports = renderer.draw(
                     context,
@@ -958,7 +958,7 @@ class NarrationViewModel : ViewModel() {
      * and next verse frames to render subsequent verses in a second viewport. If these values are null,
      * the renderer will render normally with one viewport.
      */
-    private fun selectRenderer(frame: Int): RendererParameters {
+    private fun selectRenderer(): RendererParameters {
         var reRecordLoc: Int? = null
         var nextVerseLoc: Int? = null
         val narrationState = narrationStateProperty.value
