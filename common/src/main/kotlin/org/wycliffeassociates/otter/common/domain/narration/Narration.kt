@@ -422,18 +422,35 @@ class Narration @AssistedInject constructor(
         val narrationEmpty = chapterRepresentation.scratchAudio.totalFrames == 0
 
         var chapterFile = chapter.getSelectedTake()?.file
-        var chapterFileExists = chapterFile?.exists() ?: false
+        var chapterFileExists = false// chapterFile?.exists() ?: false
 
-        if (narrationEmpty && !chapterFileExists && chapter.chunks.value?.any { it.hasSelectedAudio() } == true) {
-            // compile verses from Ot1
-            val takes = chapter.chunks.value!!.mapNotNull { it.audio.getSelectedTake()?.file }
-            chapterFile = createChapterTake().blockingGet().file
-            val compiled = concatenateAudio
-                .execute(takes, includeMarkers = true)
-                .blockingGet()
+        when {
 
-            compiled.copyTo(chapterFile, overwrite = true)
-            chapterFileExists = true
+            narrationEmpty && chapterFile != null-> {
+                chapterFileExists = true
+            }
+
+            narrationEmpty -> { // no selected chapter file, check takes relay
+                val firstAvailableTake = chapter.audio.getAllTakes().firstOrNull { it.deletedTimestamp.value == null }
+
+                when {
+                    firstAvailableTake != null -> { // takes relay has one
+                        chapterFile = firstAvailableTake.file
+                        chapterFileExists = true
+                    }
+                    chapter.chunks.value?.any { it.hasSelectedAudio() } == true -> { // some verses have take, compile to chapter
+                        val takes = chapter.chunks.value!!.mapNotNull { it.audio.getSelectedTake()?.file }
+                        val compiled = concatenateAudio.execute(takes, includeMarkers = true).blockingGet()
+
+                        chapterFile = createChapterTake().blockingGet().file
+                        compiled.copyTo(chapterFile, overwrite = true)
+                        chapterFileExists = true
+                    }
+                    else -> {
+                        chapterFileExists = false
+                    }
+                }
+            }
         }
 
         val narrationFromChapter = chapterFileExists && narrationEmpty
