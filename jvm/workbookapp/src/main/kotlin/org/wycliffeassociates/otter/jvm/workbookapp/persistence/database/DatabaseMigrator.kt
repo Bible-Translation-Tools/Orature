@@ -24,6 +24,7 @@ import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.jooq.impl.SQLDataType
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus as CheckingStatusEnum
 
 const val SCHEMA_VERSION = 13
@@ -35,6 +36,9 @@ class DatabaseMigrator {
     fun migrate(dsl: DSLContext) {
         var currentVersion = getDatabaseVersion(dsl)
         if (currentVersion != SCHEMA_VERSION) {
+            if (currentVersion <= 8) { // Ot1
+                extractSelectedTakeInfo(dsl)
+            }
             currentVersion = migrate0to1(dsl, currentVersion)
             currentVersion = migrate1to2(dsl, currentVersion)
             currentVersion = migrate2to3(dsl, currentVersion)
@@ -76,6 +80,27 @@ class DatabaseMigrator {
             .set(InstalledEntity.INSTALLED_ENTITY.VERSION, version)
             .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq(DATABASE_INSTALLABLE_NAME))
             .execute()
+    }
+
+    private fun extractSelectedTakeInfo(dsl: DSLContext) {
+//        val pathsToSelected = dsl
+//            .select()
+//            .from(ContentEntity.CONTENT_ENTITY)
+//            .join(TakeEntity.TAKE_ENTITY)
+//            .on(ContentEntity.CONTENT_ENTITY.SELECTED_TAKE_FK.eq(TakeEntity.TAKE_ENTITY.ID))
+//            .fetch(TakeEntity.TAKE_ENTITY.PATH)
+
+        val res = dsl
+            .fetch("""
+                select take_entity.path 
+                from content_entity 
+                join take_entity 
+                on content_entity.selected_take_fk = take_entity.id
+                """.trimIndent()
+            )
+            .getValues(TakeEntity.TAKE_ENTITY.PATH.name)
+
+        println(res)
     }
 
     /**
@@ -526,5 +551,10 @@ class DatabaseMigrator {
         dsl
             .deleteFrom(DublinCoreEntity.DUBLIN_CORE_ENTITY)
             .execute()
+    }
+
+    companion object {
+        var selectedTakeFiles = listOf<String>()
+            private set
     }
 }
