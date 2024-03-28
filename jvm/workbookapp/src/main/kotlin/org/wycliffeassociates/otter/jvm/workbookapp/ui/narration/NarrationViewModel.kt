@@ -651,7 +651,7 @@ class NarrationViewModel : ViewModel() {
 
     fun recordAgain(verseIndex: Int) {
         stopPlayer()
-
+        renderer.clearActiveRecordingData()
         narration.onRecordAgain(verseIndex)
 
         recordAgainVerseIndex = verseIndex
