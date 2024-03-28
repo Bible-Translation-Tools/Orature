@@ -935,7 +935,17 @@ class NarrationViewModel : ViewModel() {
                 }
                 var reRecordLoc: Int? = null
                 var nextVerseLoc: Int? = null
-                if (narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN || narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN_PAUSED) {
+
+                if (isPrependRecording) {
+                    val currentMarker = totalVerses[recordingVerseIndex.value]
+                    recordedVerses
+                        .find { it.sort > currentMarker.sort } // finds the next active verse (recorded)
+                        ?.let { nextActive ->
+                            // set reRecord location to render as "reRecord mode" (split view)
+                            reRecordLoc = currentMarker.location
+                            nextVerseLoc = nextActive.location
+                        }
+                } else if (narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN || narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN_PAUSED) {
                     val reRecordingIndex = recordingVerseIndex.value
                     nextVerseLoc = totalVerses.getOrNull(reRecordingIndex + 1)?.let { marker ->
                         if (marker in recordedVerses) {
@@ -945,15 +955,6 @@ class NarrationViewModel : ViewModel() {
                         }
                     }
                     reRecordLoc = totalVerses[reRecordingIndex].location
-                } else if (isPrependRecording) {
-                    val currentMarker = totalVerses[recordingVerseIndex.value]
-                    recordedVerses
-                        .find { it.sort > currentMarker.sort } // finds the next active verse (recorded)
-                        ?.let { nextActive ->
-                            // set reRecord location to render as "reRecord mode" (split view)
-                            reRecordLoc = currentMarker.location
-                            nextVerseLoc = nextActive.location
-                        }
                 }
 
                 val viewports = renderer.draw(
