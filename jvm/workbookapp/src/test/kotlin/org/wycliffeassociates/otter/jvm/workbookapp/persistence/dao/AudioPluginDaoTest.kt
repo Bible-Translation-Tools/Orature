@@ -18,11 +18,13 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.dao
 
+import io.mockk.mockk
 import org.jooq.exception.DataAccessException
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.AudioPluginEntity
@@ -49,7 +51,7 @@ class AudioPluginDaoTest {
 
     @Before
     fun setup() {
-        database = AppDatabase(testDatabaseFile)
+        database = AppDatabase(testDatabaseFile, mockk<IDirectoryProvider>())
     }
 
     @After

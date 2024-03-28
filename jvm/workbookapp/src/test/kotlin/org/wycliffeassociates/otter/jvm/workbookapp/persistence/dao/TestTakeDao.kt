@@ -18,11 +18,14 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.dao
 
+import io.mockk.every
+import io.mockk.mockk
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.TakeDao
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
@@ -33,10 +36,14 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.TakeMapper
 import java.io.File
 import java.time.LocalDate
+import kotlin.io.path.createTempDirectory
 
 class TestTakeDao {
+    private val directoryProvider = mockk<IDirectoryProvider> {
+        every { tempDirectory } returns createTempDirectory().toFile().apply { deleteOnExit() }
+    }
     private val testDatabaseFile = File.createTempFile("test-db", ".sqlite").also(File::deleteOnExit)
-    private val database = AppDatabase(testDatabaseFile)
+    private val database = AppDatabase(testDatabaseFile, directoryProvider)
     private val dao = database.takeDao
 
     private val files = listOf(
