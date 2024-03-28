@@ -595,7 +595,7 @@ class OngoingProjectImporter @Inject constructor(
 
                     else -> {
                         // store (verse) takes of incomplete chapter to compile later
-                        if (projectMode == ProjectMode.NARRATION) {
+                        if (projectMode == ProjectMode.NARRATION && relativeFile.invariantSeparatorsPath in selectedTakes) {
                             val existingFiles = takesToCompile.getOrDefault(sig.chapter, listOf())
                             takesToCompile[sig.chapter] = existingFiles.plus(file)
                         }
