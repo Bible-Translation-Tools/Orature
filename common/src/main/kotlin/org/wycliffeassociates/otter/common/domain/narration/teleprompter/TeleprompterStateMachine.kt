@@ -194,7 +194,13 @@ class TeleprompterStateMachine(
 
         verseContexts[pausedRecordingIndex].changeState(TeleprompterItemState.RECORD_AGAIN)
         if (pausedRecordingIndex != verseContexts.lastIndex) {
-            verseContexts[pausedRecordingIndex + 1].changeState(TeleprompterItemState.RECORD)
+            val nextRecordDisabledIndex = (pausedRecordingIndex + 1 until verseContexts.size)
+                .find { i -> verseContexts[i].state.type == TeleprompterItemState.RECORD_DISABLED }
+
+            nextRecordDisabledIndex?.let {
+                verseContexts[it].changeState(TeleprompterItemState.RECORD)
+            }
+
         }
     }
 
