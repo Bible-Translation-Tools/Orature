@@ -39,6 +39,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
+import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import java.io.File
@@ -51,6 +52,7 @@ class Narration @AssistedInject constructor(
     private val audioFileUtils: AudioFileUtils,
     private val recorder: IAudioRecorder,
     private val player: IAudioPlayer,
+    private val concatenateAudio: ConcatenateAudio,
     @Assisted private val workbook: Workbook,
     @Assisted private val chapter: Chapter
 ) {
@@ -417,10 +419,23 @@ class Narration @AssistedInject constructor(
     private fun restoreFromExistingChapterAudio(
         forceUpdate: Boolean = false
     ) {
-        val chapterFile = chapter.getSelectedTake()?.file
-        val chapterFileExists = chapterFile?.exists() ?: false
-
         val narrationEmpty = chapterRepresentation.scratchAudio.totalFrames == 0
+
+        var chapterFile = chapter.getSelectedTake()?.file
+        var chapterFileExists = chapterFile?.exists() ?: false
+
+        if (narrationEmpty && !chapterFileExists && chapter.chunks.value?.any { it.hasSelectedAudio() } == true) {
+            // compile verses from Ot1
+            val takes = chapter.chunks.value!!.mapNotNull { it.audio.getSelectedTake()?.file }
+            chapterFile = createChapterTake().blockingGet().file
+            val compiled = concatenateAudio
+                .execute(takes, includeMarkers = true)
+                .blockingGet()
+
+            compiled.copyTo(chapterFile, overwrite = true)
+            chapterFileExists = true
+        }
+
         val narrationFromChapter = chapterFileExists && narrationEmpty
 
         if (narrationFromChapter || forceUpdate) {
