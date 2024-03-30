@@ -18,7 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers
 
-import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
@@ -28,13 +28,13 @@ import tornadofx.*
 import javafx.event.EventTarget
 import javafx.scene.layout.BorderPane
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
 
 class VerseMarkersLayer : BorderPane() {
     private val logger = LoggerFactory.getLogger(VerseMarkersLayer::class.java)
-
-    val isRecordingProperty = SimpleBooleanProperty()
-    val isPlayingProperty = SimpleBooleanProperty()
     val markers = observableListOf<VerseMarker>()
+
+    val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
 
     val verseMarkersControls: ObservableList<VerseMarkerControl> = observableListOf()
     private val onScrollProperty = SimpleObjectProperty<(Int) -> Unit>()
@@ -44,8 +44,6 @@ class VerseMarkersLayer : BorderPane() {
         tryImportStylesheet("/css/verse-markers-layer.css")
 
         addClass("verse-markers-layer")
-
-        mouseTransparentProperty().bind(isRecordingProperty.or(isPlayingProperty))
 
         var scrollDelta = 0.0
         var scrollOldPos = 0.0
@@ -79,6 +77,18 @@ class VerseMarkersLayer : BorderPane() {
                 canBeMovedProperty.set(verseMarkersControls.indexOf(this) > 0)
                 val dragTarget = dragAreaProperty.value
 
+                dragTarget.mouseTransparentProperty().bind(
+                    Bindings.createBooleanBinding(
+                        {
+                            narrationStateProperty.value?.let {
+                                it == NarrationStateType.RECORDING_PAUSED
+                            } ?: false
+                        },
+                        narrationStateProperty
+                    )
+                )
+
+
                 var delta = 0.0
                 var oldPos = 0.0
 
@@ -86,11 +96,16 @@ class VerseMarkersLayer : BorderPane() {
                 prefHeightProperty().bind(this@VerseMarkersLayer.heightProperty())
 
                 dragTarget.setOnMousePressed { event ->
+
                     event.consume()
                     userIsDraggingProperty.set(true)
                     if (!canBeMovedProperty.value) return@setOnMousePressed
                     delta = 0.0
                     oldPos = layoutX
+
+                    FX.eventbus.fire(
+                        NarrationMovingMarkerEvent(verseMarkerControl.verseIndexProperty.value)
+                    )
                 }
 
                 dragTarget.setOnMouseDragged { event ->
@@ -162,3 +177,5 @@ fun EventTarget.verse_markers_layer(
 }
 
 class NarrationMarkerChangedEvent(val index: Int, val delta: Int) : FXEvent()
+
+class NarrationMovingMarkerEvent(val index: Int) : FXEvent()

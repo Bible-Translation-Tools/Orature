@@ -164,7 +164,7 @@ internal class ChapterRepresentation(
 
         history?.finalizeVerse(endIndex, totalVerses)
         onVersesUpdated()
-        return endIndex
+        return endIndex - 1 // subtract 1 due to the sector being finalized with `until`
     }
 
     fun onVersesUpdated() {

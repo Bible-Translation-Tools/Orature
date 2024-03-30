@@ -20,18 +20,25 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.dao
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.mockk.every
+import io.mockk.mockk
 import org.jooq.exception.DataAccessException
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.TestDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ResourceMetadataEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
 import java.io.File
+import kotlin.io.path.createTempDirectory
 
 class ResourceMetadataDaoTest {
+    private val directoryProvider = mockk<IDirectoryProvider> {
+        every { tempDirectory } returns createTempDirectory().toFile().apply { deleteOnExit() }
+    }
     private val testDatabaseFile = File.createTempFile(
         "test-resource-metadata-dao", ".sqlite"
     ).also(File::deleteOnExit)
@@ -53,7 +60,7 @@ class ResourceMetadataDaoTest {
 
     @Before
     fun setUp() {
-        database = AppDatabase(testDatabaseFile)
+        database = AppDatabase(testDatabaseFile, directoryProvider)
         seedLanguages()
     }
 

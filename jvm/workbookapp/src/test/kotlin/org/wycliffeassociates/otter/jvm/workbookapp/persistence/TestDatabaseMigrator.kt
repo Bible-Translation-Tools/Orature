@@ -18,6 +18,8 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence
 
+import io.mockk.every
+import io.mockk.mockk
 import jooq.Tables
 import jooq.tables.AudioPluginEntity
 import jooq.tables.InstalledEntity
@@ -27,11 +29,14 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.wycliffeassociates.otter.common.OratureInfo
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DATABASE_INSTALLABLE_NAME
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DatabaseMigrator
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.SCHEMA_VERSION
 import java.io.File
 import java.lang.Exception
+import kotlin.io.path.createTempDirectory
 
 class TestDatabaseMigrator {
 
@@ -39,6 +44,9 @@ class TestDatabaseMigrator {
     val dbFile = File.createTempFile("database", ".sqlite").apply { deleteOnExit() }
     val schemaFile = File.createTempFile("schema0", ".sql").apply { deleteOnExit() }
     val latestVersion = SCHEMA_VERSION
+    val directoryProvider = mockk<IDirectoryProvider> {
+        every { tempDirectory } returns createTempDirectory().toFile().apply { deleteOnExit() }
+    }
 
     @Before
     fun setup() {
@@ -109,7 +117,7 @@ class TestDatabaseMigrator {
             )
 
             try {
-                DatabaseMigrator().migrate(_dsl)
+                DatabaseMigrator(directoryProvider).migrate(_dsl)
             } catch (e: Exception) {
             }
 
@@ -163,7 +171,7 @@ class TestDatabaseMigrator {
             )
 
             try {
-                DatabaseMigrator().migrate(_dsl)
+                DatabaseMigrator(directoryProvider).migrate(_dsl)
             } catch (e: Exception) {
             }
 
@@ -182,7 +190,7 @@ class TestDatabaseMigrator {
     fun `migrated to the latest version`() {
         dsl?.let { _dsl ->
             try {
-                DatabaseMigrator().migrate(_dsl)
+                DatabaseMigrator(directoryProvider).migrate(_dsl)
             } catch (e: Exception) {
             }
 

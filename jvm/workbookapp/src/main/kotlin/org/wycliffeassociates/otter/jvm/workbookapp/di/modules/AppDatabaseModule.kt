@@ -36,7 +36,8 @@ class AppDatabaseModule {
         return AppDatabase(
             directoryProvider
                 .databaseDirectory
-                .resolve(File(DB_FILE_NAME))
+                .resolve(File(DB_FILE_NAME)),
+            directoryProvider
         )
     }
 }

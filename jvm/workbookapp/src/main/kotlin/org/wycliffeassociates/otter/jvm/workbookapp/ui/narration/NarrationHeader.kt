@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
+import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -29,8 +30,8 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
-import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
 import org.wycliffeassociates.otter.common.domain.project.ProjectCompletionStatus
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.chapterselector.chapterSelector
@@ -80,7 +81,7 @@ class NarrationHeader : View() {
                 setOnAction {
                     FX.eventbus.fire(NarrationUndoEvent())
                 }
-                enableWhen(viewModel.hasUndoProperty.and(viewModel.isRecordingProperty.not()))
+                enableWhen(viewModel.isUndoEnabledButtonProperty)
             }
             button {
                 tooltip = tooltip(messages["redoAction"])
@@ -89,14 +90,12 @@ class NarrationHeader : View() {
                 setOnAction {
                     FX.eventbus.fire(NarrationRedoEvent())
                 }
-                enableWhen(viewModel.hasRedoProperty.and(viewModel.isRecordingProperty.not()))
+                enableWhen(viewModel.isRedoEnabledButtonProperty)
             }
             narrationMenuButton(
-                viewModel.hasChapterTakeProperty,
-                viewModel.hasVersesProperty,
-                viewModel.hasAllItemsRecordedProperty
+                viewModel.narrationStateProperty
             ) {
-                enableWhen(viewModel.chapterTakeBusyProperty.not().and(viewModel.isRecordingProperty.not()))
+                disableWhen(viewModel.isChapterMenuButtonDisabled)
             }
             chapterSelector {
                 chapterTitleProperty.bind(viewModel.chapterTitleProperty)
@@ -114,8 +113,8 @@ class NarrationHeader : View() {
                     popupMenu.y = screenBound.maxY - 25
                 }
 
-                prevDisabledProperty.bind(viewModel.hasPreviousChapter.not().or(viewModel.isRecordingProperty))
-                nextDisabledProperty.bind(viewModel.hasNextChapter.not().or(viewModel.isRecordingProperty))
+                prevDisabledProperty.bind(viewModel.isPreviousChapterButtonDisabled)
+                nextDisabledProperty.bind(viewModel.isNextChapterButtonDisabled)
 
                 setOnPreviousChapter {
                     viewModel.selectPreviousChapter()
@@ -149,33 +148,98 @@ class NarrationHeaderViewModel : ViewModel() {
 
     val chapterTitleProperty = SimpleStringProperty()
 
-    val hasNextChapter = SimpleBooleanProperty()
-    val hasPreviousChapter = SimpleBooleanProperty()
-    val hasVersesProperty = SimpleBooleanProperty()
-    val hasAllItemsRecordedProperty = SimpleBooleanProperty()
-    val chapterTakeProperty = SimpleObjectProperty<Take>()
-    val hasChapterTakeProperty = chapterTakeProperty.isNotNull
-    val chapterTakeBusyProperty = SimpleBooleanProperty()
-
-    val hasUndoProperty = SimpleBooleanProperty()
-    val hasRedoProperty = SimpleBooleanProperty()
-    val isRecordingProperty = narrationViewModel.isRecordingProperty.or(narrationViewModel.isRecordingAgainProperty)
+    val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
+    val isUndoEnabledButtonProperty = SimpleBooleanProperty()
+    val isRedoEnabledButtonProperty = SimpleBooleanProperty()
+    val isChapterMenuButtonDisabled = SimpleBooleanProperty()
+    val isNextChapterButtonDisabled = SimpleBooleanProperty()
+    val isPreviousChapterButtonDisabled = SimpleBooleanProperty()
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
-        chapterTakeProperty.bind(narrationViewModel.chapterTakeProperty)
         chapterTitleProperty.bind(narrationViewModel.chapterTitleProperty)
-        hasNextChapter.bind(narrationViewModel.hasNextChapter)
-        hasPreviousChapter.bind(narrationViewModel.hasPreviousChapter)
-        chapterTakeBusyProperty.bind(narrationViewModel.isModifyingTakeAudioProperty)
+        narrationStateProperty.bind(narrationViewModel.narrationStateProperty)
 
-        hasUndoProperty.bind(narrationViewModel.hasUndoProperty)
-        hasRedoProperty.bind(narrationViewModel.hasRedoProperty)
-        hasVersesProperty.bind(narrationViewModel.hasVersesProperty)
-        hasAllItemsRecordedProperty.bind(narrationViewModel.hasAllItemsRecordedProperty)
+        isUndoEnabledButtonProperty.bind(
+            Bindings.createBooleanBinding(
+                {
+                    val isRecordingAgainPaused =
+                        narrationViewModel.narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN_PAUSED
+
+                    val isRecording =
+                        narrationViewModel.narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN
+                                || narrationViewModel.narrationStateProperty.value == NarrationStateType.RECORDING
+
+                    narrationViewModel.hasUndoProperty.value && !(isRecording || isRecordingAgainPaused)
+                },
+                narrationViewModel.hasUndoProperty, narrationViewModel.narrationStateProperty
+            )
+        )
+
+        isRedoEnabledButtonProperty.bind(
+            Bindings.createBooleanBinding(
+                {
+                    val isRecordingAgainPaused =
+                        narrationViewModel.narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN_PAUSED
+
+                    val isRecording =
+                        narrationViewModel.narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN
+                                || narrationViewModel.narrationStateProperty.value == NarrationStateType.RECORDING
+
+                    narrationViewModel.hasRedoProperty.value && !(isRecording || isRecordingAgainPaused)
+                },
+                narrationViewModel.hasRedoProperty, narrationViewModel.narrationStateProperty
+            )
+        )
+
+        isChapterMenuButtonDisabled.bind(
+            Bindings.createBooleanBinding(
+                {
+                    val isRecordingAgainPaused =
+                        narrationViewModel.narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN_PAUSED
+
+                    val isRecording =
+                        narrationViewModel.narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN
+                                || narrationViewModel.narrationStateProperty.value == NarrationStateType.RECORDING
+
+                    val isModifyingAudio =
+                        narrationViewModel.narrationStateProperty.value == NarrationStateType.MODIFYING_AUDIO_FILE
+
+                    isRecordingAgainPaused || isRecording || isModifyingAudio
+                },
+                narrationViewModel.narrationStateProperty
+            )
+        )
+
+
+        isNextChapterButtonDisabled.bind(
+            Bindings.createBooleanBinding(
+                {
+                    val isRecording = narrationViewModel.narrationStateProperty.value?.let {
+                        it == NarrationStateType.RECORDING || it == NarrationStateType.RECORDING_AGAIN
+                    } ?: false
+
+                    narrationViewModel.hasNextChapter.value.not() || isRecording
+                },
+                narrationViewModel.hasNextChapter, narrationViewModel.narrationStateProperty
+            )
+        )
+
+        isPreviousChapterButtonDisabled.bind(
+            Bindings.createBooleanBinding(
+                {
+                    val isRecording = narrationViewModel.narrationStateProperty.value?.let {
+                        it == NarrationStateType.RECORDING || it == NarrationStateType.RECORDING_AGAIN
+                    } ?: false
+
+                    narrationViewModel.hasPreviousChapter.value.not() || isRecording
+                },
+                narrationViewModel.hasPreviousChapter, narrationViewModel.narrationStateProperty
+            )
+        )
     }
 
     val chapterList: List<ChapterGridItemData>
