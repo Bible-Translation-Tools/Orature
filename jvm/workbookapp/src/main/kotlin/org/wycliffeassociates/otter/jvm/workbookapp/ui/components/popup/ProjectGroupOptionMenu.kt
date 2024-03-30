@@ -26,11 +26,12 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectContributorsEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectGroupDeleteEvent
+import org.wycliffeassociates.otter.jvm.controls.model.WorkbookDescriptorWrapper
 import tornadofx.FX.Companion.messages
 import tornadofx.*
 
 class ProjectGroupOptionMenu : ContextMenu() {
-    val books = observableListOf<WorkbookDescriptor>()
+    val books = observableListOf<WorkbookDescriptorWrapper>()
     init {
         val editContributorOption = MenuItem().apply {
             graphic = Label(messages["modifyContributors"]).apply {
@@ -38,7 +39,7 @@ class ProjectGroupOptionMenu : ContextMenu() {
                 tooltip(this.text)
             }
             action {
-                FX.eventbus.fire(ProjectContributorsEvent(books))
+                FX.eventbus.fire(ProjectContributorsEvent(books.map { it.workbookDescriptor }))
             }
         }
         val deleteOption = MenuItem().apply {
@@ -48,7 +49,7 @@ class ProjectGroupOptionMenu : ContextMenu() {
                 tooltip(this.text)
             }
             action {
-                FX.eventbus.fire(ProjectGroupDeleteEvent(books))
+                FX.eventbus.fire(ProjectGroupDeleteEvent(books.map { it.workbookDescriptor }))
             }
             disableWhen {
                 books.booleanBinding { list -> list.any { it.progress > 0 } }
