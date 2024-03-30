@@ -4,6 +4,10 @@ import javafx.beans.property.SimpleDoubleProperty
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import tornadofx.*
 
+/**
+ * Wrapper class for WorkbookDescriptor. This class makes use of JavaFX properties to
+ * update the field(s) which values take an extended time to compute, in a non-blocking fashion.
+ */
 data class WorkbookDescriptorWrapper(
     val workbookDescriptor: WorkbookDescriptor
 ) {
