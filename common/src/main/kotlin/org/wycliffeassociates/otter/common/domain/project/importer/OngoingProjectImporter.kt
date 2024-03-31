@@ -99,10 +99,10 @@ class OngoingProjectImporter @Inject constructor(
     private var projectAppVersion = ProjectAppVersion.THREE
     private var projectMode: ProjectMode = ProjectMode.TRANSLATION
     private var takesInChapterFilter: Map<String, Int>? = null
-    private var completedChapterTranslation: List<Int>? = null
+    private var completedChapterTranslation: List<Int>? = null // used for determining checking status
     private var takesCheckingMap: TakeCheckingStatusMap = mapOf()
-    private var completedChapterNarration = listOf<Int>()
-    private var takesToCompile = mutableMapOf<Int, List<File>>() // for migration from Ot1 - narration projects
+    private var completedChapterNarration = listOf<Int>() // store verses of incomplete chapter in Ot1 to compile
+    private var takesToCompile = mutableMapOf<Int, List<File>>() // for compiling verses of incomplete chapter in Ot1
     private var migratedSelectedTakes = listOf<String>() // list of selected take paths extracted from Ot1 database
 
     override fun import(
@@ -538,7 +538,7 @@ class OngoingProjectImporter @Inject constructor(
         val isNarrationMigration = projectAppVersion == ProjectAppVersion.ONE && projectMode == ProjectMode.NARRATION
         if (isNarrationMigration) {
             takesToCompile.forEach { (chapter, takeFiles) ->
-                compileIncompleteChapter(chapter, takeFiles, project, metadata)
+                compileIncompleteChapterNarration(chapter, takeFiles, project, metadata)
             }
         }
     }
@@ -804,7 +804,7 @@ class OngoingProjectImporter @Inject constructor(
      * can restore the file as one chapter take. Only call this method if the chapter
      * has not completed/compiled before migrating to Orature 3.x.
      */
-    private fun compileIncompleteChapter(
+    private fun compileIncompleteChapterNarration(
         chapterNumber: Int,
         takeFiles: List<File>,
         project: Collection,
