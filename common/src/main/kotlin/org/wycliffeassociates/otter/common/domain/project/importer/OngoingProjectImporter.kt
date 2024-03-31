@@ -99,8 +99,9 @@ class OngoingProjectImporter @Inject constructor(
     private var projectAppVersion = ProjectAppVersion.THREE
     private var projectMode: ProjectMode = ProjectMode.TRANSLATION
     private var takesInChapterFilter: Map<String, Int>? = null
-    private var completedChapters: List<Int>? = null
+    private var completedChapterTranslation: List<Int>? = null
     private var takesCheckingMap: TakeCheckingStatusMap = mapOf()
+    private var completedChapterNarration = listOf<Int>()
     private var takesToCompile = mutableMapOf<Int, List<File>>() // for migration from Ot1 - narration projects
     private var migratedSelectedTakes = listOf<String>() // list of selected take paths extracted from Ot1 database
 
@@ -115,8 +116,9 @@ class OngoingProjectImporter @Inject constructor(
         }
         projectName = ""
         takesInChapterFilter = null
-        completedChapters = null
+        completedChapterTranslation = null
         takesCheckingMap = mapOf()
+        completedChapterNarration = listOf()
         takesToCompile = mutableMapOf()
         migratedSelectedTakes = listOf()
         contentCache.clear()
@@ -317,7 +319,7 @@ class OngoingProjectImporter @Inject constructor(
 
         if (projectAppVersion == ProjectAppVersion.ONE) {
             callback?.onNotifyProgress(localizeKey = "loading_content", percent = 60.0)
-            completedChapters = takesInChapterFilter
+            completedChapterTranslation = takesInChapterFilter
                 ?.filterKeys { takePath ->
                     parseNumbers(takePath)?.contentSignature?.let { sig ->
                         sig.verse == null // filter only chapter take
@@ -330,6 +332,10 @@ class OngoingProjectImporter @Inject constructor(
             migratedSelectedTakes = directoryProvider.tempDirectory.resolve(SELECTED_TAKES_FROM_DB).let {
                 if (it.exists()) it.readLines() else listOf()
             }
+            completedChapterNarration = migratedSelectedTakes
+                .mapNotNull { path -> parseNumbers(path)?.contentSignature }
+                .filter { it.verse == null } // filter selected chapter
+                .map { it.chapter }
         }
         importContributorInfo(metadata, projectFilesAccessor)
         importChunks(
@@ -598,16 +604,11 @@ class OngoingProjectImporter @Inject constructor(
                 val checkingStatus = when {
                     projectAppVersion.ordinal >= ProjectAppVersion.THREE.ordinal -> takesCheckingMap[relativeFile.name]
 
-                    completedChapters?.contains(sig.chapter) == true -> {
+                    completedChapterTranslation?.contains(sig.chapter) == true -> {
                         TakeCheckingState(CheckingStatus.VERSE, computeFileChecksum(file))
                     }
 
                     else -> {
-                        // store (verse) takes of incomplete chapter to compile later
-                        if (projectMode == ProjectMode.NARRATION && isSelected) {
-                            val existingFiles = takesToCompile.getOrDefault(sig.chapter, listOf())
-                            takesToCompile[sig.chapter] = existingFiles.plus(file)
-                        }
                         null
                     }
                 }
@@ -629,6 +630,13 @@ class OngoingProjectImporter @Inject constructor(
                 if (isSelected) {
                     chunk.selectedTake = take
                     contentRepository.update(chunk).blockingAwait()
+
+                    val isNarrationMigration = projectMode == ProjectMode.NARRATION && projectAppVersion == ProjectAppVersion.ONE
+                    // store verse take of incomplete chapter narration to compile later
+                    if (isNarrationMigration && sig.chapter !in completedChapterNarration && sig.verse != null) {
+                        val existingFiles = takesToCompile.getOrDefault(sig.chapter, listOf())
+                        takesToCompile[sig.chapter] = existingFiles.plus(file)
+                    }
                 }
             }
         }
