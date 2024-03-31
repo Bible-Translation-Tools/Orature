@@ -318,7 +318,7 @@ class OngoingProjectImporter @Inject constructor(
         if (projectAppVersion == ProjectAppVersion.ONE) {
             callback?.onNotifyProgress(localizeKey = "loading_content", percent = 60.0)
             deriveChapterContentFromVerses(derivedProject, projectFilesAccessor)
-            setMigrationInfo()
+            setMigrationInfo(fileReader)
         }
         importContributorInfo(metadata, projectFilesAccessor)
         importChunks(
@@ -354,10 +354,17 @@ class OngoingProjectImporter @Inject constructor(
         return derivedProject
     }
 
-    private fun setMigrationInfo() {
+    private fun setMigrationInfo(fileReader: IFileReader) {
         migratedSelectedTakes = directoryProvider.tempDirectory.resolve(SELECTED_TAKES_FROM_DB).let {
             if (it.exists()) it.readLines() else listOf()
         }
+        val selectedChaptersFromProjectFile = prepareSelectedTakes(fileReader)
+            .mapNotNull { parseNumbers(it) }
+            .filter { sig ->
+                sig.contentSignature.verse == null
+            }
+            .map { it.contentSignature.chapter }
+
         val selectedTakeNames = migratedSelectedTakes.map { File(it).name }
         completedChapters = takesInChapterFilter
             ?.filterKeys { takePath ->
@@ -368,6 +375,7 @@ class OngoingProjectImporter @Inject constructor(
                 isChapter && File(takePath).name in selectedTakeNames
             }
             ?.values
+            ?.union(selectedChaptersFromProjectFile)
             ?.toList()
             ?: listOf()
     }
