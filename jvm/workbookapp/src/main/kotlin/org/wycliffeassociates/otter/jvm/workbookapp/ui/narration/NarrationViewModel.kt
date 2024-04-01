@@ -674,13 +674,12 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun onChapterReturnFromPlugin(pluginType: PluginType) {
-
-        Completable.create {
-            openLoadingModalProperty.set(true)
-            narration.loadFromSelectedChapterFile()
-            recordedVerses.setAll(narration.activeVerses)
-
-            runLater {
+        narration.loadFromSelectedChapterFileTask()
+            .doOnSubscribe {
+                openLoadingModalProperty.set(true)
+            }
+            .doOnComplete {
+                recordedVerses.setAll(narration.activeVerses)
                 resetNarratableList()
                 // Indicates that we used a temporary take to edit the chapter
                 if (hasAllItemsRecordedProperty.value == false) {
@@ -690,8 +689,9 @@ class NarrationViewModel : ViewModel() {
                 openLoadingModalProperty.set(false)
                 FX.eventbus.fire(PluginClosedEvent(pluginType))
             }
-            it.onComplete()
-        }
+            .doFinally {
+                openLoadingModalProperty.set(false)
+            }
             .subscribeOn(Schedulers.io())
             .subscribe()
     }
@@ -846,11 +846,19 @@ class NarrationViewModel : ViewModel() {
                     }
 
                     else -> {
-                        narration.onEditVerse(verseIndex, file)
-                        resetNarratableList()
+                        narration.onEditVerseTask(verseIndex, file)
+                            .doOnSubscribe {
+                                openLoadingModalProperty.set(true)
+                            }
+                            .doFinally {
+                                resetNarratableList()
+                                openLoadingModalProperty.set(false)
+                                FX.eventbus.fire(PluginClosedEvent(pluginType))
+                            }
+                            .subscribeOn(Schedulers.io())
+                            .subscribe()
                     }
                 }
-                FX.eventbus.fire(PluginClosedEvent(pluginType))
             }
     }
 

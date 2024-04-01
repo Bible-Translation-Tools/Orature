@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.common.domain.narration
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -151,8 +152,11 @@ class Narration @AssistedInject constructor(
         return chapterRepresentation.totalVerses.first().marker
     }
 
-    fun loadFromSelectedChapterFile() {
-        restoreFromExistingChapterAudio(true)
+    fun loadFromSelectedChapterFileTask(): Completable {
+        return Completable.create {
+            restoreFromExistingChapterAudio(true)
+            it.onComplete()
+        }
     }
 
     fun getPlayer(): IAudioPlayer {
@@ -265,28 +269,31 @@ class Narration @AssistedInject constructor(
         NarrationTakeModifier.modifyMetadata(takeToModify, activeVerses)
     }
 
-    fun onEditVerse(verseIndex: Int, editedFile: File) {
+    fun onEditVerseTask(verseIndex: Int, editedFile: File): Completable {
 
-        loadSectionIntoPlayer(totalVerses[verseIndex])
+        return Completable.create {
+            loadSectionIntoPlayer(totalVerses[verseIndex])
 
-        val scratchAudio = chapterRepresentation.scratchAudio
-        val start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1
-        audioFileUtils.appendFile(chapterRepresentation.scratchAudio, editedFile)
-        val end = chapterRepresentation.scratchAudio.totalFrames
+            val scratchAudio = chapterRepresentation.scratchAudio
+            val start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1
+            audioFileUtils.appendFile(chapterRepresentation.scratchAudio, editedFile)
+            val end = chapterRepresentation.scratchAudio.totalFrames
 
-        val frameSize = chapterRepresentation.frameSizeInBytes
+            val frameSize = chapterRepresentation.frameSizeInBytes
 
-        val action = EditVerseAction(verseIndex, start * frameSize, end * frameSize)
-        execute(action)
+            val action = EditVerseAction(verseIndex, start * frameSize, end * frameSize)
+            execute(action)
 
-        NarrationTakeModifier.modifyAudioData(
-            takeToModify,
-            chapterRepresentation.getAudioFileReader(),
-            activeVerses
-        )
+            NarrationTakeModifier.modifyAudioData(
+                takeToModify,
+                chapterRepresentation.getAudioFileReader(),
+                activeVerses
+            )
 
-        audioLoaded = false
-        loadChapterIntoPlayer()
+            audioLoaded = false
+            loadChapterIntoPlayer()
+            it.onComplete()
+        }
     }
 
     fun onResetAll() {
@@ -320,7 +327,8 @@ class Narration @AssistedInject constructor(
         audioLoaded = false
         loadChapterIntoPlayer()
 
-        val lastAbsoluteFrame = chapterRepresentation.totalVerses[index].lastIndex() / chapterRepresentation.frameSizeInBytes
+        val lastAbsoluteFrame =
+            chapterRepresentation.totalVerses[index].lastIndex() / chapterRepresentation.frameSizeInBytes
         val seekFrame = chapterRepresentation.absoluteFrameToRelativeChapterFrame(lastAbsoluteFrame)
         seek(seekFrame)
 
@@ -649,7 +657,8 @@ class Narration @AssistedInject constructor(
             }
             ?: chapterRepresentation.apply {
                 if (activeVerses.isNotEmpty()) {
-                    val lastFrame = absoluteFrameToRelativeChapterFrame(activeVerses.last().lastIndex() / frameSizeInBytes)
+                    val lastFrame =
+                        absoluteFrameToRelativeChapterFrame(activeVerses.last().lastIndex() / frameSizeInBytes)
                     logger.info("Next marker not found, seeking to end of audio; frame: $lastFrame")
                     seek(lastFrame)
                 }
@@ -657,7 +666,8 @@ class Narration @AssistedInject constructor(
     }
 
     fun findMarkerAtFrame(frame: Int): AudioMarker? {
-        val frame = chapterRepresentation.relativeChapterFrameToAbsoluteIndex(frame) / chapterRepresentation.frameSizeInBytes
+        val frame =
+            chapterRepresentation.relativeChapterFrameToAbsoluteIndex(frame) / chapterRepresentation.frameSizeInBytes
         return chapterRepresentation.findVerse(frame)?.marker
     }
 }
