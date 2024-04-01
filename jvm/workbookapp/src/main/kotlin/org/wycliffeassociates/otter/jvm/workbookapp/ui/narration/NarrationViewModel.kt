@@ -678,7 +678,7 @@ class NarrationViewModel : ViewModel() {
             .doOnSubscribe {
                 openLoadingModalProperty.set(true)
             }
-            .doOnComplete {
+            .doFinally {
                 recordedVerses.setAll(narration.activeVerses)
                 resetNarratableList()
                 // Indicates that we used a temporary take to edit the chapter
@@ -686,11 +686,9 @@ class NarrationViewModel : ViewModel() {
                     // Deletes the wav file for the temporary take since it will not be referenced to again
                     narration.deleteChapterTake(true)
                 }
+
                 openLoadingModalProperty.set(false)
                 FX.eventbus.fire(PluginClosedEvent(pluginType))
-            }
-            .doFinally {
-                openLoadingModalProperty.set(false)
             }
             .subscribeOn(Schedulers.io())
             .subscribe()
