@@ -422,14 +422,13 @@ class NarrationViewModel : ViewModel() {
                 .onErrorReturn { PluginActions.Result.NO_PLUGIN }
                 .subscribe { result: PluginActions.Result ->
                     logger.info("Returned from plugin with result: $result")
-                    FX.eventbus.fire(PluginClosedEvent(pluginType))
 
                     when (result) {
                         PluginActions.Result.NO_PLUGIN -> FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
                         else -> {
                             when (pluginType) {
                                 PluginType.EDITOR, PluginType.MARKER -> {
-                                    FX.eventbus.fire(ChapterReturnFromPluginEvent())
+                                    onChapterReturnFromPlugin(pluginType)
                                 }
 
                                 else -> {
@@ -674,7 +673,7 @@ class NarrationViewModel : ViewModel() {
         processWithEditor(file, index)
     }
 
-    fun onChapterReturnFromPlugin() {
+    fun onChapterReturnFromPlugin(pluginType: PluginType) {
 
         Completable.create {
             openLoadingModalProperty.set(true)
@@ -689,13 +688,12 @@ class NarrationViewModel : ViewModel() {
                     narration.deleteChapterTake(true)
                 }
                 openLoadingModalProperty.set(false)
+                FX.eventbus.fire(PluginClosedEvent(pluginType))
             }
             it.onComplete()
         }
             .subscribeOn(Schedulers.io())
             .subscribe()
-
-
     }
 
     fun onNext(currentIndex: Int) {
