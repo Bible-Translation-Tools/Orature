@@ -39,6 +39,10 @@ class LanguageTableRow(
         isMouseTransparent = isDisable
         isFocusTraversable = !isDisable
 
+        if (item.slug == "am") {
+            this.addClass("ethiopic-font")
+        }
+
         setOnMouseClicked {
             if (it.clickCount == 1) { // avoid double fire()
                 FX.eventbus.fire(LanguageSelectedEvent(item))

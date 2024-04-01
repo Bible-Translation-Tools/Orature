@@ -58,6 +58,10 @@
     -fx-font-size: 10pt;
 }
 
+.ethiopic-font {
+    -fx-font-family: 'Noto Sans Ethiopic';
+}
+
 .centered {
     -fx-alignment: center;
 }
