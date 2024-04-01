@@ -150,7 +150,7 @@ class PluginOpenedPage : View() {
         find<LoadingModal>().apply {
             orientationProperty.set(orientationProperty.value)
             themeProperty.set(appColorModeProperty.value)
-            messageProperty.set(messages["savingProjectWait"])
+            messageProperty.set(messages["loadingProjectWait"])
 
             openLoadingModalProperty.onChangeWithDisposer {
                 it?.let {
