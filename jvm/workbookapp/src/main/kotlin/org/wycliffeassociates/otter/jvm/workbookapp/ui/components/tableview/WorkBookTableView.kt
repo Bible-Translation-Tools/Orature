@@ -31,15 +31,15 @@ import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.util.Callback
-import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.controls.model.WorkbookDescriptorWrapper
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class WorkBookTableView(
-    books: ObservableList<WorkbookDescriptor>
-) : TableView<WorkbookDescriptor>(books) {
+    books: ObservableList<WorkbookDescriptorWrapper>
+) : TableView<WorkbookDescriptorWrapper>(books) {
 
     private val selectedIndexProperty = SimpleIntegerProperty(-1)
 
@@ -92,7 +92,7 @@ class WorkBookTableView(
             bindColumnSortComparator()
         }
         column(messages["progress"], Number::class) {
-            setCellValueFactory { it.value.progress.toProperty() }
+            setCellValueFactory { it.value.progressProperty }
             cellFormat {
                 val percent = item.toDouble()
                 graphic = MFXProgressBar(percent).apply {
@@ -114,7 +114,7 @@ class WorkBookTableView(
             maxWidth = 100.0
             bindColumnSortComparator()
         }
-        column("", WorkbookDescriptor::class) {
+        column("", WorkbookDescriptorWrapper::class) {
             setCellValueFactory { SimpleObjectProperty(it.value) }
             setCellFactory {
                 WorkbookOptionTableCell(selectedIndexProperty)
@@ -125,7 +125,7 @@ class WorkBookTableView(
             isSortable = false
         }
 
-        sortPolicy = CUSTOM_SORT_POLICY as (Callback<TableView<WorkbookDescriptor>, Boolean>)
+        sortPolicy = CUSTOM_SORT_POLICY as (Callback<TableView<WorkbookDescriptorWrapper>, Boolean>)
         setRowFactory {
             WorkbookTableRow()
         }
@@ -153,7 +153,7 @@ class WorkBookTableView(
 
 private fun WorkBookTableView.handleDefaultSortOrder() {
     val list = this.items
-    if (list is SortedList<WorkbookDescriptor>) {
+    if (list is SortedList<WorkbookDescriptorWrapper>) {
         comparatorProperty().onChangeAndDoNow {
             if (sortOrder.isEmpty()) {
                 // when toggled to "unsorted", resets to default order (usually Biblical order)
@@ -169,6 +169,6 @@ private fun WorkBookTableView.handleDefaultSortOrder() {
  * Constructs a workbook table and attach it to the parent.
  */
 fun EventTarget.workbookTableView(
-    values: ObservableList<WorkbookDescriptor>,
+    values: ObservableList<WorkbookDescriptorWrapper>,
     op: WorkBookTableView.() -> Unit = {}
 ) = WorkBookTableView(values).attachTo(this, op)

@@ -48,6 +48,7 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.NOTIFICATION_DURATION_SEC
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.controls.model.WorkbookDescriptorWrapper
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChunkingTranslationPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.NarrationPage
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -82,10 +83,10 @@ class HomePageViewModel2 : ViewModel() {
     private val settingsViewModel: SettingsViewModel by inject()
 
     val projectGroups = observableListOf<ProjectGroupCardModel>()
-    val bookList = observableListOf<WorkbookDescriptor>()
-    private val filteredBooks = FilteredList<WorkbookDescriptor>(bookList)
+    val bookList = observableListOf<WorkbookDescriptorWrapper>()
+    private val filteredBooks = FilteredList<WorkbookDescriptorWrapper>(bookList)
     private val disposableListeners = mutableListOf<ListenerDisposer>()
-    val sortedBooks = SortedList<WorkbookDescriptor>(filteredBooks)
+    val sortedBooks = SortedList<WorkbookDescriptorWrapper>(filteredBooks)
 
     val selectedProjectGroupProperty = SimpleObjectProperty<ProjectGroupKey>()
     val bookSearchQueryProperty = SimpleStringProperty("")
@@ -148,7 +149,16 @@ class HomePageViewModel2 : ViewModel() {
         workbookDescriptorRepo.getAll()
             .observeOnFx()
             .subscribe { books ->
-                updateBookList(books)
+                val bookWrappers = books.map { book ->
+                    WorkbookDescriptorWrapper(book).apply {
+                        book.progress
+                            .observeOnFx()
+                            .subscribe { p ->
+                                this.progressProperty.set(p)
+                            }
+                    }
+                }
+                updateBookList(bookWrappers)
                 runLater {
                     onFinishCallback()
                     isLoadingProperty.set(false)
@@ -188,7 +198,7 @@ class HomePageViewModel2 : ViewModel() {
         projectWizardViewModel.increaseProjectDeleteCounter()
 
         val timerDisposable = deleteProjectUseCase
-            .deleteProjectsWithTimer(cardModel.books, timeoutMillis.toInt())
+            .deleteProjectsWithTimer(cardModel.booksModel, timeoutMillis.toInt())
             .observeOnFx()
             .doOnComplete {
                 logger.info("Deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
@@ -260,7 +270,7 @@ class HomePageViewModel2 : ViewModel() {
 
         Observable.fromIterable(projectsWithDeleteTimer.keys)
             .concatMapCompletable { cardModel ->
-                deleteProjectUseCase.deleteProjects(cardModel.books)
+                deleteProjectUseCase.deleteProjects(cardModel.booksModel)
                     .doOnComplete {
                         logger.info("Force-deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
                     }
@@ -322,7 +332,7 @@ class HomePageViewModel2 : ViewModel() {
         }
     }
 
-    private fun updateBookList(books: List<WorkbookDescriptor>) {
+    private fun updateBookList(books: List<WorkbookDescriptorWrapper>) {
         if (books.isEmpty()) {
             bookList.clear()
             projectGroups.clear()

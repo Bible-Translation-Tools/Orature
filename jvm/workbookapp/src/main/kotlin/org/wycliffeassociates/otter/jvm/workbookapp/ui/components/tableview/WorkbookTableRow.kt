@@ -19,13 +19,13 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 
 import javafx.scene.control.TableRow
-import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookOpenEvent
+import org.wycliffeassociates.otter.jvm.controls.model.WorkbookDescriptorWrapper
 import tornadofx.FX
 
-class WorkbookTableRow : TableRow<WorkbookDescriptor>() {
+class WorkbookTableRow : TableRow<WorkbookDescriptorWrapper>() {
 
-    override fun updateItem(item: WorkbookDescriptor?, empty: Boolean) {
+    override fun updateItem(item: WorkbookDescriptorWrapper?, empty: Boolean) {
         super.updateItem(item, empty)
 
         if (item == null || isEmpty) {
@@ -38,7 +38,7 @@ class WorkbookTableRow : TableRow<WorkbookDescriptor>() {
 
         setOnMouseClicked {
             if (it.clickCount == 1) {
-                FX.eventbus.fire(WorkbookOpenEvent(item))
+                FX.eventbus.fire(WorkbookOpenEvent(item.workbookDescriptor))
             }
         }
     }
