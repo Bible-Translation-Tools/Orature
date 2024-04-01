@@ -24,15 +24,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.Chunkification
-import org.wycliffeassociates.otter.common.data.audio.OratureCueType
-import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.primitives.SerializableProjectMode
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
-import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -195,12 +192,6 @@ class ResourceContainerBuilder(baseRC: File? = null) {
                 tempTakeFile.copyTo(this, overwrite = true)
                 deleteOnExit()
             }
-        if (start != null && end != null) {
-            OratureAudioFile(takeToAdd).apply {
-                addMarker(VerseMarker(start, end, 0))
-                update()
-            }
-        }
 
         val chapterDirTokens = "c${chapter.toString().padStart(2, '0')}"
         val relativePath = "$chapterDirTokens/$fileName"
