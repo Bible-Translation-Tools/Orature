@@ -18,20 +18,26 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.dao
 
+import io.mockk.every
+import io.mockk.mockk
 import io.reactivex.Completable
 import io.reactivex.ObservableEmitter
 import jooq.Tables.INSTALLED_ENTITY
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.common.data.ProgressStatus
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.config.Installable
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import java.io.File
+import kotlin.io.path.createTempDirectory
 
 class TestInstalledEntityDao {
-
+    private val directoryProvider = mockk<IDirectoryProvider> {
+        every { tempDirectory } returns createTempDirectory().toFile().apply { deleteOnExit() }
+    }
     private val testDatabaseFile = File.createTempFile("test-db", ".sqlite").also(File::deleteOnExit)
-    private val database = AppDatabase(testDatabaseFile)
+    private val database = AppDatabase(testDatabaseFile, directoryProvider)
     private val dao = database.installedEntityDao
 
     private val installable = SimpleInstallable("test", 1)

@@ -18,6 +18,8 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.dao
 
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -26,13 +28,18 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.TranslationEntity
 import java.io.File
 import java.time.LocalDateTime
+import kotlin.io.path.createTempDirectory
 
 class TranslationDaoTest {
+    private val directoryProvider = mockk<IDirectoryProvider> {
+        every { tempDirectory } returns createTempDirectory().toFile().apply { deleteOnExit() }
+    }
     private val testDatabaseFile = File.createTempFile(
         "test-translation-dao", ".sqlite"
     ).also(File::deleteOnExit)
@@ -48,7 +55,7 @@ class TranslationDaoTest {
 
     @Before
     fun setup() {
-        database = AppDatabase(testDatabaseFile)
+        database = AppDatabase(testDatabaseFile, directoryProvider)
         database.dsl.execute("PRAGMA foreign_keys = OFF;")
     }
 

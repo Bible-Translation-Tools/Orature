@@ -24,17 +24,26 @@ import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.jooq.impl.SQLDataType
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.assets.initialization.InitializeProjects
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.utils.SELECTED_TAKES_FROM_DB
+import java.io.File
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus as CheckingStatusEnum
 
 const val SCHEMA_VERSION = 13
 const val DATABASE_INSTALLABLE_NAME = "DATABASE"
 
-class DatabaseMigrator {
+class DatabaseMigrator(
+    private val directoryProvider: IDirectoryProvider
+) {
     val logger = LoggerFactory.getLogger(DatabaseMigrator::class.java)
 
     fun migrate(dsl: DSLContext) {
         var currentVersion = getDatabaseVersion(dsl)
         if (currentVersion != SCHEMA_VERSION) {
+            if (currentVersion <= 8) { // Ot1
+                extractSelectedTakeInfo(dsl)
+            }
             currentVersion = migrate0to1(dsl, currentVersion)
             currentVersion = migrate1to2(dsl, currentVersion)
             currentVersion = migrate2to3(dsl, currentVersion)
@@ -76,6 +85,22 @@ class DatabaseMigrator {
             .set(InstalledEntity.INSTALLED_ENTITY.VERSION, version)
             .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq(DATABASE_INSTALLABLE_NAME))
             .execute()
+    }
+
+    /**
+     * Extracts the selected take files from Ot1 database due to potentially out-of-date selected.txt.
+     */
+    private fun extractSelectedTakeInfo(dsl: DSLContext) {
+        val pathsToSelected = dsl
+            .select()
+            .from(ContentEntity.CONTENT_ENTITY.name)
+            .join(TakeEntity.TAKE_ENTITY.name)
+            .on("${ContentEntity.CONTENT_ENTITY.SELECTED_TAKE_FK.name} = ${TakeEntity.TAKE_ENTITY.name}.id")
+            .fetch(TakeEntity.TAKE_ENTITY.PATH.name)
+
+        val filePathsToSave = pathsToSelected.map { File(it.toString()).canonicalPath }
+        directoryProvider.tempDirectory.resolve(SELECTED_TAKES_FROM_DB)
+            .writeText(filePathsToSave.joinToString("\n"))
     }
 
     /**

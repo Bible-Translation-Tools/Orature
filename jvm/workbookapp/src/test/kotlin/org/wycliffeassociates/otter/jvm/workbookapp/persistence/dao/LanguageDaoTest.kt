@@ -18,18 +18,22 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.dao
 
+import io.mockk.every
+import io.mockk.mockk
 import org.jooq.exception.DataAccessException
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.TestDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.LanguageEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
 import java.io.File
+import kotlin.io.path.createTempDirectory
 
 class LanguageDaoTest {
     private val testDatabaseFile = File.createTempFile(
@@ -39,10 +43,13 @@ class LanguageDaoTest {
     private val dao by lazy { database.languageDao }
 
     private val languages = TestDataStore.languages
+    private val directoryProvider = mockk<IDirectoryProvider> {
+        every { tempDirectory } returns createTempDirectory().toFile().apply { deleteOnExit() }
+    }
 
     @Before
     fun setup() {
-        database = AppDatabase(testDatabaseFile)
+        database = AppDatabase(testDatabaseFile, directoryProvider)
         dao.insertAll(
             TestDataStore.languages.map { LanguageMapper().mapToEntity(it) }
         )
