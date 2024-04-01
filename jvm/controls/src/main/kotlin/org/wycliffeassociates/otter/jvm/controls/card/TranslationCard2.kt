@@ -161,6 +161,7 @@ class ActiveTranslationCardSkin(card: TranslationCard2) : SkinBase<TranslationCa
             addClass("translation-card__body")
             label(sourceLanguageProperty) {
                 addClass("translation-card__language")
+                toggleClass("ethiopic-font", card.sourceLanguageProperty.value.slug == "am")
                 graphic = FontIcon(Material.HEARING)
             }
             label {
@@ -169,6 +170,7 @@ class ActiveTranslationCardSkin(card: TranslationCard2) : SkinBase<TranslationCa
             }
             label(targetLanguageProperty) {
                 addClass("translation-card__language")
+                toggleClass("ethiopic-font", card.targetLanguageProperty.value.slug == "am")
                 graphic = FontIcon(MaterialDesign.MDI_VOICE)
             }
         }

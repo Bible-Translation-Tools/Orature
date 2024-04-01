@@ -69,6 +69,7 @@ class NewTranslationCard2(
                 textProperty().bind(
                     sourceLanguageProperty.stringBinding { source ->
                         togglePseudoClass("unset", source == null)
+                        toggleClass("ethiopic-font", source?.slug == "am")
                         source?.name ?: "???"
                     }
                 )
@@ -86,6 +87,7 @@ class NewTranslationCard2(
                 textProperty().bind(
                     targetLanguageProperty.stringBinding { target ->
                         togglePseudoClass("unset", target == null)
+                        toggleClass("ethiopic-font", target?.slug == "am")
                         target?.name ?: "???"
                     }
                 )
