@@ -100,6 +100,7 @@ class OngoingProjectImporter @Inject constructor(
     private var projectMode: ProjectMode = ProjectMode.TRANSLATION
     private var takesInChapterFilter: Map<String, Int>? = null
     private var takesCheckingMap: TakeCheckingStatusMap = mapOf()
+    private var takesInSelectedFile = setOf<String>()
     private var completedChapters = listOf<Int>() // for Ot1 projects
     private var takesToCompile = mutableMapOf<Int, List<File>>() // for compiling verses of incomplete chapter in Ot1
     private var migratedSelectedTakes = listOf<String>() // list of all selected take paths extracted from Ot1 database
@@ -116,6 +117,7 @@ class OngoingProjectImporter @Inject constructor(
         projectName = ""
         takesInChapterFilter = null
         takesCheckingMap = mapOf()
+        takesInSelectedFile = setOf()
         completedChapters = listOf()
         takesToCompile = mutableMapOf()
         migratedSelectedTakes = listOf()
@@ -311,14 +313,14 @@ class OngoingProjectImporter @Inject constructor(
 
         projectFilesAccessor.initializeResourceContainerInDir()
         projectFilesAccessor.setProjectMode(projectMode)
+        takesInSelectedFile = prepareSelectedTakes(fileReader)
 
         callback?.onNotifyProgress(localizeKey = "copyingSource", percent = 40.0)
         projectFilesAccessor.copySourceFiles(fileReader)
-
         if (projectAppVersion == ProjectAppVersion.ONE) {
             callback?.onNotifyProgress(localizeKey = "loading_content", percent = 60.0)
             deriveChapterContentFromVerses(derivedProject, projectFilesAccessor)
-            setMigrationInfo(fileReader)
+            setMigrationInfo(takesInSelectedFile)
         }
         importContributorInfo(metadata, projectFilesAccessor)
         importChunks(
@@ -354,11 +356,11 @@ class OngoingProjectImporter @Inject constructor(
         return derivedProject
     }
 
-    private fun setMigrationInfo(fileReader: IFileReader) {
+    private fun setMigrationInfo(selectedTakesInProject: Set<String>) {
         migratedSelectedTakes = directoryProvider.tempDirectory.resolve(SELECTED_TAKES_FROM_DB).let {
             if (it.exists()) it.readLines() else listOf()
         }
-        val selectedChaptersFromProjectFile = prepareSelectedTakes(fileReader)
+        val selectedChaptersFromProjectFile = selectedTakesInProject
             .mapNotNull { parseNumbers(it) }
             .filter { sig ->
                 sig.contentSignature.verse == null
@@ -522,9 +524,6 @@ class OngoingProjectImporter @Inject constructor(
             else -> project
         }
         val sourceMetadata = sourceCollection.resourceContainer!!
-
-        val selectedTakes = prepareSelectedTakes(fileReader)
-
         takesCheckingMap = parseCheckingStatusFile(fileReader)
 
         projectFilesAccessor.copySelectedTakesFile(fileReader)
@@ -540,7 +539,7 @@ class OngoingProjectImporter @Inject constructor(
                     projectFilesAccessor.audioDir,
                     collectionForTakes,
                     sourceMetadata,
-                    selectedTakes
+                    takesInSelectedFile
                 )
             }
         
