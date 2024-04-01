@@ -40,6 +40,18 @@
     src: url('/fonts/NotoSans-BoldItalic.ttf');
 }
 
+@font-face {
+    font-family: 'Noto Sans Ethiopic';
+    font-size: 10pt;
+    src: url('/fonts/NotoSansEthiopic-Regular.ttf');
+}
+
+@font-face {
+    font-family: 'Noto Sans Ethiopic Bold';
+    font-size: 10pt;
+    src: url('/fonts/NotoSansEthiopic-Bold.ttf');
+}
+
 .root {
     -fx-font-family: 'Noto Sans';
     -fx-font-weight: normal;
