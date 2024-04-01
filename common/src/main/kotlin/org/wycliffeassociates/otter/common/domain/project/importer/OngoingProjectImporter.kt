@@ -99,10 +99,11 @@ class OngoingProjectImporter @Inject constructor(
     private var projectAppVersion = ProjectAppVersion.THREE
     private var projectMode: ProjectMode = ProjectMode.TRANSLATION
     private var takesInChapterFilter: Map<String, Int>? = null
-    private var completedChapters: List<Int>? = null
     private var takesCheckingMap: TakeCheckingStatusMap = mapOf()
-    private var takesToCompile = mutableMapOf<Int, List<File>>() // for migration from Ot1 - narration projects
-    private var migratedSelectedTakes = listOf<String>() // list of selected take paths extracted from Ot1 database
+    private var takesInSelectedFile = setOf<String>()
+    private var completedChapters = listOf<Int>() // for Ot1 projects
+    private var takesToCompile = mutableMapOf<Int, List<File>>() // for compiling verses of incomplete chapter in Ot1
+    private var migratedSelectedTakes = listOf<String>() // list of all selected take paths extracted from Ot1 database
 
     override fun import(
         file: File,
@@ -115,8 +116,9 @@ class OngoingProjectImporter @Inject constructor(
         }
         projectName = ""
         takesInChapterFilter = null
-        completedChapters = null
         takesCheckingMap = mapOf()
+        takesInSelectedFile = setOf()
+        completedChapters = listOf()
         takesToCompile = mutableMapOf()
         migratedSelectedTakes = listOf()
         contentCache.clear()
@@ -311,25 +313,14 @@ class OngoingProjectImporter @Inject constructor(
 
         projectFilesAccessor.initializeResourceContainerInDir()
         projectFilesAccessor.setProjectMode(projectMode)
+        takesInSelectedFile = prepareSelectedTakes(fileReader)
 
         callback?.onNotifyProgress(localizeKey = "copyingSource", percent = 40.0)
         projectFilesAccessor.copySourceFiles(fileReader)
-
         if (projectAppVersion == ProjectAppVersion.ONE) {
             callback?.onNotifyProgress(localizeKey = "loading_content", percent = 60.0)
-            completedChapters = takesInChapterFilter
-                ?.filterKeys { takePath ->
-                    parseNumbers(takePath)?.contentSignature?.let { sig ->
-                        sig.verse == null // filter only chapter take
-                    } ?: false
-                }
-                ?.values
-                ?.toList()
-
             deriveChapterContentFromVerses(derivedProject, projectFilesAccessor)
-            migratedSelectedTakes = directoryProvider.tempDirectory.resolve(SELECTED_TAKES_FROM_DB).let {
-                if (it.exists()) it.readLines() else listOf()
-            }
+            setMigrationInfo(takesInSelectedFile)
         }
         importContributorInfo(metadata, projectFilesAccessor)
         importChunks(
@@ -363,6 +354,32 @@ class OngoingProjectImporter @Inject constructor(
         callback?.onNotifyProgress(localizeKey = "finishingUp", percent = 99.0)
 
         return derivedProject
+    }
+
+    private fun setMigrationInfo(selectedTakesInProject: Set<String>) {
+        migratedSelectedTakes = directoryProvider.tempDirectory.resolve(SELECTED_TAKES_FROM_DB).let {
+            if (it.exists()) it.readLines() else listOf()
+        }
+        val selectedChaptersFromProjectFile = selectedTakesInProject
+            .mapNotNull { parseNumbers(it) }
+            .filter { sig ->
+                sig.contentSignature.verse == null
+            }
+            .map { it.contentSignature.chapter }
+
+        val selectedTakeNames = migratedSelectedTakes.map { File(it).name }
+        completedChapters = takesInChapterFilter
+            ?.filterKeys { takePath ->
+                val isChapter = parseNumbers(takePath)
+                    ?.contentSignature
+                    ?.let { sig -> sig.verse == null } == true
+
+                isChapter && File(takePath).name in selectedTakeNames
+            }
+            ?.values
+            ?.union(selectedChaptersFromProjectFile)
+            ?.toList()
+            ?: listOf()
     }
 
     private fun getProjectMode(
@@ -507,9 +524,6 @@ class OngoingProjectImporter @Inject constructor(
             else -> project
         }
         val sourceMetadata = sourceCollection.resourceContainer!!
-
-        val selectedTakes = prepareSelectedTakes(fileReader)
-
         takesCheckingMap = parseCheckingStatusFile(fileReader)
 
         projectFilesAccessor.copySelectedTakesFile(fileReader)
@@ -525,14 +539,14 @@ class OngoingProjectImporter @Inject constructor(
                     projectFilesAccessor.audioDir,
                     collectionForTakes,
                     sourceMetadata,
-                    selectedTakes
+                    takesInSelectedFile
                 )
             }
         
         val isNarrationMigration = projectAppVersion == ProjectAppVersion.ONE && projectMode == ProjectMode.NARRATION
         if (isNarrationMigration) {
             takesToCompile.forEach { (chapter, takeFiles) ->
-                compileIncompleteChapter(chapter, takeFiles, project, metadata)
+                compileIncompleteChapterNarration(chapter, takeFiles, project, metadata)
             }
         }
     }
@@ -598,18 +612,11 @@ class OngoingProjectImporter @Inject constructor(
                 val checkingStatus = when {
                     projectAppVersion.ordinal >= ProjectAppVersion.THREE.ordinal -> takesCheckingMap[relativeFile.name]
 
-                    completedChapters?.contains(sig.chapter) == true -> {
+                    completedChapters.contains(sig.chapter) -> {
                         TakeCheckingState(CheckingStatus.VERSE, computeFileChecksum(file))
                     }
 
-                    else -> {
-                        // store (verse) takes of incomplete chapter to compile later
-                        if (projectMode == ProjectMode.NARRATION && isSelected) {
-                            val existingFiles = takesToCompile.getOrDefault(sig.chapter, listOf())
-                            takesToCompile[sig.chapter] = existingFiles.plus(file)
-                        }
-                        null
-                    }
+                    else -> null
                 }
 
                 val take = Take(
@@ -629,6 +636,13 @@ class OngoingProjectImporter @Inject constructor(
                 if (isSelected) {
                     chunk.selectedTake = take
                     contentRepository.update(chunk).blockingAwait()
+
+                    val isNarrationMigration = projectMode == ProjectMode.NARRATION && projectAppVersion == ProjectAppVersion.ONE
+                    // store verse take of incomplete chapter narration to compile later
+                    if (isNarrationMigration && sig.chapter !in completedChapters && sig.verse != null) {
+                        val existingFiles = takesToCompile.getOrDefault(sig.chapter, listOf())
+                        takesToCompile[sig.chapter] = existingFiles.plus(file)
+                    }
                 }
             }
         }
@@ -796,7 +810,7 @@ class OngoingProjectImporter @Inject constructor(
      * can restore the file as one chapter take. Only call this method if the chapter
      * has not completed/compiled before migrating to Orature 3.x.
      */
-    private fun compileIncompleteChapter(
+    private fun compileIncompleteChapterNarration(
         chapterNumber: Int,
         takeFiles: List<File>,
         project: Collection,
