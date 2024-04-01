@@ -22,6 +22,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
 import com.jakewharton.rxrelay2.ReplayRelay
 import com.sun.glass.ui.Screen
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -674,15 +675,27 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun onChapterReturnFromPlugin() {
-        narration.loadFromSelectedChapterFile()
-        recordedVerses.setAll(narration.activeVerses)
-        resetNarratableList()
 
-        // Indicates that we used a temporary take to edit the chapter
-        if (hasAllItemsRecordedProperty.value == false) {
-            // Deletes the wav file for the temporary take since it will not be referenced to again
-            narration.deleteChapterTake(true)
+        Completable.create {
+            openLoadingModalProperty.set(true)
+            narration.loadFromSelectedChapterFile()
+            recordedVerses.setAll(narration.activeVerses)
+
+            runLater {
+                resetNarratableList()
+                // Indicates that we used a temporary take to edit the chapter
+                if (hasAllItemsRecordedProperty.value == false) {
+                    // Deletes the wav file for the temporary take since it will not be referenced to again
+                    narration.deleteChapterTake(true)
+                }
+                openLoadingModalProperty.set(false)
+            }
+            it.onComplete()
         }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
+
+
     }
 
     fun onNext(currentIndex: Int) {
@@ -971,7 +984,11 @@ class NarrationViewModel : ViewModel() {
                     reRecordLoc = currentMarker.location
                     nextVerseLoc = nextActive.location
                 }
-        } else if (narrationState in listOf(NarrationStateType.RECORDING_AGAIN, NarrationStateType.RECORDING_AGAIN_PAUSED)) {
+        } else if (narrationState in listOf(
+                NarrationStateType.RECORDING_AGAIN,
+                NarrationStateType.RECORDING_AGAIN_PAUSED
+            )
+        ) {
             val reRecordingIndex = recordingVerseIndex.value
             nextVerseLoc = totalVerses.getOrNull(reRecordingIndex + 1)?.let { marker ->
                 if (marker in recordedVerses) {
