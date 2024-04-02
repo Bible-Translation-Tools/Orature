@@ -27,6 +27,7 @@ import javafx.geometry.NodeOrientation
 import javafx.geometry.Pos
 import javafx.scene.input.KeyCodeCombination
 import javafx.scene.layout.Priority
+import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
@@ -46,6 +47,7 @@ class PluginOpenedPage : View() {
     val audioAvailableProperty = SimpleBooleanProperty(false)
     val sourceTextProperty = SimpleStringProperty()
     val sourceContentTitleProperty = SimpleStringProperty()
+    val sourceLanguageProperty = SimpleObjectProperty<Language>()
     val orientationProperty = SimpleObjectProperty<NodeOrientation>()
     val sourceOrientationProperty = SimpleObjectProperty<NodeOrientation>()
     val sourceSpeedRateProperty = SimpleDoubleProperty()
@@ -120,6 +122,7 @@ class PluginOpenedPage : View() {
         }.let(listeners::add)
 
         super.onDock()
+        root.toggleClass("ethiopic-font", sourceLanguageProperty.value?.slug == "am")
     }
 
     override fun onUndock() {

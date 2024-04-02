@@ -291,6 +291,7 @@ class NarrationPage : View() {
             licenseProperty.bind(workbookDataStore.sourceLicenseProperty)
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
+            sourceLanguageProperty.bind(workbookDataStore.activeWorkbookProperty.objectBinding { it?.source?.language })
             orientationProperty.bind(settingsViewModel.orientationProperty)
             sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
 
