@@ -19,14 +19,19 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home
 
 import javafx.animation.FadeTransition
+import javafx.beans.property.ObjectProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
+import javafx.scene.Node
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.jvm.controls.bar.searchBar
+import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.ProjectGroupOptionMenu
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.WorkBookTableView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.workbookTableView
@@ -37,24 +42,30 @@ import java.text.MessageFormat
 
 class BookSection(
     books: ObservableList<WorkbookDescriptorWrapper>,
-    filteredBooks: ObservableList<WorkbookDescriptorWrapper>
+    filteredBooks: ObservableList<WorkbookDescriptorWrapper>,
+    selectedProjectGroupProperty: ObjectProperty<ProjectGroupKey>
 ) : StackPane() {
     val bookSearchQueryProperty = SimpleStringProperty()
     private lateinit var bookTable: WorkBookTableView
+    private lateinit var sectionTitle: Node
     private val projectsOptionMenu = ProjectGroupOptionMenu()
-    private val titleProperty = SimpleStringProperty().apply {
-        bind(filteredBooks.stringBinding {
-            if (it.isNotEmpty()) {
-                val book = it.first()
-                MessageFormat.format(
-                    messages["projectGroupTitle"],
-                    book.targetLanguage.name,
-                    messages[book.mode.titleKey]
-                )
-            } else {
-                ""
+    private val titleTextProperty = SimpleStringProperty().apply {
+        bind(
+            books.stringBinding {
+                if (it.isNotEmpty()) {
+                    val book = it.first()
+                    val language = book.targetLanguage
+
+                    MessageFormat.format(
+                        messages["projectGroupTitle"],
+                        language.name,
+                        messages[book.mode.titleKey]
+                    )
+                } else {
+                    ""
+                }
             }
-        })
+        )
     }
 
     init {
@@ -87,7 +98,10 @@ class BookSection(
                         projectsOptionMenu.y = screenBound.centerY
                     }
                 }
-                label(titleProperty) { addClass("h4") }
+                label(titleTextProperty) {
+                    addClass("h4")
+                    sectionTitle = this
+                }
                 region { hgrow = Priority.ALWAYS }
                 searchBar {
                     textProperty().bindBidirectional(bookSearchQueryProperty)
@@ -111,6 +125,11 @@ class BookSection(
 
         books.onChange {
             if (it.list.size > 0) renderTransition()
+        }
+
+        selectedProjectGroupProperty.onChange {
+            sectionTitle.toggleClass("ethiopic-font", it?.targetLanguage == "am")
+            bookTable.toggleClass("ethiopic-font", it?.sourceLanguage == "am")
         }
     }
 
