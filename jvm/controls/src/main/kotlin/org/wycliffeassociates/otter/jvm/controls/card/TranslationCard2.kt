@@ -36,7 +36,6 @@ import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
-import org.wycliffeassociates.otter.jvm.controls.ethiopicFontLanguage
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
 import java.text.MessageFormat
 import tornadofx.*
@@ -162,7 +161,7 @@ class ActiveTranslationCardSkin(card: TranslationCard2) : SkinBase<TranslationCa
             addClass("translation-card__body")
             label(sourceLanguageProperty) {
                 addClass("translation-card__language")
-                toggleClass("ethiopic-font", card.sourceLanguageProperty.value.slug in ethiopicFontLanguage)
+                toggleClass("ethiopic-font", card.sourceLanguageProperty.value.slug == "am")
                 graphic = FontIcon(Material.HEARING)
             }
             label {
@@ -171,7 +170,7 @@ class ActiveTranslationCardSkin(card: TranslationCard2) : SkinBase<TranslationCa
             }
             label(targetLanguageProperty) {
                 addClass("translation-card__language")
-                toggleClass("ethiopic-font", card.targetLanguageProperty.value.slug in ethiopicFontLanguage)
+                toggleClass("ethiopic-font", card.targetLanguageProperty.value.slug == "am")
                 graphic = FontIcon(MaterialDesign.MDI_VOICE)
             }
         }

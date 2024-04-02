@@ -44,7 +44,7 @@ class ImportConflictDialog : OtterDialog() {
     private val conflictResolutionProperty = SimpleObjectProperty<ConflictResolution>(ConflictResolution.OVERRIDE)
 
     private val content = VBox().apply {
-        addClass("confirm-dialog", "ethiopic-font") // include font for ethiopic language by default
+        addClass("confirm-dialog", "ethiopic-font") // include font for "am" language by default
 
         hbox {
             addClass("confirm-dialog__header")

@@ -32,7 +32,7 @@ object SnackbarHandler {
 
     fun showNotification(message: String, root: Pane) {
         val snackbar = JFXSnackbar(root)
-        snackbar.addClass("ethiopic-font")  // include ethiopic font by default
+        snackbar.addClass("ethiopic-font")  // include font for "am" language by default
         snackbar.enqueue(
             JFXSnackbar.SnackbarEvent(
                 JFXSnackbarLayout(message),
@@ -43,7 +43,7 @@ object SnackbarHandler {
 
     fun showNotification(notification: NotificationViewData, container: Pane) {
         val snackbar = JFXSnackbar(container)
-        snackbar.addClass("ethiopic-font")  // include ethiopic font by default
+        snackbar.addClass("ethiopic-font")  // include font for "am" language by default
 
         val graphic = NotificationSnackBar(notification).apply {
             setOnDismiss { snackbar.hide() }  /* avoid crashing if close() is invoked before timeout */
