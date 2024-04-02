@@ -98,11 +98,7 @@ class HomePage2 : View() {
             fire(NavigationRequestEvent(this@HomePage2))
         }
     }
-    private val bookFragment = BookSection(
-        viewModel.bookList,
-        viewModel.sortedBooks,
-        viewModel.selectedProjectGroupProperty
-    ).apply {
+    private val bookFragment = BookSection(viewModel.bookList, viewModel.sortedBooks).apply {
         bookSearchQueryProperty.bindBidirectional(viewModel.bookSearchQueryProperty)
     }
     private val wizardFragment: ProjectWizardSection by lazy {
