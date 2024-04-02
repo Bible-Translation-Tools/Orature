@@ -61,6 +61,7 @@ import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectContributorsEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupCardModel
+import org.wycliffeassociates.otter.jvm.controls.toggleFontByLanguage
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
@@ -143,10 +144,6 @@ class HomePage2 : View() {
         tryImportStylesheet("/css/snack-bar-notification.css")
 
         subscribeActionEvents()
-
-        viewModel.selectedProjectGroupProperty.onChangeAndDoNow {
-            bookFragment.toggleClass("ethiopic-font", it?.sourceLanguage == "am")
-        }
     }
 
     override val root = borderpane {
