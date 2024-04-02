@@ -19,14 +19,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import com.jfoenix.controls.JFXSnackbar
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventHandler
 import javafx.scene.Node
 import javafx.scene.layout.Priority
-import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
@@ -48,7 +46,6 @@ import org.wycliffeassociates.otter.jvm.controls.event.ProjectGroupDeleteEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportFinishEvent
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
-import org.wycliffeassociates.otter.jvm.controls.popup.NotificationSnackBar
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
@@ -61,8 +58,8 @@ import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectContributorsEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupCardModel
-import org.wycliffeassociates.otter.jvm.controls.toggleFontByLanguage
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.controls.toggleFontForText
+import org.wycliffeassociates.otter.jvm.controls.toggleFontLanguage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportDialogOpenEvent
@@ -316,7 +313,7 @@ class HomePage2 : View() {
                 themeProperty.set(settingsViewModel.appColorMode.value)
                 workbookDescriptorProperty.set(workbookDescriptor)
                 onEstimateSizeAction.set(exportProjectViewModel::getEstimateExportSize)
-                this.root.toggleClass("ethiopic-font", viewModel.selectedProjectGroupProperty.value.sourceLanguage == "am")
+                this.root.toggleFontLanguage(viewModel.selectedProjectGroupProperty.value.sourceLanguage)
 
                 open()
 
@@ -397,7 +394,7 @@ class HomePage2 : View() {
             )
             dialogMessageProperty.set(messages["exportProjectMessage"])
             cancelMessageProperty.set(messages["cancelExport"])
-            this.root.toggleClass("ethiopic-font", viewModel.selectedProjectGroupProperty.value.sourceLanguage == "am")
+            this.root.toggleFontLanguage(viewModel.selectedProjectGroupProperty.value.sourceLanguage)
 
             setOnCloseAction {
                 cancelMessageProperty.set(null)
@@ -458,7 +455,7 @@ class HomePage2 : View() {
         allowCloseProperty.set(false)
         cancelMessageProperty.set(null)
         dialogTitleProperty.bind(importProjectViewModel.importedProjectTitleProperty.stringBinding {
-            this.root.toggleClass("ethiopic-font", importProjectViewModel.importProjectLanguageProperty.value?.slug == "am")
+            this.root.toggleFontForText(it)
             it?.let {
                 MessageFormat.format(
                     messages["importProjectTitle"],

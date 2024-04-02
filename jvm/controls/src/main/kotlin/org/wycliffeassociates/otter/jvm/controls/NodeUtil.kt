@@ -21,13 +21,13 @@ package org.wycliffeassociates.otter.jvm.controls
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.IntegerProperty
 import javafx.geometry.Orientation
+import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.control.ScrollBar
 import javafx.scene.layout.StackPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import tornadofx.*
-import kotlin.math.min
 
 /**
  * Calls this method from a scrollable component such as a ScrollPane
@@ -97,4 +97,19 @@ fun createAudioScrollBar(
             customizeScrollbarSkin()
         }
     }
+}
+
+fun Node.toggleFontLanguage(languageSlug: String?) {
+    toggleClass("ethiopic-font", languageSlug == "am")
+    toggleClass("lao-font", languageSlug == "lo")
+}
+
+fun Node.toggleFontForText(text: String?) {
+    if (text == null) return
+
+    val amharicPattern = Regex("[\u1200-\u137F]+") // Define a regex pattern for Amharic Unicode characters
+    val laoPattern = Regex("[\u0E80-\u0EFF]+") // Define a regex pattern for Lao Unicode characters
+
+    toggleClass("ethiopic-font", text.contains(amharicPattern))
+    toggleClass("lao-font", text.contains(laoPattern))
 }

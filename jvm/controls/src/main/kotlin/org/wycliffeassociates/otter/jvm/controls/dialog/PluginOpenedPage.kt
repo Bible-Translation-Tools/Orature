@@ -32,6 +32,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.controls.toggleFontLanguage
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
@@ -122,7 +123,7 @@ class PluginOpenedPage : View() {
         }.let(listeners::add)
 
         super.onDock()
-        root.toggleClass("ethiopic-font", sourceLanguageProperty.value?.slug == "am")
+        root.toggleFontLanguage(sourceLanguageProperty.value?.slug)
     }
 
     override fun onUndock() {

@@ -44,6 +44,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.AddFile
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEventAction
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectImportFinishEvent
+import org.wycliffeassociates.otter.jvm.controls.toggleFontForText
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ImportConflictDialog
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
@@ -65,7 +66,6 @@ class ImportProjectViewModel : ViewModel() {
     val importErrorMessage = SimpleStringProperty(null)
     val importedProjectTitleProperty = SimpleStringProperty()
     val importedProjectCoverProperty = SimpleObjectProperty<File>()
-    val importProjectLanguageProperty = SimpleObjectProperty<Language>()
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
     val availableChapters = observableListOf<Int>()
@@ -115,6 +115,7 @@ class ImportProjectViewModel : ViewModel() {
 
                         projectNameProperty.set(parameter.name)
                         chaptersProperty.set(parameter.options.size)
+                        this.root.toggleFontForText(projectNameProperty.value)
 
                         setOnSubmitAction { resolution ->
                             val importOption = if (resolution == ConflictResolution.OVERRIDE) {
@@ -217,7 +218,6 @@ class ImportProjectViewModel : ViewModel() {
                     .onErrorComplete()
                     .subscribe { resourceMetadata ->
                         resourceMetadata?.let {
-                            importProjectLanguageProperty.set(it.language)
                             importedProjectTitleProperty.set(project.title)
                             /* cover art graphic can be reused later by uncommenting */
                             //  val coverArtAccessor = ArtworkAccessor(directoryProvider, it, project.identifier)

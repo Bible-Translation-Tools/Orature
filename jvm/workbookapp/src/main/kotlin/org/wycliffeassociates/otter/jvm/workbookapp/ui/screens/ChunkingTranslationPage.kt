@@ -28,6 +28,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToPreviousChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
+import org.wycliffeassociates.otter.jvm.controls.toggleFontLanguage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.BlindDraft
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.Chunking
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.ChunkingStepsDrawer
@@ -151,7 +152,7 @@ class ChunkingTranslationPage : View() {
     override fun onDock() {
         super.onDock()
         viewModel.dockPage()
-        root.toggleClass("ethiopic-font", workbookDataStore.workbook.source.language.slug == "am")
+        root.toggleFontLanguage(workbookDataStore.workbook.source.language.slug)
     }
 
     override fun onUndock() {

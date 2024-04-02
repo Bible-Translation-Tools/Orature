@@ -42,6 +42,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.controls.toggleFontLanguage
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
@@ -111,7 +112,7 @@ class NarrationPage : View() {
         super.onDock()
         subscribeToEvents()
         setUpLoadingModal()
-        root.toggleClass("ethiopic-font", workbookDataStore.workbook.source.language.slug == "am")
+        root.toggleFontLanguage(workbookDataStore.workbook.source.language.slug)
         // avoid resetting ViewModel states & action history when coming back from plugin
         when (viewModel.pluginOpenedProperty.value) {
             true -> { // navigate back from plugin

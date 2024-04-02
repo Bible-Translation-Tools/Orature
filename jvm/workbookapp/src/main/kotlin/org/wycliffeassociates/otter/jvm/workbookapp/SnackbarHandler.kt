@@ -24,6 +24,7 @@ import javafx.scene.layout.Pane
 import javafx.util.Duration
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.popup.NotificationSnackBar
+import org.wycliffeassociates.otter.jvm.controls.toggleFontForText
 import tornadofx.*
 
 const val NOTIFICATION_DURATION_SEC = 5.0
@@ -32,7 +33,6 @@ object SnackbarHandler {
 
     fun showNotification(message: String, root: Pane) {
         val snackbar = JFXSnackbar(root)
-        snackbar.addClass("ethiopic-font")  // include font for "am" language by default
         snackbar.enqueue(
             JFXSnackbar.SnackbarEvent(
                 JFXSnackbarLayout(message),
@@ -43,7 +43,7 @@ object SnackbarHandler {
 
     fun showNotification(notification: NotificationViewData, container: Pane) {
         val snackbar = JFXSnackbar(container)
-        snackbar.addClass("ethiopic-font")  // include font for "am" language by default
+        snackbar.toggleFontForText(notification.title + notification.message)
 
         val graphic = NotificationSnackBar(notification).apply {
             setOnDismiss { snackbar.hide() }  /* avoid crashing if close() is invoked before timeout */
