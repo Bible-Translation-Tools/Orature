@@ -111,6 +111,7 @@ class NarrationPage : View() {
         super.onDock()
         subscribeToEvents()
         setUpLoadingModal()
+        root.toggleClass("ethiopic-font", workbookDataStore.workbook.source.language.slug == "am")
         // avoid resetting ViewModel states & action history when coming back from plugin
         when (viewModel.pluginOpenedProperty.value) {
             true -> { // navigate back from plugin

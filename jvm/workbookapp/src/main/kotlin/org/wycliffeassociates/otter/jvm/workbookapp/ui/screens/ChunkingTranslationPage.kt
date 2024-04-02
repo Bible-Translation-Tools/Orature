@@ -151,6 +151,7 @@ class ChunkingTranslationPage : View() {
     override fun onDock() {
         super.onDock()
         viewModel.dockPage()
+        root.toggleClass("ethiopic-font", workbookDataStore.workbook.source.language.slug == "am")
     }
 
     override fun onUndock() {
