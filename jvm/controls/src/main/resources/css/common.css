@@ -52,6 +52,18 @@
     src: url('/fonts/NotoSansEthiopic-Bold.ttf');
 }
 
+@font-face {
+    font-family: 'Noto Sans Lao';
+    font-size: 10pt;
+    src: url('/fonts/NotoSansLao-Regular.ttf');
+}
+
+@font-face {
+    font-family: 'Noto Sans Lao Bold';
+    font-size: 10pt;
+    src: url('/fonts/NotoSansLao-Bold.ttf');
+}
+
 .root {
     -fx-font-family: 'Noto Sans';
     -fx-font-weight: normal;
@@ -60,6 +72,10 @@
 
 .ethiopic-font {
     -fx-font-family: 'Noto Sans Ethiopic';
+}
+
+.lao-font {
+    -fx-font-family: 'Noto Sans Lao'
 }
 
 .centered {
