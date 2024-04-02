@@ -115,7 +115,6 @@ class ImportProjectViewModel : ViewModel() {
 
                         projectNameProperty.set(parameter.name)
                         chaptersProperty.set(parameter.options.size)
-                        this.root.toggleFontForText(projectNameProperty.value)
 
                         setOnSubmitAction { resolution ->
                             val importOption = if (resolution == ConflictResolution.OVERRIDE) {

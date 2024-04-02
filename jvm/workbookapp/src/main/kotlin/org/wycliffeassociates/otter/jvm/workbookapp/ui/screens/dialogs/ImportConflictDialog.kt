@@ -31,6 +31,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ConflictResolution
 import org.wycliffeassociates.otter.jvm.controls.button.cardRadioButton
 import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
+import org.wycliffeassociates.otter.jvm.controls.toggleFontForText
 import tornadofx.*
 import java.text.MessageFormat
 
@@ -122,6 +123,11 @@ class ImportConflictDialog : OtterDialog() {
 
     init {
         setContent(content)
+    }
+
+    override fun onDock() {
+        super.onDock()
+        content.toggleFontForText(projectNameProperty.value)
     }
 
     fun setOnCloseAction(op: () -> Unit) {
