@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.dialog.LoadingModal
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
+import org.wycliffeassociates.otter.jvm.controls.ethiopicFontLanguage
 import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
@@ -111,7 +112,7 @@ class NarrationPage : View() {
         super.onDock()
         subscribeToEvents()
         setUpLoadingModal()
-        root.toggleClass("ethiopic-font", workbookDataStore.workbook.source.language.slug == "am")
+        root.toggleClass("ethiopic-font", workbookDataStore.workbook.source.language.slug in ethiopicFontLanguage)
         // avoid resetting ViewModel states & action history when coming back from plugin
         when (viewModel.pluginOpenedProperty.value) {
             true -> { // navigate back from plugin

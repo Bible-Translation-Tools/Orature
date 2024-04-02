@@ -30,6 +30,7 @@ import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
+import org.wycliffeassociates.otter.jvm.controls.ethiopicFontLanguage
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
@@ -122,7 +123,7 @@ class PluginOpenedPage : View() {
         }.let(listeners::add)
 
         super.onDock()
-        root.toggleClass("ethiopic-font", sourceLanguageProperty.value?.slug == "am")
+        root.toggleClass("ethiopic-font", sourceLanguageProperty.value?.slug in ethiopicFontLanguage)
     }
 
     override fun onUndock() {

@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 import javafx.collections.ObservableList
 import javafx.scene.control.TableRow
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.jvm.controls.ethiopicFontLanguage
 import org.wycliffeassociates.otter.jvm.controls.event.LanguageSelectedEvent
 import tornadofx.*
 
@@ -39,7 +40,7 @@ class LanguageTableRow(
         isMouseTransparent = isDisable
         isFocusTraversable = !isDisable
 
-        if (item.slug == "am") {
+        if (item.slug in ethiopicFontLanguage) {
             this.addClass("ethiopic-font")
         }
 

@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import javafx.beans.binding.Bindings
 import javafx.scene.layout.Priority
+import org.wycliffeassociates.otter.jvm.controls.ethiopicFontLanguage
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SourceTextDrawer
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkSelectedEvent
@@ -151,7 +152,7 @@ class ChunkingTranslationPage : View() {
     override fun onDock() {
         super.onDock()
         viewModel.dockPage()
-        root.toggleClass("ethiopic-font", workbookDataStore.workbook.source.language.slug == "am")
+        root.toggleClass("ethiopic-font", workbookDataStore.workbook.source.language.slug in ethiopicFontLanguage)
     }
 
     override fun onUndock() {

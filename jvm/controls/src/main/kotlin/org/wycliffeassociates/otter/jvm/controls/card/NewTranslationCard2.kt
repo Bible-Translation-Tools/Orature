@@ -23,7 +23,6 @@ import javafx.beans.value.ObservableValue
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.event.EventTarget
-import javafx.geometry.Pos
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
@@ -32,6 +31,7 @@ import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
+import org.wycliffeassociates.otter.jvm.controls.ethiopicFontLanguage
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import tornadofx.FX.Companion.messages
@@ -69,7 +69,7 @@ class NewTranslationCard2(
                 textProperty().bind(
                     sourceLanguageProperty.stringBinding { source ->
                         togglePseudoClass("unset", source == null)
-                        toggleClass("ethiopic-font", source?.slug == "am")
+                        toggleClass("ethiopic-font", source?.slug in ethiopicFontLanguage)
                         source?.name ?: "???"
                     }
                 )
@@ -87,7 +87,7 @@ class NewTranslationCard2(
                 textProperty().bind(
                     targetLanguageProperty.stringBinding { target ->
                         togglePseudoClass("unset", target == null)
-                        toggleClass("ethiopic-font", target?.slug == "am")
+                        toggleClass("ethiopic-font", target?.slug in ethiopicFontLanguage)
                         target?.name ?: "???"
                     }
                 )

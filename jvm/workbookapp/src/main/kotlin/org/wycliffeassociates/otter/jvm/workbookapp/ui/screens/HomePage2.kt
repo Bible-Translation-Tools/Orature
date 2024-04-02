@@ -56,6 +56,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.ProjectImportFinishEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportProjectDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
+import org.wycliffeassociates.otter.jvm.controls.ethiopicFontLanguage
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectImportEvent
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
@@ -145,7 +146,7 @@ class HomePage2 : View() {
         subscribeActionEvents()
 
         viewModel.selectedProjectGroupProperty.onChangeAndDoNow {
-            bookFragment.toggleClass("ethiopic-font", it?.sourceLanguage == "am")
+            bookFragment.toggleClass("ethiopic-font", it?.sourceLanguage in ethiopicFontLanguage)
         }
     }
 
@@ -319,7 +320,7 @@ class HomePage2 : View() {
                 themeProperty.set(settingsViewModel.appColorMode.value)
                 workbookDescriptorProperty.set(workbookDescriptor)
                 onEstimateSizeAction.set(exportProjectViewModel::getEstimateExportSize)
-                this.root.toggleClass("ethiopic-font", viewModel.selectedProjectGroupProperty.value.sourceLanguage == "am")
+                this.root.toggleClass("ethiopic-font", viewModel.selectedProjectGroupProperty.value.sourceLanguage in ethiopicFontLanguage)
 
                 open()
 
@@ -400,7 +401,7 @@ class HomePage2 : View() {
             )
             dialogMessageProperty.set(messages["exportProjectMessage"])
             cancelMessageProperty.set(messages["cancelExport"])
-            this.root.toggleClass("ethiopic-font", viewModel.selectedProjectGroupProperty.value.sourceLanguage == "am")
+            this.root.toggleClass("ethiopic-font", viewModel.selectedProjectGroupProperty.value.sourceLanguage in ethiopicFontLanguage)
 
             setOnCloseAction {
                 cancelMessageProperty.set(null)
@@ -461,7 +462,7 @@ class HomePage2 : View() {
         allowCloseProperty.set(false)
         cancelMessageProperty.set(null)
         dialogTitleProperty.bind(importProjectViewModel.importedProjectTitleProperty.stringBinding {
-            this.root.toggleClass("ethiopic-font", importProjectViewModel.importProjectLanguageProperty.value?.slug == "am")
+            this.root.toggleClass("ethiopic-font", importProjectViewModel.importProjectLanguageProperty.value?.slug in ethiopicFontLanguage)
             it?.let {
                 MessageFormat.format(
                     messages["importProjectTitle"],

@@ -27,7 +27,8 @@ import javafx.scene.layout.StackPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import tornadofx.*
-import kotlin.math.min
+
+val ethiopicFontLanguage = listOf("am")
 
 /**
  * Calls this method from a scrollable component such as a ScrollPane
