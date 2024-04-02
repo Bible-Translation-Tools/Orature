@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ConflictResolution
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.ProgressStatus
+import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportCallbackParameter
@@ -64,6 +65,7 @@ class ImportProjectViewModel : ViewModel() {
     val importErrorMessage = SimpleStringProperty(null)
     val importedProjectTitleProperty = SimpleStringProperty()
     val importedProjectCoverProperty = SimpleObjectProperty<File>()
+    val importProjectLanguageProperty = SimpleObjectProperty<Language>()
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
     val availableChapters = observableListOf<Int>()
@@ -215,8 +217,8 @@ class ImportProjectViewModel : ViewModel() {
                     .onErrorComplete()
                     .subscribe { resourceMetadata ->
                         resourceMetadata?.let {
+                            importProjectLanguageProperty.set(it.language)
                             importedProjectTitleProperty.set(project.title)
-
                             /* cover art graphic can be reused later by uncommenting */
                             //  val coverArtAccessor = ArtworkAccessor(directoryProvider, it, project.identifier)
                             //  importedProjectCoverProperty.set(

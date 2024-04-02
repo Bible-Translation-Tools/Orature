@@ -319,7 +319,7 @@ class HomePage2 : View() {
                 themeProperty.set(settingsViewModel.appColorMode.value)
                 workbookDescriptorProperty.set(workbookDescriptor)
                 onEstimateSizeAction.set(exportProjectViewModel::getEstimateExportSize)
-                open()
+                this.root.toggleClass("ethiopic-font", viewModel.selectedProjectGroupProperty.value.sourceLanguage == "am")
 
                 open()
 
@@ -400,6 +400,7 @@ class HomePage2 : View() {
             )
             dialogMessageProperty.set(messages["exportProjectMessage"])
             cancelMessageProperty.set(messages["cancelExport"])
+            this.root.toggleClass("ethiopic-font", viewModel.selectedProjectGroupProperty.value.sourceLanguage == "am")
 
             setOnCloseAction {
                 cancelMessageProperty.set(null)
@@ -460,6 +461,7 @@ class HomePage2 : View() {
         allowCloseProperty.set(false)
         cancelMessageProperty.set(null)
         dialogTitleProperty.bind(importProjectViewModel.importedProjectTitleProperty.stringBinding {
+            this.root.toggleClass("ethiopic-font", importProjectViewModel.importProjectLanguageProperty.value?.slug == "am")
             it?.let {
                 MessageFormat.format(
                     messages["importProjectTitle"],
