@@ -18,6 +18,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.narration.ActiveRecordingDrawable
+import org.wycliffeassociates.otter.common.domain.narration.AudioReaderDrawable
 import org.wycliffeassociates.otter.common.domain.narration.AudioScene
 import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
@@ -27,6 +28,7 @@ import org.wycliffeassociates.otter.common.domain.narration.testDirWithoutAudio
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.NarrationWaveformRenderer
 import java.awt.image.BufferedImage
 import java.io.File
+import java.nio.ByteBuffer
 import java.nio.file.Files
 import java.nio.file.Paths
 import javax.imageio.ImageIO
@@ -102,6 +104,13 @@ class NarrationRenderingTest {
             narrationReader.open()
             val recordingOff = ReplayRelay.create<Boolean>()
             recordingOff.accept(false)
+
+            val readerDrawable = AudioReaderDrawable(
+                narrationReader,
+                rendererWidth,
+                10,
+                44100
+            )
             val scene = AudioScene(
                 narrationReader,
                 ReplayRelay.create(),
@@ -111,14 +120,31 @@ class NarrationRenderingTest {
                 44100,
                 activeDrawable = mockk<ActiveRecordingDrawable> {
                     every { hasData() } returns false
-                }
+                },
+                readerDrawable = readerDrawable
             )
             val renderer = NarrationWaveformRenderer(scene, rendererWidth, rendererHeight)
+
+            val drawables = renderDrawables(readerDrawable, 0, 10)
             val frames = renderFrames(renderer, rendererWidth, rendererHeight, 0, 10)
-            
+
+            // writeFramesToImages(frames)
+
+            compareDrawables(drawables)
             compareImages(frames)
-            writeFramesToImages(frames)
         }
+    }
+
+    private fun renderDrawables(
+        renderer: AudioReaderDrawable,
+        locationToRender: Int,
+        framesToRender: Int
+    ): List<FloatArray> {
+        val frames = arrayListOf<FloatArray>()
+        for (i in 0 until framesToRender) {
+            frames.add(renderer.getWaveformDrawable(locationToRender).copyOf())
+        }
+        return frames
     }
 
     private fun renderFrames(
@@ -151,8 +177,20 @@ class NarrationRenderingTest {
                 val pixel = frames.map { it.pixelReader.getArgb(x, y) }
                 Assert.assertTrue(
                     "Not all pixels at ($x, $y) are the same, should be ${pixel[0]}",
-                    pixel.all { it == pixel[0] })
+                    pixel.all { it == pixel[0] }
+                )
             }
+        }
+    }
+
+    private fun compareDrawables(frames: List<FloatArray>) {
+        if (frames.isEmpty()) return
+        for (i in frames[0].indices) {
+            val data = frames.map { it[i] }
+            Assert.assertTrue(
+                "Not all values for drawable are the same at $i, should be ${data[0]}",
+                data.all { it == data[0] }
+            )
         }
     }
 
