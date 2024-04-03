@@ -301,7 +301,9 @@ class NarrationViewModel : ViewModel() {
                 Screen.getMainScreen().width,
                 10,
                 DEFAULT_SAMPLE_RATE
-            )
+            ),
+            Screen.getMainScreen().width,
+            Screen.getMainScreen().height
         )
         totalAudioSizeProperty.set(rendererAudioReader.totalFrames)
         narrationStateMachine = TeleprompterStateMachine(narration.totalVerses)
