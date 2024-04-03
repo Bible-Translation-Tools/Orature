@@ -22,7 +22,6 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
 import com.jakewharton.rxrelay2.ReplayRelay
 import com.sun.glass.ui.Screen
-import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -674,7 +673,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun onChapterReturnFromPlugin(pluginType: PluginType) {
-        narration.loadFromSelectedChapterFileTask()
+        narration.loadFromSelectedChapterFile()
             .doOnSubscribe {
                 openLoadingModalProperty.set(true)
             }
@@ -844,7 +843,7 @@ class NarrationViewModel : ViewModel() {
                     }
 
                     else -> {
-                        narration.onEditVerseTask(verseIndex, file)
+                        narration.onEditVerse(verseIndex, file)
                             .doOnSubscribe {
                                 openLoadingModalProperty.set(true)
                             }

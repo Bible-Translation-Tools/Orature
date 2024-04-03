@@ -152,10 +152,9 @@ class Narration @AssistedInject constructor(
         return chapterRepresentation.totalVerses.first().marker
     }
 
-    fun loadFromSelectedChapterFileTask(): Completable {
-        return Completable.create {
+    fun loadFromSelectedChapterFile(): Completable {
+        return Completable.fromAction {
             restoreFromExistingChapterAudio(true)
-            it.onComplete()
         }
     }
 
@@ -269,9 +268,9 @@ class Narration @AssistedInject constructor(
         NarrationTakeModifier.modifyMetadata(takeToModify, activeVerses)
     }
 
-    fun onEditVerseTask(verseIndex: Int, editedFile: File): Completable {
+    fun onEditVerse(verseIndex: Int, editedFile: File): Completable {
 
-        return Completable.create {
+        return Completable.fromAction {
             loadSectionIntoPlayer(totalVerses[verseIndex])
 
             val scratchAudio = chapterRepresentation.scratchAudio
@@ -292,7 +291,6 @@ class Narration @AssistedInject constructor(
 
             audioLoaded = false
             loadChapterIntoPlayer()
-            it.onComplete()
         }
     }
 
