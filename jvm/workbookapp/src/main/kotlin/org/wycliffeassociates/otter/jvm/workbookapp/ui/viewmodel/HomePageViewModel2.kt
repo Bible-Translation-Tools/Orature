@@ -55,6 +55,7 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.time.LocalDateTime
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
 import java.util.function.Predicate
 import javax.inject.Inject
 
@@ -197,23 +198,28 @@ class HomePageViewModel2 : ViewModel() {
         val timeoutMillis = NOTIFICATION_DURATION_SEC * 1000
         projectWizardViewModel.increaseProjectDeleteCounter()
 
-        val timerDisposable = deleteProjectUseCase
-            .deleteProjectsWithTimer(cardModel.booksModel, timeoutMillis.toInt())
-            .observeOnFx()
-            .doOnComplete {
-                logger.info("Deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
-                projectWizardViewModel.existingLanguagePairs.remove(
-                    Pair(cardModel.sourceLanguage, cardModel.targetLanguage)
-                )
-                projectsWithDeleteTimer.remove(cardModel)
-            }
-            .doOnDispose {
-                logger.info("Cancelled deleting project group ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
-            }
-            .doFinally {
-                projectWizardViewModel.decreaseProjectDeleteCounter()
-            }
-            .subscribe()
+        val timerDisposable =
+            Completable
+                .timer(timeoutMillis.toLong(), TimeUnit.MILLISECONDS)
+                .andThen {
+                    projectsWithDeleteTimer.remove(cardModel) // remove from undoable list; delete task is starting
+                    it.onComplete()
+                }
+                .concatWith(deleteProjectUseCase.deleteProjects(cardModel.booksModel))
+                .observeOnFx()
+                .doOnComplete {
+                    logger.info("Deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
+                    projectWizardViewModel.existingLanguagePairs.remove(
+                        Pair(cardModel.sourceLanguage, cardModel.targetLanguage)
+                    )
+                }
+                .doOnDispose {
+                    logger.info("Cancelled deleting project group ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
+                }
+                .doFinally {
+                    projectWizardViewModel.decreaseProjectDeleteCounter()
+                }
+                .subscribe()
 
         projectsWithDeleteTimer[cardModel] = timerDisposable
     }
