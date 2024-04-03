@@ -12,6 +12,7 @@ import javafx.scene.image.WritableImage
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.pcm.PcmFile
 import org.wycliffeassociates.otter.common.audio.pcm.PcmOutputStream
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -28,6 +29,7 @@ import org.wycliffeassociates.otter.common.domain.narration.testDirWithoutAudio
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.NarrationWaveformRenderer
 import java.awt.image.BufferedImage
 import java.io.File
+import java.io.Reader
 import java.nio.ByteBuffer
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -125,14 +127,41 @@ class NarrationRenderingTest {
             )
             val renderer = NarrationWaveformRenderer(scene, rendererWidth, rendererHeight)
 
-            val drawables = renderDrawables(readerDrawable, 0, 10)
-            val frames = renderFrames(renderer, rendererWidth, rendererHeight, 0, 10)
+            val location = 0
+            val experiments = 10
+
+            val audio = readAudio(narrationReader, location, experiments)
+            val drawables = renderDrawables(readerDrawable, location, experiments)
+            val frames = renderFrames(renderer, rendererWidth, rendererHeight, location, experiments)
 
             // writeFramesToImages(frames)
 
+            compareAudio(audio)
             compareDrawables(drawables)
             compareImages(frames)
         }
+    }
+
+    private fun readAudio(
+        narrationReader: AudioFileReader,
+        startLocation: Int,
+        experiments: Int
+    ): List<ByteArray> {
+        val bytes = ByteArray(narrationReader.totalFrames * narrationReader.frameSizeBytes)
+        val bb = ByteBuffer.wrap(bytes)
+        val bucket = ByteArray(DEFAULT_BUFFER_SIZE)
+        val samples = arrayListOf<ByteArray>()
+        for (i in 0 until experiments) {
+            narrationReader.seek(0)
+            var total = 0
+            while (narrationReader.hasRemaining()) {
+                val read = narrationReader.getPcmBuffer(bucket)
+                bb.put(total, bucket, 0, read)
+                total += read
+            }
+            samples.add(bytes.copyOf())
+        }
+        return samples
     }
 
     private fun renderDrawables(
@@ -187,6 +216,17 @@ class NarrationRenderingTest {
         if (frames.isEmpty()) return
         for (i in frames[0].indices) {
             val data = frames.map { it[i] }
+            Assert.assertTrue(
+                "Not all values for drawable are the same at $i, should be ${data[0]}",
+                data.all { it == data[0] }
+            )
+        }
+    }
+
+    private fun compareAudio(samples: List<ByteArray>) {
+        if (samples.isEmpty()) return
+        for (i in samples[0].indices) {
+            val data = samples.map { it[i] }
             Assert.assertTrue(
                 "Not all values for drawable are the same at $i, should be ${data[0]}",
                 data.all { it == data[0] }
