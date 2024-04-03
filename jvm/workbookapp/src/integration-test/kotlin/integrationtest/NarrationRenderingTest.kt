@@ -1,29 +1,37 @@
 package integrationtest
 
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay2.ReplayRelay
 import integrationtest.di.DaggerTestPersistenceComponent
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.Observable
+import javafx.embed.swing.SwingFXUtils
+import javafx.scene.image.Image
+import javafx.scene.image.WritableImage
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.wycliffeassociates.otter.common.audio.pcm.PcmFile
 import org.wycliffeassociates.otter.common.audio.pcm.PcmOutputStream
-import org.wycliffeassociates.otter.common.audio.wav.WavFile
-import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.narration.ActiveRecordingDrawable
+import org.wycliffeassociates.otter.common.domain.narration.AudioScene
 import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
 import org.wycliffeassociates.otter.common.domain.narration.testDataRootFilePath
 import org.wycliffeassociates.otter.common.domain.narration.testDirWithAudio
 import org.wycliffeassociates.otter.common.domain.narration.testDirWithoutAudio
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.NarrationWaveformRenderer
+import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
+import javax.imageio.ImageIO
 import javax.inject.Inject
+
 
 class NarrationRenderingTest {
 
@@ -55,14 +63,85 @@ class NarrationRenderingTest {
     }
 
     @Test
-    fun testNarration() {
+    fun `test reading verse by verse gets correct content`() {
         narration.audioReader.use {
             it.open()
             for (i in 1 until seconds) {
                 val bytes = ByteArray(88200)
                 it.getPcmBuffer(bytes)
-                Assert.assertTrue("Not all bytes matched for ${i}", bytes.all { it.toInt() == i })
+                Assert.assertTrue(
+                    "Not all bytes matched for ${i}; found: ${bytes.firstOrNull { it.toInt() != i }}",
+                    bytes.all { it.toInt() == i }
+                )
             }
+        }
+    }
+
+    @Test
+    fun `test reading a half verse at a time gets correct content`() {
+        narration.audioReader.use {
+            it.open()
+            for (i in 1 until seconds) {
+                for (j in 1..2) {
+                    val bytes = ByteArray(44100)
+                    it.getPcmBuffer(bytes)
+                    Assert.assertTrue(
+                        "Not all bytes matched for ${i}; found: ${bytes.firstOrNull { it.toInt() != i }}",
+                        bytes.all { it.toInt() == i }
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `test repeated frames generated at the same audio location are equal`() {
+        val rendererWidth = 1920
+        val rendererHeight = 1080
+        narration.audioReader.use { narrationReader ->
+            narrationReader.open()
+            val recordingOff = ReplayRelay.create<Boolean>()
+            recordingOff.accept(false)
+            val scene = AudioScene(
+                narrationReader,
+                ReplayRelay.create(),
+                recordingOff,
+                rendererWidth,
+                10,
+                44100,
+                activeDrawable = mockk<ActiveRecordingDrawable> {
+                    every { hasData() } returns false
+                }
+            )
+            val renderer = NarrationWaveformRenderer(scene, rendererWidth, rendererHeight)
+            val frames = arrayListOf<Image>()
+            for (i in 0 until 10) {
+                val image = WritableImage(rendererWidth, rendererHeight)
+                val (frame, _) = renderer.generateImage(
+                    0,
+                    rendererHeight.toDouble(),
+                    image,
+                    null,
+                    null
+                )
+                frames.add(frame)
+            }
+            for (x in 0 until frames[0]!!.width.toInt()) {
+                for (y in 0 until frames[0]!!.height.toInt()) {
+                    val pixel = frames.map { it.pixelReader.getArgb(x, y) }
+                    Assert.assertTrue(
+                        "Not all pixels at ($x, $y) are the same, should be ${pixel[0]}",
+                        pixel.all { it == pixel[0] })
+                }
+            }
+            //writeFramesToImages(frames)
+        }
+    }
+
+    private fun writeFramesToImages(frames: List<Image>) {
+        frames.forEachIndexed { index, image ->
+            val bImage: BufferedImage = SwingFXUtils.fromFXImage(image, null)
+            ImageIO.write(bImage, "png", File("${index}.png"))
         }
     }
 
@@ -124,7 +203,7 @@ class NarrationRenderingTest {
     }
 
     private fun createObservableChunkMock(chunk: Chunk): Observable<List<Chunk>> {
-        return Observable.just(listOf( chunk))
+        return Observable.just(listOf(chunk))
     }
 
     private fun writeWavFile(): File {
