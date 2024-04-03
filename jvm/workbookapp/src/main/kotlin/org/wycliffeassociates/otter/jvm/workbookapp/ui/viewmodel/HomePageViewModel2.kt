@@ -199,13 +199,13 @@ class HomePageViewModel2 : ViewModel() {
         projectWizardViewModel.increaseProjectDeleteCounter()
 
         val timerDisposable =
-            Completable
-                .timer(timeoutMillis.toLong(), TimeUnit.MILLISECONDS)
-                .andThen {
-                    projectsWithDeleteTimer.remove(cardModel) // remove from undoable list; delete task is starting
-                    it.onComplete()
+            deleteProjectUseCase
+                .deleteProjectsWithTimer(
+                    cardModel.booksModel,
+                    timeoutMillis.toInt()
+                ) {
+                    projectsWithDeleteTimer.remove(cardModel) // remove from undo list just right before deleting
                 }
-                .concatWith(deleteProjectUseCase.deleteProjects(cardModel.booksModel))
                 .observeOnFx()
                 .doOnComplete {
                     logger.info("Deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
