@@ -114,27 +114,45 @@ class NarrationRenderingTest {
                 }
             )
             val renderer = NarrationWaveformRenderer(scene, rendererWidth, rendererHeight)
-            val frames = arrayListOf<Image>()
-            for (i in 0 until 10) {
-                val image = WritableImage(rendererWidth, rendererHeight)
-                val (frame, _) = renderer.generateImage(
-                    0,
-                    rendererHeight.toDouble(),
-                    image,
-                    null,
-                    null
-                )
-                frames.add(frame)
+            val frames = renderFrames(renderer, rendererWidth, rendererHeight, 0, 10)
+            
+            compareImages(frames)
+            writeFramesToImages(frames)
+        }
+    }
+
+    private fun renderFrames(
+        renderer: NarrationWaveformRenderer,
+        rendererWidth: Int,
+        rendererHeight: Int,
+        locationToRender: Int,
+        framesToRender: Int
+    ): List<Image> {
+        val frames = arrayListOf<Image>()
+        for (i in 0 until framesToRender) {
+            val image = WritableImage(rendererWidth, rendererHeight)
+            val (frame, _) = renderer.generateImage(
+                locationToRender,
+                rendererHeight.toDouble(),
+                image,
+                null,
+                null
+            )
+            frames.add(frame)
+        }
+        return frames
+    }
+
+    private fun compareImages(frames: List<Image>) {
+        if (frames.isEmpty()) return
+
+        for (x in 0 until frames[0]!!.width.toInt()) {
+            for (y in 0 until frames[0]!!.height.toInt()) {
+                val pixel = frames.map { it.pixelReader.getArgb(x, y) }
+                Assert.assertTrue(
+                    "Not all pixels at ($x, $y) are the same, should be ${pixel[0]}",
+                    pixel.all { it == pixel[0] })
             }
-            for (x in 0 until frames[0]!!.width.toInt()) {
-                for (y in 0 until frames[0]!!.height.toInt()) {
-                    val pixel = frames.map { it.pixelReader.getArgb(x, y) }
-                    Assert.assertTrue(
-                        "Not all pixels at ($x, $y) are the same, should be ${pixel[0]}",
-                        pixel.all { it == pixel[0] })
-                }
-            }
-            //writeFramesToImages(frames)
         }
     }
 
