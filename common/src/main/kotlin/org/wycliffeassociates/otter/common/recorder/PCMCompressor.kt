@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.common.recorder
 
 import org.wycliffeassociates.otter.common.collections.FloatRingBuffer
+import java.util.*
 
 class PCMCompressor(private val ringBuffer: FloatRingBuffer, framesToCompress: Int) {
 
@@ -52,5 +53,9 @@ class PCMCompressor(private val ringBuffer: FloatRingBuffer, framesToCompress: I
         }
         ringBuffer.add(min)
         ringBuffer.add(max)
+    }
+
+    fun clear() {
+        Arrays.fill(accumulator, 0f)
     }
 }
