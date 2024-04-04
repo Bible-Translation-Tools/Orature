@@ -521,7 +521,7 @@ class TestWorkbookRepository {
 
         Assert.assertArrayEquals(
             chapter.children.blockingIterable().sortedBy { it.sort }.toTypedArray(),
-            chapter.chunks.value!!.sortedBy { it.sort }.toTypedArray()
+            chapter.chunks.blockingGet().sortedBy { it.sort }.toTypedArray()
         )
     }
 

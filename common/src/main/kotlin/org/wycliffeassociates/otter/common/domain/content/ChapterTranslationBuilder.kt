@@ -44,10 +44,13 @@ class ChapterTranslationBuilder @Inject constructor(
      * will be returned. Otherwise, the candidate take will be selected and returned.
      */
     fun getOrCompile(workbook: Workbook, chapter: Chapter) : Single<Take> {
-        val takes = chapter.chunks.value
-            ?.filter { it.hasSelectedAudio() }
-            ?.mapNotNull { it.audio.getSelectedTake()?.file }
-            ?: return Single.error(IllegalStateException("No takes to compile."))
+        val takes = chapter.chunks.blockingGet()
+            .filter { it.hasSelectedAudio() }
+            .mapNotNull { it.audio.getSelectedTake()?.file }
+
+        if (takes.isEmpty()) {
+            return Single.error(IllegalStateException("No takes to compile."))
+        }
 
         var compiled: File? = null
 

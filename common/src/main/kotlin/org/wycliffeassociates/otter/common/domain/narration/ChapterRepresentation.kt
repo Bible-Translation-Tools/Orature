@@ -114,22 +114,16 @@ internal class ChapterRepresentation(
     private fun initializeActiveVerses(): MutableList<VerseNode> {
         return chapter
             .chunks
-            .take(1)
-            .map { chunks ->
-                chunks.map { chunk ->
-                    when (chunk.sort) {
-                        BOOK_TITLE_SORT -> BookMarker(workbook.source.slug, 0)
-                        CHAPTER_TITLE_SORT -> ChapterMarker(chapter.sort, 0)
-                        else -> VerseMarker(chunk.start, chunk.end, 0)
-                    }
+            .blockingGet()
+            .map { chunk ->
+                val marker = when (chunk.sort) {
+                    BOOK_TITLE_SORT -> BookMarker(workbook.source.slug, 0)
+                    CHAPTER_TITLE_SORT -> ChapterMarker(chapter.sort, 0)
+                    else -> VerseMarker(chunk.start, chunk.end, 0)
                 }
-            }
-            .flatMap { it.toObservable() }
-            .map { marker ->
                 VerseNode(false, marker)
             }
-            .toList()
-            .blockingGet()
+            .toMutableList()
     }
 
     fun loadFromSerializedVerses() {

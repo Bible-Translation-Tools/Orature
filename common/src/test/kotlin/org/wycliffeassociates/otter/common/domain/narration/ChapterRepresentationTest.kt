@@ -22,6 +22,7 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.Observable
+import io.reactivex.Single
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -102,7 +103,7 @@ class ChapterRepresentationTest {
     fun mockChapter(): Chapter {
         return mockk<Chapter> {
             every { getDraft() } returns chunk
-            every { chunks } returns BehaviorRelay.create<List<Chunk>>().also { it.accept(emptyList<Chunk>()) }
+            every { chunks } returns Single.just(listOf())
             every { sort } returns sortCount++
         }
     }

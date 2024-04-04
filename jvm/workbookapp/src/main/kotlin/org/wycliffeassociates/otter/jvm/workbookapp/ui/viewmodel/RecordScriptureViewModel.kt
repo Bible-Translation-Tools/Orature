@@ -156,8 +156,9 @@ class RecordScriptureViewModel : ViewModel() {
         workbookDataStore.activeChapterProperty.onChangeAndDoNowWithDisposer { chapter ->
             setHasNextAndPreviousChapter()
             chapter?.let {
-                val chunks = if (chapter.chunks.value?.all { c -> c.draftNumber > 0 } == true) {
-                    chapter.chunks.value!!
+                val chunkList = chapter.chunks.blockingGet()
+                val chunks = if (chunkList.all { c -> c.draftNumber > 0 }) {
+                    chunkList
                 } else {
                     listOf()
                 }

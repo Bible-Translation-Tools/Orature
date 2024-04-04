@@ -5,6 +5,7 @@ import integrationtest.di.DaggerTestPersistenceComponent
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.Observable
+import io.reactivex.Single
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -99,9 +100,7 @@ class NarrationRenderingTest {
     private var sortCount = 1
     private fun mockChapter(): Chapter {
         return mockk<Chapter> {
-            every { chunks } returns BehaviorRelay.create<List<Chunk>>().also {
-                it.accept(mockChunkList())
-            }
+            every { chunks } returns Single.just(mockChunkList())
             every { getSelectedTake() } returns null
             every { sort } returns sortCount++
         }

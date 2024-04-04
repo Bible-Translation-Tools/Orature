@@ -25,6 +25,7 @@ import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.binding.Bindings
@@ -519,10 +520,7 @@ class NarrationViewModel : ViewModel() {
             .map {
                 it.find { it.sort == chapter.sort }
             }
-            .map { chapter ->
-                chapter.chunks.take(1)
-            }
-            .flatMap { it }
+            .flatMap { c -> c.observableChunks }
             .map { injectChapterTitleText(chapter, it) }
             .observeOnFx()
             .subscribe(
@@ -532,7 +530,7 @@ class NarrationViewModel : ViewModel() {
                 },
                 {},
                 { resetNarratableList() }
-            )
+            ).addTo(disposables)
     }
 
     /**

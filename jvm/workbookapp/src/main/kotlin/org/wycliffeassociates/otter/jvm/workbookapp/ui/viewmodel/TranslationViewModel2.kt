@@ -140,7 +140,7 @@ class TranslationViewModel2 : ViewModel() {
 
     fun selectChunk(chunkNumber: Int) {
         resetUndoRedo()
-        val chunk = workbookDataStore.chapter.chunks.value?.find { it.sort == chunkNumber } ?: return
+        val chunk = workbookDataStore.chapter.chunks.blockingGet().find { it.sort == chunkNumber } ?: return
         workbookDataStore.activeChunkProperty.set(chunk)
 
         audioDataStore.stopPlayers()
@@ -180,7 +180,7 @@ class TranslationViewModel2 : ViewModel() {
         compositeDisposable.clear()
 
         workbookDataStore.chapter
-            .chunks
+            .observableChunks
             .observeOnFx()
             .subscribe { list ->
                 val chunkList = list.filter { it.contentType == ContentType.TEXT }
@@ -275,9 +275,8 @@ class TranslationViewModel2 : ViewModel() {
         showAudioMissingViewProperty.set(true)
         val chapterHasChunks = chapter
             .chunks
-            .take(1)
             .map { chunks -> chunks.filter { it.contentType == ContentType.TEXT } }
-            .blockingFirst()
+            .blockingGet()
             .isNotEmpty()
 
         if (chapterHasChunks) {

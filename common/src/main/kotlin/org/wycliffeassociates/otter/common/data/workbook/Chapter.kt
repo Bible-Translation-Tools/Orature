@@ -48,6 +48,7 @@ class Chapter(
     override val contentType: ContentType = ContentType.META
     override val children: Observable<BookElement> by lazy { getDraft().cast() }
 
+    val observableChunks: Observable<List<Chunk>> by lazychunks
     val chunks: Single<List<Chunk>> get() { return lazychunks.value.firstOrError() }
 
     var text: String = ""

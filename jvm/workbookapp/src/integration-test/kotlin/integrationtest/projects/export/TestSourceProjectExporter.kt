@@ -276,9 +276,9 @@ class TestSourceProjectExporter {
         val chapter = workbook.target
             .chapters.blockingFirst()
         chapter
-            .chunks.take(1)
+            .chunks
             .timeout(5, TimeUnit.SECONDS)
-            .blockingFirst()
+            .blockingGet()
             ?.forEach {
                 it.audio.selectTake(take)
             }

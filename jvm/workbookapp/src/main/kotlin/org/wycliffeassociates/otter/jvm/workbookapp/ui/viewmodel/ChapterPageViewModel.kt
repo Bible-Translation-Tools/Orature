@@ -377,9 +377,7 @@ class ChapterPageViewModel : ViewModel() {
         allContent.clear()
         loading = true
         return chapter.chunks
-            .flatMap {
-                Observable.fromIterable(it)
-            }
+            .flattenAsObservable { it }
             .map { CardData(it) }
             .map {
                 buildTakes(it)

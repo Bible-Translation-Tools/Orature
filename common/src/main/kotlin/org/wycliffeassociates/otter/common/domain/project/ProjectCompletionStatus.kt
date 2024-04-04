@@ -20,11 +20,10 @@ class ProjectCompletionStatus @Inject constructor() {
         if (chunkCount == 0) return 0.0
 
         val chunkWithAudio = chapter.chunks
-            .take(1)
             .map {
                 it.count { it.hasSelectedAudio() }
             }
-            .blockingFirst()
+            .blockingGet()
 
         return chunkWithAudio.toDouble() / chunkCount
     }
