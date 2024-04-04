@@ -19,26 +19,14 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.toLazyBinding
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.dialog.LoadingModal
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
-import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
-import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
-import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
-import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
-import org.wycliffeassociates.otter.jvm.controls.event.OpenInAudioPluginEvent
-import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
-import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordAgainEvent
-import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordingEvent
-import org.wycliffeassociates.otter.jvm.controls.event.PlayChapterEvent
-import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
-import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
-import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
-import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingAgainEvent
-import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
-import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.event.*
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
@@ -48,10 +36,12 @@ import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.NarrationMarkerChangedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.NarrationMovingMarkerEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationOpenImportAudioDialogEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRestartChapterEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationUndoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ImportAudioViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
@@ -61,6 +51,7 @@ class NarrationPage : View() {
 
     private val viewModel: NarrationViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
+    private val importAudioViewModel: ImportAudioViewModel by inject()
     private val settingsViewModel: SettingsViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
 
@@ -68,6 +59,7 @@ class NarrationPage : View() {
 
     private val eventSubscriptions = mutableListOf<EventRegistration>()
     private val disposableListeners = mutableListOf<ListenerDisposer>()
+    private val disposable = CompositeDisposable()
 
     private lateinit var narrationHeader: NarrationHeader
     private lateinit var audioWorkspaceView: AudioWorkspaceView
@@ -130,6 +122,7 @@ class NarrationPage : View() {
         super.onUndock()
         unsubscribeFromEvents()
         disposableListeners.forEach { it.dispose() }
+        disposable.clear()
         // avoid resetting ViewModel states & action history when opening plugin
         when (viewModel.pluginOpenedProperty.value) {
             true -> {
@@ -158,6 +151,10 @@ class NarrationPage : View() {
 
         subscribe<NarrationRestartChapterEvent> {
             viewModel.restartChapter()
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<NarrationOpenImportAudioDialogEvent> {
+            openImportAudioModal(it.verseIndex)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<NarrationUndoEvent> {
@@ -237,6 +234,10 @@ class NarrationPage : View() {
         subscribe<NavigateChapterEvent> {
             viewModel.deferNavigateChapterWhileModifyingTake(it.chapterNumber)
         }.let { eventSubscriptions.add(it) }
+
+        subscribe<ImportVerseAudioEvent> {
+            viewModel.importVerseAudio(it.index, it.file)
+        }.let { eventSubscriptions.add(it) }
     }
 
     private fun unsubscribeFromEvents() {
@@ -304,6 +305,40 @@ class NarrationPage : View() {
                     it.translation.targetRate.toLazyBinding()
                 }
             )
+        }
+    }
+
+    fun openImportAudioModal(verseIndex: Int? = null) {
+
+        find<ImportAudioDialog>().apply {
+            themeProperty.set(settingsViewModel.appColorMode.value)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+
+            verseIndex?.let {
+                verseIndexProperty.set(verseIndex)
+            }
+
+            validateFileCallback.set {
+                importAudioViewModel.isValidImportFile(it)
+            }
+
+            setOnCloseAction {
+                close()
+            }
+
+            importAudioViewModel.snackBarObservable
+                .subscribe { msg ->
+                    SnackbarHandler.showNotification(
+                        NotificationViewData(
+                            title = messages["error"],
+                            message = msg,
+                            statusType = NotificationStatusType.FAILED
+                        ),
+                        this.root
+                    )
+                }.addTo(disposable)
+
+            open()
         }
     }
 }
