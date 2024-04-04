@@ -24,4 +24,5 @@ import tornadofx.FXEvent
 class NarrationRedoEvent : FXEvent()
 class NarrationUndoEvent : FXEvent()
 class NarrationOpenInPluginEvent(val plugin: PluginType) : FXEvent()
-class NarrationRestartChapterEvent: FXEvent()
+class NarrationRestartChapterEvent : FXEvent()
+class NarrationOpenImportAudioDialogEvent(val verseIndex: Int? = null) : FXEvent()
