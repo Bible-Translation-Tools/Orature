@@ -40,6 +40,7 @@ class VerseMenu : ContextMenu() {
     val isPlayingEnabledProperty = SimpleBooleanProperty()
     val isEditVerseEnabledProperty = SimpleBooleanProperty()
     val isRecordAgainEnabledProperty = SimpleBooleanProperty()
+    val isImportVerseEnabledProperty = SimpleBooleanProperty()
 
     init {
         addClass("wa-context-menu")
@@ -81,6 +82,18 @@ class VerseMenu : ContextMenu() {
             }
         }
 
-        items.setAll(playOpt, recordAgainOpt, editVerseOpt)
+        val importVerseAudio = MenuItem().apply {
+            graphic = label(messages["import"]) {
+                graphic = FontIcon(MaterialDesign.MDI_DOWNLOAD)
+                tooltip(text)
+            }
+            action {
+                FX.eventbus.fire(NarrationOpenImportAudioDialogEvent(verseIndexProperty.value))
+            }
+
+            enableWhen(isImportVerseEnabledProperty)
+        }
+
+        items.setAll(playOpt, recordAgainOpt, editVerseOpt, importVerseAudio)
     }
 }

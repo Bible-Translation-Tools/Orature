@@ -120,6 +120,8 @@ class VerseMarkerControl : BorderPane() {
                 isPlayingEnabledProperty.bind(this@VerseMarkerControl.isPlayingEnabledProperty)
                 isEditVerseEnabledProperty.bind(this@VerseMarkerControl.isEditVerseEnabledProperty)
                 isRecordAgainEnabledProperty.bind(this@VerseMarkerControl.isRecordAgainEnabledProperty)
+                isImportVerseEnabledProperty.bind(this@VerseMarkerControl.isRecordAgainEnabledProperty)
+
                 verseProperty.bind(this@VerseMarkerControl.verseProperty)
                 verseIndexProperty.bind(this@VerseMarkerControl.verseIndexProperty)
             }
