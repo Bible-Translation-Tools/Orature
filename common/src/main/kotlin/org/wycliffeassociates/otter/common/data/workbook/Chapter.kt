@@ -48,7 +48,7 @@ class Chapter(
     override val contentType: ContentType = ContentType.META
     override val children: Observable<BookElement> by lazy { getDraft().cast() }
 
-    val chunks by lazychunks
+    val chunks: Single<List<Chunk>> get() { return lazychunks.value.firstOrError() }
 
     var text: String = ""
 
@@ -60,14 +60,9 @@ class Chapter(
     fun getSelectedTake() = audio.selected.value?.value
 
     fun getDraft(): Observable<Chunk> {
-        return getLatestDraftFromRelay()
+        return chunks
             .flattenAsObservable { it }
-            .switchIfEmpty(Observable.empty<Chunk>())
             .subscribeOn(Schedulers.io())
-    }
-
-    private fun getLatestDraftFromRelay(): Maybe<List<Chunk>> {
-        return Maybe.fromCallable { chunks.value }
     }
 
     private fun textItem(): TextItem {
