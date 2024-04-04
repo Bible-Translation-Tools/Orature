@@ -18,38 +18,29 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform
 
-import com.sun.glass.ui.Screen
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleDoubleProperty
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
+import javafx.scene.image.Image
 import javafx.scene.image.PixelFormat
+import javafx.scene.image.PixelWriter
 import javafx.scene.image.WritableImage
+import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.domain.narration.AudioScene
 import tornadofx.c
 import tornadofx.runLater
 import java.nio.ByteBuffer
 
-private const val VOLUME_BAR_WIDTH = 25
-private const val APP_BAR_WIDTH = 88
-
 // Set up the canvas for the Waveform and Volume bar
 class NarrationWaveformRenderer(
-    // val renderer: NarrationAudioScene
-    val renderer: AudioScene
+    private val renderer: AudioScene,
+    val renderWidth: Int,
+    val renderHeight: Int,
+    val backgroundColor: Color = c("#E5E8EB"),
+    val waveformColor: Color = c("#66768B")
 ) {
-
-    val heightProperty = SimpleDoubleProperty(1.0)
-    val widthProperty = SimpleDoubleProperty()
-    val isRecordingProperty = SimpleBooleanProperty(false)
-    val DEFAULT_SCREEN_WIDTH = Screen.getMainScreen().width
-    val DEFAULT_SCREEN_HEIGHT = Screen.getMainScreen().height
-    val backgroundColor = c("#E5E8EB")
-    val waveformColor = c("#66768B")
-    val writableImage = WritableImage(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT)
-    val pixelWriter = writableImage.pixelWriter
+    private val writableImage = WritableImage(renderWidth, renderHeight)
     var pixelFormat: PixelFormat<ByteBuffer> = PixelFormat.getByteRgbInstance()
-    private val imageData = ByteArray(DEFAULT_SCREEN_WIDTH * DEFAULT_SCREEN_HEIGHT * 3)
+    private val imageData = ByteArray(renderWidth * renderHeight * 3)
 
     init {
         fillImageDataWithDefaultColor()
@@ -62,25 +53,24 @@ class NarrationWaveformRenderer(
         reRecordLocation: Int? = null,
         nextVerseLocation: Int? = null
     ): List<IntRange> {
-        heightProperty.set(canvas.height)
-
-        //val buffer = renderer.getFrameData()
-        val (buffer, viewports) = renderer.getNarrationDrawable(location, reRecordLocation, nextVerseLocation)
-
-        fillImageDataWithDefaultColor()
-        addLinesToImageData(buffer)
-        drawImageDataToImage()
+        val (_, viewports) = generateImage(
+            location,
+            canvas.height,
+            writableImage,
+            reRecordLocation,
+            nextVerseLocation
+        )
 
         runLater {
             // due to the renderer (PCM compressor, etc) being initialized with the screen width, don't scale the image
             // however, this means the image needs to be translated by the half the delta between the screen and canvas
             context.drawImage(
                 writableImage,
-                (canvas.width - DEFAULT_SCREEN_WIDTH) / 2.0,
+                (canvas.width - renderWidth) / 2.0,
                 0.0
             )
 
-            context.stroke = javafx.scene.paint.Color.RED
+            context.stroke = Color.RED
             context.lineWidth = 2.0
             context.strokeLine(canvas.width / 2.0, 0.0, canvas.width / 2.0, canvas.height)
         }
@@ -88,14 +78,35 @@ class NarrationWaveformRenderer(
         return viewports
     }
 
+    class RenderedFrame(val image: Image, val viewports: List<IntRange>) {
+        operator fun component1(): Image = image
+        operator fun component2(): List<IntRange> = viewports
+    }
+
+    fun generateImage(
+        location: Int,
+        canvasHeight: Double,
+        writableImage: WritableImage,
+        reRecordLocation: Int?,
+        nextVerseLocation: Int?,
+    ): RenderedFrame {
+        val (buffer, viewports) = renderer.getNarrationDrawable(location, reRecordLocation, nextVerseLocation)
+
+        fillImageDataWithDefaultColor()
+        addLinesToImageData(buffer, canvasHeight)
+        drawImageDataToImage(writableImage.pixelWriter)
+
+        return RenderedFrame(writableImage, viewports)
+    }
+
     private fun scaleAmplitude(sample: Double, height: Double): Double {
         return height / (Short.MAX_VALUE * 2) * (sample + Short.MAX_VALUE)
     }
 
-    fun fillImageDataWithDefaultColor() {
+    private fun fillImageDataWithDefaultColor() {
         var i = 0
-        for (y in 0 until DEFAULT_SCREEN_HEIGHT) {
-            for (x in 0 until DEFAULT_SCREEN_WIDTH) {
+        for (y in 0 until renderHeight) {
+            for (x in 0 until renderWidth) {
                 imageData[i] = (backgroundColor.red * 255).toInt().toByte()
                 imageData[i + 1] = (backgroundColor.green * 255).toInt().toByte()
                 imageData[i + 2] = (backgroundColor.blue * 255).toInt().toByte()
@@ -104,40 +115,32 @@ class NarrationWaveformRenderer(
         }
     }
 
-    fun addLinesToImageData(buffer: FloatArray) {
+    private fun addLinesToImageData(
+        buffer: FloatArray,
+        canvasHeight: Double
+    ) {
         for (x in 0 until buffer.size / 2) {
-            val y1 = scaleAmplitude(buffer[x * 2].toDouble(), heightProperty.value)
-            val y2 = scaleAmplitude(buffer[x * 2 + 1].toDouble(), heightProperty.value)
+            val y1 = scaleAmplitude(buffer[x * 2].toDouble(), canvasHeight)
+            val y2 = scaleAmplitude(buffer[x * 2 + 1].toDouble(), canvasHeight)
 
             for (y in minOf(y1.toInt(), y2.toInt())..maxOf(y1.toInt(), y2.toInt())) {
-                imageData[(x + y * DEFAULT_SCREEN_WIDTH) * 3] = (waveformColor.red * 255).toInt().toByte()
-                imageData[(x + y * DEFAULT_SCREEN_WIDTH) * 3 + 1] = (waveformColor.green * 255).toInt().toByte()
-                imageData[(x + y * DEFAULT_SCREEN_WIDTH) * 3 + 2] = (waveformColor.blue * 255).toInt().toByte()
+                imageData[(x + y * renderWidth) * 3] = (waveformColor.red * 255).toInt().toByte()
+                imageData[(x + y * renderWidth) * 3 + 1] = (waveformColor.green * 255).toInt().toByte()
+                imageData[(x + y * renderWidth) * 3 + 2] = (waveformColor.blue * 255).toInt().toByte()
             }
         }
     }
 
-    fun drawImageDataToImage() {
+    private fun drawImageDataToImage(pixelWriter: PixelWriter) {
         pixelWriter.setPixels(
             0,
             0,
-            DEFAULT_SCREEN_WIDTH,
-            DEFAULT_SCREEN_HEIGHT,
+            renderWidth,
+            renderHeight,
             pixelFormat,
             imageData,
             0,
-            DEFAULT_SCREEN_WIDTH * 3
-        )
-    }
-
-    fun drawImageToCanvas(context: GraphicsContext, canvas: Canvas) {
-        var startingXPosition = (0.0 + minOf(widthProperty.value - DEFAULT_SCREEN_WIDTH, 0.0))
-        context.drawImage(
-            writableImage,
-            startingXPosition,
-            0.0,
-            DEFAULT_SCREEN_WIDTH.toDouble(),
-            DEFAULT_SCREEN_HEIGHT.toDouble()
+            renderWidth * 3
         )
     }
 
