@@ -59,6 +59,7 @@ class AudioReaderDrawable(
     fun getWaveformDrawable(location: Int): FloatArray {
         Arrays.fill(waveformDrawable, 0f)
         drawableData.clear()
+        pcmCompressor.clear()
         var totalFramesToRead = secondsOnScreen * recordingSampleRate
 
         val paddedFrames = padStart(pcmCompressor, audioReader.frameSizeBytes, location, totalFramesToRead)

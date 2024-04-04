@@ -53,4 +53,9 @@ class PCMCompressor(private val ringBuffer: FloatRingBuffer, framesToCompress: I
         ringBuffer.add(min)
         ringBuffer.add(max)
     }
+
+    fun clear() {
+        index = 0
+        accumulator.fill(0f)
+    }
 }
