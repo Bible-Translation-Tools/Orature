@@ -245,7 +245,7 @@ internal class EditVerseAction(
         node = VerseNode(
             placed = true,
             vm,
-            mutableListOf(start..end)
+            mutableListOf(start until end)
         ).also {
             totalVerses[verseIndex] = it.copy()
         }

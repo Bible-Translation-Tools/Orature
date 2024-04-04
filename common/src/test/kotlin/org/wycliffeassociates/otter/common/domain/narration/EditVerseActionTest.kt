@@ -26,7 +26,7 @@ import org.junit.Test
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 
-class EditVerseActionTest{
+class EditVerseActionTest {
 
     private val totalVerses: MutableList<VerseNode> = mutableListOf()
     lateinit var workingAudioFile: AudioFile
@@ -46,13 +46,13 @@ class EditVerseActionTest{
 
     // Initializes each verse with placed equal to true and with one sector that holds one second worth of frames.
     // where the start of each added sector is offset by "paddingLength" number of frames
-    private fun initializeVerseNodeList(verseNodeList : MutableList<VerseNode>, paddingLength: Int = 0) {
+    private fun initializeVerseNodeList(verseNodeList: MutableList<VerseNode>, paddingLength: Int = 0) {
         var start = -1
         for (i in 0 until numTestVerses) {
             val verseMarker = VerseMarker((i + 1), (i + 1), 0)
             val sectors = mutableListOf<IntRange>()
             val verseNode = VerseNode(true, verseMarker, sectors)
-            sectors.add(start + 1 .. start + 44100)
+            sectors.add(start + 1..start + 44100)
             start += 44100 + paddingLength
             verseNodeList.add(verseNode)
         }
@@ -85,7 +85,7 @@ class EditVerseActionTest{
         val editVerseAction = EditVerseAction(verseEditedIndex, editVerseStart, editVerseEnd)
 
         // Verify that the verse being moved has the expected values
-        Assert.assertEquals(0 .. 44099, verseBeingEdited.sectors.last())
+        Assert.assertEquals(0..44099, verseBeingEdited.sectors.last())
 
         // Verify that the editVerseAction has not been used before and is initialized correctly
         Assert.assertNull(editVerseAction.previous)
@@ -95,16 +95,16 @@ class EditVerseActionTest{
 
         // Verify that editVerseAction's node and previous are correct values
         Assert.assertEquals(1, editVerseAction.previous?.sectors?.size)
-        Assert.assertEquals(0 .. 44099, editVerseAction.previous?.sectors?.last())
+        Assert.assertEquals(0..44099, editVerseAction.previous?.sectors?.last())
         Assert.assertEquals(1, editVerseAction.node?.sectors?.size)
-        Assert.assertEquals(editVerseStart .. editVerseEnd, editVerseAction.node?.sectors?.last())
+        Assert.assertEquals(editVerseStart until editVerseEnd, editVerseAction.node?.sectors?.last())
 
         // Verify that the edited verse has the correct values after being edited
         Assert.assertEquals(1, totalVerses[verseEditedIndex].sectors.size)
-        Assert.assertEquals(editVerseStart .. editVerseEnd, totalVerses[verseEditedIndex].sectors.last())
+        Assert.assertEquals(editVerseStart until editVerseEnd, totalVerses[verseEditedIndex].sectors.last())
         Assert.assertEquals(true, totalVerses[verseEditedIndex].placed)
     }
-    
+
 
     @Test
     fun `undo with empty verseNode list`() {
@@ -138,14 +138,14 @@ class EditVerseActionTest{
 
         // Verify that the verse being moved has the expected initial values
         Assert.assertEquals(1, verseBeingEdited.sectors.size)
-        Assert.assertEquals(0 .. 44099, verseBeingEdited.sectors.last())
+        Assert.assertEquals(0..44099, verseBeingEdited.sectors.last())
 
         val editVerseAction = EditVerseAction(verseEditedIndex, editVerseStart, editVerseEnd)
         editVerseAction.execute(totalVerses, workingAudioFile)
 
         // Verify that the edited verse has the correct values after being edited
         Assert.assertEquals(1, totalVerses[verseEditedIndex].sectors.size)
-        Assert.assertEquals(editVerseStart .. editVerseEnd, totalVerses[verseEditedIndex].sectors.last())
+        Assert.assertEquals(editVerseStart until editVerseEnd, totalVerses[verseEditedIndex].sectors.last())
         Assert.assertEquals(true, totalVerses[verseEditedIndex].placed)
 
         // undo the edit
@@ -153,7 +153,7 @@ class EditVerseActionTest{
 
         // Verify that the verse has been restored to its initial state
         Assert.assertEquals(1, totalVerses[verseEditedIndex].sectors.size)
-        Assert.assertEquals(0 .. 44099, totalVerses[verseEditedIndex].sectors.last())
+        Assert.assertEquals(0..44099, totalVerses[verseEditedIndex].sectors.last())
     }
 
 
@@ -188,14 +188,14 @@ class EditVerseActionTest{
 
         // Verify that the verse being moved has the expected initial values
         Assert.assertEquals(1, verseBeingEdited.sectors.size)
-        Assert.assertEquals(0 .. 44099, verseBeingEdited.sectors.last())
+        Assert.assertEquals(0..44099, verseBeingEdited.sectors.last())
 
         val editVerseAction = EditVerseAction(verseEditedIndex, editVerseStart, editVerseEnd)
         editVerseAction.execute(totalVerses, workingAudioFile)
 
         // Verify that the edited verse has the correct values after being edited
         Assert.assertEquals(1, totalVerses[verseEditedIndex].sectors.size)
-        Assert.assertEquals(editVerseStart .. editVerseEnd, totalVerses[verseEditedIndex].sectors.last())
+        Assert.assertEquals(editVerseStart until editVerseEnd, totalVerses[verseEditedIndex].sectors.last())
         Assert.assertEquals(true, totalVerses[verseEditedIndex].placed)
 
         // undo the edit
@@ -203,14 +203,14 @@ class EditVerseActionTest{
 
         // Verify that the verse has been restored to its initial state
         Assert.assertEquals(1, totalVerses[verseEditedIndex].sectors.size)
-        Assert.assertEquals(0 .. 44099, totalVerses[verseEditedIndex].sectors.last())
+        Assert.assertEquals(0..44099, totalVerses[verseEditedIndex].sectors.last())
 
         // redo the edit
         editVerseAction.redo(totalVerses)
 
         // Verify that the previous edit has been restored
         Assert.assertEquals(1, totalVerses[verseEditedIndex].sectors.size)
-        Assert.assertEquals(editVerseStart .. editVerseEnd, totalVerses[verseEditedIndex].sectors.last())
+        Assert.assertEquals(editVerseStart until editVerseEnd, totalVerses[verseEditedIndex].sectors.last())
         Assert.assertEquals(true, totalVerses[verseEditedIndex].placed)
     }
 }
