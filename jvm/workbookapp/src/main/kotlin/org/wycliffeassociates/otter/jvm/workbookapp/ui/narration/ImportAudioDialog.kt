@@ -140,13 +140,13 @@ class ImportAudioDialog : OtterDialog() {
     }
 
     private fun importFile(file: File) {
-        runLater { close() } // avoid ghost image after file dropped
-
         if (verseIndexProperty.value > -1) {
             FX.eventbus.fire(ImportVerseAudioEvent(verseIndexProperty.value, file))
             verseIndexProperty.set(-1)
-        } else {
-            // TODO: fire ImportChapterAudioEvent here
+        }
+
+        runLater {
+            onCloseActionProperty.value.handle(ActionEvent())
         }
 
     }
