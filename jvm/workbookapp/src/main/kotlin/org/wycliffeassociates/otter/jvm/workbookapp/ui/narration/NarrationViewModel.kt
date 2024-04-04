@@ -809,10 +809,15 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun importVerseAudio(verseIndex: Int, file: File) {
-        openLoadingModalProperty.set(true)
         narration.onEditVerse(verseIndex, file)
-        resetNarratableList()
-        openLoadingModalProperty.set(false)
+            .doOnSubscribe {
+                openLoadingModalProperty.set(true)
+            }
+            .doFinally {
+                resetNarratableList()
+                openLoadingModalProperty.set(false)
+            }
+            .subscribe()
     }
 
     private fun stopPlayer() {
