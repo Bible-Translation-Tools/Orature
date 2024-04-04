@@ -56,6 +56,7 @@ class PCMCompressor(private val ringBuffer: FloatRingBuffer, framesToCompress: I
     }
 
     fun clear() {
+        index = 0
         Arrays.fill(accumulator, 0f)
     }
 }
