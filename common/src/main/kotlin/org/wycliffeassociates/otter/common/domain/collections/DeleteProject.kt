@@ -29,7 +29,6 @@ import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
-import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -91,9 +90,17 @@ class DeleteProject @Inject constructor(
             .subscribeOn(Schedulers.single()) // sequential execution of delete to avoid db transaction error
     }
 
-    fun deleteProjectsWithTimer(books: List<WorkbookDescriptor>, timeoutMillis: Int): Completable {
+    fun deleteProjectsWithTimer(
+        books: List<WorkbookDescriptor>,
+        timeoutMillis: Int,
+        onBeforeDeleteCallback: () -> Unit = {}
+    ): Completable {
         return Completable
             .timer(timeoutMillis.toLong(), TimeUnit.MILLISECONDS)
+            .andThen {
+                onBeforeDeleteCallback()
+                it.onComplete()
+            }
             .andThen(deleteProjects(books))
     }
 

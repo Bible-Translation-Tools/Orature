@@ -60,6 +60,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.ProjectContributorsEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupCardModel
 import org.wycliffeassociates.otter.jvm.controls.toggleFontForText
 import org.wycliffeassociates.otter.jvm.controls.toggleFontLanguage
+import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportDialogOpenEvent
@@ -91,6 +92,7 @@ class HomePage2 : View() {
     private val navigator: NavigationMediator by inject()
 
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
+    private val resumeProjectProperty = SimpleObjectProperty<ProjectGroupKey>(null)
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.set(messages["home"])
         iconProperty.set(FontIcon(MaterialDesign.MDI_HOME))
@@ -118,7 +120,7 @@ class HomePage2 : View() {
             targetLanguageSearchQueryProperty.bindBidirectional(projectWizardViewModel.targetLanguageSearchQueryProperty)
 
             setOnCancelAction {
-                exitWizard()
+                exitWizard(resumeProjectProperty.value)
             }
         }
     }
@@ -154,6 +156,7 @@ class HomePage2 : View() {
                     visibleWhen { mainSectionProperty.isNotEqualTo(wizardFragment) }
                     managedWhen(visibleProperty())
                     setOnAction {
+                        resumeProjectProperty.set(viewModel.selectedProjectGroupProperty.value)
                         viewModel.selectedProjectGroupProperty.set(null)
                         mainSectionProperty.set(wizardFragment)
                         projectWizardViewModel.dock()
@@ -169,7 +172,7 @@ class HomePage2 : View() {
                     managedWhen(visibleProperty())
 
                     setOnCancelAction {
-                        exitWizard()
+                        exitWizard(resumeProjectProperty.value)
                     }
                 }
             }
@@ -375,9 +378,10 @@ class HomePage2 : View() {
         }
     }
 
-    private fun exitWizard() {
+    private fun exitWizard(resumeProjectGroup: ProjectGroupKey? = null) {
         projectWizardViewModel.undock()
-        viewModel.selectedProjectGroupProperty.set(viewModel.projectGroups.firstOrNull()?.getKey())
+        resumeProjectGroup?.let { viewModel.selectedProjectGroupProperty.set(it) }
+        resumeProjectProperty.set(null)
         mainSectionProperty.set(bookFragment)
     }
 
