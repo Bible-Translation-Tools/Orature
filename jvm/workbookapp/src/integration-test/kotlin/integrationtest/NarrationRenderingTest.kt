@@ -152,7 +152,7 @@ class NarrationRenderingTest {
         val bucket = ByteArray(DEFAULT_BUFFER_SIZE)
         val samples = arrayListOf<ByteArray>()
         for (i in 0 until experiments) {
-            narrationReader.seek(0)
+            narrationReader.seek(startLocation)
             var total = 0
             while (narrationReader.hasRemaining()) {
                 val read = narrationReader.getPcmBuffer(bucket)
