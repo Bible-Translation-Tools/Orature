@@ -64,6 +64,8 @@ class AudioReaderDrawable(
         var totalFramesToRead = secondsOnScreen * recordingSampleRate
 
         val paddedFrames = padStart(pcmCompressor, audioReader.frameSizeBytes, location, totalFramesToRead)
+
+        pcmCompressor.clear() // clear the compressor after potentially padding 0s
         totalFramesToRead -= paddedFrames
 
         val clampedFrameLoc = location.coerceIn(0..audioReader.totalFrames)
