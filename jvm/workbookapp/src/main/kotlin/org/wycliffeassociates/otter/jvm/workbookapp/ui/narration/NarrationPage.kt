@@ -228,6 +228,10 @@ class NarrationPage : View() {
             viewModel.openInAudioPlugin(it.index)
         }.let { eventSubscriptions.add(it) }
 
+        subscribe<ChapterReturnFromPluginEvent> {
+            viewModel.onChapterReturnFromPlugin()
+        }.let { eventSubscriptions.add(it) }
+
         subscribe<NavigateChapterEvent> {
             viewModel.deferNavigateChapterWhileModifyingTake(it.chapterNumber)
         }.let { eventSubscriptions.add(it) }
@@ -290,8 +294,6 @@ class NarrationPage : View() {
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
             orientationProperty.bind(settingsViewModel.orientationProperty)
             sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
-            openLoadingModalProperty.bind(viewModel.openLoadingModalProperty)
-            appColorModeProperty.bind(settingsViewModel.appColorMode)
 
             sourceSpeedRateProperty.bind(
                 workbookDataStore.activeWorkbookProperty.select {

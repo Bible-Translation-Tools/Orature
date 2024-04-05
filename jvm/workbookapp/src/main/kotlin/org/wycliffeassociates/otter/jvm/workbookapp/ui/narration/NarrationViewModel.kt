@@ -423,13 +423,14 @@ class NarrationViewModel : ViewModel() {
                 .onErrorReturn { PluginActions.Result.NO_PLUGIN }
                 .subscribe { result: PluginActions.Result ->
                     logger.info("Returned from plugin with result: $result")
+                    FX.eventbus.fire(PluginClosedEvent(pluginType))
 
                     when (result) {
                         PluginActions.Result.NO_PLUGIN -> FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
                         else -> {
                             when (pluginType) {
                                 PluginType.EDITOR, PluginType.MARKER -> {
-                                    onChapterReturnFromPlugin(pluginType)
+                                    FX.eventbus.fire(ChapterReturnFromPluginEvent())
                                 }
 
                                 else -> {
@@ -674,25 +675,16 @@ class NarrationViewModel : ViewModel() {
         processWithEditor(file, index)
     }
 
-    fun onChapterReturnFromPlugin(pluginType: PluginType) {
+    fun onChapterReturnFromPlugin() {
         narration.loadFromSelectedChapterFile()
-            .doOnSubscribe {
-                openLoadingModalProperty.set(true)
-            }
-            .doFinally {
-                recordedVerses.setAll(narration.activeVerses)
-                resetNarratableList()
-                // Indicates that we used a temporary take to edit the chapter
-                if (hasAllItemsRecordedProperty.value == false) {
-                    // Deletes the wav file for the temporary take since it will not be referenced to again
-                    narration.deleteChapterTake(true)
-                }
+        recordedVerses.setAll(narration.activeVerses)
+        resetNarratableList()
 
-                openLoadingModalProperty.set(false)
-                FX.eventbus.fire(PluginClosedEvent(pluginType))
-            }
-            .subscribeOn(Schedulers.io())
-            .subscribe()
+        // Indicates that we used a temporary take to edit the chapter
+        if (hasAllItemsRecordedProperty.value == false) {
+            // Deletes the wav file for the temporary take since it will not be referenced to again
+            narration.deleteChapterTake(true)
+        }
     }
 
     fun onNext(currentIndex: Int) {
@@ -858,18 +850,10 @@ class NarrationViewModel : ViewModel() {
 
                     else -> {
                         narration.onEditVerse(verseIndex, file)
-                            .doOnSubscribe {
-                                openLoadingModalProperty.set(true)
-                            }
-                            .doFinally {
-                                resetNarratableList()
-                                openLoadingModalProperty.set(false)
-                                FX.eventbus.fire(PluginClosedEvent(pluginType))
-                            }
-                            .subscribeOn(Schedulers.io())
-                            .subscribe()
+                        resetNarratableList()
                     }
                 }
+                FX.eventbus.fire(PluginClosedEvent(pluginType))
             }
     }
 
@@ -1001,11 +985,7 @@ class NarrationViewModel : ViewModel() {
                     reRecordLoc = currentMarker.location
                     nextVerseLoc = nextActive.location
                 }
-        } else if (narrationState in listOf(
-                NarrationStateType.RECORDING_AGAIN,
-                NarrationStateType.RECORDING_AGAIN_PAUSED
-            )
-        ) {
+        } else if (narrationState in listOf(NarrationStateType.RECORDING_AGAIN, NarrationStateType.RECORDING_AGAIN_PAUSED)) {
             val reRecordingIndex = recordingVerseIndex.value
             nextVerseLoc = totalVerses.getOrNull(reRecordingIndex + 1)?.let { marker ->
                 if (marker in recordedVerses) {
