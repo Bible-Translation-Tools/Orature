@@ -801,15 +801,12 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun importVerseAudio(verseIndex: Int, file: File) {
+        openLoadingModalProperty.set(true)
+
         narration.onEditVerse(verseIndex, file)
-            .doOnSubscribe {
-                openLoadingModalProperty.set(true)
-            }
-            .doFinally {
-                resetNarratableList()
-                openLoadingModalProperty.set(false)
-            }
-            .subscribe()
+
+        resetNarratableList()
+        openLoadingModalProperty.set(false)
     }
 
     private fun stopPlayer() {
@@ -985,7 +982,11 @@ class NarrationViewModel : ViewModel() {
                     reRecordLoc = currentMarker.location
                     nextVerseLoc = nextActive.location
                 }
-        } else if (narrationState in listOf(NarrationStateType.RECORDING_AGAIN, NarrationStateType.RECORDING_AGAIN_PAUSED)) {
+        } else if (narrationState in listOf(
+                NarrationStateType.RECORDING_AGAIN,
+                NarrationStateType.RECORDING_AGAIN_PAUSED
+            )
+        ) {
             val reRecordingIndex = recordingVerseIndex.value
             nextVerseLoc = totalVerses.getOrNull(reRecordingIndex + 1)?.let { marker ->
                 if (marker in recordedVerses) {
