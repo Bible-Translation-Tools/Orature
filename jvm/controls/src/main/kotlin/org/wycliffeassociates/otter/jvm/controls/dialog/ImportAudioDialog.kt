@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
+package org.wycliffeassociates.otter.jvm.controls.dialog
 
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -12,12 +12,10 @@ import javafx.stage.FileChooser
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.OratureFileFormat
-import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
+import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.jvm.controls.event.ImportVerseAudioEvent
 import tornadofx.*
 import java.io.File
-
 
 class ImportAudioDialog : OtterDialog() {
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -83,7 +81,7 @@ class ImportAudioDialog : OtterDialog() {
                             arrayOf(
                                 FileChooser.ExtensionFilter(
                                     messages["oratureFileTypes"],
-                                    *OratureFileFormat.extensionList.map { "*.$it" }.toTypedArray()
+                                    enumValues<AudioFileFormat>().map { "*.$it" }
                                 )
                             ),
                             mode = FileChooserMode.Single,
