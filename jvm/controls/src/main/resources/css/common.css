@@ -19,13 +19,13 @@
 @font-face {
     font-family: 'Noto Sans';
     font-size: 10pt;
-    src: url('/fonts/NotoSans-Regular.ttf');
+    src: url('/fonts/NotoSans-en-am-lo-Reg.ttf'); /* merged Noto Sans and other corresponding languages for Noto Sans */
 }
 
 @font-face {
     font-family: 'Noto Sans Bold';
     font-size: 10pt;
-    src: url('/fonts/NotoSans-Bold.ttf');
+    src: url('/fonts/NotoSans-en-am-lo-Bold.ttf'); /* merged */
 }
 
 @font-face {
