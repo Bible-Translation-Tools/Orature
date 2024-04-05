@@ -25,6 +25,7 @@ import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.dialog.LoadingModal
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.OpenInAudioPluginEvent
@@ -229,6 +230,10 @@ class NarrationPage : View() {
             viewModel.openInAudioPlugin(it.index)
         }.let { eventSubscriptions.add(it) }
 
+        subscribe<ChapterReturnFromPluginEvent> {
+            viewModel.onChapterReturnFromPlugin()
+        }.let { eventSubscriptions.add(it) }
+
         subscribe<NavigateChapterEvent> {
             viewModel.deferNavigateChapterWhileModifyingTake(it.chapterNumber)
         }.let { eventSubscriptions.add(it) }
@@ -287,8 +292,6 @@ class NarrationPage : View() {
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
             orientationProperty.bind(settingsViewModel.orientationProperty)
             sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
-            openLoadingModalProperty.bind(viewModel.openLoadingModalProperty)
-            appColorModeProperty.bind(settingsViewModel.appColorMode)
 
             sourceSpeedRateProperty.bind(
                 workbookDataStore.activeWorkbookProperty.select {
