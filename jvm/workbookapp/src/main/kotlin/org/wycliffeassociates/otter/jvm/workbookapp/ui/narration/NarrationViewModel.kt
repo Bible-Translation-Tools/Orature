@@ -302,7 +302,9 @@ class NarrationViewModel : ViewModel() {
                 Screen.getMainScreen().width,
                 10,
                 DEFAULT_SAMPLE_RATE
-            )
+            ),
+            Screen.getMainScreen().width,
+            Screen.getMainScreen().height
         )
         totalAudioSizeProperty.set(rendererAudioReader.totalFrames)
         narrationStateMachine = TeleprompterStateMachine(narration.totalVerses)
@@ -796,6 +798,15 @@ class NarrationViewModel : ViewModel() {
         narration.resumeRecording(recordingVerseIndex.value)
     }
 
+    fun importVerseAudio(verseIndex: Int, file: File) {
+        openLoadingModalProperty.set(true)
+
+        narration.onEditVerse(verseIndex, file)
+
+        resetNarratableList()
+        openLoadingModalProperty.set(false)
+    }
+
     private fun stopPlayer() {
         audioPlayer.pause()
     }
@@ -969,7 +980,11 @@ class NarrationViewModel : ViewModel() {
                     reRecordLoc = currentMarker.location
                     nextVerseLoc = nextActive.location
                 }
-        } else if (narrationState in listOf(NarrationStateType.RECORDING_AGAIN, NarrationStateType.RECORDING_AGAIN_PAUSED)) {
+        } else if (narrationState in listOf(
+                NarrationStateType.RECORDING_AGAIN,
+                NarrationStateType.RECORDING_AGAIN_PAUSED
+            )
+        ) {
             val reRecordingIndex = recordingVerseIndex.value
             nextVerseLoc = totalVerses.getOrNull(reRecordingIndex + 1)?.let { marker ->
                 if (marker in recordedVerses) {
@@ -1002,7 +1017,6 @@ class NarrationViewModel : ViewModel() {
 
         for (marker in markerNodes) {
             if (marker.userIsDraggingProperty.value == true) continue
-
             val verse = marker.verseProperty.value
             val verseIndex = marker.verseIndexProperty.value
             var found = false

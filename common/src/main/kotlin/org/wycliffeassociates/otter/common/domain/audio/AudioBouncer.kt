@@ -40,7 +40,7 @@ class AudioBouncer {
             }
 
             val wav = WavFile(bouncedAudio, reader.channels, reader.sampleRate, reader.sampleSizeBits)
-            WavOutputStream(wav).use { out ->
+            WavOutputStream(wav, buffered = true).use { out ->
                 while (reader.hasRemaining() && !isInterrupted.get()) {
                     val read = reader.getPcmBuffer(bytes)
                     out.write(bytes, 0, read)
