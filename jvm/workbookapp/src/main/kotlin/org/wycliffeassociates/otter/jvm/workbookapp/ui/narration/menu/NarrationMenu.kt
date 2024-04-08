@@ -47,10 +47,6 @@ class NarrationMenu : ContextMenu() {
             action {
                 FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.EDITOR))
             }
-            enableWhen(
-                narrationStateProperty.isEqualTo(NarrationStateType.FINISHED)
-                    .or(narrationStateProperty.isEqualTo(NarrationStateType.HAS_RECORDINGS))
-            )
         }
         val verseMarkerOpt = MenuItem().apply {
             graphic = label(messages["editVerseMarkers"]) {
@@ -60,7 +56,7 @@ class NarrationMenu : ContextMenu() {
             action {
                 FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.MARKER))
             }
-            enableWhen(narrationStateProperty.isEqualTo(NarrationStateType.FINISHED))
+            enableWhen(narrationStateProperty.isEqualTo(NarrationStateType.HAS_RECORDINGS))
         }
         val restartChapterOpt = MenuItem().apply {
             graphic = label(messages["restartChapter"]) {
