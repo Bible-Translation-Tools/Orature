@@ -342,3 +342,34 @@ internal class ChapterEditedAction(
         totalVerses.addAll(newList)
     }
 }
+
+
+internal class ChapterImportedAction(
+    private val newList: List<VerseNode>
+) : NarrationAction {
+    private val logger = LoggerFactory.getLogger(ChapterEditedAction::class.java)
+
+    private val nodes = ArrayList<VerseNode>()
+
+    override fun execute(totalVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
+        logger.info("Chapter imported action")
+
+        nodes.addAll(totalVerses)
+        totalVerses.clear()
+        totalVerses.addAll(newList)
+    }
+
+    override fun undo(totalVerses: MutableList<VerseNode>) {
+        logger.info("Undoing chapter import action")
+
+        totalVerses.clear()
+        totalVerses.addAll(nodes)
+    }
+
+    override fun redo(totalVerses: MutableList<VerseNode>) {
+        logger.info("Redoing chapter import action")
+
+        totalVerses.clear()
+        totalVerses.addAll(newList)
+    }
+}
