@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.controls.event
 
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import tornadofx.FXEvent
+import java.io.File
 
 class BeginRecordingEvent(val index: Int, val chunk: Chunk) : FXEvent()
 class NextVerseEvent(val currentIndex: Int) : FXEvent()
@@ -34,4 +35,5 @@ class PlayVerseEvent(val index: Int) : FXEvent()
 class PlayChapterEvent() : FXEvent()
 class PauseEvent() : FXEvent()
 class OpenInAudioPluginEvent(val index: Int) : FXEvent()
+class ImportVerseAudioEvent(val index: Int, val file: File) : FXEvent()
 class ChapterReturnFromPluginEvent : FXEvent()

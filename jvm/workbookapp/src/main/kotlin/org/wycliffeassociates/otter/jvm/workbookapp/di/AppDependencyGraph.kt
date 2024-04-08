@@ -31,16 +31,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.DirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.ZipEntryTreeBuilderModule
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ImportProjectViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddPluginViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookWizardViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterPageViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportChapterViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SplashScreenViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioDataStore
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppPreferencesStore
 import javax.inject.Singleton
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
@@ -48,18 +38,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.NarrationDebugA
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.AudioWorkspaceViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.NarrationHeaderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.NarrationViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppInfoViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BlindDraftViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterReviewViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ConsumeViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportProjectViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.PeerEditViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.*
 
 @Component(
     modules = [
@@ -85,6 +64,7 @@ interface AppDependencyGraph {
     fun inject(viewModel: AudioPluginViewModel)
     fun inject(viewModel: SettingsViewModel)
     fun inject(viewModel: ImportProjectViewModel)
+    fun inject(viewModel: ImportAudioViewModel)
     fun inject(viewModel: TranslationViewModel2)
     fun inject(viewModel: BookWizardViewModel)
     fun inject(viewModel: ProjectWizardViewModel)
