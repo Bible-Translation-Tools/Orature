@@ -62,6 +62,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm
 import org.wycliffeassociates.usfmtools.USFMParser
 import org.wycliffeassociates.usfmtools.models.markers.CMarker
 import org.wycliffeassociates.usfmtools.models.markers.VMarker
+import java.util.concurrent.TimeUnit
 
 class ProjectFilesAccessor(
     directoryProvider: IDirectoryProvider,
@@ -575,8 +576,10 @@ class ProjectFilesAccessor(
     ): Observable<Take> {
         return workbook.target.chapters
             .flatMap { chapter ->
-                chapter.chunks
-                    .flattenAsObservable { it }
+                chapter.observableChunks
+                    .filter { it.isNotEmpty() }
+                    .timeout(300, TimeUnit.MILLISECONDS, Observable.just(listOf<Chunk>()))
+                    .flatMapIterable { it }
                     .cast<BookElement>()
                     .startWith(chapter as BookElement)
                     .concatMap { content ->
