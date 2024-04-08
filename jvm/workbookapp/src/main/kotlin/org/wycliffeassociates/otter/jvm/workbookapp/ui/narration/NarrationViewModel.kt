@@ -687,6 +687,13 @@ class NarrationViewModel : ViewModel() {
         }
     }
 
+
+    fun onImportChapterAudio(file: File) {
+        narration.importChapterAudioFile(file)
+        recordedVerses.setAll(narration.activeVerses)
+        resetNarratableList()
+    }
+
     fun onNext(currentIndex: Int) {
         val nextIndex = totalVerses.indexOfFirst { item ->
             item.sort > totalVerses[currentIndex].sort && item !in recordedVerses

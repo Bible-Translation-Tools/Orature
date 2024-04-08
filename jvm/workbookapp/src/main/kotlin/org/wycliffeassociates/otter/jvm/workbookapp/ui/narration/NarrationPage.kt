@@ -239,6 +239,10 @@ class NarrationPage : View() {
         subscribe<ImportVerseAudioEvent> {
             viewModel.importVerseAudio(it.index, it.file)
         }.let { eventSubscriptions.add(it) }
+
+        subscribe<ImportChapterAudioEvent> {
+            viewModel.onImportChapterAudio(it.file)
+        }.let { eventSubscriptions.add(it) }
     }
 
     private fun unsubscribeFromEvents() {

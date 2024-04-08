@@ -155,6 +155,19 @@ class Narration @AssistedInject constructor(
         restoreFromExistingChapterAudio(true)
     }
 
+
+    fun importChapterAudioFile(chapterAudioFile: File) {
+        if (!chapterAudioFile.exists()) {
+            logger.error("Tried to import a chapter file that does not exists.")
+            return
+        }
+
+        val segments = splitAudioOnCues.execute(chapterAudioFile, firstVerse)
+        val verseNodes = createVersesFromVerseSegments(segments)
+        onChapterAudioImported(verseNodes)
+        appendVerseSegmentsToScratchAudio(segments)
+    }
+
     fun getPlayer(): IAudioPlayer {
         return player
     }
@@ -309,6 +322,21 @@ class Narration @AssistedInject constructor(
         }
     }
 
+    private fun onChapterAudioImported(newVerses: List<VerseNode>) {
+        val action = ChapterImportedAction(newVerses)
+        execute(action)
+
+        val hasAllVersesRecorded = newVerses.any { !it.placed }.not()
+
+        if (hasAllVersesRecorded) {
+            NarrationTakeModifier.modifyAudioData(
+                takeToModify,
+                chapterRepresentation.getAudioFileReader(),
+                activeVerses
+            )
+        }
+    }
+
     fun pauseRecording() {
         writer?.pause()
         isRecording.set(false)
@@ -320,7 +348,8 @@ class Narration @AssistedInject constructor(
         audioLoaded = false
         loadChapterIntoPlayer()
 
-        val lastAbsoluteFrame = chapterRepresentation.totalVerses[index].lastIndex() / chapterRepresentation.frameSizeInBytes
+        val lastAbsoluteFrame =
+            chapterRepresentation.totalVerses[index].lastIndex() / chapterRepresentation.frameSizeInBytes
         val seekFrame = chapterRepresentation.absoluteFrameToRelativeChapterFrame(lastAbsoluteFrame)
         seek(seekFrame)
 
@@ -649,7 +678,8 @@ class Narration @AssistedInject constructor(
             }
             ?: chapterRepresentation.apply {
                 if (activeVerses.isNotEmpty()) {
-                    val lastFrame = absoluteFrameToRelativeChapterFrame(activeVerses.last().lastIndex() / frameSizeInBytes)
+                    val lastFrame =
+                        absoluteFrameToRelativeChapterFrame(activeVerses.last().lastIndex() / frameSizeInBytes)
                     logger.info("Next marker not found, seeking to end of audio; frame: $lastFrame")
                     seek(lastFrame)
                 }
@@ -657,7 +687,8 @@ class Narration @AssistedInject constructor(
     }
 
     fun findMarkerAtFrame(frame: Int): AudioMarker? {
-        val frame = chapterRepresentation.relativeChapterFrameToAbsoluteIndex(frame) / chapterRepresentation.frameSizeInBytes
+        val frame =
+            chapterRepresentation.relativeChapterFrameToAbsoluteIndex(frame) / chapterRepresentation.frameSizeInBytes
         return chapterRepresentation.findVerse(frame)?.marker
     }
 }
