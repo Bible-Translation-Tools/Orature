@@ -241,7 +241,8 @@ class SettingsView : View() {
                                     styleClass,
                                     "app-drawer-success",
                                     "app-drawer-error",
-                                    result)
+                                    result
+                                )
                             }
                         }
                         hbox {
@@ -453,10 +454,12 @@ class SettingsView : View() {
                 style.add(successClass)
                 style.remove(errorClass)
             }
+
             false -> {
                 style.add(errorClass)
                 style.remove(successClass)
             }
+
             else -> {
                 style.remove(errorClass)
                 style.remove(successClass)
@@ -475,9 +478,9 @@ class SettingsView : View() {
             orientationProperty.set(viewModel.orientationProperty.value)
             themeProperty.set(viewModel.appColorMode.value)
 
-            cancelButtonTextProperty.set(messages["close"])
+            cancelButtonTextProperty.set(messages["closeApp"])
             onCloseAction { viewModel.showChangeLanguageSuccessDialogProperty.set(false) }
-            onCancelAction { viewModel.showChangeLanguageSuccessDialogProperty.set(false) }
+            onCancelAction { System.exit(0) }
         }
 
         viewModel.showChangeLanguageSuccessDialogProperty.onChange {
