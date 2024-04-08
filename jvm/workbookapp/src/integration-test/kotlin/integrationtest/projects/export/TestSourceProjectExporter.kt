@@ -22,7 +22,6 @@ import integrationtest.createTestWavFile
 import integrationtest.di.DaggerTestPersistenceComponent
 import integrationtest.enUlbTestMetadata
 import integrationtest.projects.DatabaseEnvironment
-import integrationtest.projects.RowCount
 import org.junit.After
 import org.junit.Assert
 import org.junit.Assert.assertEquals
@@ -30,10 +29,8 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.wycliffeassociates.otter.common.ResourceContainerBuilder
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.primitives.Collection
-import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
@@ -41,7 +38,6 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
@@ -275,10 +271,12 @@ class TestSourceProjectExporter {
         // select take for each chunk so that the chapter is ready to compile
         val chapter = workbook.target
             .chapters.blockingFirst()
+
         chapter
-            .chunks
-            .timeout(5, TimeUnit.SECONDS)
-            .blockingGet()
+            .observableChunks
+            .filter { it.isNotEmpty() }
+            .timeout(3, TimeUnit.SECONDS) // "blocking get" the item from relay or Exception
+            .blockingFirst()
             ?.forEach {
                 it.audio.selectTake(take)
             }
