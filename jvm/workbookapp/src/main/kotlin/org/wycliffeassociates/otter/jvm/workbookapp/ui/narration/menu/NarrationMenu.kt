@@ -72,7 +72,22 @@ class NarrationMenu : ContextMenu() {
             )
         }
 
-        items.setAll(openChapterOpt, verseMarkerOpt, restartChapterOpt)
+        val importChapterAudio = MenuItem().apply {
+            graphic = label(messages["import"]) {
+                graphic = FontIcon(MaterialDesign.MDI_DOWNLOAD)
+                tooltip(text)
+            }
+            action {
+                FX.eventbus.fire(NarrationOpenImportAudioDialogEvent())
+            }
+            disableWhen {
+                narrationStateProperty.isEqualTo(NarrationStateType.RECORDING)
+                    .or(narrationStateProperty.isEqualTo(NarrationStateType.RECORDING_AGAIN))
+                    .or(narrationStateProperty.isEqualTo(NarrationStateType.PLAYING))
+            }
+        }
+
+        items.setAll(openChapterOpt, verseMarkerOpt, restartChapterOpt, importChapterAudio)
     }
 }
 
