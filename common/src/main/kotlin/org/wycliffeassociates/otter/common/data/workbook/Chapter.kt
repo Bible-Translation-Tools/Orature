@@ -49,7 +49,7 @@ class Chapter(
     override val children: Observable<BookElement> by lazy { getDraft().cast() }
 
     val observableChunks: Observable<List<Chunk>> by lazychunks
-    val chunks: Single<List<Chunk>> get() { return lazychunks.value.firstOrError() }
+    val chunks: Single<List<Chunk>> get() { return Single.just(lazychunks.value.value ?: listOf()) }
 
     var text: String = ""
 

@@ -274,8 +274,6 @@ class TestSourceProjectExporter {
 
         chapter
             .observableChunks
-            .filter { it.isNotEmpty() }
-            .timeout(3, TimeUnit.SECONDS) // "blocking get" the item from relay or Exception
             .blockingFirst()
             ?.forEach {
                 it.audio.selectTake(take)

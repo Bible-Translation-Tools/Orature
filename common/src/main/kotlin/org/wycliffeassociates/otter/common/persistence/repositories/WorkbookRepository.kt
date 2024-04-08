@@ -230,7 +230,7 @@ class WorkbookRepository(
         chapterCollection: Collection,
         disposables: MutableList<Disposable>
     ): BehaviorRelay<List<Chunk>> {
-        val relay = BehaviorRelay.createDefault<List<Chunk>>(listOf())
+        val relay = BehaviorRelay.create<List<Chunk>>()
         db.getContentByCollectionActiveConnection(chapterCollection)
             .subscribe { contents ->
                 val chunks = contents

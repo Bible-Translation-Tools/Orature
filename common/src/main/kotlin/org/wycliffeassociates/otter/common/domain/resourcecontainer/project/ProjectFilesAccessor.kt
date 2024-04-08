@@ -575,8 +575,9 @@ class ProjectFilesAccessor(
     ): Observable<Take> {
         return workbook.target.chapters
             .flatMap { chapter ->
-                chapter.chunks
-                    .flattenAsObservable { it }
+                chapter.observableChunks
+                    .take(1)
+                    .flatMapIterable { it }
                     .cast<BookElement>()
                     .startWith(chapter as BookElement)
                     .concatMap { content ->
