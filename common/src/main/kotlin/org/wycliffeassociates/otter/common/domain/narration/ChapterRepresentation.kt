@@ -113,8 +113,9 @@ internal class ChapterRepresentation(
 
     private fun initializeActiveVerses(): MutableList<VerseNode> {
         return chapter
-            .chunks
-            .blockingGet()
+            .observableChunks
+            .filter { it.isNotEmpty() }
+            .blockingFirst()
             .map { chunk ->
                 val marker = when (chunk.sort) {
                     BOOK_TITLE_SORT -> BookMarker(workbook.source.slug, 0)
