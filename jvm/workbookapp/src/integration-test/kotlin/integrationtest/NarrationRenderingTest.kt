@@ -275,7 +275,7 @@ class NarrationRenderingTest {
     private var sortCount = 1
     private fun mockChapter(): Chapter {
         return mockk<Chapter> {
-            every { chunks } returns Single.just(mockChunkList())
+            every { observableChunks } returns Observable.just(mockChunkList())
             every { getSelectedTake() } returns null
             every { sort } returns sortCount++
         }
