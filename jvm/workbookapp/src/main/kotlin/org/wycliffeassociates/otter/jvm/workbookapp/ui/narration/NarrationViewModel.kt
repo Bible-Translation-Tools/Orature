@@ -680,8 +680,6 @@ class NarrationViewModel : ViewModel() {
                 openLoadingModalProperty.set(true)
             }
             .doFinally {
-                recordedVerses.setAll(narration.activeVerses)
-                resetNarratableList()
                 // Indicates that we used a temporary take to edit the chapter
                 if (hasAllItemsRecordedProperty.value == false) {
                     // Deletes the wav file for the temporary take since it will not be referenced to again
