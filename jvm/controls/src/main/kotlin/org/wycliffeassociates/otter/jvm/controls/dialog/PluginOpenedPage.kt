@@ -148,7 +148,7 @@ class PluginOpenedPage : View() {
 
     private fun setUpLoadingModal() {
         find<LoadingModal>().apply {
-            orientationProperty.set(orientationProperty.value)
+            orientationProperty.bind(this@PluginOpenedPage.orientationProperty)
             themeProperty.set(appColorModeProperty.value)
             messageProperty.set(messages["savingProjectWait"])
 
