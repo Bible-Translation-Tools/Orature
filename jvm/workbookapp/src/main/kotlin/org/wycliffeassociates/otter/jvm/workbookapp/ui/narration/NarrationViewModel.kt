@@ -856,10 +856,8 @@ class NarrationViewModel : ViewModel() {
                     }
 
                     else -> {
+                        openLoadingModalProperty.set(true)
                         narration.onEditVerse(verseIndex, file)
-                            .doOnSubscribe {
-                                openLoadingModalProperty.set(true)
-                            }
                             .doFinally {
                                 resetNarratableList()
                                 openLoadingModalProperty.set(false)
