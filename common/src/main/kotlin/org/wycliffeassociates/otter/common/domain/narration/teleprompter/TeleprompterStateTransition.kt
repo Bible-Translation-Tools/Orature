@@ -57,12 +57,10 @@ object PauseVerseRecordingAction {
         if (index !in contexts.indices) return
 
         if (0 != index) {
-            for (i in 0 until contexts.size) {
-
+            for (i in contexts.indices) {
                 if (contexts[i].state.type == TeleprompterItemState.RECORD_DISABLED) {
                     continue
                 }
-
                 contexts[i].restore()
                 if (contexts[i].state.type == TeleprompterItemState.RECORD_AGAIN_DISABLED) {
                     contexts[i].changeState(TeleprompterItemState.RECORD_AGAIN)
