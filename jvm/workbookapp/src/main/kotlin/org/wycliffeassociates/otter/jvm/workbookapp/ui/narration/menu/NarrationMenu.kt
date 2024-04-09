@@ -56,7 +56,10 @@ class NarrationMenu : ContextMenu() {
             action {
                 FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.MARKER))
             }
-            enableWhen(narrationStateProperty.isEqualTo(NarrationStateType.HAS_RECORDINGS))
+            enableWhen(
+                narrationStateProperty.isEqualTo(NarrationStateType.IN_PROGRESS)
+                    .or(narrationStateProperty.isEqualTo(NarrationStateType.FINISHED))
+            )
         }
         val restartChapterOpt = MenuItem().apply {
             graphic = label(messages["restartChapter"]) {
@@ -68,7 +71,7 @@ class NarrationMenu : ContextMenu() {
             }
             enableWhen(
                 narrationStateProperty.isEqualTo(NarrationStateType.FINISHED)
-                    .or(narrationStateProperty.isEqualTo(NarrationStateType.HAS_RECORDINGS))
+                    .or(narrationStateProperty.isEqualTo(NarrationStateType.IN_PROGRESS))
             )
         }
 

@@ -710,7 +710,9 @@ class NarrationViewModel : ViewModel() {
             }
 
             narrationStateProperty.value == NarrationStateType.RECORDING_PAUSED -> {
+                renderer.clearActiveRecordingData()
                 recordingVerseIndex.set(-1)
+                isPrependRecordingProperty.set(false)
             }
 
             else -> {}

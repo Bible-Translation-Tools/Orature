@@ -16,7 +16,7 @@ class NarrationStateTest {
             Pair(NarrationStateType.RECORDING_AGAIN_PAUSED, true),
             Pair(NarrationStateType.PLAYING, true),
             Pair(NarrationStateType.NOT_STARTED, true),
-            Pair(NarrationStateType.HAS_RECORDINGS, true),
+            Pair(NarrationStateType.IN_PROGRESS, true),
             Pair(NarrationStateType.FINISHED, true),
             Pair(NarrationStateType.MODIFYING_AUDIO_FILE, false),
             Pair(NarrationStateType.MOVING_MARKER, true),
@@ -69,7 +69,7 @@ class NarrationStateTest {
             Pair(NarrationStateType.RECORDING_AGAIN_PAUSED, true),
             Pair(NarrationStateType.PLAYING, false),
             Pair(NarrationStateType.NOT_STARTED, true),
-            Pair(NarrationStateType.HAS_RECORDINGS, false),
+            Pair(NarrationStateType.IN_PROGRESS, false),
             Pair(NarrationStateType.FINISHED, true),
             Pair(NarrationStateType.MODIFYING_AUDIO_FILE, false),
             Pair(NarrationStateType.MOVING_MARKER, true),
@@ -100,9 +100,9 @@ class NarrationStateTest {
 
 
     @Test
-    fun `RecordingPausedState changeState to IdleInProgressState`() {
-        val newState = RecordingPausedState.changeState(NarrationStateType.HAS_RECORDINGS)
-        Assert.assertEquals(newState.type, NarrationStateType.HAS_RECORDINGS)
+    fun `RecordingPausedState changeState to InProgressState`() {
+        val newState = RecordingPausedState.changeState(NarrationStateType.IN_PROGRESS)
+        Assert.assertEquals(newState.type, NarrationStateType.IN_PROGRESS)
     }
 
 
@@ -136,7 +136,7 @@ class NarrationStateTest {
             Pair(NarrationStateType.RECORDING_AGAIN_PAUSED, false),
             Pair(NarrationStateType.PLAYING, true),
             Pair(NarrationStateType.NOT_STARTED, true),
-            Pair(NarrationStateType.HAS_RECORDINGS, false),
+            Pair(NarrationStateType.IN_PROGRESS, false),
             Pair(NarrationStateType.FINISHED, true),
             Pair(NarrationStateType.MODIFYING_AUDIO_FILE, false),
             Pair(NarrationStateType.MOVING_MARKER, true),
@@ -174,9 +174,9 @@ class NarrationStateTest {
 
 
     @Test
-    fun `RecordingAgainState changeState to IdleInProgressState`() {
-        val newState = RecordingAgainState.changeState(NarrationStateType.HAS_RECORDINGS)
-        Assert.assertEquals(newState.type, NarrationStateType.HAS_RECORDINGS)
+    fun `RecordingAgainState changeState to InProgressState`() {
+        val newState = RecordingAgainState.changeState(NarrationStateType.IN_PROGRESS)
+        Assert.assertEquals(newState.type, NarrationStateType.IN_PROGRESS)
     }
 
 
@@ -190,7 +190,7 @@ class NarrationStateTest {
             Pair(NarrationStateType.RECORDING_AGAIN_PAUSED, true),
             Pair(NarrationStateType.PLAYING, true),
             Pair(NarrationStateType.NOT_STARTED, true),
-            Pair(NarrationStateType.HAS_RECORDINGS, false),
+            Pair(NarrationStateType.IN_PROGRESS, false),
             Pair(NarrationStateType.FINISHED, true),
             Pair(NarrationStateType.MODIFYING_AUDIO_FILE, false),
             Pair(NarrationStateType.MOVING_MARKER, true),
@@ -228,9 +228,9 @@ class NarrationStateTest {
 
 
     @Test
-    fun `RecordingAgainPausedState changeState to IdleInProgressState`() {
-        val newState = RecordingAgainPausedState.changeState(NarrationStateType.HAS_RECORDINGS)
-        Assert.assertEquals(newState.type, NarrationStateType.HAS_RECORDINGS)
+    fun `RecordingAgainPausedState changeState to InProgressState`() {
+        val newState = RecordingAgainPausedState.changeState(NarrationStateType.IN_PROGRESS)
+        Assert.assertEquals(newState.type, NarrationStateType.IN_PROGRESS)
     }
 
 
@@ -244,7 +244,7 @@ class NarrationStateTest {
             Pair(NarrationStateType.RECORDING_AGAIN_PAUSED, true),
             Pair(NarrationStateType.PLAYING, true),
             Pair(NarrationStateType.NOT_STARTED, true),
-            Pair(NarrationStateType.HAS_RECORDINGS, false),
+            Pair(NarrationStateType.IN_PROGRESS, false),
             Pair(NarrationStateType.FINISHED, false),
             Pair(NarrationStateType.MODIFYING_AUDIO_FILE, false),
             Pair(NarrationStateType.MOVING_MARKER, true),
@@ -275,14 +275,14 @@ class NarrationStateTest {
 
 
     @Test
-    fun `PlayingAudioState changeState to IdleInProgressState`() {
-        val newState = PlayingAudioState.changeState(NarrationStateType.HAS_RECORDINGS)
-        Assert.assertEquals(newState.type, NarrationStateType.HAS_RECORDINGS)
+    fun `PlayingAudioState changeState to InProgressState`() {
+        val newState = PlayingAudioState.changeState(NarrationStateType.IN_PROGRESS)
+        Assert.assertEquals(newState.type, NarrationStateType.IN_PROGRESS)
     }
 
 
     @Test
-    fun `PlayingAudioState changeState to IdleFinishedState`() {
+    fun `PlayingAudioState changeState to FinishedState`() {
         val newState = PlayingAudioState.changeState(NarrationStateType.FINISHED)
         Assert.assertEquals(newState.type, NarrationStateType.FINISHED)
     }
@@ -296,7 +296,7 @@ class NarrationStateTest {
 
 
     @Test
-    fun `IdleEmptyState changeState and all possible state transitions`() {
+    fun `NotStartedState changeState and all possible state transitions`() {
         // Pair.first = NarrationStateType, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(NarrationStateType.RECORDING, false),
@@ -305,7 +305,7 @@ class NarrationStateTest {
             Pair(NarrationStateType.RECORDING_AGAIN_PAUSED, true),
             Pair(NarrationStateType.PLAYING, true),
             Pair(NarrationStateType.NOT_STARTED, true),
-            Pair(NarrationStateType.HAS_RECORDINGS, false),
+            Pair(NarrationStateType.IN_PROGRESS, false),
             Pair(NarrationStateType.FINISHED, false),
             Pair(NarrationStateType.MODIFYING_AUDIO_FILE, true),
             Pair(NarrationStateType.MOVING_MARKER, true),
@@ -329,28 +329,28 @@ class NarrationStateTest {
 
 
     @Test
-    fun `IdleEmptyState changeState to RecordingState`() {
+    fun `NotStartedState changeState to RecordingState`() {
         val newState = NotStartedState.changeState(NarrationStateType.RECORDING)
         Assert.assertEquals(newState.type, NarrationStateType.RECORDING)
     }
 
 
     @Test
-    fun `IdleEmptyState changeState to IdleFinishedState`() {
+    fun `NotStartedState changeState to FinishedState`() {
         val newState = NotStartedState.changeState(NarrationStateType.FINISHED)
         Assert.assertEquals(newState.type, NarrationStateType.FINISHED)
     }
 
 
     @Test
-    fun `IdleEmptyState changeState to IdleInProgressState`() {
-        val newState = NotStartedState.changeState(NarrationStateType.HAS_RECORDINGS)
-        Assert.assertEquals(newState.type, NarrationStateType.HAS_RECORDINGS)
+    fun `NotStartedState changeState to InProgressState`() {
+        val newState = NotStartedState.changeState(NarrationStateType.IN_PROGRESS)
+        Assert.assertEquals(newState.type, NarrationStateType.IN_PROGRESS)
     }
 
 
     @Test
-    fun `IdleInProgressState changeState and all possible state transitions`() {
+    fun `InProgressState changeState and all possible state transitions`() {
         // Pair.first = NarrationStateType, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(NarrationStateType.RECORDING, false),
@@ -359,7 +359,7 @@ class NarrationStateTest {
             Pair(NarrationStateType.RECORDING_AGAIN_PAUSED, true),
             Pair(NarrationStateType.PLAYING, false),
             Pair(NarrationStateType.NOT_STARTED, false),
-            Pair(NarrationStateType.HAS_RECORDINGS, true),
+            Pair(NarrationStateType.IN_PROGRESS, true),
             Pair(NarrationStateType.FINISHED, true),
             Pair(NarrationStateType.MODIFYING_AUDIO_FILE, false),
             Pair(NarrationStateType.MOVING_MARKER, false),
@@ -369,7 +369,7 @@ class NarrationStateTest {
         // Verifies that exceptions are thrown when invalid states are requested
         for (transition in stateTransitions) {
             try {
-                HasRecordingState.changeState(transition.first)
+                InProgressState.changeState(transition.first)
                 if (transition.second) {
                     Assert.fail("Error: expected an exception for state transition: ${transition.first}")
                 }
@@ -382,47 +382,47 @@ class NarrationStateTest {
     }
 
     @Test
-    fun `IdleInProgressState changeState to RecordingState`() {
-        val newState = HasRecordingState.changeState(NarrationStateType.RECORDING)
+    fun `InProgressState changeState to RecordingState`() {
+        val newState = InProgressState.changeState(NarrationStateType.RECORDING)
         Assert.assertEquals(newState.type, NarrationStateType.RECORDING)
     }
 
     @Test
-    fun `IdleInProgressState changeState to ModifyingAudioState`() {
-        val newState = HasRecordingState.changeState(NarrationStateType.MODIFYING_AUDIO_FILE)
+    fun `InProgressState changeState to ModifyingAudioState`() {
+        val newState = InProgressState.changeState(NarrationStateType.MODIFYING_AUDIO_FILE)
         Assert.assertEquals(newState.type, NarrationStateType.MODIFYING_AUDIO_FILE)
     }
 
     @Test
-    fun `IdleInProgressState changeState to IdleEmptyState`() {
-        val newState = HasRecordingState.changeState(NarrationStateType.NOT_STARTED)
+    fun `InProgressState changeState to NotStartedState`() {
+        val newState = InProgressState.changeState(NarrationStateType.NOT_STARTED)
         Assert.assertEquals(newState.type, NarrationStateType.NOT_STARTED)
     }
 
 
     @Test
-    fun `IdleInProgressState changeState to RecordingAgainState`() {
-        val newState = HasRecordingState.changeState(NarrationStateType.RECORDING_AGAIN)
+    fun `InProgressState changeState to RecordingAgainState`() {
+        val newState = InProgressState.changeState(NarrationStateType.RECORDING_AGAIN)
         Assert.assertEquals(newState.type, NarrationStateType.RECORDING_AGAIN)
     }
 
 
     @Test
-    fun `IdleInProgressState changeState to PlayingAudioState`() {
-        val newState = HasRecordingState.changeState(NarrationStateType.PLAYING)
+    fun `InProgressState changeState to PlayingAudioState`() {
+        val newState = InProgressState.changeState(NarrationStateType.PLAYING)
         Assert.assertEquals(newState.type, NarrationStateType.PLAYING)
     }
 
 
     @Test
-    fun `IdleInProgressState changeState to MovingMarkerState`() {
-        val newState = HasRecordingState.changeState(NarrationStateType.MOVING_MARKER)
+    fun `InProgressState changeState to MovingMarkerState`() {
+        val newState = InProgressState.changeState(NarrationStateType.MOVING_MARKER)
         Assert.assertEquals(newState.type, NarrationStateType.MOVING_MARKER)
     }
 
 
     @Test
-    fun `IdleFinishedState changeState and all possible state transitions`() {
+    fun `FinishedState changeState and all possible state transitions`() {
         // Pair.first = NarrationStateType, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(NarrationStateType.RECORDING, true),
@@ -431,7 +431,7 @@ class NarrationStateTest {
             Pair(NarrationStateType.RECORDING_AGAIN_PAUSED, true),
             Pair(NarrationStateType.PLAYING, false),
             Pair(NarrationStateType.NOT_STARTED, false),
-            Pair(NarrationStateType.HAS_RECORDINGS, false),
+            Pair(NarrationStateType.IN_PROGRESS, false),
             Pair(NarrationStateType.FINISHED, true),
             Pair(NarrationStateType.MODIFYING_AUDIO_FILE, false),
             Pair(NarrationStateType.MOVING_MARKER, false),
@@ -455,40 +455,40 @@ class NarrationStateTest {
 
 
     @Test
-    fun `IdleFinishedState changeState to RecordingAgainState`() {
+    fun `FinishedState changeState to RecordingAgainState`() {
         val newState = FinishedState.changeState(NarrationStateType.RECORDING_AGAIN)
         Assert.assertEquals(newState.type, NarrationStateType.RECORDING_AGAIN)
     }
 
 
     @Test
-    fun `IdleFinishedState changeState to ModifyingAudioState`() {
+    fun `FinishedState changeState to ModifyingAudioState`() {
         val newState = FinishedState.changeState(NarrationStateType.MODIFYING_AUDIO_FILE)
         Assert.assertEquals(newState.type, NarrationStateType.MODIFYING_AUDIO_FILE)
     }
 
 
     @Test
-    fun `IdleFinishedState changeState to IdleEmptyState`() {
+    fun `FinishedState changeState to NotStartedState`() {
         val newState = FinishedState.changeState(NarrationStateType.NOT_STARTED)
         Assert.assertEquals(newState.type, NarrationStateType.NOT_STARTED)
     }
 
     @Test
-    fun `IdleFinishedState changeState to IdleInProgressState`() {
-        val newState = FinishedState.changeState(NarrationStateType.HAS_RECORDINGS)
-        Assert.assertEquals(newState.type, NarrationStateType.HAS_RECORDINGS)
+    fun `FinishedState changeState to InProgressState`() {
+        val newState = FinishedState.changeState(NarrationStateType.IN_PROGRESS)
+        Assert.assertEquals(newState.type, NarrationStateType.IN_PROGRESS)
     }
 
 
     @Test
-    fun `IdleFinishedState changeState to PlayingAudioState`() {
+    fun `FinishedState changeState to PlayingAudioState`() {
         val newState = FinishedState.changeState(NarrationStateType.PLAYING)
         Assert.assertEquals(newState.type, NarrationStateType.PLAYING)
     }
 
     @Test
-    fun `IdleFinishedState changeState to MovingMarkerState`() {
+    fun `FinishedState changeState to MovingMarkerState`() {
         val newState = FinishedState.changeState(NarrationStateType.MOVING_MARKER)
         Assert.assertEquals(newState.type, NarrationStateType.MOVING_MARKER)
     }
@@ -504,7 +504,7 @@ class NarrationStateTest {
             Pair(NarrationStateType.RECORDING_AGAIN_PAUSED, true),
             Pair(NarrationStateType.PLAYING, false),
             Pair(NarrationStateType.NOT_STARTED, true),
-            Pair(NarrationStateType.HAS_RECORDINGS, false),
+            Pair(NarrationStateType.IN_PROGRESS, false),
             Pair(NarrationStateType.FINISHED, false),
             Pair(NarrationStateType.MODIFYING_AUDIO_FILE, true),
             Pair(NarrationStateType.MOVING_MARKER, false),
@@ -527,13 +527,13 @@ class NarrationStateTest {
     }
 
     @Test
-    fun `ModifyingAudioState changeState to IdleInProgressState`() {
-        val newState = ModifyingAudioState.changeState(NarrationStateType.HAS_RECORDINGS)
-        Assert.assertEquals(newState.type, NarrationStateType.HAS_RECORDINGS)
+    fun `ModifyingAudioState changeState to InProgressState`() {
+        val newState = ModifyingAudioState.changeState(NarrationStateType.IN_PROGRESS)
+        Assert.assertEquals(newState.type, NarrationStateType.IN_PROGRESS)
     }
 
     @Test
-    fun `ModifyingAudioState changeState to IdleFinishedState`() {
+    fun `ModifyingAudioState changeState to FinishedState`() {
         val newState = ModifyingAudioState.changeState(NarrationStateType.FINISHED)
         Assert.assertEquals(newState.type, NarrationStateType.FINISHED)
     }
@@ -568,7 +568,7 @@ class NarrationStateTest {
             Pair(NarrationStateType.RECORDING_AGAIN_PAUSED, true),
             Pair(NarrationStateType.PLAYING, true),
             Pair(NarrationStateType.NOT_STARTED, true),
-            Pair(NarrationStateType.HAS_RECORDINGS, false),
+            Pair(NarrationStateType.IN_PROGRESS, false),
             Pair(NarrationStateType.FINISHED, false),
             Pair(NarrationStateType.MODIFYING_AUDIO_FILE, false),
             Pair(NarrationStateType.MOVING_MARKER, true),
@@ -592,14 +592,14 @@ class NarrationStateTest {
 
 
     @Test
-    fun `MovingMarkerState changeState to IdleInProgressState`() {
-        val newState = MovingMarkerState.changeState(NarrationStateType.HAS_RECORDINGS)
-        Assert.assertEquals(newState.type, NarrationStateType.HAS_RECORDINGS)
+    fun `MovingMarkerState changeState to InProgressState`() {
+        val newState = MovingMarkerState.changeState(NarrationStateType.IN_PROGRESS)
+        Assert.assertEquals(newState.type, NarrationStateType.IN_PROGRESS)
     }
 
 
     @Test
-    fun `MovingMarkerState changeState to IdleFinishedState`() {
+    fun `MovingMarkerState changeState to FinishedState`() {
         val newState = MovingMarkerState.changeState(NarrationStateType.FINISHED)
         Assert.assertEquals(newState.type, NarrationStateType.FINISHED)
     }
