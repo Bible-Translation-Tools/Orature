@@ -56,15 +56,13 @@ object PauseVerseRecordingAction {
     fun apply(contexts: MutableList<TeleprompterStateContext>, index: Int) {
         if (index !in contexts.indices) return
 
-        if (0 != index) {
-            for (i in contexts.indices) {
-                if (contexts[i].state.type == TeleprompterItemState.RECORD_DISABLED) {
-                    continue
-                }
-                contexts[i].restore()
-                if (contexts[i].state.type == TeleprompterItemState.RECORD_AGAIN_DISABLED) {
-                    contexts[i].changeState(TeleprompterItemState.RECORD_AGAIN)
-                }
+        for (i in contexts.indices) {
+            if (contexts[i].state.type == TeleprompterItemState.RECORD_DISABLED) {
+                continue
+            }
+            contexts[i].restore()
+            if (contexts[i].state.type == TeleprompterItemState.RECORD_AGAIN_DISABLED) {
+                contexts[i].changeState(TeleprompterItemState.RECORD_AGAIN)
             }
         }
 
