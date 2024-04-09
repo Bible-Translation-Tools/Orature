@@ -576,11 +576,18 @@ class ProjectFilesAccessor(
     ): Observable<Take> {
         return workbook.target.chapters
             .flatMap { chapter ->
-                chapter.observableChunks
-                    .filter { it.isNotEmpty() }
-                    .timeout(300, TimeUnit.MILLISECONDS, Observable.just(listOf<Chunk>()))
-                    .flatMapIterable { it }
-                    .cast<BookElement>()
+                val chunkCount = chapter.chunkCount.blockingGet()
+                val chunks: Observable<BookElement> = if (chunkCount > 0) {
+                    chapter.observableChunks
+                        .filter { it.isNotEmpty() }
+                        .firstOrError()
+                        .flattenAsObservable { it }
+                        .cast<BookElement>()
+                } else {
+                    Observable.empty()
+                }
+
+                chunks
                     .startWith(chapter as BookElement)
                     .concatMap { content ->
                         val takesNotEmitted = content.audio.getSelectedTake() != null &&
