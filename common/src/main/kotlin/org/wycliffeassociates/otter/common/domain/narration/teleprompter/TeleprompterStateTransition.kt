@@ -57,7 +57,12 @@ object PauseVerseRecordingAction {
         if (index !in contexts.indices) return
 
         if (0 != index) {
-            for (i in 0 until index) {
+            for (i in 0 until contexts.size) {
+
+                if (contexts[i].state.type == TeleprompterItemState.RECORD_DISABLED) {
+                    continue
+                }
+
                 contexts[i].restore()
                 if (contexts[i].state.type == TeleprompterItemState.RECORD_AGAIN_DISABLED) {
                     contexts[i].changeState(TeleprompterItemState.RECORD_AGAIN)
@@ -108,10 +113,12 @@ object NextVerseAction {
 
         if (wasActive) {
             contexts[currentIndex].changeState(TeleprompterItemState.RECORD_AGAIN_DISABLED)
-            contexts.firstOrNull { it.state.type == TeleprompterItemState.RECORD_DISABLED }?.changeState(TeleprompterItemState.RECORD_ACTIVE)
+            contexts.firstOrNull { it.state.type == TeleprompterItemState.RECORD_DISABLED }
+                ?.changeState(TeleprompterItemState.RECORD_ACTIVE)
         } else {
             contexts[currentIndex].changeState(TeleprompterItemState.RECORD_AGAIN)
-            contexts.firstOrNull { it.state.type == TeleprompterItemState.RECORD_DISABLED }?.changeState(TeleprompterItemState.RECORD)
+            contexts.firstOrNull { it.state.type == TeleprompterItemState.RECORD_DISABLED }
+                ?.changeState(TeleprompterItemState.RECORD)
         }
     }
 }
