@@ -77,7 +77,7 @@ class ImportAudioDialog : OtterDialog() {
                     graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
                     action {
                         chooseFile(
-                            FX.messages["importResourceFromZip"],
+                            FX.messages["importAudioFile"],
                             arrayOf(
                                 FileChooser.ExtensionFilter(
                                     messages["audioFileTypes"],
