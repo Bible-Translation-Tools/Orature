@@ -79,7 +79,7 @@ class TeleprompterStateMachine(
         } else if (hasNoItemsRecorded) {
             NotStartedState
         } else {
-            HasRecordingState
+            InProgressState
         }
 
         updateNarrationContext(newGlobalContext)
