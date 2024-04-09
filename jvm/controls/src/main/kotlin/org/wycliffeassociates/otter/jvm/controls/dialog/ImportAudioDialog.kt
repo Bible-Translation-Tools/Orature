@@ -80,7 +80,7 @@ class ImportAudioDialog : OtterDialog() {
                             FX.messages["importResourceFromZip"],
                             arrayOf(
                                 FileChooser.ExtensionFilter(
-                                    messages["oratureFileTypes"],
+                                    messages["audioFileTypes"],
                                     enumValues<AudioFileFormat>().map { "*.$it" }
                                 )
                             ),
