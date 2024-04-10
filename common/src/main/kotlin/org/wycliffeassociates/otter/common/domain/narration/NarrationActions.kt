@@ -339,6 +339,6 @@ internal class ChapterEditedAction(
         logger.info("Redoing chapter edited action")
 
         totalVerses.clear()
-        totalVerses.addAll(newList)
+        totalVerses.addAll(newList.map { it.copy() })
     }
 }
