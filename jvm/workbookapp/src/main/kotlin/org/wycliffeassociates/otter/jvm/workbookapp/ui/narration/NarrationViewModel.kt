@@ -675,9 +675,13 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun onChapterReturnFromPlugin(pluginType: PluginType) {
+        openLoadingModalProperty.set(true)
         narration.loadFromSelectedChapterFile()
-            .doOnSubscribe {
-                openLoadingModalProperty.set(true)
+            .doOnComplete {
+                runLater {
+                    recordedVerses.setAll(narration.activeVerses)
+                    resetNarratableList()
+                }
             }
             .doFinally {
                 // Indicates that we used a temporary take to edit the chapter
