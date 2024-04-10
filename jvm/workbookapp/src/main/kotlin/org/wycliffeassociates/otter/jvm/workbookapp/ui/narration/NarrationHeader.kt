@@ -18,6 +18,9 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -102,7 +105,7 @@ class NarrationHeader : View() {
 
                 setOnChapterSelectorOpenedProperty {
 
-                    popupMenu.updateChapterGrid(viewModel.chapterList)
+                    popupMenu.updateChapterGrid(viewModel.getChapterList())
 
                     val bound = this.boundsInLocal
                     val screenBound = this.localToScreen(bound)
@@ -242,24 +245,34 @@ class NarrationHeaderViewModel : ViewModel() {
         )
     }
 
-    val chapterList: List<ChapterGridItemData>
-        get() {
-            return narrationViewModel.chapterList.map { chapter ->
-                val wb = workbookDataStore.workbook
-                val chapterProgress: Double = if (hasInProgressNarration(wb, chapter)) {
-                    projectCompletionStatus.getChapterNarrationProgress(wb, chapter)
-                } else {
-                    0.0
-                }
-                val isCompleted = chapterProgress == 1.0
+    fun getChapterList(): List<ChapterGridItemData> {
+        return narrationViewModel.chapterList.map { chapter ->
+            val wb = workbookDataStore.workbook
+            val isCompletedProperty = SimpleBooleanProperty(false)
 
-                ChapterGridItemData(
-                    chapter.sort,
-                    isCompleted,
-                    workbookDataStore.activeChapterProperty.value?.sort == chapter.sort
-                )
-            }
+            hasInProgressNarration(wb, chapter)
+                .map {
+                    if (it) {
+                        projectCompletionStatus.getChapterNarrationProgress(wb, chapter)
+                    } else {
+                        0.0
+                    }
+                }
+                .subscribeOn(Schedulers.io())
+                .observeOnFx()
+                .subscribe { progress ->
+                    isCompletedProperty.set(progress == 1.0)
+                }
+
+            val selected = workbookDataStore.activeChapterProperty.value?.sort == chapter.sort
+
+            ChapterGridItemData(
+                chapter.sort,
+                isCompletedProperty,
+                selected
+            )
         }
+    }
 
     private enum class StepDirection {
         FORWARD,
@@ -296,9 +309,17 @@ class NarrationHeaderViewModel : ViewModel() {
         narrationViewModel.processWithPlugin(pluginType)
     }
 
-    private fun hasInProgressNarration(workbook: Workbook, chapter: Chapter): Boolean {
-        val files = workbook.projectFilesAccessor.getInProgressNarrationFiles(workbook, chapter)
-        return files.all { it.exists() }
+    private fun hasInProgressNarration(
+        workbook: Workbook,
+        chapter: Chapter
+    ): Single<Boolean> {
+        return Single
+            .fromCallable {
+                workbook.projectFilesAccessor
+                    .getInProgressNarrationFiles(workbook, chapter)
+                    .all { it.exists() }
+            }
+            .subscribeOn(Schedulers.io())
     }
 }
 
