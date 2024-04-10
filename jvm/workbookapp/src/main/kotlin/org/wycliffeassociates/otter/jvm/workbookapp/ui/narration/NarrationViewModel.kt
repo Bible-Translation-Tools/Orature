@@ -378,7 +378,7 @@ class NarrationViewModel : ViewModel() {
     }
 
 
-    fun processWithPlugin(pluginType: PluginType) {
+    fun processChapterWithPlugin(pluginType: PluginType) {
 
         val getChapterTake = if (chapterTakeProperty.value != null) {
             Single.just(chapterTakeProperty.value)
@@ -392,12 +392,12 @@ class NarrationViewModel : ViewModel() {
             }
             .doAfterSuccess { take ->
                 openLoadingModalProperty.set(false)
-                openTakeInPlugin(pluginType, take)
+                openChapterTakeInPlugin(pluginType, take)
             }
             .subscribe()
     }
 
-    private fun openTakeInPlugin(pluginType: PluginType, take: Take) {
+    private fun openChapterTakeInPlugin(pluginType: PluginType, take: Take) {
         workbookDataStore.activeChapterProperty.value?.audio?.let { audio ->
             pluginContextProperty.set(pluginType)
             workbookDataStore.activeTakeNumberProperty.set(take.number)
