@@ -356,7 +356,7 @@ internal class ChapterImportedAction(
 
         nodes.addAll(totalVerses)
         totalVerses.clear()
-        totalVerses.addAll(newList)
+        totalVerses.addAll(newList.map { it.copy() })
     }
 
     override fun undo(totalVerses: MutableList<VerseNode>) {
@@ -370,6 +370,6 @@ internal class ChapterImportedAction(
         logger.info("Redoing chapter import action")
 
         totalVerses.clear()
-        totalVerses.addAll(newList)
+        totalVerses.addAll(newList.map { it.copy() })
     }
 }
