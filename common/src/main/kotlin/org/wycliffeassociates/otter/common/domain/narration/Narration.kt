@@ -162,10 +162,22 @@ class Narration @AssistedInject constructor(
             return
         }
 
-        val segments = splitAudioOnCues.execute(chapterAudioFile, firstVerse)
-        val verseNodes = createVersesFromVerseSegments(segments)
+        var newSegments = splitAudioOnCues.execute(chapterAudioFile, firstVerse)
+
+        // Removes marker with duplicate label
+        newSegments = newSegments
+            .entries
+            .distinctBy { it.key.formattedLabel }
+            .associate { it.toPair() }
+
+        // Only uses markers that correspond to the current chapter
+        val totalVerseLabels = totalVerses.map { it.formattedLabel }
+        newSegments = newSegments.filterKeys { it.formattedLabel in totalVerseLabels }
+
+
+        val verseNodes = createVersesFromVerseSegments(newSegments)
         onChapterAudioImported(verseNodes)
-        appendVerseSegmentsToScratchAudio(segments)
+        appendVerseSegmentsToScratchAudio(newSegments)
     }
 
     fun getPlayer(): IAudioPlayer {
