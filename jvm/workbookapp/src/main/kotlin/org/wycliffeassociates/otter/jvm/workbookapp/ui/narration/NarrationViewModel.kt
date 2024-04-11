@@ -699,9 +699,19 @@ class NarrationViewModel : ViewModel() {
 
 
     fun onImportChapterAudio(file: File) {
+        openLoadingModalProperty.set(true)
         narration.importChapterAudioFile(file)
-        recordedVerses.setAll(narration.activeVerses)
-        resetNarratableList()
+            .doOnComplete {
+                runLater {
+                    recordedVerses.setAll(narration.activeVerses)
+                    resetNarratableList()
+                }
+            }
+            .doFinally {
+                openLoadingModalProperty.set(false)
+            }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
     }
 
     fun onNext(currentIndex: Int) {
