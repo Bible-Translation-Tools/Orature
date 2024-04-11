@@ -27,6 +27,7 @@ import javafx.geometry.NodeOrientation
 import javafx.geometry.Pos
 import javafx.scene.input.KeyCodeCombination
 import javafx.scene.layout.Priority
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
@@ -51,6 +52,8 @@ class PluginOpenedPage : View() {
     val sourceSpeedRateProperty = SimpleDoubleProperty()
     val targetSpeedRateProperty = SimpleDoubleProperty()
     val sourceTextZoomRateProperty = SimpleIntegerProperty()
+    val openLoadingModalProperty = SimpleBooleanProperty()
+    val appColorModeProperty = SimpleObjectProperty<ColorTheme>()
 
     private lateinit var sourceContent: SourceContent
 
@@ -119,6 +122,8 @@ class PluginOpenedPage : View() {
             it?.let { sourceContent.zoomRateProperty.set(it.toInt()) }
         }.let(listeners::add)
 
+        setUpLoadingModal()
+
         super.onDock()
     }
 
@@ -138,5 +143,26 @@ class PluginOpenedPage : View() {
 
     private fun removeShortcut(combo: KeyCodeCombination) {
         workspace.accelerators.remove(combo)
+    }
+
+
+    private fun setUpLoadingModal() {
+        find<LoadingModal>().apply {
+            orientationProperty.bind(this@PluginOpenedPage.orientationProperty)
+            themeProperty.set(appColorModeProperty.value)
+            messageProperty.set(messages["savingProjectWait"])
+
+            openLoadingModalProperty.onChangeWithDisposer {
+                it?.let {
+                    runLater {
+                        if (it) {
+                            open()
+                        } else {
+                            close()
+                        }
+                    }
+                }
+            }.apply { listeners.add(this) }
+        }
     }
 }

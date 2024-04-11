@@ -59,7 +59,7 @@ class NarrationHeader : View() {
 
     init {
         subscribe<NarrationOpenInPluginEvent> {
-            viewModel.processWithPlugin(it.plugin)
+            viewModel.processChapterWithPlugin(it.plugin)
         }
 
         subscribe<NavigateChapterEvent> {
@@ -305,8 +305,8 @@ class NarrationHeaderViewModel : ViewModel() {
     }
 
 
-    fun processWithPlugin(pluginType: PluginType) {
-        narrationViewModel.processWithPlugin(pluginType)
+    fun processChapterWithPlugin(pluginType: PluginType) {
+        narrationViewModel.processChapterWithPlugin(pluginType)
     }
 
     private fun hasInProgressNarration(

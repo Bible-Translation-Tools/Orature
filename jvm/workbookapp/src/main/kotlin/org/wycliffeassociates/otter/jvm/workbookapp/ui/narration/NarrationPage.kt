@@ -28,6 +28,20 @@ import org.wycliffeassociates.otter.jvm.controls.dialog.ImportAudioDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.LoadingModal
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.event.*
+import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.OpenInAudioPluginEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordAgainEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PlayChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
+import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingAgainEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
@@ -228,10 +242,6 @@ class NarrationPage : View() {
             viewModel.openInAudioPlugin(it.index)
         }.let { eventSubscriptions.add(it) }
 
-        subscribe<ChapterReturnFromPluginEvent> {
-            viewModel.onChapterReturnFromPlugin()
-        }.let { eventSubscriptions.add(it) }
-
         subscribe<NavigateChapterEvent> {
             viewModel.deferNavigateChapterWhileModifyingTake(it.chapterNumber)
         }.let { eventSubscriptions.add(it) }
@@ -294,6 +304,8 @@ class NarrationPage : View() {
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
             orientationProperty.bind(settingsViewModel.orientationProperty)
             sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
+            openLoadingModalProperty.bind(viewModel.openLoadingModalProperty)
+            appColorModeProperty.bind(settingsViewModel.appColorMode)
 
             sourceSpeedRateProperty.bind(
                 workbookDataStore.activeWorkbookProperty.select {
