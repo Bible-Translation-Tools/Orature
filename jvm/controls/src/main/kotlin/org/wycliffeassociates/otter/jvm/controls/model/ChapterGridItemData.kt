@@ -18,4 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.model
 
-data class ChapterGridItemData(val number: Int, val completed: Boolean, val selected: Boolean)
+import javafx.beans.property.BooleanProperty
+
+data class ChapterGridItemData(val number: Int, val completedProperty: BooleanProperty, val selected: Boolean)
