@@ -325,7 +325,7 @@ internal class ChapterEditedAction(
 
         nodes.addAll(totalVerses)
         totalVerses.clear()
-        totalVerses.addAll(newList)
+        totalVerses.addAll(newList.map { it.copy() })
     }
 
     override fun undo(totalVerses: MutableList<VerseNode>) {
@@ -339,6 +339,6 @@ internal class ChapterEditedAction(
         logger.info("Redoing chapter edited action")
 
         totalVerses.clear()
-        totalVerses.addAll(newList)
+        totalVerses.addAll(newList.map { it.copy() })
     }
 }
