@@ -378,7 +378,7 @@ class NarrationViewModel : ViewModel() {
     }
 
 
-    fun processWithPlugin(pluginType: PluginType) {
+    fun processChapterWithPlugin(pluginType: PluginType) {
 
         val getChapterTake = if (chapterTakeProperty.value != null) {
             Single.just(chapterTakeProperty.value)
@@ -392,12 +392,12 @@ class NarrationViewModel : ViewModel() {
             }
             .doAfterSuccess { take ->
                 openLoadingModalProperty.set(false)
-                openTakeInPlugin(pluginType, take)
+                openChapterTakeInPlugin(pluginType, take)
             }
             .subscribe()
     }
 
-    private fun openTakeInPlugin(pluginType: PluginType, take: Take) {
+    private fun openChapterTakeInPlugin(pluginType: PluginType, take: Take) {
         workbookDataStore.activeChapterProperty.value?.audio?.let { audio ->
             pluginContextProperty.set(pluginType)
             workbookDataStore.activeTakeNumberProperty.set(take.number)
@@ -423,14 +423,13 @@ class NarrationViewModel : ViewModel() {
                 .onErrorReturn { PluginActions.Result.NO_PLUGIN }
                 .subscribe { result: PluginActions.Result ->
                     logger.info("Returned from plugin with result: $result")
-                    FX.eventbus.fire(PluginClosedEvent(pluginType))
 
                     when (result) {
                         PluginActions.Result.NO_PLUGIN -> FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
                         else -> {
                             when (pluginType) {
                                 PluginType.EDITOR, PluginType.MARKER -> {
-                                    FX.eventbus.fire(ChapterReturnFromPluginEvent())
+                                    onChapterReturnFromPlugin(pluginType)
                                 }
 
                                 else -> {
@@ -675,16 +674,27 @@ class NarrationViewModel : ViewModel() {
         processWithEditor(file, index)
     }
 
-    fun onChapterReturnFromPlugin() {
+    fun onChapterReturnFromPlugin(pluginType: PluginType) {
+        openLoadingModalProperty.set(true)
         narration.loadFromSelectedChapterFile()
-        recordedVerses.setAll(narration.activeVerses)
-        resetNarratableList()
+            .doOnComplete {
+                runLater {
+                    recordedVerses.setAll(narration.activeVerses)
+                    resetNarratableList()
+                }
+            }
+            .doFinally {
+                // Indicates that we used a temporary take to edit the chapter
+                if (hasAllItemsRecordedProperty.value == false) {
+                    // Deletes the wav file for the temporary take since it will not be referenced to again
+                    narration.deleteChapterTake(true)
+                }
 
-        // Indicates that we used a temporary take to edit the chapter
-        if (hasAllItemsRecordedProperty.value == false) {
-            // Deletes the wav file for the temporary take since it will not be referenced to again
-            narration.deleteChapterTake(true)
-        }
+                openLoadingModalProperty.set(false)
+                FX.eventbus.fire(PluginClosedEvent(pluginType))
+            }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
     }
 
 
@@ -855,11 +865,17 @@ class NarrationViewModel : ViewModel() {
                     }
 
                     else -> {
+                        openLoadingModalProperty.set(true)
                         narration.onEditVerse(verseIndex, file)
-                        resetNarratableList()
+                            .doFinally {
+                                resetNarratableList()
+                                openLoadingModalProperty.set(false)
+                                FX.eventbus.fire(PluginClosedEvent(pluginType))
+                            }
+                            .subscribeOn(Schedulers.io())
+                            .subscribe()
                     }
                 }
-                FX.eventbus.fire(PluginClosedEvent(pluginType))
             }
     }
 
