@@ -53,6 +53,7 @@ class Narration @AssistedInject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val splitAudioOnCues: SplitAudioOnCues,
     private val audioFileUtils: AudioFileUtils,
+    private val audioBouncer: AudioBouncer,
     private val recorder: IAudioRecorder,
     private val player: IAudioPlayer,
     @Assisted private val workbook: Workbook,
@@ -513,7 +514,7 @@ class Narration @AssistedInject constructor(
 
                 // bounce to a temp file to avoid Windows file-locking issue when editing with external app
                 val tempFile = directoryProvider.createTempFile("bounced-${take.name}",".wav")
-                AudioBouncer().bounceAudio(
+                audioBouncer.bounceAudio(
                     tempFile,
                     chapterRepresentation.getAudioFileReader(),
                     activeVerses
