@@ -440,7 +440,6 @@ class Narration @AssistedInject constructor(
             if (!forceUpdate) {
                 history.clear()
             }
-            appendVerseSegmentsToScratchAudio(segments)
         }
     }
 
@@ -452,8 +451,6 @@ class Narration @AssistedInject constructor(
 
     private fun createVersesFromVerseSegments(segments: VerseSegments): List<VerseNode> {
         val nodes = mutableListOf<VerseNode>()
-        var start = chapterRepresentation.scratchAudio.totalFrames * chapterRepresentation.frameSizeInBytes
-        var end = start
 
         val segmentLabels = segments.keys.map { it.formattedLabel }
         totalVerses
@@ -470,14 +467,18 @@ class Narration @AssistedInject constructor(
 
         segments.forEach { (marker, file) ->
             val verseAudio = AudioFile(file)
-            end += verseAudio.totalFrames * chapterRepresentation.frameSizeInBytes
+
+            val scratchAudio = chapterRepresentation.scratchAudio
+            val start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1
+            audioFileUtils.appendFile(chapterRepresentation.scratchAudio, verseAudio.file)
+            val end = chapterRepresentation.scratchAudio.totalFrames
+
             val node = VerseNode(
                 true,
                 marker,
-                mutableListOf(start until end)
+                mutableListOf(start * chapterRepresentation.frameSizeInBytes until end * chapterRepresentation.frameSizeInBytes)
             )
             nodes.add(node)
-            start = end
         }
 
         return nodes.sortedBy { it.marker.sort } // sort order of book-chapter-verse
@@ -513,7 +514,7 @@ class Narration @AssistedInject constructor(
                 takeToModify = take
 
                 // bounce to a temp file to avoid Windows file-locking issue when editing with external app
-                val tempFile = directoryProvider.createTempFile("bounced-${take.name}",".wav")
+                val tempFile = directoryProvider.createTempFile("bounced-${take.name}", ".wav")
                 audioBouncer.bounceAudio(
                     tempFile,
                     chapterRepresentation.getAudioFileReader(),
