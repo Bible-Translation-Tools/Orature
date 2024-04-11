@@ -46,7 +46,7 @@ class WorkBookTableView(
     init {
         addClass("wa-table-view")
         vgrow = Priority.ALWAYS
-        columnResizePolicy = CONSTRAINED_RESIZE_POLICY
+        columnResizePolicy = CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS
         placeholder = Region() // shows nothing when table is empty
 
         column(messages["book"], String::class) {
@@ -62,6 +62,7 @@ class WorkBookTableView(
             minWidth = 120.0 // this may not be replaced with css
             isReorderable = false
             isSortable = true
+            isResizable = true
 
             bindColumnSortComparator()
         }
@@ -74,6 +75,7 @@ class WorkBookTableView(
             minWidth = 80.0 // this may not be replaced with css
             isReorderable = false
             isSortable = true
+            isResizable = true
 
             bindColumnSortComparator()
         }
@@ -86,8 +88,10 @@ class WorkBookTableView(
                     addClass("h5")
                 }
             }
+            minWidth = 120.0
             isReorderable = false
             isSortable = true
+            isResizable = true
 
             bindColumnSortComparator()
         }
@@ -101,6 +105,7 @@ class WorkBookTableView(
             }
             isReorderable = false
             isSortable = true
+            isResizable = true
 
             bindColumnSortComparator()
         }
@@ -112,6 +117,8 @@ class WorkBookTableView(
             isSortable = true
             minWidth = 80.0
             maxWidth = 100.0
+            isResizable = true
+
             bindColumnSortComparator()
         }
         column("", WorkbookDescriptorWrapper::class) {
@@ -123,6 +130,7 @@ class WorkBookTableView(
             maxWidth = 100.0
             isReorderable = false
             isSortable = false
+            isResizable = true
         }
 
         sortPolicy = CUSTOM_SORT_POLICY as (Callback<TableView<WorkbookDescriptorWrapper>, Boolean>)
