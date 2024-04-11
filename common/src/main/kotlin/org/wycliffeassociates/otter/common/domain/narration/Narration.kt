@@ -40,7 +40,9 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
+import org.wycliffeassociates.otter.common.domain.audio.AudioBouncer
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import java.io.File
 import java.time.LocalDate
@@ -48,8 +50,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 class Narration @AssistedInject constructor(
+    private val directoryProvider: IDirectoryProvider,
     private val splitAudioOnCues: SplitAudioOnCues,
     private val audioFileUtils: AudioFileUtils,
+    private val audioBouncer: AudioBouncer,
     private val recorder: IAudioRecorder,
     private val player: IAudioPlayer,
     @Assisted private val workbook: Workbook,
@@ -486,7 +490,7 @@ class Narration @AssistedInject constructor(
      */
     fun createChapterTakeWithAudio(): Single<Take> {
         return chapter.audio.getNewTakeNumber()
-            .flatMap { takeNumber ->
+            .map { takeNumber ->
                 val namer = WorkbookFileNamerBuilder.createFileNamer(
                     workbook,
                     chapter,
@@ -503,18 +507,22 @@ class Narration @AssistedInject constructor(
 
                 chapter.audio.insertTake(take)
 
-                Single.just(take)
+                take
             }
-            .flatMap { take ->
+            .map { take ->
                 takeToModify = take
 
-                NarrationTakeModifier
-                    .modifyAudioDataTask(
-                        take,
-                        chapterRepresentation.getAudioFileReader(),
-                        activeVerses
-                    )
-                    .andThen(Single.just(take))
+                // bounce to a temp file to avoid Windows file-locking issue when editing with external app
+                val tempFile = directoryProvider.createTempFile("bounced-${take.name}",".wav")
+                audioBouncer.bounceAudio(
+                    tempFile,
+                    chapterRepresentation.getAudioFileReader(),
+                    activeVerses
+                )
+                tempFile.copyTo(take.file, overwrite = true)
+                tempFile.deleteOnExit()
+
+                take
             }
     }
 
