@@ -480,11 +480,11 @@ class Narration @AssistedInject constructor(
         if (narrationFromChapter || forceUpdate) {
             val segments = splitAudioOnCues.execute(chapterFile!!, firstVerse)
             val verseNodes = createVersesFromVerseSegments(segments)
+            appendVerseSegmentsToScratchAudio(segments)
             onChapterEdited(verseNodes)
             if (!forceUpdate) {
                 history.clear()
             }
-            appendVerseSegmentsToScratchAudio(segments)
         }
     }
 
@@ -496,8 +496,6 @@ class Narration @AssistedInject constructor(
 
     private fun createVersesFromVerseSegments(segments: VerseSegments): List<VerseNode> {
         val nodes = mutableListOf<VerseNode>()
-        var start = chapterRepresentation.scratchAudio.totalFrames * chapterRepresentation.frameSizeInBytes
-        var end = start
 
         val segmentLabels = segments.keys.map { it.formattedLabel }
         totalVerses
@@ -512,16 +510,24 @@ class Narration @AssistedInject constructor(
                 )
             }
 
+
+        val scratchAudio = chapterRepresentation.scratchAudio
+        var start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1
+        var end: Int
+        val frameSizeInBytes = chapterRepresentation.frameSizeInBytes
+
         segments.forEach { (marker, file) ->
             val verseAudio = AudioFile(file)
-            end += verseAudio.totalFrames * chapterRepresentation.frameSizeInBytes
+            end = start + verseAudio.totalFrames - 1
+
             val node = VerseNode(
                 true,
                 marker,
-                mutableListOf(start until end)
+                mutableListOf(start * frameSizeInBytes until end * frameSizeInBytes)
             )
             nodes.add(node)
-            start = end
+
+            start = end + 1
         }
 
         return nodes.sortedBy { it.marker.sort } // sort order of book-chapter-verse
@@ -557,7 +563,7 @@ class Narration @AssistedInject constructor(
                 takeToModify = take
 
                 // bounce to a temp file to avoid Windows file-locking issue when editing with external app
-                val tempFile = directoryProvider.createTempFile("bounced-${take.name}",".wav")
+                val tempFile = directoryProvider.createTempFile("bounced-${take.name}", ".wav")
                 audioBouncer.bounceAudio(
                     tempFile,
                     chapterRepresentation.getAudioFileReader(),
