@@ -104,15 +104,17 @@ class Narration @AssistedInject constructor(
 
     private var lockedVerseIndex: Int? = null
 
-    private var takeToModify: Take?
+    private var takeToModify: Take? = null
 
     init {
         firstVerse = getFirstVerseMarker()
         restoreFromExistingChapterAudio()
-        chapterRepresentation.loadFromSerializedVerses()
-        disposables.add(resetUncommittedFramesOnUpdatedVerses())
-        loadChapterIntoPlayer()
-        takeToModify = chapter.getSelectedTake()
+            .subscribe {
+                chapterRepresentation.loadFromSerializedVerses()
+                disposables.add(resetUncommittedFramesOnUpdatedVerses())
+                loadChapterIntoPlayer()
+                takeToModify = chapter.getSelectedTake()
+            }
     }
 
     fun startMicrophone() {
@@ -157,9 +159,7 @@ class Narration @AssistedInject constructor(
     }
 
     fun loadFromSelectedChapterFile(): Completable {
-        return Completable.fromAction {
-            restoreFromExistingChapterAudio(true)
-        }
+        return restoreFromExistingChapterAudio(true)
     }
 
 
@@ -468,24 +468,27 @@ class Narration @AssistedInject constructor(
         chapterRepresentation.onVersesUpdated()
     }
 
-    private fun restoreFromExistingChapterAudio(
-        forceUpdate: Boolean = false
-    ) {
-        val chapterFile = chapter.getSelectedTake()?.file
-        val chapterFileExists = chapterFile?.exists() ?: false
+    private fun restoreFromExistingChapterAudio(forceUpdate: Boolean = false): Completable {
+        return Completable
+            .fromAction {
+                val chapterFile = chapter.getSelectedTake()?.file
+                val chapterFileExists = chapterFile?.exists() ?: false
 
-        val narrationEmpty = chapterRepresentation.scratchAudio.totalFrames == 0
-        val narrationFromChapter = chapterFileExists && narrationEmpty
+                val narrationEmpty = chapterRepresentation.scratchAudio.totalFrames == 0
+                val narrationFromChapter = chapterFileExists && narrationEmpty
 
-        if (narrationFromChapter || forceUpdate) {
-            val segments = splitAudioOnCues.execute(chapterFile!!, firstVerse)
-            val verseNodes = createVersesFromVerseSegments(segments)
-            appendVerseSegmentsToScratchAudio(segments)
-            onChapterEdited(verseNodes)
-            if (!forceUpdate) {
-                history.clear()
+                if (narrationFromChapter || forceUpdate) {
+                    val segments = splitAudioOnCues.execute(chapterFile!!, firstVerse)
+                    val verseNodes = createVersesFromVerseSegments(segments)
+                    appendVerseSegmentsToScratchAudio(segments)
+                    onChapterEdited(verseNodes)
+                    if (!forceUpdate) {
+                        history.clear()
+                    }
+                }
             }
-        }
+            .doOnError { logger.error("Error while restoring chapter audio.", it) }
+            .subscribeOn(Schedulers.io())
     }
 
     private fun appendVerseSegmentsToScratchAudio(segments: VerseSegments) {
