@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.controls.dialog
 
-import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
@@ -13,6 +12,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
+import org.wycliffeassociates.otter.jvm.controls.event.ImportChapterAudioEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ImportVerseAudioEvent
 import tornadofx.*
 import java.io.File
@@ -22,7 +22,7 @@ class ImportAudioDialog : OtterDialog() {
 
     val validateFileCallback = SimpleObjectProperty<(List<File>) -> Boolean>()
     private val onCloseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    val verseIndexProperty = SimpleIntegerProperty()
+    val verseIndexProperty = SimpleObjectProperty<Int?>()
 
     private val content = VBox().apply {
         addClass("confirm-dialog", "import-project-dialog")
@@ -138,9 +138,11 @@ class ImportAudioDialog : OtterDialog() {
     }
 
     private fun importFile(file: File) {
-        if (verseIndexProperty.value > -1) {
-            FX.eventbus.fire(ImportVerseAudioEvent(verseIndexProperty.value, file))
-            verseIndexProperty.set(-1)
+        verseIndexProperty.value?.let {
+            FX.eventbus.fire(ImportVerseAudioEvent(it, file))
+            verseIndexProperty.set(null)
+        } ?: run {
+            FX.eventbus.fire(ImportChapterAudioEvent(file))
         }
 
         runLater {

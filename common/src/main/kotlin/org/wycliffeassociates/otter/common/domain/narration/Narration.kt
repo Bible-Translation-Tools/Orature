@@ -162,6 +162,35 @@ class Narration @AssistedInject constructor(
         }
     }
 
+
+    fun importChapterAudioFile(chapterAudioFile: File): Completable {
+
+        return Completable.fromAction {
+
+            if (!chapterAudioFile.exists()) {
+                logger.error("Tried to import a chapter file that does not exists.")
+                return@fromAction
+            }
+
+            var newSegments = splitAudioOnCues.execute(chapterAudioFile, firstVerse)
+
+            // Removes marker with duplicate label
+            newSegments = newSegments
+                .entries
+                .distinctBy { it.key.formattedLabel }
+                .associate { it.toPair() }
+
+            // Only uses markers that correspond to the current chapter
+            val totalVerseLabels = totalVerses.map { it.formattedLabel }
+            newSegments = newSegments.filterKeys { it.formattedLabel in totalVerseLabels }
+
+
+            val verseNodes = createVersesFromVerseSegments(newSegments)
+            onChapterAudioImported(verseNodes)
+            appendVerseSegmentsToScratchAudio(newSegments)
+        }
+    }
+
     fun getPlayer(): IAudioPlayer {
         return player
     }
@@ -305,6 +334,21 @@ class Narration @AssistedInject constructor(
 
     private fun onChapterEdited(newVerses: List<VerseNode>) {
         val action = ChapterEditedAction(newVerses)
+        execute(action)
+
+        val hasAllVersesRecorded = newVerses.any { !it.placed }.not()
+
+        if (hasAllVersesRecorded) {
+            NarrationTakeModifier.modifyAudioData(
+                takeToModify,
+                chapterRepresentation.getAudioFileReader(),
+                activeVerses
+            )
+        }
+    }
+
+    private fun onChapterAudioImported(newVerses: List<VerseNode>) {
+        val action = ChapterImportedAction(newVerses)
         execute(action)
 
         val hasAllVersesRecorded = newVerses.any { !it.placed }.not()
