@@ -64,6 +64,7 @@ class NarrationRenderingTest {
         chapter = mockChapter()
 
         narration = narrationFactory.create(workbookWithAudio, chapter)
+        narration.initialize().blockingAwait()
     }
 
     @Test
