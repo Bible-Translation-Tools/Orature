@@ -108,12 +108,16 @@ class Narration @AssistedInject constructor(
 
     init {
         firstVerse = getFirstVerseMarker()
-        restoreFromExistingChapterAudio()
-            .subscribe {
+    }
+
+    fun initialize(): Completable {
+        return restoreFromExistingChapterAudio()
+            .andThen {
                 chapterRepresentation.loadFromSerializedVerses()
                 disposables.add(resetUncommittedFramesOnUpdatedVerses())
                 loadChapterIntoPlayer()
                 takeToModify = chapter.getSelectedTake()
+                it.onComplete()
             }
     }
 

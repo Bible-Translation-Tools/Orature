@@ -122,6 +122,7 @@ class NarrationViewModel : ViewModel() {
     val hasPreviousChapter = SimpleBooleanProperty()
     val isModifyingTakeAudioProperty = SimpleBooleanProperty()
     val openLoadingModalProperty = SimpleBooleanProperty()
+    val loadingModalTextProperty = SimpleStringProperty()
     private val navigator: NavigationMediator by inject()
 
     val chunkTotalProperty = SimpleIntegerProperty(0)
@@ -169,7 +170,7 @@ class NarrationViewModel : ViewModel() {
 
         subscribe<NavigationRequestBlockedEvent> {
             if (isModifyingTakeAudioProperty.value) {
-                openLoadingModalProperty.set(true)
+                showLoadingDialog()
                 onTaskRunnerIdle = {
                     FX.eventbus.fire(it.navigationRequest)
                 }
@@ -264,6 +265,13 @@ class NarrationViewModel : ViewModel() {
 
     private fun initializeNarration(chapter: Chapter) {
         narration = narrationFactory.create(workbookDataStore.workbook, chapter)
+        narration.initialize()
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
+            .subscribe {
+                openLoadingModalProperty.set(false)
+            }
+
         narration.startMicrophone()
         audioPlayer = narration.getPlayer()
         audioPlayer.addEventListener { event: AudioPlayerEvent ->
@@ -386,10 +394,8 @@ class NarrationViewModel : ViewModel() {
             narration.createChapterTakeWithAudio()
         }
 
+        showLoadingDialog()
         getChapterTake
-            .doOnSubscribe {
-                openLoadingModalProperty.set(true)
-            }
             .doAfterSuccess { take ->
                 openLoadingModalProperty.set(false)
                 openChapterTakeInPlugin(pluginType, take)
@@ -449,12 +455,11 @@ class NarrationViewModel : ViewModel() {
      * @param chapterNumber the chapter to move to
      */
     fun deferNavigateChapterWhileModifyingTake(chapterNumber: Int) {
+        showLoadingDialog("pleaseWait")
         if (isModifyingTakeAudioProperty.value) {
-            openLoadingModalProperty.set(true)
             onTaskRunnerIdle = {
                 navigateChapter(chapterNumber)
             }
-
         } else {
             navigateChapter(chapterNumber)
         }
@@ -487,7 +492,6 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun loadChapter(chapter: Chapter) {
-
         logger.info("Loading chapter: ${chapter.sort}")
         resetState()
 
@@ -675,7 +679,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun onChapterReturnFromPlugin(pluginType: PluginType) {
-        openLoadingModalProperty.set(true)
+        showLoadingDialog()
         narration.loadFromSelectedChapterFile()
             .doOnComplete {
                 runLater {
@@ -699,7 +703,7 @@ class NarrationViewModel : ViewModel() {
 
 
     fun onImportChapterAudio(file: File) {
-        openLoadingModalProperty.set(true)
+        showLoadingDialog()
         narration.importChapterAudioFile(file)
             .doFinally {
                 openLoadingModalProperty.set(false)
@@ -828,7 +832,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun importVerseAudio(verseIndex: Int, file: File) {
-        openLoadingModalProperty.set(true)
+        showLoadingDialog()
 
         narration.onEditVerse(verseIndex, file)
 
@@ -873,7 +877,7 @@ class NarrationViewModel : ViewModel() {
                     }
 
                     else -> {
-                        openLoadingModalProperty.set(true)
+                        showLoadingDialog()
                         narration.onEditVerse(verseIndex, file)
                             .doFinally {
                                 resetNarratableList()
@@ -1220,5 +1224,10 @@ class NarrationViewModel : ViewModel() {
                 highlightedVerseIndex.set(index)
             }
         }
+    }
+    
+    private fun showLoadingDialog(messageKey: String = "savingProjectWait") {
+        loadingModalTextProperty.set(messages[messageKey])
+        openLoadingModalProperty.set(true)
     }
 }
