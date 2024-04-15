@@ -28,6 +28,7 @@ import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
@@ -233,13 +234,19 @@ class HomePage2 : View() {
 
     private fun subscribeActionEvents() {
         subscribe<LanguageSelectedEvent> {
-            if (projectWizardViewModel.selectedSourceLanguageProperty.value == null) {
+            val selectedSource = projectWizardViewModel.selectedSourceLanguageProperty.value
+            val projectMode = projectWizardViewModel.selectedModeProperty.value
+
+            if (selectedSource == null && projectMode != ProjectMode.NARRATION) {
                 wizardFragment.nextStep()
-            } else {
+            }
+
+            if (selectedSource != null || projectMode == ProjectMode.NARRATION) {
                 // open loading dialog when creating project
                 viewModel.isLoadingProperty.set(true)
             }
-            projectWizardViewModel.onLanguageSelected(it.item) {
+
+            projectWizardViewModel.onLanguageSelected(projectMode, it.item) {
                 viewModel.loadProjects()
                 mainSectionProperty.set(bookFragment)
             }
