@@ -144,16 +144,14 @@ class ProjectWizardViewModel : ViewModel() {
 
     fun onLanguageSelected(projectMode: ProjectMode, language: Language, onNavigateBack: () -> Unit) {
         val sourceLanguage = selectedSourceLanguageProperty.value
-        if (sourceLanguage != null) {
-            createProject(sourceLanguage, targetLanguage = language, onNavigateBack)
-        }
-        else {
-            // source language selected
-            selectedSourceLanguageProperty.set(language)
-        }
 
-        if (projectMode == ProjectMode.NARRATION) {
-            createProject(language, language, onNavigateBack)
+        val createNarrationProject = projectMode == ProjectMode.NARRATION
+        val createOtherProject = projectMode != ProjectMode.NARRATION && sourceLanguage != null
+        
+        when {
+            createNarrationProject -> createProject(language, language, onNavigateBack)
+            createOtherProject -> createProject(sourceLanguage, language, onNavigateBack)
+            else -> selectedSourceLanguageProperty.set(language)
         }
     }
 
