@@ -284,7 +284,7 @@ class NarrationPage : View() {
         find<LoadingModal>().apply {
             orientationProperty.set(settingsViewModel.orientationProperty.value)
             themeProperty.set(settingsViewModel.appColorMode.value)
-            messageProperty.set(messages["savingProjectWait"])
+            messageProperty.bind(viewModel.loadingModalTextProperty)
 
             viewModel.openLoadingModalProperty.onChangeWithDisposer {
                 it?.let {
