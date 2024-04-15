@@ -186,8 +186,8 @@ class Narration @AssistedInject constructor(
 
 
             val verseNodes = createVersesFromVerseSegments(newSegments)
-            onChapterAudioImported(verseNodes)
             appendVerseSegmentsToScratchAudio(newSegments)
+            onChapterAudioImported(verseNodes)
         }
     }
 
