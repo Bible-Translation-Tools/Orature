@@ -56,7 +56,10 @@ class NarrationMenu : ContextMenu() {
             action {
                 FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.MARKER))
             }
-            enableWhen(narrationStateProperty.isEqualTo(NarrationStateType.HAS_RECORDINGS))
+            enableWhen(
+                narrationStateProperty.isEqualTo(NarrationStateType.IN_PROGRESS)
+                    .or(narrationStateProperty.isEqualTo(NarrationStateType.FINISHED))
+            )
         }
         val restartChapterOpt = MenuItem().apply {
             graphic = label(messages["restartChapter"]) {
@@ -68,11 +71,26 @@ class NarrationMenu : ContextMenu() {
             }
             enableWhen(
                 narrationStateProperty.isEqualTo(NarrationStateType.FINISHED)
-                    .or(narrationStateProperty.isEqualTo(NarrationStateType.HAS_RECORDINGS))
+                    .or(narrationStateProperty.isEqualTo(NarrationStateType.IN_PROGRESS))
             )
         }
 
-        items.setAll(openChapterOpt, verseMarkerOpt, restartChapterOpt)
+        val importChapterAudio = MenuItem().apply {
+            graphic = label(messages["import"]) {
+                graphic = FontIcon(MaterialDesign.MDI_DOWNLOAD)
+                tooltip(text)
+            }
+            action {
+                FX.eventbus.fire(NarrationOpenImportAudioDialogEvent())
+            }
+            disableWhen {
+                narrationStateProperty.isEqualTo(NarrationStateType.RECORDING)
+                    .or(narrationStateProperty.isEqualTo(NarrationStateType.RECORDING_AGAIN))
+                    .or(narrationStateProperty.isEqualTo(NarrationStateType.PLAYING))
+            }
+        }
+
+        items.setAll(openChapterOpt, verseMarkerOpt, restartChapterOpt, importChapterAudio)
     }
 }
 

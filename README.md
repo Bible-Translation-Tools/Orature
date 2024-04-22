@@ -4,12 +4,12 @@ Orature is an application for oral drafting, narration, and translation of the B
 More information can be found [here.](https://bibletranslationtools.org/tool/orature/), as well as in the [wiki.](https://github.com/Bible-Translation-Tools/Orature/wiki)
 
 <p float="left">
-  <img src="https://raw.githubusercontent.com/jsarabia/orature-screenshots/main/Orature%20Home.png" width="48%" title="Artwork in screenshot provided by Sweet Publishing, CC By-SA 3.0, www.sweetpublishing.com" />
-  <img src="https://raw.githubusercontent.com/jsarabia/orature-screenshots/main/Recording%20Page.png" width="48%" /> 
+  <img src="https://raw.githubusercontent.com/jsarabia/orature-screenshots/main/Orature%203%20Home.png" width="48%" />
+  <img src="https://raw.githubusercontent.com/jsarabia/orature-screenshots/main/Orature%203%20Narration.png" width="48%" /> 
 </p>
 <p float="left">
-  <img src="https://raw.githubusercontent.com/jsarabia/orature-screenshots/main/Verse%20Marker%20Placement.png" width="48%" />
-  <img src="https://raw.githubusercontent.com/jsarabia/orature-screenshots/main/Takes%20Page.png" width="48%" /> 
+  <img src="https://raw.githubusercontent.com/jsarabia/orature-screenshots/main/Orature%203%20Chunking.png" width="48%" />
+  <img src="https://raw.githubusercontent.com/jsarabia/orature-screenshots/main/Orature%203%20Peer%20Edit.png" width="48%" /> 
 </p>
 
 # Usage

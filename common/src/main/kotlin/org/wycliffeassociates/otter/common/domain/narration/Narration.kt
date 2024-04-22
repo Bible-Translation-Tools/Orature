@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.common.domain.narration
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -39,7 +40,9 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
+import org.wycliffeassociates.otter.common.domain.audio.AudioBouncer
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import java.io.File
 import java.time.LocalDate
@@ -47,8 +50,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 class Narration @AssistedInject constructor(
+    private val directoryProvider: IDirectoryProvider,
     private val splitAudioOnCues: SplitAudioOnCues,
     private val audioFileUtils: AudioFileUtils,
+    private val audioBouncer: AudioBouncer,
     private val recorder: IAudioRecorder,
     private val player: IAudioPlayer,
     @Assisted private val workbook: Workbook,
@@ -99,15 +104,21 @@ class Narration @AssistedInject constructor(
 
     private var lockedVerseIndex: Int? = null
 
-    private var takeToModify: Take?
+    private var takeToModify: Take? = null
 
     init {
         firstVerse = getFirstVerseMarker()
-        restoreFromExistingChapterAudio()
-        chapterRepresentation.loadFromSerializedVerses()
-        disposables.add(resetUncommittedFramesOnUpdatedVerses())
-        loadChapterIntoPlayer()
-        takeToModify = chapter.getSelectedTake()
+    }
+
+    fun initialize(): Completable {
+        return restoreFromExistingChapterAudio()
+            .andThen {
+                chapterRepresentation.loadFromSerializedVerses()
+                disposables.add(resetUncommittedFramesOnUpdatedVerses())
+                loadChapterIntoPlayer()
+                takeToModify = chapter.getSelectedTake()
+                it.onComplete()
+            }
     }
 
     fun startMicrophone() {
@@ -151,8 +162,37 @@ class Narration @AssistedInject constructor(
         return chapterRepresentation.totalVerses.first().marker
     }
 
-    fun loadFromSelectedChapterFile() {
-        restoreFromExistingChapterAudio(true)
+    fun loadFromSelectedChapterFile(): Completable {
+        return restoreFromExistingChapterAudio(true)
+    }
+
+
+    fun importChapterAudioFile(chapterAudioFile: File): Completable {
+
+        return Completable.fromAction {
+
+            if (!chapterAudioFile.exists()) {
+                logger.error("Tried to import a chapter file that does not exists.")
+                return@fromAction
+            }
+
+            var newSegments = splitAudioOnCues.execute(chapterAudioFile, firstVerse)
+
+            // Removes marker with duplicate label
+            newSegments = newSegments
+                .entries
+                .distinctBy { it.key.formattedLabel }
+                .associate { it.toPair() }
+
+            // Only uses markers that correspond to the current chapter
+            val totalVerseLabels = totalVerses.map { it.formattedLabel }
+            newSegments = newSegments.filterKeys { it.formattedLabel in totalVerseLabels }
+
+
+            val verseNodes = createVersesFromVerseSegments(newSegments)
+            appendVerseSegmentsToScratchAudio(newSegments)
+            onChapterAudioImported(verseNodes)
+        }
     }
 
     fun getPlayer(): IAudioPlayer {
@@ -265,28 +305,30 @@ class Narration @AssistedInject constructor(
         NarrationTakeModifier.modifyMetadata(takeToModify, activeVerses)
     }
 
-    fun onEditVerse(verseIndex: Int, editedFile: File) {
+    fun onEditVerse(verseIndex: Int, editedFile: File): Completable {
 
-        loadSectionIntoPlayer(totalVerses[verseIndex])
+        return Completable.fromAction {
+            loadSectionIntoPlayer(totalVerses[verseIndex])
 
-        val scratchAudio = chapterRepresentation.scratchAudio
-        val start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1
-        audioFileUtils.appendFile(chapterRepresentation.scratchAudio, editedFile)
-        val end = chapterRepresentation.scratchAudio.totalFrames
+            val scratchAudio = chapterRepresentation.scratchAudio
+            val start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1
+            audioFileUtils.appendFile(chapterRepresentation.scratchAudio, editedFile)
+            val end = chapterRepresentation.scratchAudio.totalFrames
 
-        val frameSize = chapterRepresentation.frameSizeInBytes
+            val frameSize = chapterRepresentation.frameSizeInBytes
 
-        val action = EditVerseAction(verseIndex, start * frameSize, end * frameSize)
-        execute(action)
+            val action = EditVerseAction(verseIndex, start * frameSize, end * frameSize)
+            execute(action)
 
-        NarrationTakeModifier.modifyAudioData(
-            takeToModify,
-            chapterRepresentation.getAudioFileReader(),
-            activeVerses
-        )
+            NarrationTakeModifier.modifyAudioData(
+                takeToModify,
+                chapterRepresentation.getAudioFileReader(),
+                activeVerses
+            )
 
-        audioLoaded = false
-        loadChapterIntoPlayer()
+            audioLoaded = false
+            loadChapterIntoPlayer()
+        }
     }
 
     fun onResetAll() {
@@ -296,6 +338,21 @@ class Narration @AssistedInject constructor(
 
     private fun onChapterEdited(newVerses: List<VerseNode>) {
         val action = ChapterEditedAction(newVerses)
+        execute(action)
+
+        val hasAllVersesRecorded = newVerses.any { !it.placed }.not()
+
+        if (hasAllVersesRecorded) {
+            NarrationTakeModifier.modifyAudioData(
+                takeToModify,
+                chapterRepresentation.getAudioFileReader(),
+                activeVerses
+            )
+        }
+    }
+
+    private fun onChapterAudioImported(newVerses: List<VerseNode>) {
+        val action = ChapterImportedAction(newVerses)
         execute(action)
 
         val hasAllVersesRecorded = newVerses.any { !it.placed }.not()
@@ -320,7 +377,8 @@ class Narration @AssistedInject constructor(
         audioLoaded = false
         loadChapterIntoPlayer()
 
-        val lastAbsoluteFrame = chapterRepresentation.totalVerses[index].lastIndex() / chapterRepresentation.frameSizeInBytes
+        val lastAbsoluteFrame =
+            chapterRepresentation.totalVerses[index].lastIndex() / chapterRepresentation.frameSizeInBytes
         val seekFrame = chapterRepresentation.absoluteFrameToRelativeChapterFrame(lastAbsoluteFrame)
         seek(seekFrame)
 
@@ -414,24 +472,27 @@ class Narration @AssistedInject constructor(
         chapterRepresentation.onVersesUpdated()
     }
 
-    private fun restoreFromExistingChapterAudio(
-        forceUpdate: Boolean = false
-    ) {
-        val chapterFile = chapter.getSelectedTake()?.file
-        val chapterFileExists = chapterFile?.exists() ?: false
+    private fun restoreFromExistingChapterAudio(forceUpdate: Boolean = false): Completable {
+        return Completable
+            .fromAction {
+                val chapterFile = chapter.getSelectedTake()?.file
+                val chapterFileExists = chapterFile?.exists() ?: false
 
-        val narrationEmpty = chapterRepresentation.scratchAudio.totalFrames == 0
-        val narrationFromChapter = chapterFileExists && narrationEmpty
+                val narrationEmpty = chapterRepresentation.scratchAudio.totalFrames == 0
+                val narrationFromChapter = chapterFileExists && narrationEmpty
 
-        if (narrationFromChapter || forceUpdate) {
-            val segments = splitAudioOnCues.execute(chapterFile!!, firstVerse)
-            val verseNodes = createVersesFromVerseSegments(segments)
-            onChapterEdited(verseNodes)
-            if (!forceUpdate) {
-                history.clear()
+                if (narrationFromChapter || forceUpdate) {
+                    val segments = splitAudioOnCues.execute(chapterFile!!, firstVerse)
+                    val verseNodes = createVersesFromVerseSegments(segments)
+                    appendVerseSegmentsToScratchAudio(segments)
+                    onChapterEdited(verseNodes)
+                    if (!forceUpdate) {
+                        history.clear()
+                    }
+                }
             }
-            appendVerseSegmentsToScratchAudio(segments)
-        }
+            .doOnError { logger.error("Error while restoring chapter audio.", it) }
+            .subscribeOn(Schedulers.io())
     }
 
     private fun appendVerseSegmentsToScratchAudio(segments: VerseSegments) {
@@ -442,8 +503,6 @@ class Narration @AssistedInject constructor(
 
     private fun createVersesFromVerseSegments(segments: VerseSegments): List<VerseNode> {
         val nodes = mutableListOf<VerseNode>()
-        var start = chapterRepresentation.scratchAudio.totalFrames * chapterRepresentation.frameSizeInBytes
-        var end = start
 
         val segmentLabels = segments.keys.map { it.formattedLabel }
         totalVerses
@@ -458,16 +517,24 @@ class Narration @AssistedInject constructor(
                 )
             }
 
+
+        val scratchAudio = chapterRepresentation.scratchAudio
+        var start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1
+        var end: Int
+        val frameSizeInBytes = chapterRepresentation.frameSizeInBytes
+
         segments.forEach { (marker, file) ->
             val verseAudio = AudioFile(file)
-            end += verseAudio.totalFrames * chapterRepresentation.frameSizeInBytes
+            end = start + verseAudio.totalFrames - 1
+
             val node = VerseNode(
                 true,
                 marker,
-                mutableListOf(start until end)
+                mutableListOf(start * frameSizeInBytes until end * frameSizeInBytes)
             )
             nodes.add(node)
-            start = end
+
+            start = end + 1
         }
 
         return nodes.sortedBy { it.marker.sort } // sort order of book-chapter-verse
@@ -480,7 +547,7 @@ class Narration @AssistedInject constructor(
      */
     fun createChapterTakeWithAudio(): Single<Take> {
         return chapter.audio.getNewTakeNumber()
-            .flatMap { takeNumber ->
+            .map { takeNumber ->
                 val namer = WorkbookFileNamerBuilder.createFileNamer(
                     workbook,
                     chapter,
@@ -497,18 +564,22 @@ class Narration @AssistedInject constructor(
 
                 chapter.audio.insertTake(take)
 
-                Single.just(take)
+                take
             }
-            .flatMap { take ->
+            .map { take ->
                 takeToModify = take
 
-                NarrationTakeModifier
-                    .modifyAudioDataTask(
-                        take,
-                        chapterRepresentation.getAudioFileReader(),
-                        activeVerses
-                    )
-                    .andThen(Single.just(take))
+                // bounce to a temp file to avoid Windows file-locking issue when editing with external app
+                val tempFile = directoryProvider.createTempFile("bounced-${take.name}", ".wav")
+                audioBouncer.bounceAudio(
+                    tempFile,
+                    chapterRepresentation.getAudioFileReader(),
+                    activeVerses
+                )
+                tempFile.copyTo(take.file, overwrite = true)
+                tempFile.deleteOnExit()
+
+                take
             }
     }
 
@@ -649,7 +720,8 @@ class Narration @AssistedInject constructor(
             }
             ?: chapterRepresentation.apply {
                 if (activeVerses.isNotEmpty()) {
-                    val lastFrame = absoluteFrameToRelativeChapterFrame(activeVerses.last().lastIndex() / frameSizeInBytes)
+                    val lastFrame =
+                        absoluteFrameToRelativeChapterFrame(activeVerses.last().lastIndex() / frameSizeInBytes)
                     logger.info("Next marker not found, seeking to end of audio; frame: $lastFrame")
                     seek(lastFrame)
                 }
@@ -657,7 +729,8 @@ class Narration @AssistedInject constructor(
     }
 
     fun findMarkerAtFrame(frame: Int): AudioMarker? {
-        val frame = chapterRepresentation.relativeChapterFrameToAbsoluteIndex(frame) / chapterRepresentation.frameSizeInBytes
+        val frame =
+            chapterRepresentation.relativeChapterFrameToAbsoluteIndex(frame) / chapterRepresentation.frameSizeInBytes
         return chapterRepresentation.findVerse(frame)?.marker
     }
 }

@@ -44,7 +44,7 @@ class TeleprompterStateMachineTest {
 
         TeleprompterStateMachine.initialize(activeVerses)
 
-        // Verifies that the narration context is in an idle empty state
+        // Verifies that the narration context is in a not started state
         Assert.assertEquals(NarrationStateType.NOT_STARTED, TeleprompterStateMachine.getNarrationContext())
 
         val contexts = TeleprompterStateMachine.getVerseItemStates()
@@ -71,8 +71,8 @@ class TeleprompterStateMachineTest {
 
         TeleprompterStateMachine.initialize(activeVerses)
 
-        // Verifies that the narration context is in an idle empty state
-        Assert.assertEquals(NarrationStateType.HAS_RECORDINGS, TeleprompterStateMachine.getNarrationContext())
+        // Verifies that the narration context is in a not started state
+        Assert.assertEquals(NarrationStateType.IN_PROGRESS, TeleprompterStateMachine.getNarrationContext())
 
         val contexts = TeleprompterStateMachine.getVerseItemStates()
 
@@ -96,7 +96,7 @@ class TeleprompterStateMachineTest {
 
         TeleprompterStateMachine.initialize(activeVerses)
 
-        // Verifies that the narration context is in an IDLE_FINISHED state
+        // Verifies that the narration context is in a FINISHED state
         Assert.assertEquals(NarrationStateType.FINISHED, TeleprompterStateMachine.getNarrationContext())
 
         val contexts = TeleprompterStateMachine.getVerseItemStates()
@@ -120,7 +120,7 @@ class TeleprompterStateMachineTest {
 
         TeleprompterStateMachine.initialize(activeVerses)
 
-        Assert.assertEquals(NarrationStateType.HAS_RECORDINGS, TeleprompterStateMachine.getNarrationContext())
+        Assert.assertEquals(NarrationStateType.IN_PROGRESS, TeleprompterStateMachine.getNarrationContext())
 
         val contexts = TeleprompterStateMachine.transition(NarrationStateTransition.PLAY_AUDIO, verseToPlay)
         Assert.assertEquals(NarrationStateType.PLAYING, TeleprompterStateMachine.getNarrationContext())
@@ -145,7 +145,7 @@ class TeleprompterStateMachineTest {
 
         TeleprompterStateMachine.initialize(activeVerses)
 
-        // Verifies that the narration context is in an idle empty state
+        // Verifies that the narration context is in a not started state
         Assert.assertEquals(NarrationStateType.NOT_STARTED, TeleprompterStateMachine.getNarrationContext())
 
         val index = 0
@@ -173,7 +173,7 @@ class TeleprompterStateMachineTest {
 
         TeleprompterStateMachine.initialize(activeVerses)
 
-        // Verifies that the narration context is in an idle empty state
+        // Verifies that the narration context is in a not started state
         Assert.assertEquals(NarrationStateType.NOT_STARTED, TeleprompterStateMachine.getNarrationContext())
 
 
@@ -211,8 +211,8 @@ class TeleprompterStateMachineTest {
 
         TeleprompterStateMachine.initialize(activeVerses)
 
-        // Verifies that the narration context is in an IDLE_IN_PROGRESS state
-        Assert.assertEquals(NarrationStateType.HAS_RECORDINGS, TeleprompterStateMachine.getNarrationContext())
+        // Verifies that the narration context is in an IN_PROGRESS state
+        Assert.assertEquals(NarrationStateType.IN_PROGRESS, TeleprompterStateMachine.getNarrationContext())
 
         val index = 1
         var newContext = TeleprompterStateMachine.transition(NarrationStateTransition.RECORD_AGAIN, index)
@@ -341,7 +341,7 @@ class TeleprompterStateMachineTest {
         Assert.assertEquals(NarrationStateType.RECORDING_PAUSED, TeleprompterStateMachine.getNarrationContext())
         TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, 0)
 
-        Assert.assertEquals(NarrationStateType.HAS_RECORDINGS, TeleprompterStateMachine.getNarrationContext())
+        Assert.assertEquals(NarrationStateType.IN_PROGRESS, TeleprompterStateMachine.getNarrationContext())
 
         // Records verse 2
         TeleprompterStateMachine.transition(NarrationStateTransition.RECORD, 1)
@@ -350,7 +350,7 @@ class TeleprompterStateMachineTest {
         Assert.assertEquals(NarrationStateType.RECORDING_PAUSED, TeleprompterStateMachine.getNarrationContext())
         TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, 1)
 
-        Assert.assertEquals(NarrationStateType.HAS_RECORDINGS, TeleprompterStateMachine.getNarrationContext())
+        Assert.assertEquals(NarrationStateType.IN_PROGRESS, TeleprompterStateMachine.getNarrationContext())
 
         // Starts recording for verse 3
         TeleprompterStateMachine.transition(NarrationStateTransition.RECORD, 2)
@@ -418,7 +418,7 @@ class TeleprompterStateMachineTest {
 
         TeleprompterStateMachine.initialize(activeVerses)
 
-        // Verifies that the narration context is in an IDLE_EMPTY state
+        // Verifies that the narration context is in a NOT_STARTED state
         Assert.assertEquals(NarrationStateType.NOT_STARTED, TeleprompterStateMachine.getNarrationContext())
 
         val index = 0
@@ -438,8 +438,8 @@ class TeleprompterStateMachineTest {
         // Next
         var newContext = TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, index)
 
-        // Verifies that the narration context is in an IDLE_IN_PROGRESS state
-        Assert.assertEquals(NarrationStateType.HAS_RECORDINGS, TeleprompterStateMachine.getNarrationContext())
+        // Verifies that the narration context is in an IN_PROGRESS state
+        Assert.assertEquals(NarrationStateType.IN_PROGRESS, TeleprompterStateMachine.getNarrationContext())
 
         // Verify that newContext[index] is in the RECORD_AGAIN state
         Assert.assertEquals(TeleprompterItemState.RECORD_AGAIN, newContext[index].verseState)
@@ -528,7 +528,7 @@ class TeleprompterStateMachineTest {
         // Next
         TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, index)
 
-        Assert.assertEquals(NarrationStateType.HAS_RECORDINGS, TeleprompterStateMachine.getNarrationContext())
+        Assert.assertEquals(NarrationStateType.IN_PROGRESS, TeleprompterStateMachine.getNarrationContext())
 
         TeleprompterStateMachine.transition(NarrationStateTransition.RECORD_AGAIN, index)
 
@@ -582,7 +582,7 @@ class TeleprompterStateMachineTest {
             // Next
             newContext = TeleprompterStateMachine.transition(NarrationStateTransition.NEXT, i)
 
-            Assert.assertEquals(NarrationStateType.HAS_RECORDINGS, TeleprompterStateMachine.getNarrationContext())
+            Assert.assertEquals(NarrationStateType.IN_PROGRESS, TeleprompterStateMachine.getNarrationContext())
         }
 
         // Records the last verse
@@ -620,7 +620,7 @@ class TeleprompterStateMachineTest {
         }
 
         TeleprompterStateMachine.initialize(activeVerses)
-        Assert.assertEquals(NarrationStateType.HAS_RECORDINGS, TeleprompterStateMachine.getNarrationContext())
+        Assert.assertEquals(NarrationStateType.IN_PROGRESS, TeleprompterStateMachine.getNarrationContext())
 
         val verseIndexToRecord = versesPreviouslyRecorded
         var newContext = TeleprompterStateMachine.transition(NarrationStateTransition.RECORD, verseIndexToRecord)
@@ -658,7 +658,7 @@ class TeleprompterStateMachineTest {
         }
 
         TeleprompterStateMachine.initialize(activeVerses)
-        Assert.assertEquals(NarrationStateType.HAS_RECORDINGS, TeleprompterStateMachine.getNarrationContext())
+        Assert.assertEquals(NarrationStateType.IN_PROGRESS, TeleprompterStateMachine.getNarrationContext())
 
         val verseIndexToRecord = versesPreviouslyRecorded
         var newContext = TeleprompterStateMachine.transition(NarrationStateTransition.RECORD, verseIndexToRecord)
@@ -781,7 +781,7 @@ class TeleprompterStateMachineTest {
         }
 
         TeleprompterStateMachine.initialize(activeVerses)
-        Assert.assertEquals(NarrationStateType.HAS_RECORDINGS, TeleprompterStateMachine.getNarrationContext())
+        Assert.assertEquals(NarrationStateType.IN_PROGRESS, TeleprompterStateMachine.getNarrationContext())
 
         val verseIndexToRecord = 5
         var newContext = TeleprompterStateMachine.transition(NarrationStateTransition.RECORD, verseIndexToRecord)
@@ -837,7 +837,7 @@ class TeleprompterStateMachineTest {
 
 
     @Test
-    fun `transition from MODIFYING_AUDIO_FILE, PLAYING, to IDLE_FINISHED with all verses previously recorded`() {
+    fun `transition from MODIFYING_AUDIO_FILE, PLAYING, to FINISHED with all verses previously recorded`() {
         val numMarkers = 10
         val audioMarkers = makeAudioMarkerLists(numMarkers)
         val TeleprompterStateMachine = TeleprompterStateMachine(audioMarkers)
@@ -898,7 +898,7 @@ class TeleprompterStateMachineTest {
 
 
     @Test
-    fun `transition from MODIFYING_AUDIO_FILE, MOVING_MARKER, to IDLE_IN_PROGRESS with all verses previously recorded`() {
+    fun `transition from MODIFYING_AUDIO_FILE, MOVING_MARKER, to IN_PROGRESS with all verses previously recorded`() {
         val numMarkers = 10
         val audioMarkers = makeAudioMarkerLists(numMarkers)
         val TeleprompterStateMachine = TeleprompterStateMachine(audioMarkers)

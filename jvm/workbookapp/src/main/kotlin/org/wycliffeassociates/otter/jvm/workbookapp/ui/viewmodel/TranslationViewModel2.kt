@@ -305,7 +305,7 @@ class TranslationViewModel2 : ViewModel() {
                     chapters.map {
                         ChapterGridItemData(
                             it.sort,
-                            it.hasSelectedAudio(),
+                            SimpleBooleanProperty(it.hasSelectedAudio()),
                             chapter == it.sort
                         )
                     }

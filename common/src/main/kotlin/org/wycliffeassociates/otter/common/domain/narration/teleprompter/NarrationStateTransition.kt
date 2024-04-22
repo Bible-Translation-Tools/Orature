@@ -76,7 +76,7 @@ object NextAction {
         return if (isRecording) {
             globalContext.changeState(NarrationStateType.RECORDING)
         } else {
-            globalContext.changeState(NarrationStateType.HAS_RECORDINGS)
+            globalContext.changeState(NarrationStateType.IN_PROGRESS)
         }
 
     }
@@ -143,7 +143,7 @@ object StartSaveAction {
         return if (allVersesRecorded) {
             globalContext.changeState(NarrationStateType.MODIFYING_AUDIO_FILE)
         } else {
-            globalContext.changeState(NarrationStateType.HAS_RECORDINGS)
+            globalContext.changeState(NarrationStateType.IN_PROGRESS)
         }
 
     }
@@ -228,7 +228,7 @@ object PausePlaybackAction {
         } else if (allVersesRecorded) {
             NarrationStateType.FINISHED
         } else {
-            NarrationStateType.HAS_RECORDINGS
+            NarrationStateType.IN_PROGRESS
         }
 
 
@@ -303,7 +303,7 @@ object PlaceMarkerAction {
         return if (allVersesRecorded) {
             globalContext.changeState(NarrationStateType.FINISHED)
         } else {
-            globalContext.changeState(NarrationStateType.HAS_RECORDINGS)
+            globalContext.changeState(NarrationStateType.IN_PROGRESS)
         }
     }
 }
