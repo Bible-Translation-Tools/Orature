@@ -31,6 +31,7 @@ import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFileReaderProvider
+import java.util.concurrent.CopyOnWriteArrayList
 
 class AudioBufferPlayer(
     private val player: SourceDataLine?,
@@ -64,7 +65,7 @@ class AudioBufferPlayer(
 
     val processor = AudioProcessor()
 
-    private val listeners = mutableListOf<IAudioPlayerListener>()
+    private val listeners = CopyOnWriteArrayList<IAudioPlayerListener>()
 
     override fun addEventListener(listener: IAudioPlayerListener) {
         listeners.add(listener)
@@ -199,16 +200,16 @@ class AudioBufferPlayer(
                                         val output = processor.process(bytes)
                                         player.write(output, 0, output.size)
                                     } else {
-                                        _reader.getPcmBuffer(bytes)
-                                        player.write(bytes, 0, bytes.size)
+                                        val written = _reader.getPcmBuffer(bytes)
+                                        player.write(bytes, 0, written)
                                     }
                                 }
                             }
                             player.drain()
                             if (!pause.get()) {
-                                startPosition = _reader.totalFrames
                                 listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
                                 player.close()
+                                startPosition = _reader.totalFrames
                                 seek(startPosition)
                             }
                         } catch (e: LineUnavailableException) {

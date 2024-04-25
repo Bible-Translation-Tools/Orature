@@ -387,7 +387,7 @@ class WorkbookRepository(
             }
     }
 
-    private fun subscribeToCheckingStatus(
+    private fun subscribeCheckingStateRelay(
         take: WorkbookTake,
         modelTake: ModelTake,
         content: Content
@@ -544,7 +544,7 @@ class WorkbookRepository(
             .doOnNext { (wbTake, modelTake) ->
                 if (content.type == ContentType.TEXT) {
                     wbTake?.let {
-                        subscribeToCheckingStatus(it, modelTake, content) // subscribe to takes from db
+                        subscribeCheckingStateRelay(it, modelTake, content) // subscribe to takes from db
                     }
                 }
                 takeMap[wbTake] = modelTake
@@ -584,7 +584,7 @@ class WorkbookRepository(
                         selectedTakeRelay.accept(TakeHolder(wbTake))
 
                         if (content.type == ContentType.TEXT || content.type == ContentType.META) {
-                            subscribeToCheckingStatus(wbTake, modelTake, content) // subscribe to takes from UI
+                            subscribeCheckingStateRelay(wbTake, modelTake, content) // subscribe to takes from UI
                         }
                     }
             }

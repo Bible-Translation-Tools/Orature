@@ -47,6 +47,8 @@ import org.wycliffeassociates.otter.common.data.primitives.Take
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
+import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
+import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.takeFilenamePattern
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.project.ProjectAppVersion
@@ -65,6 +67,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRep
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import org.wycliffeassociates.otter.common.utils.SELECTED_TAKES_FROM_DB
 import org.wycliffeassociates.otter.common.utils.computeFileChecksum
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Manifest
@@ -86,16 +89,21 @@ class OngoingProjectImporter @Inject constructor(
     private val takeRepository: ITakeRepository,
     private val languageRepository: ILanguageRepository,
     private val resourceRepository: IResourceRepository,
-    private val createProjectUseCase: CreateProject
+    private val createProjectUseCase: CreateProject,
+    private val concatAudioUseCase: ConcatenateAudio
 ) : RCImporter(directoryProvider, resourceMetadataRepository) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     private val contentCache = mutableMapOf<ContentSignature, Content>()
     private var projectName = ""
-    private var takesInChapterFilter: Map<String, Int>? = null
-    private var completedChapters: List<Int>? = null
-    private var takesCheckingMap: TakeCheckingStatusMap = mapOf()
     private var projectAppVersion = ProjectAppVersion.THREE
+    private var projectMode: ProjectMode = ProjectMode.TRANSLATION
+    private var takesInChapterFilter: Map<String, Int>? = null
+    private var takesCheckingMap: TakeCheckingStatusMap = mapOf()
+    private var takesInSelectedFile = setOf<String>()
+    private var completedChapters = listOf<Int>() // for Ot1 projects
+    private var takesToCompile = mutableMapOf<Int, List<File>>() // for compiling verses of incomplete chapter in Ot1
+    private var migratedSelectedTakes = listOf<String>() // list of all selected take paths extracted from Ot1 database
 
     override fun import(
         file: File,
@@ -108,7 +116,11 @@ class OngoingProjectImporter @Inject constructor(
         }
         projectName = ""
         takesInChapterFilter = null
-        completedChapters = null
+        takesCheckingMap = mapOf()
+        takesInSelectedFile = setOf()
+        completedChapters = listOf()
+        takesToCompile = mutableMapOf()
+        migratedSelectedTakes = listOf()
         contentCache.clear()
 
         return Single
@@ -157,14 +169,11 @@ class OngoingProjectImporter @Inject constructor(
                 val projects = workbookRepository.getProjects().blockingGet()
                 return projects.firstOrNull { existingProject ->
                     sourceLanguageSlug == existingProject.source.language.slug &&
-                            languageSlug == existingProject.target.language.slug &&
-                            projectSlug == existingProject.target.slug
-                }?.let { workbook ->
-                    directoryProvider.getProjectDirectory(
-                        workbook.source.resourceMetadata,
-                        workbook.target.resourceMetadata,
-                        projectSlug
-                    ).list().isNullOrEmpty().not() // since getProjectDirectory always uses mkdir()
+                        languageSlug == existingProject.target.language.slug &&
+                        projectSlug == existingProject.target.slug
+                }?.let {
+                    workbookRepository.closeWorkbook(it)
+                    it.projectFilesAccessor.isInitialized()
                 } ?: false
             }
         }
@@ -282,14 +291,14 @@ class OngoingProjectImporter @Inject constructor(
         callback: ProjectImporterCallback?
     ): Collection {
         val sourceMetadata = sourceCollection.resourceContainer!!
-        val mode = getProjectMode(fileReader, metadata.language, sourceCollection.resourceContainer!!.language)
-        val isVerseByVerse = mode != ProjectMode.TRANSLATION ||
+        projectMode = getProjectMode(fileReader, metadata.language, sourceCollection.resourceContainer!!.language)
+        val isVerseByVerse = projectMode != ProjectMode.TRANSLATION ||
                 projectAppVersion == ProjectAppVersion.ONE
 
         val derivedProject = createDerivedProjects(
             metadata.language,
             sourceCollection,
-            mode,
+            projectMode,
             isVerseByVerse
         )
 
@@ -303,23 +312,15 @@ class OngoingProjectImporter @Inject constructor(
         )
 
         projectFilesAccessor.initializeResourceContainerInDir()
-        projectFilesAccessor.setProjectMode(mode)
+        projectFilesAccessor.setProjectMode(projectMode)
+        takesInSelectedFile = prepareSelectedTakes(fileReader)
 
         callback?.onNotifyProgress(localizeKey = "copyingSource", percent = 40.0)
         projectFilesAccessor.copySourceFiles(fileReader)
-
         if (projectAppVersion == ProjectAppVersion.ONE) {
             callback?.onNotifyProgress(localizeKey = "loading_content", percent = 60.0)
-            completedChapters = takesInChapterFilter
-                ?.filterKeys { takePath ->
-                    parseNumbers(takePath)?.contentSignature?.let { sig ->
-                        sig.verse == null // filter only chapter take
-                    } ?: false
-                }
-                ?.values
-                ?.toList()
-
             deriveChapterContentFromVerses(derivedProject, projectFilesAccessor)
+            setMigrationInfo(takesInSelectedFile)
         }
         importContributorInfo(metadata, projectFilesAccessor)
         importChunks(
@@ -348,11 +349,37 @@ class OngoingProjectImporter @Inject constructor(
 
         translation.modifiedTs = LocalDateTime.now()
         languageRepository.updateTranslation(translation).subscribe()
-        resetChaptersWithoutTakes(fileReader, derivedProject, mode)
+        resetChaptersWithoutTakes(fileReader, derivedProject, projectMode)
 
         callback?.onNotifyProgress(localizeKey = "finishingUp", percent = 99.0)
 
         return derivedProject
+    }
+
+    private fun setMigrationInfo(selectedTakesInProject: Set<String>) {
+        migratedSelectedTakes = directoryProvider.tempDirectory.resolve(SELECTED_TAKES_FROM_DB).let {
+            if (it.exists()) it.readLines() else listOf()
+        }
+        val selectedChaptersFromProjectFile = selectedTakesInProject
+            .mapNotNull { parseNumbers(it) }
+            .filter { sig ->
+                sig.contentSignature.verse == null
+            }
+            .map { it.contentSignature.chapter }
+
+        val selectedTakeNames = migratedSelectedTakes.map { File(it).name }
+        completedChapters = takesInChapterFilter
+            ?.filterKeys { takePath ->
+                val isChapter = parseNumbers(takePath)
+                    ?.contentSignature
+                    ?.let { sig -> sig.verse == null } == true
+
+                isChapter && File(takePath).name in selectedTakeNames
+            }
+            ?.values
+            ?.union(selectedChaptersFromProjectFile)
+            ?.toList()
+            ?: listOf()
     }
 
     private fun getProjectMode(
@@ -497,9 +524,6 @@ class OngoingProjectImporter @Inject constructor(
             else -> project
         }
         val sourceMetadata = sourceCollection.resourceContainer!!
-
-        val selectedTakes = prepareSelectedTakes(fileReader)
-
         takesCheckingMap = parseCheckingStatusFile(fileReader)
 
         projectFilesAccessor.copySelectedTakesFile(fileReader)
@@ -515,9 +539,16 @@ class OngoingProjectImporter @Inject constructor(
                     projectFilesAccessor.audioDir,
                     collectionForTakes,
                     sourceMetadata,
-                    selectedTakes
+                    takesInSelectedFile
                 )
             }
+        
+        val isNarrationMigration = projectAppVersion == ProjectAppVersion.ONE && projectMode == ProjectMode.NARRATION
+        if (isNarrationMigration) {
+            takesToCompile.forEach { (chapter, takeFiles) ->
+                compileIncompleteChapterNarration(chapter, takeFiles, project, metadata)
+            }
+        }
     }
 
     private fun prepareSelectedTakes(fileReader: IFileReader): Set<String> {
@@ -576,11 +607,12 @@ class OngoingProjectImporter @Inject constructor(
                 val now = LocalDate.now()
                 val file = File(filepath).canonicalFile
                 val relativeFile = file.relativeTo(projectAudioDir.canonicalFile)
+                val isSelected = relativeFile.invariantSeparatorsPath in selectedTakes || filepath in migratedSelectedTakes
 
                 val checkingStatus = when {
                     projectAppVersion.ordinal >= ProjectAppVersion.THREE.ordinal -> takesCheckingMap[relativeFile.name]
 
-                    completedChapters?.contains(sig.chapter) == true -> {
+                    completedChapters.contains(sig.chapter) -> {
                         TakeCheckingState(CheckingStatus.VERSE, computeFileChecksum(file))
                     }
 
@@ -601,9 +633,16 @@ class OngoingProjectImporter @Inject constructor(
                 val insertedId = takeRepository.insertForContent(take, chunk).blockingGet()
                 take.id = insertedId
 
-                if (relativeFile.invariantSeparatorsPath in selectedTakes) {
+                if (isSelected) {
                     chunk.selectedTake = take
                     contentRepository.update(chunk).blockingAwait()
+
+                    val isNarrationMigration = projectMode == ProjectMode.NARRATION && projectAppVersion == ProjectAppVersion.ONE
+                    // store verse take of incomplete chapter narration to compile later
+                    if (isNarrationMigration && sig.chapter !in completedChapters && sig.verse != null) {
+                        val existingFiles = takesToCompile.getOrDefault(sig.chapter, listOf())
+                        takesToCompile[sig.chapter] = existingFiles.plus(file)
+                    }
                 }
             }
         }
@@ -764,6 +803,69 @@ class OngoingProjectImporter @Inject constructor(
 
             content.blockingGet()
         }
+    }
+
+    /**
+     * Compile all the selected takes of every verse into a chapter, so that narration
+     * can restore the file as one chapter take. Only call this method if the chapter
+     * has not completed/compiled before migrating to Orature 3.x.
+     */
+    private fun compileIncompleteChapterNarration(
+        chapterNumber: Int,
+        takeFiles: List<File>,
+        project: Collection,
+        metadata: ResourceMetadata
+    ) {
+         val collections = collectionRepository
+            .getChildren(project)
+            .blockingGet()
+
+        val chapterCollection = collections.find {
+            collection -> collection.slug.endsWith("_$chapterNumber")
+        } ?: return
+
+        val chapterContent = contentRepository.getCollectionMetaContent(chapterCollection).blockingGet()
+        val chunkCount = contentRepository.getByCollection(chapterCollection).blockingGet()
+            .count { content -> content.type == ContentType.TEXT }
+
+        val fileNamer = FileNamer(
+            start = null,
+            end = null,
+            sort = chapterNumber,
+            contentType = ContentType.META,
+            languageSlug = metadata.language.slug,
+            bookSlug = project.slug,
+            rcSlug = metadata.identifier,
+            chunkCount = chunkCount.toLong(),
+            chapterCount = collections.count().toLong(),
+            chapterTitle = "$chapterNumber",
+            chapterSort = chapterNumber
+        )
+        val fileName = fileNamer.generateName(1, AudioFileFormat.WAV)
+        val filesToCompile = takeFiles.sortedBy { parseNumbers(it.name)!!.contentSignature.verse } // sort by verse order
+        val compiled = concatAudioUseCase.execute(filesToCompile, includeMarkers = true).blockingGet()
+        val chapterFile = takeFiles.first().parentFile.resolve(fileName)
+            .apply {
+                createNewFile()
+                compiled.copyTo(this, overwrite = true)
+                compiled.delete()
+            }
+
+        val chapterTake = Take(
+            fileName,
+            chapterFile,
+            number = 1,
+            LocalDate.now(),
+            null,
+            false,
+            CheckingStatus.UNCHECKED,
+            checksum = null,
+            listOf()
+        )
+        val insertedId = takeRepository.insertForContent(chapterTake, chapterContent).blockingGet()
+        chapterTake.id = insertedId
+        chapterContent.selectedTake = chapterTake
+        contentRepository.update(chapterContent).blockingAwait()
     }
 
     private fun parseNumbers(filename: String): TakeSignature? {

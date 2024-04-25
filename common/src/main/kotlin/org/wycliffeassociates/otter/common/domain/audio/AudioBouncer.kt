@@ -2,16 +2,14 @@ package org.wycliffeassociates.otter.common.domain.audio
 
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
-import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
-import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
-import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
+import javax.inject.Inject
 
-class AudioBouncer {
+class AudioBouncer @Inject constructor() {
 
     private val logger = LoggerFactory.getLogger(AudioBouncer::class.java)
 
@@ -40,7 +38,7 @@ class AudioBouncer {
             }
 
             val wav = WavFile(bouncedAudio, reader.channels, reader.sampleRate, reader.sampleSizeBits)
-            WavOutputStream(wav).use { out ->
+            WavOutputStream(wav, buffered = true).use { out ->
                 while (reader.hasRemaining() && !isInterrupted.get()) {
                     val read = reader.getPcmBuffer(bytes)
                     out.write(bytes, 0, read)

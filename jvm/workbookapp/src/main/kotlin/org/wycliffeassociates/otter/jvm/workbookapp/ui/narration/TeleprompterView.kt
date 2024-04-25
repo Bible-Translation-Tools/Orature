@@ -26,15 +26,17 @@ import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.scene.layout.Priority
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.*
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextCell
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextItemData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.NarratableItemModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.text.MessageFormat
 import kotlin.math.max
@@ -44,30 +46,14 @@ class TeleprompterSeekEvent(val index: Int) : FXEvent()
 
 class TeleprompterViewModel : ViewModel() {
     private val narrationViewModel: NarrationViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
 
     val chunks = narrationViewModel.narratableList
+    var narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
 
-    val stickyVerseProperty = SimpleObjectProperty<NarrationTextItemData>()
+    val stickyVerseProperty = SimpleObjectProperty<NarratableItemModel>()
     val showStickyVerseProperty = SimpleBooleanProperty(false)
-
-    private val recordStartProperty = SimpleBooleanProperty()
-    private var recordStart by recordStartProperty
-
-    private val recordPauseProperty = SimpleBooleanProperty()
-    private var recordPause by recordPauseProperty
-
-    private val recordResumeProperty = SimpleBooleanProperty()
-    private var recordResume by recordResumeProperty
-
-    val isRecordingProperty = SimpleBooleanProperty()
-    private var isRecording by isRecordingProperty
-
-    val isPlayingProperty = SimpleBooleanProperty()
-    private var isPlaying by isPlayingProperty
-
-    val isRecordingAgainProperty = SimpleBooleanProperty()
-    private var isRecordingAgain by isRecordingAgainProperty
-
+    val licenseProperty = SimpleStringProperty()
 
     val lastRecordedVerseProperty = SimpleIntegerProperty(0)
 
@@ -76,16 +62,16 @@ class TeleprompterViewModel : ViewModel() {
     val highlightedVerseProperty = SimpleIntegerProperty()
 
     init {
-        recordStartProperty.bindBidirectional(narrationViewModel.recordStartProperty)
-        recordResumeProperty.bindBidirectional(narrationViewModel.recordResumeProperty)
-        isRecordingProperty.bindBidirectional(narrationViewModel.isRecordingProperty)
-        isPlayingProperty.bind(narrationViewModel.isPlayingProperty)
-        recordPauseProperty.bindBidirectional(narrationViewModel.recordPauseProperty)
-        isRecordingAgainProperty.bindBidirectional(narrationViewModel.isRecordingAgainProperty)
         lastRecordedVerseProperty.bindBidirectional(narrationViewModel.lastRecordedVerseProperty)
         recordingVerseProperty.bind(narrationViewModel.recordingVerseIndex)
         playingVerseProperty.bind(narrationViewModel.playingVerseIndex)
         highlightedVerseProperty.bind(narrationViewModel.highlightedVerseIndex)
+        narrationStateProperty.bind(narrationViewModel.narrationStateProperty)
+        licenseProperty.bind(workbookDataStore.sourceLicenseProperty.stringBinding {
+            it?.let {
+                MessageFormat.format(FX.messages["licenseStatement"], it)
+            } ?: ""
+        })
     }
 
     fun currentVerseTextBinding(): StringBinding {
@@ -110,35 +96,11 @@ class TeleprompterViewModel : ViewModel() {
         )
     }
 
-    fun recordButtonTextBinding(): StringBinding {
-        return Bindings.createStringBinding(
-            {
-                when {
-                    isRecording && !isRecordingAgain -> messages["pauseRecording"]
-                    isRecording && isRecordingAgain -> messages["stopRecording"]
-                    recordResume || recordPause -> messages["resumeRecording"]
-                    else -> messages["beginRecording"]
-                }
-            },
-            recordStartProperty,
-            recordResumeProperty,
-            isRecordingProperty,
-            recordPauseProperty,
-            isRecordingAgainProperty
-        )
-    }
-
     fun updateStickyVerse() {
-        val activeStates = listOf(
-            TeleprompterItemState.RECORD_ACTIVE,
-            TeleprompterItemState.RECORD_AGAIN_ACTIVE,
-            TeleprompterItemState.RECORDING_PAUSED,
-            TeleprompterItemState.RECORD_AGAIN_PAUSED
-        )
         val verse = narrationViewModel.narratableList
-                .firstOrNull {
-                    it.state in activeStates || !it.hasRecording
-                }
+            .firstOrNull {
+                it.isActiveRecording || !it.hasRecording
+            }
 
         stickyVerseProperty.set(verse)
     }
@@ -149,7 +111,7 @@ class TeleprompterView : View() {
     private val logger = LoggerFactory.getLogger(TeleprompterView::class.java)
 
     private val viewModel: TeleprompterViewModel by inject()
-    private var listView: NarrationTextListView<NarrationTextItemData> by singleAssign()
+    private var listView: NarrationTextListView<NarratableItemModel> by singleAssign()
 
     private val subscriptions = mutableListOf<EventRegistration>()
 
@@ -237,13 +199,9 @@ class TeleprompterView : View() {
             setCellFactory {
                 NarrationTextCell(
                     messages["nextVerse"],
-                    viewModel.recordButtonTextBinding(),
-                    viewModel.isRecordingProperty,
-                    viewModel.isRecordingAgainProperty,
-                    viewModel.isPlayingProperty,
-                    viewModel.recordingVerseProperty,
-                    viewModel.playingVerseProperty,
-                    viewModel.highlightedVerseProperty
+                    viewModel.licenseProperty,
+                    viewModel.narrationStateProperty,
+                    viewModel.highlightedVerseProperty,
                 )
             }
 

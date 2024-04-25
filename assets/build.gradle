@@ -1,3 +1,9 @@
+import groovy.json.JsonSlurper
+
+plugins {
+    id "de.undercouch.download" version "5.6.0"
+}
+
 group 'org.wycliffeassociates.otter'
 version '0.0.1'
 
@@ -37,36 +43,58 @@ configurations {
 }
 
 dependencies {
-
-    /**
-     * Commented out Bible artwork to reduce file size as new design doesn't use it
-     */
-    // content 'bible-translation-tools:en_art_wa:2.0.0@zip'
-    // content 'bible-translation-tools:en_art_sp:2.0.0@zip'
-    // content 'bible-translation-tools:bible_artwork@zip'
-
-    content 'wa-catalog:en_ulb:V21-05@zip'
     content 'bibleineverylanguage:langnames@json'
 
     implementation project(":common")
     implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlinVer"
     implementation "org.slf4j:slf4j-api:$slf4jApiVer"
     implementation "com.google.dagger:dagger:$daggerVer"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVer"
 }
 
-task copyToResources(type: Copy) {
-    dependsOn configurations.content
-    from configurations.content
+tasks.register('downloadGLSources') {
+    doLast {
+        def jsonFilePath = "src/main/resources/gl_sources.json"
+        def jsonFile = file(jsonFilePath)
+
+        if (!jsonFile.exists()) {
+            return
+        }
+
+        def parser = new JsonSlurper()
+        def jsonData = parser.parse(jsonFile) as List<Map<String, String>>
+
+        jsonData.each { dependency ->
+            def artifactName = dependency["name"]
+            def artifactUrl = dependency["url"]
+            def outputPath = "${layout.buildDirectory.dir("resources/content").get().asFile}/${artifactName}.zip"
+
+            try {
+                download.run {
+                    src artifactUrl
+                    dest outputPath
+                    overwrite false
+                }
+            } catch (Exception _) {
+            }
+        }
+    }
+}
+
+tasks.register('copyToResources', Copy) {
+    dependsOn configurations.content, 'downloadGLSources'
+    from configurations.content, layout.buildDirectory.dir("resources/content")
     into 'src/main/resources/content'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
     rename {
         String filename ->
             if (filename.matches(".*.json\$")) {
                 filename.replaceAll('-\\.json$', '.json')
-            } else {
-                filename.replaceAll('-.*.zip$', '.zip')
             }
     }
 }
 
+licenseMain.dependsOn copyToResources
 compileJava.dependsOn copyToResources
 processResources.dependsOn(copyToResources)

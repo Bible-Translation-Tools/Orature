@@ -19,12 +19,13 @@
 package org.wycliffeassociates.otter.common.recorder
 
 import org.wycliffeassociates.otter.common.collections.FloatRingBuffer
+import java.util.*
 
-class PCMCompressor(private val ringBuffer: FloatRingBuffer, samplesToCompress: Int) {
+class PCMCompressor(private val ringBuffer: FloatRingBuffer, framesToCompress: Int) {
 
     // size is how small the waveform is being shrunk for visualization
     // arbitrary for now, could be based on number of seconds to show and resolution
-    val accumulator = FloatArray(samplesToCompress)
+    val accumulator = FloatArray(framesToCompress)
     var index = 0
 
     fun add(data: FloatArray) {
@@ -52,5 +53,10 @@ class PCMCompressor(private val ringBuffer: FloatRingBuffer, samplesToCompress: 
         }
         ringBuffer.add(min)
         ringBuffer.add(max)
+    }
+
+    fun clear() {
+        index = 0
+        Arrays.fill(accumulator, 0f)
     }
 }

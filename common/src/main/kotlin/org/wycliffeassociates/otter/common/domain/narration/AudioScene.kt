@@ -22,6 +22,8 @@ import io.reactivex.Observable
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import java.util.*
+import kotlin.math.max
+import kotlin.math.roundToInt
 
 class AudioScene(
     private val existingAudioReader: AudioFileReader,
@@ -53,6 +55,9 @@ class AudioScene(
         reRecordStart: Int,
         nextVerseLocation: Int
     ): Pair<FloatArray, List<IntRange>> {
+        // if the first item is being re-recorded, both it and the next verse locations will be 0
+        // which will break rendering of the subsequent verses. Thus, we max with 1.
+        val nextVerseLocation = max(1, nextVerseLocation)
         Arrays.fill(frameBuffer, 0f)
         val framesOnScreen = secondsOnScreen * recordingSampleRate
 
@@ -161,6 +166,6 @@ class AudioScene(
 }
 
 fun framesToPixels(frames: Int, width: Int, framesOnScreen: Int): Int {
-    val framesInPixel = framesOnScreen / width.toFloat()
-    return (frames / framesInPixel).toInt()
+    val framesInPixel = framesOnScreen / width
+    return (frames / framesInPixel.toFloat()).roundToInt()
 }

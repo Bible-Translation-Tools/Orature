@@ -24,6 +24,7 @@ import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.button.AppBarButton
+import org.wycliffeassociates.otter.jvm.controls.button.debounce
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.AddFilesView
@@ -50,10 +51,11 @@ class AppBar : Fragment() {
 
         toggleGroup = buttonsToggleGroup
         selectedProperty().onChange { removePseudoClass("selected") }
-        setOnMouseClicked {
+        setOnAction {
             val homePage = find<HomePage2>()
             fire(NavigationRequestEvent(homePage))
         }
+        debounce()
     }
 
     private val addButton = AppBarButton().apply {

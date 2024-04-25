@@ -43,7 +43,8 @@ internal interface NarrationAction {
  * It doesn't track the end position of the verse. It should be updated when recording is paused.
  */
 internal class NewVerseAction(
-    private val verseIndex: Int
+    private val verseIndex: Int,
+    private val frameSizeInBytes: Int
 ) : NarrationAction {
     private val logger = LoggerFactory.getLogger(NarrationAction::class.java)
 
@@ -52,10 +53,10 @@ internal class NewVerseAction(
     override fun execute(
         totalVerses: MutableList<VerseNode>, workingAudio: AudioFile
     ) {
-        logger.info("New marker added: ${totalVerses[verseIndex].marker.formattedLabel}")
-
-        val start = if (workingAudio.totalFrames == 0) 0 else workingAudio.totalFrames + 1
+        val start = (if (workingAudio.totalFrames == 0) 0 else workingAudio.totalFrames + 1) * frameSizeInBytes
         val end = start
+
+        logger.info("New marker added: ${totalVerses[verseIndex].marker.formattedLabel} at $start")
 
         node = VerseNode(
             placed = true, totalVerses[verseIndex].marker.clone()
@@ -90,7 +91,8 @@ internal class NewVerseAction(
  * It doesn't track the end position of the verse. It should be updated when recording is stopped.
  */
 internal class RecordAgainAction(
-    private val verseIndex: Int
+    private val verseIndex: Int,
+    private val frameSizeInBytes: Int
 ) : NarrationAction {
     private val logger = LoggerFactory.getLogger(RecordAgainAction::class.java)
 
@@ -103,7 +105,7 @@ internal class RecordAgainAction(
         logger.info("Recording again for: ${totalVerses[verseIndex].marker.formattedLabel}")
         previous = totalVerses[verseIndex].copy()
 
-        val start = if (workingAudio.totalFrames == 0) 0 else workingAudio.totalFrames + 1
+        val start = (if (workingAudio.totalFrames == 0) 0 else workingAudio.totalFrames + 1) * frameSizeInBytes
         val end = start
 
         node = VerseNode(
@@ -145,7 +147,7 @@ internal class RecordAgainAction(
  * to the verse index and the previous verse.
  */
 internal class MoveMarkerAction(
-    private val verseIndex: Int, private val delta: Int
+    private val verseIndex: Int, private val deltaIndexes: Int
 ) : NarrationAction {
     private val logger = LoggerFactory.getLogger(MoveMarkerAction::class.java)
 
@@ -159,7 +161,7 @@ internal class MoveMarkerAction(
     override fun execute(
         totalVerses: MutableList<VerseNode>, workingAudio: AudioFile
     ) {
-        logger.info("Moving marker: ${totalVerses[verseIndex].marker.formattedLabel} by ${delta} frames")
+        logger.info("Moving marker: ${totalVerses[verseIndex].marker.formattedLabel} by ${deltaIndexes} indexes")
         oldPrecedingVerse = totalVerses.getOrNull(verseIndex - 1)?.copy()
         oldVerse = totalVerses[verseIndex].copy()
 
@@ -175,10 +177,10 @@ internal class MoveMarkerAction(
             firstMarkerMoved -> {
                 logger.warn("First marker moved, no other markers placed?")
                 verse = oldVerse!!.copy()
-                if (delta < 0) {
-                    verse!!.takeFramesFromStart(delta.absoluteValue)
+                if (deltaIndexes < 0) {
+                    verse!!.takeIndicesFromStart(deltaIndexes.absoluteValue)
                 } else {
-                    verse!!.addRange(listOf(delta.absoluteValue..verse!!.firstFrame()))
+                    verse!!.addRange(listOf(deltaIndexes.absoluteValue until verse!!.firstIndex()))
                 }
 
                 totalVerses[verseIndex] = verse!!.copy()
@@ -188,12 +190,12 @@ internal class MoveMarkerAction(
                 precedingVerse = oldPrecedingVerse!!.copy()
                 verse = oldVerse!!.copy()
 
-                if (delta < 0) {
-                    val framesToAdd = precedingVerse!!.takeFramesFromEnd(delta.absoluteValue)
+                if (deltaIndexes < 0) {
+                    val framesToAdd = precedingVerse!!.takeIndicesFromEnd(deltaIndexes.absoluteValue)
                     verse!!.sectors.addAll(0, framesToAdd)
                 } else {
-                    val framesToAdd = verse!!.takeFramesFromStart(delta.absoluteValue)
-                    precedingVerse!!.sectors.addAll(framesToAdd)
+                    val indicesToAdd = verse!!.takeIndicesFromStart(deltaIndexes.absoluteValue)
+                    precedingVerse!!.sectors.addAll(indicesToAdd)
                 }
 
                 totalVerses[verseIndex] = verse!!.copy()
@@ -243,7 +245,7 @@ internal class EditVerseAction(
         node = VerseNode(
             placed = true,
             vm,
-            mutableListOf(start..end)
+            mutableListOf(start until end)
         ).also {
             totalVerses[verseIndex] = it.copy()
         }
@@ -323,7 +325,7 @@ internal class ChapterEditedAction(
 
         nodes.addAll(totalVerses)
         totalVerses.clear()
-        totalVerses.addAll(newList)
+        totalVerses.addAll(newList.map { it.copy() })
     }
 
     override fun undo(totalVerses: MutableList<VerseNode>) {
@@ -337,6 +339,37 @@ internal class ChapterEditedAction(
         logger.info("Redoing chapter edited action")
 
         totalVerses.clear()
-        totalVerses.addAll(newList)
+        totalVerses.addAll(newList.map { it.copy() })
+    }
+}
+
+
+internal class ChapterImportedAction(
+    private val newList: List<VerseNode>
+) : NarrationAction {
+    private val logger = LoggerFactory.getLogger(ChapterEditedAction::class.java)
+
+    private val nodes = ArrayList<VerseNode>()
+
+    override fun execute(totalVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
+        logger.info("Chapter imported action")
+
+        nodes.addAll(totalVerses)
+        totalVerses.clear()
+        totalVerses.addAll(newList.map { it.copy() })
+    }
+
+    override fun undo(totalVerses: MutableList<VerseNode>) {
+        logger.info("Undoing chapter import action")
+
+        totalVerses.clear()
+        totalVerses.addAll(nodes)
+    }
+
+    override fun redo(totalVerses: MutableList<VerseNode>) {
+        logger.info("Redoing chapter import action")
+
+        totalVerses.clear()
+        totalVerses.addAll(newList.map { it.copy() })
     }
 }

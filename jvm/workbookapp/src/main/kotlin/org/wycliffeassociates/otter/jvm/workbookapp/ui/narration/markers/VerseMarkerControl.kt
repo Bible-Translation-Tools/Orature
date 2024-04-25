@@ -45,9 +45,12 @@ class VerseMarkerControl : BorderPane() {
     val verseProperty = SimpleObjectProperty<AudioMarker>()
     val verseIndexProperty = SimpleIntegerProperty()
     val labelProperty = SimpleStringProperty()
-    val canBeMovedProperty: BooleanBinding = verseIndexProperty.greaterThan(0)
+    val canBeMovedProperty = SimpleBooleanProperty()
     val userIsDraggingProperty = SimpleBooleanProperty(false)
-    val isRecordingProperty = SimpleBooleanProperty()
+
+    val isPlayingEnabledProperty = SimpleBooleanProperty()
+    val isEditVerseEnabledProperty = SimpleBooleanProperty()
+    val isRecordAgainEnabledProperty = SimpleBooleanProperty()
 
     val dragAreaProperty = SimpleObjectProperty<Node>()
 
@@ -102,10 +105,10 @@ class VerseMarkerControl : BorderPane() {
         }
 
         center = label(labelProperty) {
-                minWidth = Region.USE_PREF_SIZE
-                addClass("verse-marker__title")
-                setAlignment(this, Pos.BOTTOM_LEFT)
-            }
+            minWidth = Region.USE_PREF_SIZE
+            addClass("verse-marker__title")
+            setAlignment(this, Pos.BOTTOM_LEFT)
+        }
 
         right = Button().apply {
             addClass("btn", "btn--icon", "verse-marker__menu")
@@ -114,7 +117,11 @@ class VerseMarkerControl : BorderPane() {
             tooltip(messages["options"])
 
             val menu = VerseMenu().apply {
-                isRecordingProperty.bind(this@VerseMarkerControl.isRecordingProperty)
+                isPlayingEnabledProperty.bind(this@VerseMarkerControl.isPlayingEnabledProperty)
+                isEditVerseEnabledProperty.bind(this@VerseMarkerControl.isEditVerseEnabledProperty)
+                isRecordAgainEnabledProperty.bind(this@VerseMarkerControl.isRecordAgainEnabledProperty)
+                isImportVerseEnabledProperty.bind(this@VerseMarkerControl.isEditVerseEnabledProperty)
+
                 verseProperty.bind(this@VerseMarkerControl.verseProperty)
                 verseIndexProperty.bind(this@VerseMarkerControl.verseIndexProperty)
             }

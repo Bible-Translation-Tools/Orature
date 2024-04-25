@@ -16,10 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.domain.narration.teleprompter
+package org.wycliffeassociates.otter.common.domain.narration.statemachine
 
 import org.junit.Assert
 import org.junit.Test
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.*
 
 class TeleprompterStateContextTest {
 
@@ -27,7 +28,7 @@ class TeleprompterStateContextTest {
     @Test
     fun `BeginReocrdingState changeState and all possible state transitions`() {
 
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(TeleprompterItemState.BEGIN_RECORDING, true),
             Pair(TeleprompterItemState.RECORD, false),
@@ -38,6 +39,8 @@ class TeleprompterStateContextTest {
             Pair(TeleprompterItemState.RECORD_AGAIN_ACTIVE, true),
             Pair(TeleprompterItemState.RECORD_AGAIN_PAUSED, true),
             Pair(TeleprompterItemState.RECORD_AGAIN_DISABLED, true),
+            Pair(TeleprompterItemState.PLAYING, true),
+            Pair(TeleprompterItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
         )
 
         // Verifies that exceptions are thrown when invalid states are requested
@@ -72,7 +75,7 @@ class TeleprompterStateContextTest {
     @Test
     fun `RecordState changeState and all possible state transitions`() {
 
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(TeleprompterItemState.BEGIN_RECORDING, true),
             Pair(TeleprompterItemState.RECORD, false),
@@ -83,6 +86,7 @@ class TeleprompterStateContextTest {
             Pair(TeleprompterItemState.RECORD_AGAIN_ACTIVE, true),
             Pair(TeleprompterItemState.RECORD_AGAIN_PAUSED, true),
             Pair(TeleprompterItemState.RECORD_AGAIN_DISABLED, true),
+            Pair(TeleprompterItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
         )
 
         // Verifies that exceptions are thrown when invalid states are requested
@@ -124,7 +128,7 @@ class TeleprompterStateContextTest {
     @Test
     fun `RecordDisabledState changeState and all possible state transitions`() {
 
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(TeleprompterItemState.BEGIN_RECORDING, true),
             Pair(TeleprompterItemState.RECORD, false),
@@ -135,6 +139,8 @@ class TeleprompterStateContextTest {
             Pair(TeleprompterItemState.RECORD_AGAIN_ACTIVE, true),
             Pair(TeleprompterItemState.RECORD_AGAIN_PAUSED, true),
             Pair(TeleprompterItemState.RECORD_AGAIN_DISABLED, true),
+            Pair(TeleprompterItemState.PLAYING, true),
+            Pair(TeleprompterItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
         )
 
         // Verifies that exceptions are thrown when invalid states are requested
@@ -169,7 +175,7 @@ class TeleprompterStateContextTest {
     @Test
     fun `RecordActiveState changeState and all possible state transitions`() {
 
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(TeleprompterItemState.BEGIN_RECORDING, true),
             Pair(TeleprompterItemState.RECORD, true),
@@ -180,7 +186,10 @@ class TeleprompterStateContextTest {
             Pair(TeleprompterItemState.RECORD_AGAIN_ACTIVE, true),
             Pair(TeleprompterItemState.RECORD_AGAIN_PAUSED, true),
             Pair(TeleprompterItemState.RECORD_AGAIN_DISABLED, false),
-        )
+            Pair(TeleprompterItemState.PLAYING, true),
+            Pair(TeleprompterItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
+
+            )
 
         // Verifies that exceptions are thrown when invalid states are requested
         for (transition in stateTransitions) {
@@ -215,7 +224,7 @@ class TeleprompterStateContextTest {
     @Test
     fun `RecordPausedState changeState and all possible state transitions`() {
 
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(TeleprompterItemState.BEGIN_RECORDING, true),
             Pair(TeleprompterItemState.RECORD, true),
@@ -226,6 +235,8 @@ class TeleprompterStateContextTest {
             Pair(TeleprompterItemState.RECORD_AGAIN_ACTIVE, true),
             Pair(TeleprompterItemState.RECORD_AGAIN_PAUSED, true),
             Pair(TeleprompterItemState.RECORD_AGAIN_DISABLED, false),
+            Pair(TeleprompterItemState.PLAYING, true),
+            Pair(TeleprompterItemState.PLAYING_WHILE_RECORDING_PAUSED, false),
         )
 
         // Verifies that exceptions are thrown when invalid states are requested
@@ -266,9 +277,94 @@ class TeleprompterStateContextTest {
 
 
     @Test
+    fun `PlayingWhileRecordingPausedState changeState and all possible state transitions`() {
+        // Pair.first = VerseItemState, Pair.second = throws exception
+        val stateTransitions = mutableListOf(
+            Pair(TeleprompterItemState.BEGIN_RECORDING, true),
+            Pair(TeleprompterItemState.RECORD, true),
+            Pair(TeleprompterItemState.RECORDING_PAUSED, false),
+            Pair(TeleprompterItemState.RECORD_DISABLED, true),
+            Pair(TeleprompterItemState.RECORD_ACTIVE, true),
+            Pair(TeleprompterItemState.RECORD_AGAIN, true),
+            Pair(TeleprompterItemState.RECORD_AGAIN_ACTIVE, true),
+            Pair(TeleprompterItemState.RECORD_AGAIN_PAUSED, true),
+            Pair(TeleprompterItemState.RECORD_AGAIN_DISABLED, true),
+            Pair(TeleprompterItemState.PLAYING, true),
+            Pair(TeleprompterItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
+        )
+
+        // Verifies that exceptions are thrown when invalid states are requested
+        for (transition in stateTransitions) {
+            try {
+                PlayingWhileRecordingPausedState.changeState(transition.first)
+                if (transition.second) {
+                    Assert.fail("Error: expected an exception for state transition: ${transition.first}")
+                }
+            } catch (illegalState: IllegalStateException) {
+                if (!transition.second) {
+                    Assert.fail("Error: not expecting exception for state transition: ${transition.first}")
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `PlayingWhileRecordingPausedState changeState to RecordPausedState`() {
+        val newState = PlayingWhileRecordingPausedState.changeState(TeleprompterItemState.RECORDING_PAUSED)
+        Assert.assertEquals(RecordPausedState, newState)
+    }
+
+
+    @Test
+    fun `PlayingState changeState and all possible state transitions`() {
+        // Pair.first = VerseItemState, Pair.second = throws exception
+        val stateTransitions = mutableListOf(
+            Pair(TeleprompterItemState.BEGIN_RECORDING, true),
+            Pair(TeleprompterItemState.RECORD, false),
+            Pair(TeleprompterItemState.RECORDING_PAUSED, true),
+            Pair(TeleprompterItemState.RECORD_DISABLED, true),
+            Pair(TeleprompterItemState.RECORD_ACTIVE, true),
+            Pair(TeleprompterItemState.RECORD_AGAIN, false),
+            Pair(TeleprompterItemState.RECORD_AGAIN_ACTIVE, true),
+            Pair(TeleprompterItemState.RECORD_AGAIN_PAUSED, true),
+            Pair(TeleprompterItemState.RECORD_AGAIN_DISABLED, true),
+            Pair(TeleprompterItemState.PLAYING, true),
+            Pair(TeleprompterItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
+        )
+
+        // Verifies that exceptions are thrown when invalid states are requested
+        for (transition in stateTransitions) {
+            try {
+                PlayingState.changeState(transition.first)
+                if (transition.second) {
+                    Assert.fail("Error: expected an exception for state transition: ${transition.first}")
+                }
+            } catch (illegalState: IllegalStateException) {
+                if (!transition.second) {
+                    Assert.fail("Error: not expecting exception for state transition: ${transition.first}")
+                }
+            }
+        }
+    }
+
+
+    @Test
+    fun `Playing changeState to RecordState`() {
+        val newState = PlayingState.changeState(TeleprompterItemState.RECORD)
+        Assert.assertEquals(RecordState, newState)
+    }
+
+
+    @Test
+    fun `Playing changeState to RecordAgainState`() {
+        val newState = PlayingState.changeState(TeleprompterItemState.RECORD_AGAIN)
+        Assert.assertEquals(RecordAgainState, newState)
+    }
+
+    @Test
     fun `RecordAgainState changeState and all possible state transitions`() {
 
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(TeleprompterItemState.BEGIN_RECORDING, true),
             Pair(TeleprompterItemState.RECORD, true),
@@ -279,6 +375,8 @@ class TeleprompterStateContextTest {
             Pair(TeleprompterItemState.RECORD_AGAIN_ACTIVE, false),
             Pair(TeleprompterItemState.RECORD_AGAIN_PAUSED, true),
             Pair(TeleprompterItemState.RECORD_AGAIN_DISABLED, false),
+            Pair(TeleprompterItemState.PLAYING, false),
+            Pair(TeleprompterItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
         )
 
         // Verifies that exceptions are thrown when invalid states are requested
@@ -313,7 +411,7 @@ class TeleprompterStateContextTest {
     @Test
     fun `RecordAgainDisabledState changeState and all possible state transitions`() {
 
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(TeleprompterItemState.BEGIN_RECORDING, true),
             Pair(TeleprompterItemState.RECORD, true),
@@ -324,6 +422,8 @@ class TeleprompterStateContextTest {
             Pair(TeleprompterItemState.RECORD_AGAIN_ACTIVE, true),
             Pair(TeleprompterItemState.RECORD_AGAIN_PAUSED, true),
             Pair(TeleprompterItemState.RECORD_AGAIN_DISABLED, true),
+            Pair(TeleprompterItemState.PLAYING, true),
+            Pair(TeleprompterItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
         )
 
         // Verifies that exceptions are thrown when invalid states are requested
@@ -351,7 +451,7 @@ class TeleprompterStateContextTest {
     @Test
     fun `RecordAgainActiveState changeState and all possible state transitions`() {
 
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(TeleprompterItemState.BEGIN_RECORDING, true),
             Pair(TeleprompterItemState.RECORD, true),
@@ -362,6 +462,8 @@ class TeleprompterStateContextTest {
             Pair(TeleprompterItemState.RECORD_AGAIN_ACTIVE, true),
             Pair(TeleprompterItemState.RECORD_AGAIN_PAUSED, false),
             Pair(TeleprompterItemState.RECORD_AGAIN_DISABLED, true),
+            Pair(TeleprompterItemState.PLAYING, true),
+            Pair(TeleprompterItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
         )
 
         // Verifies that exceptions are thrown when invalid states are requested
@@ -397,7 +499,7 @@ class TeleprompterStateContextTest {
     @Test
     fun `RecordAgainPausedState changeState and all possible state transitions`() {
 
-        // Pair.first = TeleprompterItemState, Pair.second = throws exception
+        // Pair.first = VerseItemState, Pair.second = throws exception
         val stateTransitions = mutableListOf(
             Pair(TeleprompterItemState.BEGIN_RECORDING, true),
             Pair(TeleprompterItemState.RECORD, true),
@@ -408,6 +510,8 @@ class TeleprompterStateContextTest {
             Pair(TeleprompterItemState.RECORD_AGAIN_ACTIVE, false),
             Pair(TeleprompterItemState.RECORD_AGAIN_PAUSED, true),
             Pair(TeleprompterItemState.RECORD_AGAIN_DISABLED, false),
+            Pair(TeleprompterItemState.PLAYING, true),
+            Pair(TeleprompterItemState.PLAYING_WHILE_RECORDING_PAUSED, true),
         )
 
         // Verifies that exceptions are thrown when invalid states are requested

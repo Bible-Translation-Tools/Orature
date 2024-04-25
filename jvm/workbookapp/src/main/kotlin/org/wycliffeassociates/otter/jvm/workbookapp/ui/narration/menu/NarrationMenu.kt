@@ -18,23 +18,22 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu
 
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.value.ObservableBooleanValue
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.value.ObservableObjectValue
 import javafx.event.EventTarget
 import javafx.scene.control.Button
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class NarrationMenu : ContextMenu() {
 
-    val hasChapterTakeProperty = SimpleBooleanProperty()
-    val hasVersesProperty = SimpleBooleanProperty()
-    val hasAllItemsRecordedProperty = SimpleBooleanProperty()
+    val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
 
     init {
         addClass("wa-context-menu")
@@ -48,7 +47,6 @@ class NarrationMenu : ContextMenu() {
             action {
                 FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.EDITOR))
             }
-            enableWhen(hasChapterTakeProperty)
         }
         val verseMarkerOpt = MenuItem().apply {
             graphic = label(messages["editVerseMarkers"]) {
@@ -58,7 +56,10 @@ class NarrationMenu : ContextMenu() {
             action {
                 FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.MARKER))
             }
-            enableWhen(hasChapterTakeProperty.and(hasAllItemsRecordedProperty))
+            enableWhen(
+                narrationStateProperty.isEqualTo(NarrationStateType.IN_PROGRESS)
+                    .or(narrationStateProperty.isEqualTo(NarrationStateType.FINISHED))
+            )
         }
         val restartChapterOpt = MenuItem().apply {
             graphic = label(messages["restartChapter"]) {
@@ -68,17 +69,33 @@ class NarrationMenu : ContextMenu() {
             action {
                 FX.eventbus.fire(NarrationRestartChapterEvent())
             }
-            enableWhen(hasVersesProperty)
+            enableWhen(
+                narrationStateProperty.isEqualTo(NarrationStateType.FINISHED)
+                    .or(narrationStateProperty.isEqualTo(NarrationStateType.IN_PROGRESS))
+            )
         }
 
-        items.setAll(openChapterOpt, verseMarkerOpt, restartChapterOpt)
+        val importChapterAudio = MenuItem().apply {
+            graphic = label(messages["import"]) {
+                graphic = FontIcon(MaterialDesign.MDI_DOWNLOAD)
+                tooltip(text)
+            }
+            action {
+                FX.eventbus.fire(NarrationOpenImportAudioDialogEvent())
+            }
+            disableWhen {
+                narrationStateProperty.isEqualTo(NarrationStateType.RECORDING)
+                    .or(narrationStateProperty.isEqualTo(NarrationStateType.RECORDING_AGAIN))
+                    .or(narrationStateProperty.isEqualTo(NarrationStateType.PLAYING))
+            }
+        }
+
+        items.setAll(openChapterOpt, verseMarkerOpt, restartChapterOpt, importChapterAudio)
     }
 }
 
 fun EventTarget.narrationMenuButton(
-    hasChapterTakeBinding: ObservableBooleanValue,
-    hasVersesBinding: ObservableBooleanValue,
-    hasAllItemsRecordedBinding: ObservableBooleanValue,
+    narrationStateBinding: ObservableObjectValue<NarrationStateType>,
     op: Button.() -> Unit = {}
 ): Button {
     return Button().attachTo(this).apply {
@@ -87,9 +104,7 @@ fun EventTarget.narrationMenuButton(
         tooltip(messages["options"])
 
         val menu = NarrationMenu().apply {
-            this.hasChapterTakeProperty.bind(hasChapterTakeBinding)
-            this.hasVersesProperty.bind(hasVersesBinding)
-            this.hasAllItemsRecordedProperty.bind(hasAllItemsRecordedBinding)
+            this.narrationStateProperty.bind(narrationStateBinding)
         }
 
         menu.setOnShowing { addPseudoClass("active") }

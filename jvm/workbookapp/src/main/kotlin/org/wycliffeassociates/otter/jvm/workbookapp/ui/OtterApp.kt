@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.scene.control.ButtonBase
+import javafx.scene.image.Image
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Pane
@@ -70,7 +71,6 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
             DirectoryProvider(OratureInfo.SUITE_NAME)
         ).initialize()
         dependencyGraph.inject(this)
-        directoryProvider.cleanTempDirectory()
         Thread.setDefaultUncaughtExceptionHandler(OtterExceptionHandler(directoryProvider, localeLanguage))
         initializeLogger(directoryProvider)
         initializeAppLocale()
@@ -93,6 +93,9 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
         logSystemProperties()
 
         stage.isMaximized = true
+        stage.titleProperty().unbind()
+        stage.title = "Orature"
+        stage.icons.add(Image(javaClass.classLoader.getResourceAsStream("orature_app_icon.png")))
         stage.scene.window.setOnCloseRequest {
             if (shouldBlockWindowCloseRequest) {
                 it.consume()
@@ -136,5 +139,10 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
 
     override fun shouldShowPrimaryStage(): Boolean {
         return false
+    }
+
+    override fun stop() {
+        super.stop()
+        directoryProvider.cleanTempDirectory()
     }
 }

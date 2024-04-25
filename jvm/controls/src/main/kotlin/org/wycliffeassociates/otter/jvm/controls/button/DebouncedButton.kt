@@ -22,6 +22,7 @@ import javafx.animation.Animation
 import javafx.animation.PauseTransition
 import javafx.event.EventTarget
 import javafx.scene.control.Button
+import javafx.scene.control.ButtonBase
 import javafx.util.Duration
 import tornadofx.*
 
@@ -86,7 +87,7 @@ fun EventTarget.debouncedButton(
  * debounce(700.0) // called after setOnAction()
  * ```
  */
-fun Button.debounce(coolDownMillis: Double = DEFAULT_COOL_DOWN_MILLIS) {
+fun ButtonBase.debounce(coolDownMillis: Double = DEFAULT_COOL_DOWN_MILLIS) {
     val actionHandler = this.onActionProperty().value ?: return
     val coolDownTransition = PauseTransition(Duration.millis(coolDownMillis))
 

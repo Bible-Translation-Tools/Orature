@@ -19,13 +19,16 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.toLazyBinding
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
+import org.wycliffeassociates.otter.jvm.controls.dialog.ImportAudioDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.LoadingModal
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
+import org.wycliffeassociates.otter.jvm.controls.event.*
 import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
-import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.OpenInAudioPluginEvent
@@ -47,10 +50,13 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.NarrationMarkerChangedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.NarrationMovingMarkerEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationOpenImportAudioDialogEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRestartChapterEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationUndoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ImportAudioViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
@@ -60,6 +66,7 @@ class NarrationPage : View() {
 
     private val viewModel: NarrationViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
+    private val importAudioViewModel: ImportAudioViewModel by inject()
     private val settingsViewModel: SettingsViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
 
@@ -67,6 +74,7 @@ class NarrationPage : View() {
 
     private val eventSubscriptions = mutableListOf<EventRegistration>()
     private val disposableListeners = mutableListOf<ListenerDisposer>()
+    private val disposable = CompositeDisposable()
 
     private lateinit var narrationHeader: NarrationHeader
     private lateinit var audioWorkspaceView: AudioWorkspaceView
@@ -129,6 +137,7 @@ class NarrationPage : View() {
         super.onUndock()
         unsubscribeFromEvents()
         disposableListeners.forEach { it.dispose() }
+        disposable.clear()
         // avoid resetting ViewModel states & action history when opening plugin
         when (viewModel.pluginOpenedProperty.value) {
             true -> {
@@ -157,6 +166,10 @@ class NarrationPage : View() {
 
         subscribe<NarrationRestartChapterEvent> {
             viewModel.restartChapter()
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<NarrationOpenImportAudioDialogEvent> {
+            openImportAudioModal(it.verseIndex)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<NarrationUndoEvent> {
@@ -193,7 +206,12 @@ class NarrationPage : View() {
 
         subscribe<NarrationMarkerChangedEvent> {
             logger.info("Received Narration Moved event")
-            viewModel.moveMarker(it.index, it.delta)
+            viewModel.finishMoveMarker(it.index, it.delta)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<NarrationMovingMarkerEvent> {
+            logger.info("Received moving marker event")
+            viewModel.startMoveMarker(it.index)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<NextVerseEvent> {
@@ -201,7 +219,7 @@ class NarrationPage : View() {
         }.let { eventSubscriptions.add(it) }
 
         subscribe<PlayVerseEvent> {
-            viewModel.play(it.verse)
+            viewModel.play(it.index)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<PlayChapterEvent> {
@@ -224,12 +242,16 @@ class NarrationPage : View() {
             viewModel.openInAudioPlugin(it.index)
         }.let { eventSubscriptions.add(it) }
 
-        subscribe<ChapterReturnFromPluginEvent> {
-            viewModel.onChapterReturnFromPlugin()
-        }.let { eventSubscriptions.add(it) }
-
         subscribe<NavigateChapterEvent> {
             viewModel.deferNavigateChapterWhileModifyingTake(it.chapterNumber)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<ImportVerseAudioEvent> {
+            viewModel.importVerseAudio(it.index, it.file)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<ImportChapterAudioEvent> {
+            viewModel.onImportChapterAudio(it.file)
         }.let { eventSubscriptions.add(it) }
     }
 
@@ -262,7 +284,7 @@ class NarrationPage : View() {
         find<LoadingModal>().apply {
             orientationProperty.set(settingsViewModel.orientationProperty.value)
             themeProperty.set(settingsViewModel.appColorMode.value)
-            messageProperty.set(messages["savingProjectWait"])
+            messageProperty.bind(viewModel.loadingModalTextProperty)
 
             viewModel.openLoadingModalProperty.onChangeWithDisposer {
                 it?.let {
@@ -286,6 +308,8 @@ class NarrationPage : View() {
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
             orientationProperty.bind(settingsViewModel.orientationProperty)
             sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
+            openLoadingModalProperty.bind(viewModel.openLoadingModalProperty)
+            appColorModeProperty.bind(settingsViewModel.appColorMode)
 
             sourceSpeedRateProperty.bind(
                 workbookDataStore.activeWorkbookProperty.select {
@@ -298,6 +322,40 @@ class NarrationPage : View() {
                     it.translation.targetRate.toLazyBinding()
                 }
             )
+        }
+    }
+
+    fun openImportAudioModal(verseIndex: Int? = null) {
+
+        find<ImportAudioDialog>().apply {
+            themeProperty.set(settingsViewModel.appColorMode.value)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+
+            verseIndex?.let {
+                verseIndexProperty.set(verseIndex)
+            }
+
+            validateFileCallback.set {
+                importAudioViewModel.isValidImportFile(it)
+            }
+
+            setOnCloseAction {
+                close()
+            }
+
+            importAudioViewModel.snackBarObservable
+                .subscribe { msg ->
+                    SnackbarHandler.showNotification(
+                        NotificationViewData(
+                            title = messages["error"],
+                            message = msg,
+                            statusType = NotificationStatusType.FAILED
+                        ),
+                        this.root
+                    )
+                }.addTo(disposable)
+
+            open()
         }
     }
 }

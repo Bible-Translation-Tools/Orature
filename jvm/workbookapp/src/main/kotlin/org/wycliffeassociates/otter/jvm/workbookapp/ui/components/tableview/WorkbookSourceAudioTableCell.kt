@@ -22,10 +22,10 @@ import javafx.geometry.Pos
 import javafx.scene.control.TableCell
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
+import org.wycliffeassociates.otter.jvm.controls.model.WorkbookDescriptorWrapper
 import tornadofx.*
 
-class WorkbookSourceAudioTableCell : TableCell<WorkbookDescriptor, Boolean>() {
+class WorkbookSourceAudioTableCell : TableCell<WorkbookDescriptorWrapper, Boolean>() {
 
     private val graphicContent = hbox {
         alignment = Pos.CENTER

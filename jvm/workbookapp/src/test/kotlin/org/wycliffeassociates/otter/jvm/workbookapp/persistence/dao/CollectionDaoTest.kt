@@ -18,15 +18,19 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.dao
 
+import io.mockk.every
+import io.mockk.mockk
 import org.jooq.exception.DataAccessException
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
 import java.io.File
+import kotlin.io.path.createTempDirectory
 
 class CollectionDaoTest {
     private val testDatabaseFile = File.createTempFile(
@@ -34,6 +38,9 @@ class CollectionDaoTest {
     ).also(File::deleteOnExit)
     private lateinit var database: AppDatabase
     private val dao by lazy { database.collectionDao }
+    private val directoryProvider = mockk<IDirectoryProvider> {
+        every { tempDirectory } returns createTempDirectory().toFile().apply { deleteOnExit() }
+    }
 
     companion object {
         val defaultCollection = CollectionEntity(
@@ -51,7 +58,7 @@ class CollectionDaoTest {
 
     @Before
     fun setup() {
-        database = AppDatabase(testDatabaseFile)
+        database = AppDatabase(testDatabaseFile, directoryProvider)
         database.dsl.execute("PRAGMA foreign_keys = OFF;")
     }
 

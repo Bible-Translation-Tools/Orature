@@ -24,14 +24,14 @@ import javafx.geometry.Pos
 import javafx.scene.control.TableCell
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.WorkbookOptionMenu
+import org.wycliffeassociates.otter.jvm.controls.model.WorkbookDescriptorWrapper
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class WorkbookOptionTableCell(
     private val selectedIndexProperty: SimpleIntegerProperty
-) : TableCell<WorkbookDescriptor, WorkbookDescriptor>() {
+) : TableCell<WorkbookDescriptorWrapper, WorkbookDescriptorWrapper>() {
 
     private val actionButton = button {
         addClass("btn", "btn--icon", "btn--borderless", "option-button")
@@ -66,7 +66,7 @@ class WorkbookOptionTableCell(
         }
     }
 
-    override fun updateItem(item: WorkbookDescriptor?, empty: Boolean) {
+    override fun updateItem(item: WorkbookDescriptorWrapper?, empty: Boolean) {
         super.updateItem(item, empty)
         if (item == null || empty) {
             popupMenu.workbookInfoProperty.set(null)
@@ -74,7 +74,7 @@ class WorkbookOptionTableCell(
             return
         }
 
-        popupMenu.workbookInfoProperty.set(item)
+        popupMenu.workbookInfoProperty.set(item.workbookDescriptor)
         actionButton.setOnAction {
             val bound = this.boundsInLocal
             val screenBound = this.localToScreen(bound)

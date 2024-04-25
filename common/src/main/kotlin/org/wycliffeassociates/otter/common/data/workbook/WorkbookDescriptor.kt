@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.common.data.workbook
 
+import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.primitives.Anthology
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.Language
@@ -30,7 +31,7 @@ data class WorkbookDescriptor(
     val sourceCollection: Collection,
     val targetCollection: Collection,
     val mode: ProjectMode,
-    val progress: Double = 0.0,
+    val progress: Single<Double>,
     val hasSourceAudio: Boolean = false
 ) {
     val slug: String = targetCollection.slug

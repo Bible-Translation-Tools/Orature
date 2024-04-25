@@ -25,6 +25,7 @@ import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
 import org.sqlite.SQLiteDataSource
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.*
 import java.io.File
 import java.io.IOException
@@ -33,7 +34,8 @@ import java.sql.Connection
 const val CREATION_SCRIPT = "sql/CreateAppDb.sql"
 
 class AppDatabase(
-    databaseFile: File
+    databaseFile: File,
+    directoryProvider: IDirectoryProvider
 ) {
     val logger = LoggerFactory.getLogger(AppDatabase::class.java)
 
@@ -59,7 +61,7 @@ class AppDatabase(
         if (dbDoesNotExist) {
             setup()
         }
-        DatabaseMigrator().migrate(dsl)
+        DatabaseMigrator(directoryProvider).migrate(dsl)
     }
 
     private fun setup() {

@@ -19,40 +19,24 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.beans.property.IntegerProperty
+import javafx.beans.property.StringProperty
 import javafx.beans.value.ObservableValue
 import javafx.event.Event
 import javafx.event.EventHandler
 import javafx.scene.control.ListCell
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.audio.AudioMarker
-import org.wycliffeassociates.otter.common.data.workbook.Chunk
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
 import org.wycliffeassociates.otter.jvm.controls.event.*
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.NarratableItemModel
 import tornadofx.*
-
-class NarrationTextItemData(
-    val chunk: Chunk,
-    var marker: AudioMarker?,
-    var hasRecording: Boolean = false,
-    var previousChunksRecorded: Boolean = false,
-    var state: TeleprompterItemState = TeleprompterItemState.RECORD_DISABLED
-) {
-    override fun toString(): String {
-        return "${chunk.sort}, $hasRecording, $previousChunksRecorded"
-    }
-}
 
 class NarrationTextCell(
     private val nextChunkText: String,
-    private val recordButtonTextProperty: ObservableValue<String>,
-    private val isRecordingProperty: ObservableValue<Boolean>,
-    private val isRecordingAgainProperty: ObservableValue<Boolean>,
-    private val isPlayingProperty: ObservableValue<Boolean>,
-    private val recordingIndexProperty: IntegerProperty,
-    private val playingVerseProperty: IntegerProperty,
-    highlightedVerseProperty: IntegerProperty
-) : ListCell<NarrationTextItemData>() {
+    private val licenseInfoProperty: StringProperty,
+    private val narrationStateProperty: ObservableValue<NarrationStateType>,
+    highlightedVerseProperty: IntegerProperty,
+) : ListCell<NarratableItemModel>() {
 
     private val logger = LoggerFactory.getLogger(NarrationTextCell::class.java)
 
@@ -66,7 +50,7 @@ class NarrationTextCell(
         addClass("narration-list__verse-cell")
     }
 
-    override fun updateItem(item: NarrationTextItemData?, empty: Boolean) {
+    override fun updateItem(item: NarratableItemModel?, empty: Boolean) {
         super.updateItem(item, empty)
 
         if (empty || item == null) {
@@ -74,26 +58,25 @@ class NarrationTextCell(
             return
         }
 
-        val isLast = index == listView.items.lastIndex
+        val isLast = index == listView.items.lastIndex || listView.items.all { (it as NarratableItemModel).hasRecording }
 
         view.isSelectedProperty.set(isSelected)
         view.isLastVerseProperty.set(isLast)
 
         graphic = view.apply {
-
+            val isLastItemInView = index == listView.items.lastIndex
+            isLastIndexProperty.set(isLastItemInView)
+            prefHeight = if (isLastItemInView) listView.height else -1.0 // extra space at the end
+            
             val title = if (item.chunk.label == "verse") item.chunk.title else ""
 
             verseLabelProperty.set(title)
-
             verseTextProperty.set(item.chunk.textItem.text)
+            licenseProperty.set(licenseInfoProperty.value)
 
-            hasRecordingProperty.set(item.hasRecording)
-            recordButtonTextProperty.bind(this@NarrationTextCell.recordButtonTextProperty)
-            isRecordingProperty.bind(this@NarrationTextCell.isRecordingProperty)
-            isRecordingAgainProperty.bind(this@NarrationTextCell.isRecordingAgainProperty)
-            isPlayingProperty.bind(this@NarrationTextCell.isPlayingProperty)
-            playingVerseIndexProperty.bind(this@NarrationTextCell.playingVerseProperty)
             isHighlightedProperty.bind(shouldHighlight)
+
+            narrationStateProperty.bind(this@NarrationTextCell.narrationStateProperty)
 
             indexProperty.set(index)
             nextChunkTextProperty.set(nextChunkText)
@@ -118,12 +101,7 @@ class NarrationTextCell(
                         logger.error("Error in selecting and scrolling to a Teleprompter item", e)
                     }
 
-                    val nextVerseIndex = index + 1
-                    val nextVerse = items.getOrNull(nextVerseIndex)
-                    nextVerse?.let {
-                        FX.eventbus.fire(NextVerseEvent(nextVerseIndex, nextVerse.chunk))
-                    }
-                        ?: logger.error("Tried to select an invalid next verse! Tried to select: $nextVerseIndex from index $index")
+                    FX.eventbus.fire(NextVerseEvent(index))
                 }
             })
 
@@ -133,7 +111,7 @@ class NarrationTextCell(
 
             onPlayActionProperty.set(DebouncedEventHandler {
                 item.marker?.let {
-                    FX.eventbus.fire(PlayVerseEvent(it))
+                    FX.eventbus.fire(PlayVerseEvent(index))
                 }
             })
 
@@ -167,7 +145,9 @@ class NarrationTextCell(
                 FX.eventbus.fire(ResumeRecordingAgainEvent(index, item.chunk))
             })
 
-            stateProperty.set(item.state)
+            verseStateProperty.set(item.verseState)
+
+            isPlayEnabledProperty.set(item.isPlayOptionEnabled)
         }
     }
 

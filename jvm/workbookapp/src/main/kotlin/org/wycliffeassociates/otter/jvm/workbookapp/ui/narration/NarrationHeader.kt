@@ -19,6 +19,9 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
+import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -30,18 +33,14 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
-import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.domain.content.PluginActions
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.NarrationStateType
 import org.wycliffeassociates.otter.common.domain.project.ProjectCompletionStatus
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.chapterselector.chapterSelector
-import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.ChapterSelectorPopup
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationOpenInPluginEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
@@ -60,7 +59,7 @@ class NarrationHeader : View() {
 
     init {
         subscribe<NarrationOpenInPluginEvent> {
-            viewModel.processWithPlugin(it.plugin)
+            viewModel.processChapterWithPlugin(it.plugin)
         }
 
         subscribe<NavigateChapterEvent> {
@@ -85,7 +84,7 @@ class NarrationHeader : View() {
                 setOnAction {
                     FX.eventbus.fire(NarrationUndoEvent())
                 }
-                enableWhen(viewModel.hasUndoProperty.and(viewModel.isRecordingProperty.not()))
+                enableWhen(viewModel.isUndoEnabledButtonProperty)
             }
             button {
                 tooltip = tooltip(messages["redoAction"])
@@ -94,21 +93,19 @@ class NarrationHeader : View() {
                 setOnAction {
                     FX.eventbus.fire(NarrationRedoEvent())
                 }
-                enableWhen(viewModel.hasRedoProperty.and(viewModel.isRecordingProperty.not()))
+                enableWhen(viewModel.isRedoEnabledButtonProperty)
             }
             narrationMenuButton(
-                viewModel.hasChapterTakeProperty,
-                viewModel.hasVersesProperty,
-                viewModel.hasAllItemsRecordedProperty
+                viewModel.narrationStateProperty
             ) {
-                enableWhen(viewModel.chapterTakeBusyProperty.not().and(viewModel.isRecordingProperty.not()))
+                disableWhen(viewModel.isChapterMenuButtonDisabled)
             }
             chapterSelector {
                 chapterTitleProperty.bind(viewModel.chapterTitleProperty)
 
                 setOnChapterSelectorOpenedProperty {
 
-                    popupMenu.updateChapterGrid(viewModel.chapterList)
+                    popupMenu.updateChapterGrid(viewModel.getChapterList())
 
                     val bound = this.boundsInLocal
                     val screenBound = this.localToScreen(bound)
@@ -119,8 +116,8 @@ class NarrationHeader : View() {
                     popupMenu.y = screenBound.maxY - 25
                 }
 
-                prevDisabledProperty.bind(viewModel.hasPreviousChapter.not().or(viewModel.isRecordingProperty))
-                nextDisabledProperty.bind(viewModel.hasNextChapter.not().or(viewModel.isRecordingProperty))
+                prevDisabledProperty.bind(viewModel.isPreviousChapterButtonDisabled)
+                nextDisabledProperty.bind(viewModel.isNextChapterButtonDisabled)
 
                 setOnPreviousChapter {
                     viewModel.selectPreviousChapter()
@@ -154,53 +151,128 @@ class NarrationHeaderViewModel : ViewModel() {
 
     val chapterTitleProperty = SimpleStringProperty()
 
-    val hasNextChapter = SimpleBooleanProperty()
-    val hasPreviousChapter = SimpleBooleanProperty()
-    val hasVersesProperty = SimpleBooleanProperty()
-    val hasAllItemsRecordedProperty = SimpleBooleanProperty()
-    val chapterTakeProperty = SimpleObjectProperty<Take>()
-    val hasChapterTakeProperty = chapterTakeProperty.isNotNull
-    val chapterTakeBusyProperty = SimpleBooleanProperty()
-
-    val hasUndoProperty = SimpleBooleanProperty()
-    val hasRedoProperty = SimpleBooleanProperty()
-    val isRecordingProperty = narrationViewModel.isRecordingProperty.or(narrationViewModel.isRecordingAgainProperty)
+    val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
+    val isUndoEnabledButtonProperty = SimpleBooleanProperty()
+    val isRedoEnabledButtonProperty = SimpleBooleanProperty()
+    val isChapterMenuButtonDisabled = SimpleBooleanProperty()
+    val isNextChapterButtonDisabled = SimpleBooleanProperty()
+    val isPreviousChapterButtonDisabled = SimpleBooleanProperty()
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
-        chapterTakeProperty.bind(narrationViewModel.chapterTakeProperty)
         chapterTitleProperty.bind(narrationViewModel.chapterTitleProperty)
-        hasNextChapter.bind(narrationViewModel.hasNextChapter)
-        hasPreviousChapter.bind(narrationViewModel.hasPreviousChapter)
-        chapterTakeBusyProperty.bind(narrationViewModel.isModifyingTakeAudioProperty)
+        narrationStateProperty.bind(narrationViewModel.narrationStateProperty)
 
-        hasUndoProperty.bind(narrationViewModel.hasUndoProperty)
-        hasRedoProperty.bind(narrationViewModel.hasRedoProperty)
-        hasVersesProperty.bind(narrationViewModel.hasVersesProperty)
-        hasAllItemsRecordedProperty.bind(narrationViewModel.hasAllItemsRecordedProperty)
+        isUndoEnabledButtonProperty.bind(
+            Bindings.createBooleanBinding(
+                {
+                    val isRecordingAgainPaused =
+                        narrationViewModel.narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN_PAUSED
+
+                    val isRecording =
+                        narrationViewModel.narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN
+                                || narrationViewModel.narrationStateProperty.value == NarrationStateType.RECORDING
+
+                    narrationViewModel.hasUndoProperty.value && !(isRecording || isRecordingAgainPaused)
+                },
+                narrationViewModel.hasUndoProperty, narrationViewModel.narrationStateProperty
+            )
+        )
+
+        isRedoEnabledButtonProperty.bind(
+            Bindings.createBooleanBinding(
+                {
+                    val isRecordingAgainPaused =
+                        narrationViewModel.narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN_PAUSED
+
+                    val isRecording =
+                        narrationViewModel.narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN
+                                || narrationViewModel.narrationStateProperty.value == NarrationStateType.RECORDING
+
+                    narrationViewModel.hasRedoProperty.value && !(isRecording || isRecordingAgainPaused)
+                },
+                narrationViewModel.hasRedoProperty, narrationViewModel.narrationStateProperty
+            )
+        )
+
+        isChapterMenuButtonDisabled.bind(
+            Bindings.createBooleanBinding(
+                {
+                    val isRecordingAgainPaused =
+                        narrationViewModel.narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN_PAUSED
+
+                    val isRecording =
+                        narrationViewModel.narrationStateProperty.value == NarrationStateType.RECORDING_AGAIN
+                                || narrationViewModel.narrationStateProperty.value == NarrationStateType.RECORDING
+
+                    val isModifyingAudio =
+                        narrationViewModel.narrationStateProperty.value == NarrationStateType.MODIFYING_AUDIO_FILE
+
+                    isRecordingAgainPaused || isRecording || isModifyingAudio
+                },
+                narrationViewModel.narrationStateProperty
+            )
+        )
+
+
+        isNextChapterButtonDisabled.bind(
+            Bindings.createBooleanBinding(
+                {
+                    val isRecording = narrationViewModel.narrationStateProperty.value?.let {
+                        it == NarrationStateType.RECORDING || it == NarrationStateType.RECORDING_AGAIN
+                    } ?: false
+
+                    narrationViewModel.hasNextChapter.value.not() || isRecording
+                },
+                narrationViewModel.hasNextChapter, narrationViewModel.narrationStateProperty
+            )
+        )
+
+        isPreviousChapterButtonDisabled.bind(
+            Bindings.createBooleanBinding(
+                {
+                    val isRecording = narrationViewModel.narrationStateProperty.value?.let {
+                        it == NarrationStateType.RECORDING || it == NarrationStateType.RECORDING_AGAIN
+                    } ?: false
+
+                    narrationViewModel.hasPreviousChapter.value.not() || isRecording
+                },
+                narrationViewModel.hasPreviousChapter, narrationViewModel.narrationStateProperty
+            )
+        )
     }
 
-    val chapterList: List<ChapterGridItemData>
-        get() {
-            return narrationViewModel.chapterList.map { chapter ->
-                val wb = workbookDataStore.workbook
-                val chapterProgress: Double = if (hasInProgressNarration(wb, chapter)) {
-                    projectCompletionStatus.getChapterNarrationProgress(wb, chapter)
-                } else {
-                    0.0
-                }
-                val isCompleted = chapterProgress == 1.0
+    fun getChapterList(): List<ChapterGridItemData> {
+        return narrationViewModel.chapterList.map { chapter ->
+            val wb = workbookDataStore.workbook
+            val isCompletedProperty = SimpleBooleanProperty(false)
 
-                ChapterGridItemData(
-                    chapter.sort,
-                    isCompleted,
-                    workbookDataStore.activeChapterProperty.value?.sort == chapter.sort
-                )
-            }
+            hasInProgressNarration(wb, chapter)
+                .map {
+                    if (it) {
+                        projectCompletionStatus.getChapterNarrationProgress(wb, chapter)
+                    } else {
+                        0.0
+                    }
+                }
+                .subscribeOn(Schedulers.io())
+                .observeOnFx()
+                .subscribe { progress ->
+                    isCompletedProperty.set(progress == 1.0)
+                }
+
+            val selected = workbookDataStore.activeChapterProperty.value?.sort == chapter.sort
+
+            ChapterGridItemData(
+                chapter.sort,
+                isCompletedProperty,
+                selected
+            )
         }
+    }
 
     private enum class StepDirection {
         FORWARD,
@@ -233,57 +305,21 @@ class NarrationHeaderViewModel : ViewModel() {
     }
 
 
-    fun processWithPlugin(pluginType: PluginType) {
-        chapterTakeProperty.value?.let { take ->
-            workbookDataStore.activeChapterProperty.value?.audio?.let { audio ->
-                pluginContextProperty.set(pluginType)
-                workbookDataStore.activeTakeNumberProperty.set(take.number)
-
-                audioPluginViewModel
-                    .getPlugin(pluginType)
-                    .doOnError { e ->
-                        logger.error("Error in processing take with plugin type: $pluginType, ${e.message}")
-                    }
-                    .flatMapSingle { plugin ->
-                        narrationViewModel.pluginOpenedProperty.set(true)
-                        fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
-                        when (pluginType) {
-                            PluginType.EDITOR -> audioPluginViewModel.edit(audio, take)
-                            PluginType.MARKER -> audioPluginViewModel.mark(audio, take)
-                            else -> null
-                        }
-                    }
-                    .observeOnFx()
-                    .doOnError { e ->
-                        logger.error("Error in processing take with plugin type: $pluginType - $e")
-                    }
-                    .onErrorReturn { PluginActions.Result.NO_PLUGIN }
-                    .subscribe { result: PluginActions.Result ->
-                        logger.info("Returned from plugin with result: $result")
-                        FX.eventbus.fire(PluginClosedEvent(pluginType))
-
-                        when (result) {
-                            PluginActions.Result.NO_PLUGIN -> FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
-                            else -> {
-                                when (pluginType) {
-                                    PluginType.EDITOR, PluginType.MARKER -> {
-                                        FX.eventbus.fire(ChapterReturnFromPluginEvent())
-                                    }
-
-                                    else -> {
-                                        logger.error("Plugin returned with result $result, plugintype: $pluginType did not match a known plugin.")
-                                    }
-                                }
-                            }
-                        }
-                    }
-            }
-        }
+    fun processChapterWithPlugin(pluginType: PluginType) {
+        narrationViewModel.processChapterWithPlugin(pluginType)
     }
 
-    private fun hasInProgressNarration(workbook: Workbook, chapter: Chapter): Boolean {
-        val files = workbook.projectFilesAccessor.getInProgressNarrationFiles(workbook, chapter)
-        return files.all { it.exists() }
+    private fun hasInProgressNarration(
+        workbook: Workbook,
+        chapter: Chapter
+    ): Single<Boolean> {
+        return Single
+            .fromCallable {
+                workbook.projectFilesAccessor
+                    .getInProgressNarrationFiles(workbook, chapter)
+                    .all { it.exists() }
+            }
+            .subscribeOn(Schedulers.io())
     }
 }
 

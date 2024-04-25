@@ -25,6 +25,8 @@ import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.times
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -35,6 +37,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.JooqTestConfiguration
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
@@ -49,6 +52,9 @@ class ContentRepositoryTest {
         javaClass.classLoader.getResource("sql/AppDatabaseSchema0.sql").file
     )
     private lateinit var db: AppDatabase
+    private val directoryProvider = mockk<IDirectoryProvider> {
+        every { tempDirectory } returns createTempDirectory().toFile().apply { deleteOnExit() }
+    }
 
     private val content = listOf(
         Content(
@@ -133,7 +139,7 @@ class ContentRepositoryTest {
     @Before
     fun setup() {
         JooqTestConfiguration.createDatabase(databaseFile.path, schemaFile)
-        db = AppDatabase(databaseFile)
+        db = AppDatabase(databaseFile, directoryProvider)
     }
 
     @Test

@@ -31,22 +31,22 @@ import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.util.Callback
-import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.controls.model.WorkbookDescriptorWrapper
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class WorkBookTableView(
-    books: ObservableList<WorkbookDescriptor>
-) : TableView<WorkbookDescriptor>(books) {
+    books: ObservableList<WorkbookDescriptorWrapper>
+) : TableView<WorkbookDescriptorWrapper>(books) {
 
     private val selectedIndexProperty = SimpleIntegerProperty(-1)
 
     init {
         addClass("wa-table-view")
         vgrow = Priority.ALWAYS
-        columnResizePolicy = CONSTRAINED_RESIZE_POLICY
+        columnResizePolicy = CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS
         placeholder = Region() // shows nothing when table is empty
 
         column(messages["book"], String::class) {
@@ -62,6 +62,7 @@ class WorkBookTableView(
             minWidth = 120.0 // this may not be replaced with css
             isReorderable = false
             isSortable = true
+            isResizable = true
 
             bindColumnSortComparator()
         }
@@ -74,6 +75,7 @@ class WorkBookTableView(
             minWidth = 80.0 // this may not be replaced with css
             isReorderable = false
             isSortable = true
+            isResizable = true
 
             bindColumnSortComparator()
         }
@@ -86,13 +88,15 @@ class WorkBookTableView(
                     addClass("h5")
                 }
             }
+            minWidth = 120.0
             isReorderable = false
             isSortable = true
+            isResizable = true
 
             bindColumnSortComparator()
         }
         column(messages["progress"], Number::class) {
-            setCellValueFactory { it.value.progress.toProperty() }
+            setCellValueFactory { it.value.progressProperty }
             cellFormat {
                 val percent = item.toDouble()
                 graphic = MFXProgressBar(percent).apply {
@@ -101,6 +105,7 @@ class WorkBookTableView(
             }
             isReorderable = false
             isSortable = true
+            isResizable = true
 
             bindColumnSortComparator()
         }
@@ -112,9 +117,11 @@ class WorkBookTableView(
             isSortable = true
             minWidth = 80.0
             maxWidth = 100.0
+            isResizable = true
+
             bindColumnSortComparator()
         }
-        column("", WorkbookDescriptor::class) {
+        column("", WorkbookDescriptorWrapper::class) {
             setCellValueFactory { SimpleObjectProperty(it.value) }
             setCellFactory {
                 WorkbookOptionTableCell(selectedIndexProperty)
@@ -123,9 +130,10 @@ class WorkBookTableView(
             maxWidth = 100.0
             isReorderable = false
             isSortable = false
+            isResizable = true
         }
 
-        sortPolicy = CUSTOM_SORT_POLICY as (Callback<TableView<WorkbookDescriptor>, Boolean>)
+        sortPolicy = CUSTOM_SORT_POLICY as (Callback<TableView<WorkbookDescriptorWrapper>, Boolean>)
         setRowFactory {
             WorkbookTableRow()
         }
@@ -153,7 +161,7 @@ class WorkBookTableView(
 
 private fun WorkBookTableView.handleDefaultSortOrder() {
     val list = this.items
-    if (list is SortedList<WorkbookDescriptor>) {
+    if (list is SortedList<WorkbookDescriptorWrapper>) {
         comparatorProperty().onChangeAndDoNow {
             if (sortOrder.isEmpty()) {
                 // when toggled to "unsorted", resets to default order (usually Biblical order)
@@ -169,6 +177,6 @@ private fun WorkBookTableView.handleDefaultSortOrder() {
  * Constructs a workbook table and attach it to the parent.
  */
 fun EventTarget.workbookTableView(
-    values: ObservableList<WorkbookDescriptor>,
+    values: ObservableList<WorkbookDescriptorWrapper>,
     op: WorkBookTableView.() -> Unit = {}
 ) = WorkBookTableView(values).attachTo(this, op)

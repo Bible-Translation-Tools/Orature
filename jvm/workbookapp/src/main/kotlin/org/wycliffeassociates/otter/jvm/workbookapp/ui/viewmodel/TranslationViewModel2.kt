@@ -83,7 +83,7 @@ class TranslationViewModel2 : ViewModel() {
 
     fun dockPage() {
         val recentChapter = workbookDataStore.workbookRecentChapterMap.getOrDefault(
-            workbookDataStore.workbook.hashCode(),
+            workbookDataStore.workbook,
             1
         )
         navigateChapter(recentChapter)
@@ -297,6 +297,7 @@ class TranslationViewModel2 : ViewModel() {
     }
 
     private fun updateChapterSelector(chapter: Int) {
+        workbookDataStore.updateLastSelectedChapter(chapter)
         workbookDataStore.workbook.target
             .chapters
             .toList()
@@ -305,7 +306,7 @@ class TranslationViewModel2 : ViewModel() {
                     chapters.map {
                         ChapterGridItemData(
                             it.sort,
-                            it.hasSelectedAudio(),
+                            SimpleBooleanProperty(it.hasSelectedAudio()),
                             chapter == it.sort
                         )
                     }

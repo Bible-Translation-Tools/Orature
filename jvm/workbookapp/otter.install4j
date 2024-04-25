@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="9.0.5" transformSequenceNumber="9">
+<install4j version="10.0.5" transformSequenceNumber="10">
   <directoryPresets config="." />
-  <application name="Orature" applicationId="8057-9807-3529-9982" mediaDir=".exec" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-${compiler:sys.version}" shortName="orature" version="0.1" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="82fd10b9f6e2b1b5" javaMinVersion="11" javaMaxVersion="11">
+  <application name="Orature" applicationId="8057-9807-3529-9982" mediaDir=".exec" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-${compiler:sys.version}" shortName="orature" version="0.1" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="82fd10b9f6e2b1b5" javaMinVersion="21" javaMaxVersion="21">
     <codeSigning windowsEnabled="true" windowsPkcs12File="~/signing.p12" />
+    <jreBundles jdkProviderId="Liberica" release="21/latest">
+      <modules>
+        <defaultModules set="all" />
+      </modules>
+    </jreBundles>
   </application>
-  <files preserveSymlinks="false">
+  <files>
     <mountPoints>
       <mountPoint id="58" />
     </mountPoints>
@@ -15,12 +20,11 @@
   <launchers>
     <launcher name="orature" id="59">
       <executable name="orature" iconSet="true" iconFile="./orature_icon.ico" executableDir="." executableMode="gui" singleInstance="true" />
-      <java mainClass="org.wycliffeassociates.otter.jvm.workbookapp.MainKt">
+      <java mainClass="org.wycliffeassociates.otter.jvm.workbookapp.MainKt" vmParameters="--add-exports=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED, --add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED, --add-exports=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED, --add-opens=javafx.controls/javafx.scene.control.skin=ALL-UNNAMED, --add-exports=javafx.base/com.sun.javafx.binding=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.css=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED, --add-opens=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED, --add-opens=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED, --add-opens=javafx.controls/javafx.scene.control.skin=ALL-UNNAMED, --add-opens=javafx.base/com.sun.javafx.binding=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.css=ALL-UNNAMED">
         <classPath>
           <archive location="workbookapp.jar" />
         </classPath>
       </java>
-      <macStaticAssociationActions mode="selected" />
       <iconImageFiles>
         <file path="./orature_icon_48x48.png" />
         <file path="./orature_icon_128x128.png" />
@@ -869,14 +873,14 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
     </styles>
   </installerGui>
   <mediaSets>
-    <windows name="Windows" id="60">
+    <windows name="Windows" id="60" architecture="64">
       <excludedBeans>
         <bean refId="414" />
       </excludedBeans>
-      <jreBundle jreBundleSource="preCreated" includedJre="windows-amd64-11.0.3.tar.gz" manualJreEntry="true" />
+      <jreBundle jdkProviderId="Liberica" release="21/latest" />
     </windows>
     <linuxDeb name="Linux Deb Archive" id="158" description="Orature is a modular suite of Oral Translation libraries and distributable software." maintainerEmail="wycliffeassociates.org">
-      <jreBundle jreBundleSource="preCreated" includedJre="linux-amd64-11.0.4.tar.gz" manualJreEntry="true" />
+      <jreBundle jdkProviderId="Liberica" release="21/latest" />
       <postInstallScript>for desktop in /home/*/Desktop; do
     USER=$(stat -c "%U" "$desktop")
     sudo -u $USER cp /opt/${compiler:sys.shortName}/orature.desktop "$desktop"
@@ -887,8 +891,8 @@ for desktop in /home/*/Desktop; do
     rm "$desktop/orature.desktop" || true
 done</postUninstallScript>
     </linuxDeb>
-    <macosArchive name="macOS Single Bundle Archive" id="415" launcherId="59">
-      <jreBundle jreBundleSource="preCreated" includedJre="macosx-amd64-11.0.3.tar.gz" manualJreEntry="true" />
+    <macosArchive name="macOS Single Bundle Archive" id="415" architecture="universal" launcherId="59">
+      <jreBundle jdkProviderId="Liberica" release="21/latest" />
       <topLevelFiles>
         <symlink name="&quot; &quot;" target="/Applications" />
         <file name=".background/orature-dmg-bg.png" file="./orature-dmg-bg.png" />

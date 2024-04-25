@@ -23,6 +23,7 @@ import java.io.FileInputStream
 import java.security.DigestInputStream
 import java.security.MessageDigest
 
+const val SELECTED_TAKES_FROM_DB = "selectedTakesInDatabase.txt"
 /**
  *  Returns a new file path with the suffix appended to the file name
  *  (file name here does not include the extension).

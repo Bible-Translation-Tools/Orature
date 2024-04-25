@@ -72,6 +72,7 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.SnackBarEvent
 import tornadofx.*
 import java.io.File
@@ -99,6 +100,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     val audioDataStore: AudioDataStore by inject()
     val audioPluginViewModel: AudioPluginViewModel by inject()
     private val translationViewModel: TranslationViewModel2 by inject()
+    private val navigator: NavigationMediator by inject()
 
     override var markerModel: MarkerPlacementModel? = null
     override val markers = observableListOf<MarkerItem>()
@@ -330,6 +332,8 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     }
 
     private fun loadChapterTake() {
+        navigator.blockNavigationEvents.set(true)
+
         chapterTranslationBuilder
             .getOrCompile(
                 workbookDataStore.workbook,
@@ -345,6 +349,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             .observeOnFx()
             .doFinally {
                 translationViewModel.loadingStepProperty.set(false)
+                navigator.blockNavigationEvents.set(false)
             }
             .subscribe()
     }

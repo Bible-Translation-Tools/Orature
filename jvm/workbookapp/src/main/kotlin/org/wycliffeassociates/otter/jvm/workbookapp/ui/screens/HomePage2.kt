@@ -19,17 +19,16 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import com.jfoenix.controls.JFXSnackbar
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventHandler
 import javafx.scene.Node
 import javafx.scene.layout.Priority
-import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
@@ -48,7 +47,6 @@ import org.wycliffeassociates.otter.jvm.controls.event.ProjectGroupDeleteEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportFinishEvent
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
-import org.wycliffeassociates.otter.jvm.controls.popup.NotificationSnackBar
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
@@ -61,6 +59,7 @@ import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectContributorsEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupCardModel
+import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportDialogOpenEvent
@@ -70,7 +69,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookQuickBacku
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ImportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
-import org.wycliffeassociates.otter.jvm.workbookapp.NOTIFICATION_DURATION_SEC
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -93,6 +91,7 @@ class HomePage2 : View() {
     private val navigator: NavigationMediator by inject()
 
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
+    private val resumeProjectProperty = SimpleObjectProperty<ProjectGroupKey>(null)
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.set(messages["home"])
         iconProperty.set(FontIcon(MaterialDesign.MDI_HOME))
@@ -116,7 +115,7 @@ class HomePage2 : View() {
             targetLanguageSearchQueryProperty.bindBidirectional(projectWizardViewModel.targetLanguageSearchQueryProperty)
 
             setOnCancelAction {
-                exitWizard()
+                exitWizard(resumeProjectProperty.value)
             }
         }
     }
@@ -152,6 +151,7 @@ class HomePage2 : View() {
                     visibleWhen { mainSectionProperty.isNotEqualTo(wizardFragment) }
                     managedWhen(visibleProperty())
                     setOnAction {
+                        resumeProjectProperty.set(viewModel.selectedProjectGroupProperty.value)
                         viewModel.selectedProjectGroupProperty.set(null)
                         mainSectionProperty.set(wizardFragment)
                         projectWizardViewModel.dock()
@@ -167,7 +167,7 @@ class HomePage2 : View() {
                     managedWhen(visibleProperty())
 
                     setOnCancelAction {
-                        exitWizard()
+                        exitWizard(resumeProjectProperty.value)
                     }
                 }
             }
@@ -234,13 +234,19 @@ class HomePage2 : View() {
 
     private fun subscribeActionEvents() {
         subscribe<LanguageSelectedEvent> {
-            if (projectWizardViewModel.selectedSourceLanguageProperty.value == null) {
+            val selectedSource = projectWizardViewModel.selectedSourceLanguageProperty.value
+            val projectMode = projectWizardViewModel.selectedModeProperty.value
+
+            if (selectedSource == null && projectMode != ProjectMode.NARRATION) {
                 wizardFragment.nextStep()
-            } else {
+            }
+
+            if (selectedSource != null || projectMode == ProjectMode.NARRATION) {
                 // open loading dialog when creating project
                 viewModel.isLoadingProperty.set(true)
             }
-            projectWizardViewModel.onLanguageSelected(it.item) {
+
+            projectWizardViewModel.onLanguageSelected(projectMode, it.item) {
                 viewModel.loadProjects()
                 mainSectionProperty.set(bookFragment)
             }
@@ -311,7 +317,6 @@ class HomePage2 : View() {
                 themeProperty.set(settingsViewModel.appColorMode.value)
                 workbookDescriptorProperty.set(workbookDescriptor)
                 onEstimateSizeAction.set(exportProjectViewModel::getEstimateExportSize)
-                open()
 
                 open()
 
@@ -373,9 +378,10 @@ class HomePage2 : View() {
         }
     }
 
-    private fun exitWizard() {
+    private fun exitWizard(resumeProjectGroup: ProjectGroupKey? = null) {
         projectWizardViewModel.undock()
-        viewModel.selectedProjectGroupProperty.set(viewModel.projectGroups.firstOrNull()?.getKey())
+        resumeProjectGroup?.let { viewModel.selectedProjectGroupProperty.set(it) }
+        resumeProjectProperty.set(null)
         mainSectionProperty.set(bookFragment)
     }
 

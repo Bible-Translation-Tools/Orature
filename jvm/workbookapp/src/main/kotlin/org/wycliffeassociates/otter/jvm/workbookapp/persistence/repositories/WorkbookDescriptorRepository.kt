@@ -98,7 +98,11 @@ class WorkbookDescriptorRepository @Inject constructor(
             sourceCollection.slug
         )
         val mode = workbookTypeDao.fetchById(entity.typeFk)!!
-        val progress = getProgress(sourceCollection, targetCollection, mode)
+        val progress = Single
+            .fromCallable {
+                getProgress(sourceCollection, targetCollection, mode)
+            }
+            .subscribeOn(Schedulers.io())
 
         return WorkbookDescriptor(
             entity.id,

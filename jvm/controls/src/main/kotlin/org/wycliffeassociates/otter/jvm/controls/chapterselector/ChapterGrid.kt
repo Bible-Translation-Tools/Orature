@@ -71,8 +71,8 @@ class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
                     )
                     isMouseTransparent = true
                     isPickOnBounds = false
-                    visibleProperty().set(chapter.completed)
-                    managedProperty().set(chapter.completed)
+                    visibleWhen { chapter.completedProperty }
+                    managedWhen { visibleProperty() }
                 }
             }
             this.add(node, index % GRID_COLUMNS, index / GRID_COLUMNS)
