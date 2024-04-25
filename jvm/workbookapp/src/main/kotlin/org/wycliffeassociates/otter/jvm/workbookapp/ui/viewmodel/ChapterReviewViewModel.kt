@@ -343,7 +343,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                 loadTargetAudio(take)
             }
             .flatMapCompletable { audio ->
-                loadMarkerWaveformStuff(audio)
+                loadMarkersAndWaveform(audio)
             }
             .subscribeOn(Schedulers.io())
             .observeOnFx()
@@ -361,14 +361,14 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         val chapterTake = workbookDataStore.chapter.audio.getSelectedTake()!!
         return loadTargetAudio(chapterTake)
             .flatMapCompletable {
-                loadMarkerWaveformStuff(it)
+                loadMarkersAndWaveform(it)
             }
             .doOnComplete {
                 onUndoableAction()
             }
     }
 
-    private fun loadMarkerWaveformStuff(audio: OratureAudioFile): Completable {
+    private fun loadMarkersAndWaveform(audio: OratureAudioFile): Completable {
         return Completable
             .fromAction {
                 val sourceAudio = audioDataStore.sourceAudioProperty.value
