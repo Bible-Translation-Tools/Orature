@@ -18,18 +18,12 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.core.JsonFactory
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.wycliffeassociates.otter.common.collections.OtterTree
 import org.wycliffeassociates.otter.common.collections.OtterTreeNode
 import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.toCollection
-import org.wycliffeassociates.otter.common.domain.versification.ParatextVersification
 import org.wycliffeassociates.otter.common.domain.versification.Versification
-import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Project
@@ -47,7 +41,7 @@ class VersificationTreeBuilder @Inject constructor(
     }
 
     private fun getVersification(container: ResourceContainer): Versification? {
-        var versificationCode = container.manifest.projects.firstOrNull()?.versification ?: return null
+        val versificationCode = container.manifest.projects.firstOrNull()?.versification ?: return null
         if (versificationCode == "") return null
         return versificationRepository.getVersification(versificationCode).blockingGet()
     }
@@ -77,7 +71,7 @@ class VersificationTreeBuilder @Inject constructor(
                 val chapterCollection = Collection(
                     sort = i,
                     slug = "${project.identifier}_${i}",
-                    labelKey = "chapter",
+                    labelKey = ChapterLabel.of(project.identifier),
                     titleKey = "$i",
                     resourceContainer = null
                 )
@@ -86,7 +80,7 @@ class VersificationTreeBuilder @Inject constructor(
 
                 val chapChunk = Content(
                     sort = 0,
-                    labelKey = ContentLabel.CHAPTER.value,
+                    labelKey = "chapter",
                     start = 1,
                     end = verses,
                     selectedTake = null,
@@ -97,7 +91,7 @@ class VersificationTreeBuilder @Inject constructor(
                 )
                 val chapTitle = Content(
                     sort = CHAPTER_TITLE_SORT,
-                    labelKey = ContentLabel.CHAPTER.value,
+                    labelKey = "chapter",
                     start = 1,
                     end = verses,
                     selectedTake = null,
@@ -127,7 +121,7 @@ class VersificationTreeBuilder @Inject constructor(
                 for (j in 1..verses) {
                     val verseChunk = Content(
                         sort = j,
-                        labelKey = ContentLabel.VERSE.value,
+                        labelKey = "verse",
                         start = j,
                         end = j,
                         selectedTake = null,

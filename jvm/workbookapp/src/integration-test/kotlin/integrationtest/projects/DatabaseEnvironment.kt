@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import jooq.Tables.CONTENT_DERIVATIVE
 import org.junit.Assert
+import org.wycliffeassociates.otter.common.data.primitives.ChapterLabel
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
@@ -136,7 +137,7 @@ class DatabaseEnvironment @Inject constructor(
         Assert.assertNotNull("Retrieving resource container info", rc)
 
         chapter.forEach { (slug, verseCount) ->
-            val entity = db.collectionDao.fetch(containerId = rc!!.id, label = "chapter", slug = slug)
+            val entity = db.collectionDao.fetch(containerId = rc!!.id, label = ChapterLabel.of(slug), slug = slug)
             Assert.assertNotNull("Retrieving chapter $slug", entity)
             val content = db.contentDao.fetchByCollectionId(entity!!.id)
 

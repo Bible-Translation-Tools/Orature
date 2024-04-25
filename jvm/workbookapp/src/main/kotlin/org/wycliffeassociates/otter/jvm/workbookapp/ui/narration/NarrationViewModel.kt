@@ -497,8 +497,8 @@ class NarrationViewModel : ViewModel() {
 
         chapterTitleProperty.set(
             MessageFormat.format(
-                messages["bookChapterTitle"],
-                workbookDataStore.workbook.target.title,
+                messages["chapterTitle"],
+                messages[chapter.label],
                 chapter.title
             )
         )
