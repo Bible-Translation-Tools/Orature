@@ -298,23 +298,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                                     newTake,
                                     existingChapterTake
                                 ).apply {
-                                    setUndoCallback {
-                                        newMarkerModel = markerModel!!
-
-                                        reloadAudio()
-                                            .doOnComplete {
-                                                markerModel = oldMarkerModel
-                                            }
-                                            .subscribe()
-                                    }
-                                    setRedoCallback {
-                                        reloadAudio()
-                                            .doOnComplete {
-                                                markerModel = newMarkerModel
-                                                onUndoableAction()
-                                            }
-                                            .subscribe()
-                                    }
+                                    setupUndoRedo(this, oldMarkerModel)
                                 }
                                 actionHistory.execute(action)
                             }
@@ -498,6 +482,28 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             )
         )
         return newTake
+    }
+
+    private fun setupUndoRedo(action: TakeEditAction, oldMarkerModel: MarkerPlacementModel?) {
+        with(action) {
+            setUndoCallback {
+                newMarkerModel = markerModel!!
+
+                reloadAudio()
+                    .doOnComplete {
+                        markerModel = oldMarkerModel
+                    }
+                    .subscribe()
+            }
+            setRedoCallback {
+                reloadAudio()
+                    .doOnComplete {
+                        markerModel = newMarkerModel
+                        onUndoableAction()
+                    }
+                    .subscribe()
+            }
+        }
     }
 
     private fun cleanup() {
