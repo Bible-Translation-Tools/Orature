@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.project.mar
 
 import org.wycliffeassociates.otter.common.collections.OtterTree
 import org.wycliffeassociates.otter.common.collections.OtterTreeNode
+import org.wycliffeassociates.otter.common.data.primitives.ChapterLabel
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.CollectionOrContent
 import org.wycliffeassociates.otter.common.data.primitives.Content
@@ -43,7 +44,6 @@ import java.util.ArrayDeque
 private val extensions = Regex(".+\\.(md|mkdn?|mdown|markdown)$", RegexOption.IGNORE_CASE)
 
 private const val PRIMARY_COLLECTION_KEY = "project"
-private const val SECONDARY_COLLECTION_KEY = "chapter"
 
 class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
     private val collectionForEachFile = !isHelp
@@ -135,7 +135,7 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
     ) = Collection(
         sort = fileToSort(file),
         slug = fileToSlug(file = file, projectRoot = projectRoot, project = project),
-        labelKey = SECONDARY_COLLECTION_KEY,
+        labelKey = ChapterLabel.of(fileToSlug(file = file, projectRoot = projectRoot, project = project)),
         titleKey = simplifyTitle(file.nameWithoutExtension),
         resourceContainer = null
     )
@@ -220,7 +220,10 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
         if (isHelp) return
         this.children.forEach { (it as? OtterTree)?.addMetaContents() }
         val labelKey = (this.value as? Collection)?.labelKey
-        if (labelKey == SECONDARY_COLLECTION_KEY) {
+        val expectedLabelKey = (this.value as? Collection)?.slug?.let {
+            ChapterLabel.of(it)
+        }
+        if (labelKey == expectedLabelKey) {
             addChild(chapterMetaNode(this))
         }
     }

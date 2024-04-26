@@ -18,18 +18,12 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.core.JsonFactory
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.wycliffeassociates.otter.common.collections.OtterTree
 import org.wycliffeassociates.otter.common.collections.OtterTreeNode
 import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.toCollection
-import org.wycliffeassociates.otter.common.domain.versification.ParatextVersification
 import org.wycliffeassociates.otter.common.domain.versification.Versification
-import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Project
@@ -47,7 +41,7 @@ class VersificationTreeBuilder @Inject constructor(
     }
 
     private fun getVersification(container: ResourceContainer): Versification? {
-        var versificationCode = container.manifest.projects.firstOrNull()?.versification ?: return null
+        val versificationCode = container.manifest.projects.firstOrNull()?.versification ?: return null
         if (versificationCode == "") return null
         return versificationRepository.getVersification(versificationCode).blockingGet()
     }
@@ -73,11 +67,13 @@ class VersificationTreeBuilder @Inject constructor(
                 )
             val projectTree = OtterTree<CollectionOrContent>(project.toCollection())
             val chapters = versification.getChaptersInBook(project.identifier)
+            val chapterLabel = ChapterLabel.of(project.identifier)
+
             for (i in 1..chapters) {
                 val chapterCollection = Collection(
                     sort = i,
                     slug = "${project.identifier}_${i}",
-                    labelKey = "chapter",
+                    labelKey = chapterLabel,
                     titleKey = "$i",
                     resourceContainer = null
                 )

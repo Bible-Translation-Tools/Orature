@@ -170,7 +170,8 @@ class TestRcImport {
                 "ulb",
                 CollectionDescriptor(label = "bundle", slug = "ulb"),
                 CollectionDescriptor(label = "project", slug = "gen"),
-                CollectionDescriptor(label = "chapter", slug = "gen_1")
+                CollectionDescriptor(label = "chapter", slug = "gen_1"),
+                CollectionDescriptor(label = "psalm", slug = "psa_1")
             )
     }
 

@@ -24,13 +24,14 @@ import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.jooq.impl.SQLDataType
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.assets.initialization.InitializeProjects
+import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
+import org.wycliffeassociates.otter.common.data.primitives.PSALMS_SLUG
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.utils.SELECTED_TAKES_FROM_DB
 import java.io.File
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus as CheckingStatusEnum
 
-const val SCHEMA_VERSION = 13
+const val SCHEMA_VERSION = 14
 const val DATABASE_INSTALLABLE_NAME = "DATABASE"
 
 class DatabaseMigrator(
@@ -57,6 +58,7 @@ class DatabaseMigrator(
             currentVersion = migrate10to11(dsl, currentVersion)
             currentVersion = migrate11to12(dsl, currentVersion)
             currentVersion = migrate12to13(dsl, currentVersion)
+            currentVersion = migrate13to14(dsl, currentVersion)
             updateDatabaseVersion(dsl, currentVersion)
         }
     }
@@ -468,6 +470,34 @@ class DatabaseMigrator(
             }
             logger.info("Updated database from version 12 to 13")
             13
+        } else {
+            current
+        }
+    }
+
+    /**
+     * Version 14
+     * Renames 'chapter' labels of Psalms collections to 'psalm'.
+     */
+    private fun migrate13to14(dsl: DSLContext, current: Int): Int {
+        return if (current < 14) {
+            try {
+                dsl
+                    .update(CollectionEntity.COLLECTION_ENTITY)
+                    .set(CollectionEntity.COLLECTION_ENTITY.LABEL, ContentLabel.PSALM.value)
+                    .where(
+                        CollectionEntity.COLLECTION_ENTITY.LABEL.eq(ContentLabel.CHAPTER.value)
+                            .and(CollectionEntity.COLLECTION_ENTITY.SLUG.startsWith(PSALMS_SLUG))
+                    )
+                    .execute()
+            } catch (e: DataAccessException) {
+                // Exception is thrown because the column might already exist but an existence check cannot
+                // be performed in sqlite.
+                logger.error("Error in while migrating database from version 13 to 14", e)
+                return 13
+            }
+            logger.info("Updated database from version 13 to 14")
+            14
         } else {
             current
         }
