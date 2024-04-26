@@ -67,11 +67,13 @@ class VersificationTreeBuilder @Inject constructor(
                 )
             val projectTree = OtterTree<CollectionOrContent>(project.toCollection())
             val chapters = versification.getChaptersInBook(project.identifier)
+            val chapterLabel = ChapterLabel.of(project.identifier)
+
             for (i in 1..chapters) {
                 val chapterCollection = Collection(
                     sort = i,
                     slug = "${project.identifier}_${i}",
-                    labelKey = ChapterLabel.of(project.identifier),
+                    labelKey = chapterLabel,
                     titleKey = "$i",
                     resourceContainer = null
                 )
@@ -80,7 +82,7 @@ class VersificationTreeBuilder @Inject constructor(
 
                 val chapChunk = Content(
                     sort = 0,
-                    labelKey = "chapter",
+                    labelKey = ContentLabel.CHAPTER.value,
                     start = 1,
                     end = verses,
                     selectedTake = null,
@@ -91,7 +93,7 @@ class VersificationTreeBuilder @Inject constructor(
                 )
                 val chapTitle = Content(
                     sort = CHAPTER_TITLE_SORT,
-                    labelKey = "chapter",
+                    labelKey = ContentLabel.CHAPTER.value,
                     start = 1,
                     end = verses,
                     selectedTake = null,
@@ -121,7 +123,7 @@ class VersificationTreeBuilder @Inject constructor(
                 for (j in 1..verses) {
                     val verseChunk = Content(
                         sort = j,
-                        labelKey = "verse",
+                        labelKey = ContentLabel.VERSE.value,
                         start = j,
                         end = j,
                         selectedTake = null,

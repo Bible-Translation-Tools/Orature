@@ -24,6 +24,8 @@ import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.jooq.impl.SQLDataType
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
+import org.wycliffeassociates.otter.common.data.primitives.PSALMS_SLUG
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.utils.SELECTED_TAKES_FROM_DB
 import java.io.File
@@ -482,10 +484,10 @@ class DatabaseMigrator(
             try {
                 dsl
                     .update(CollectionEntity.COLLECTION_ENTITY)
-                    .set(CollectionEntity.COLLECTION_ENTITY.LABEL, "psalm")
+                    .set(CollectionEntity.COLLECTION_ENTITY.LABEL, ContentLabel.PSALM.value)
                     .where(
-                        CollectionEntity.COLLECTION_ENTITY.LABEL.eq("chapter")
-                            .and(CollectionEntity.COLLECTION_ENTITY.SLUG.startsWith("psa"))
+                        CollectionEntity.COLLECTION_ENTITY.LABEL.eq(ContentLabel.CHAPTER.value)
+                            .and(CollectionEntity.COLLECTION_ENTITY.SLUG.startsWith(PSALMS_SLUG))
                     )
                     .execute()
             } catch (e: DataAccessException) {
