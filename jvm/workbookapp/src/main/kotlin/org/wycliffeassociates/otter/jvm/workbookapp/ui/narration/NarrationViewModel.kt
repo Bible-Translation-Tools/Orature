@@ -284,6 +284,7 @@ class NarrationViewModel : ViewModel() {
                             NarrationStateTransition.PAUSE_AUDIO_PLAYBACK
                         }
 
+                        narration.onPlaybackFinished()
                         performNarrationStateMachineTransition(transition, playingVerseIndex.value)
                     }
 

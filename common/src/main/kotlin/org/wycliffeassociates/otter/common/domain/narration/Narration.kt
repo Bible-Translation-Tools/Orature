@@ -336,6 +336,12 @@ class Narration @AssistedInject constructor(
         execute(action)
     }
 
+    fun onPlaybackFinished() {
+        if (lockedVerseIndex != null) {
+            seek(0)
+        }
+    }
+
     private fun onChapterEdited(newVerses: List<VerseNode>) {
         val action = ChapterEditedAction(newVerses)
         execute(action)
