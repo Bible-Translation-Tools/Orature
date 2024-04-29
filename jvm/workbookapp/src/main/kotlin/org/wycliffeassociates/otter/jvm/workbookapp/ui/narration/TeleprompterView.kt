@@ -60,6 +60,7 @@ class TeleprompterViewModel : ViewModel() {
     val recordingVerseProperty = SimpleIntegerProperty()
     val playingVerseProperty = SimpleIntegerProperty()
     val highlightedVerseProperty = SimpleIntegerProperty()
+    val autoScrollProperty = SimpleBooleanProperty()
 
     init {
         lastRecordedVerseProperty.bindBidirectional(narrationViewModel.lastRecordedVerseProperty)
@@ -67,6 +68,7 @@ class TeleprompterViewModel : ViewModel() {
         playingVerseProperty.bind(narrationViewModel.playingVerseIndex)
         highlightedVerseProperty.bind(narrationViewModel.highlightedVerseIndex)
         narrationStateProperty.bind(narrationViewModel.narrationStateProperty)
+        autoScrollProperty.bind(narrationViewModel.autoScrollProperty)
         licenseProperty.bind(workbookDataStore.sourceLicenseProperty.stringBinding {
             it?.let {
                 MessageFormat.format(FX.messages["licenseStatement"], it)
@@ -208,7 +210,9 @@ class TeleprompterView : View() {
             runLater { customizeScrollbarSkin() }
 
             viewModel.highlightedVerseProperty.onChange {
-                if (it in items.indices) scrollTo(it)
+                if (it in items.indices && viewModel.autoScrollProperty.value) {
+                    scrollTo(it)
+                }
             }
         }
     }

@@ -146,6 +146,7 @@ class NarrationViewModel : ViewModel() {
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
     val pluginOpenedProperty = SimpleBooleanProperty(false)
+    val autoScrollProperty = SimpleBooleanProperty(true)
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
@@ -284,6 +285,8 @@ class NarrationViewModel : ViewModel() {
                             NarrationStateTransition.PAUSE_AUDIO_PLAYBACK
                         }
 
+                        narration.onPlaybackFinished()
+                        autoScrollProperty.set(true)
                         performNarrationStateMachineTransition(transition, playingVerseIndex.value)
                     }
 
@@ -615,6 +618,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun play(verseIndex: Int) {
+        autoScrollProperty.set(false)
         playingVerseIndex.set(verseIndex)
         renderer.clearActiveRecordingData()
         audioPlayer.pause()
@@ -641,7 +645,6 @@ class NarrationViewModel : ViewModel() {
 
 
     fun pausePlayback() {
-
         val transition = if (isModifyingTakeAudioProperty.value) {
             NarrationStateTransition.PAUSE_PLAYBACK_WHILE_MODIFYING_AUDIO
         } else {
@@ -649,7 +652,7 @@ class NarrationViewModel : ViewModel() {
         }
 
         performNarrationStateMachineTransition(transition)
-
+        autoScrollProperty.set(true)
         logger.info("Pausing playback")
         audioPlayer.pause()
     }
