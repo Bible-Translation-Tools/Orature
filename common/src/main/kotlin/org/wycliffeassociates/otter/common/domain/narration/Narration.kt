@@ -338,6 +338,7 @@ class Narration @AssistedInject constructor(
 
     fun onPlaybackFinished() {
         if (lockedVerseIndex != null) {
+            player.pause()
             seek(0)
         }
     }
