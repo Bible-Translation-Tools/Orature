@@ -14,6 +14,7 @@ import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.MarkerType
 import org.wycliffeassociates.otter.common.data.audio.OratureCueType
+import org.wycliffeassociates.otter.common.data.audio.UnknownMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.audio.MarkerParser
 import org.wycliffeassociates.otter.common.domain.audio.OratureCueParser
@@ -46,6 +47,7 @@ class OratureVttMetadata(val vttFile: File, val markers: OratureMarkers = Oratur
                     is ChapterMarker -> this.markers.addMarker(OratureCueType.CHAPTER_TITLE, marker)
                     is VerseMarker -> this.markers.addMarker(OratureCueType.VERSE, marker)
                     is ChunkMarker -> this.markers.addMarker(OratureCueType.CHUNK, marker)
+                    is UnknownMarker -> this.markers.addMarker(OratureCueType.UNKNOWN, marker)
                 }
             }
         }
