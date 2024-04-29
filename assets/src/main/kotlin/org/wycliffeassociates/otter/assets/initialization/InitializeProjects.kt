@@ -83,7 +83,6 @@ class InitializeProjects @Inject constructor(
     }
 
     private fun `migrate to version 1`() {
-        `migrate sources to version 1`()
         `migrate takes to version 1`()
 
         val projects = fetchProjects()

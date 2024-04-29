@@ -205,7 +205,7 @@ class NewSourceImporter @Inject constructor(
         return if (file.isDirectory) {
             copyRecursivelyToInternalDirectory(file, destinationDirectory)
         } else {
-            copyFileToInternalDirectory(file, destinationDirectory)
+            extractSourceToDir(file, destinationDirectory)
         }
     }
 
@@ -238,5 +238,22 @@ class NewSourceImporter @Inject constructor(
             }
         }
         return destinationFile
+    }
+
+    private fun extractSourceToDir(source: File, dir: File): File {
+        val targetDir = dir.resolve(source.nameWithoutExtension)
+        directoryProvider
+            .newFileReader(source)
+            .use { fileReader ->
+                fileReader.copyDirectory("/", targetDir)
+            }
+
+        targetDir.walk().forEach {
+            if (it.isDirectory && it.resolve("manifest.yaml").exists()) {
+                return it
+            }
+        }
+
+        return targetDir
     }
 }
