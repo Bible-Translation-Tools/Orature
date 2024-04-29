@@ -36,7 +36,7 @@ open class AudioFile protected constructor() {
 
     private lateinit var strategy: AudioFormatStrategy
 
-    val metadata: AudioMetadata
+    open val metadata: AudioMetadata
         get() = strategy.metadata
 
     constructor(file: File, metadata: AudioMetadata) : this() {

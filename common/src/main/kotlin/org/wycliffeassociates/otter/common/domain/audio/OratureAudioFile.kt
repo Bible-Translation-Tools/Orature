@@ -32,6 +32,7 @@ import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.OratureCueType
 import org.wycliffeassociates.otter.common.data.audio.UnknownMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.domain.audio.metadata.OratureMetadata
 import java.io.File
 import java.util.regex.Pattern
 import kotlin.reflect.KClass
@@ -41,17 +42,10 @@ class OratureAudioFile : AudioFile {
     val logger = LoggerFactory.getLogger(OratureAudioFile::class.java)
 
     private val markers = OratureMarkers()
+    override val metadata = OratureMetadata(file, markers)
 
     private fun initializeCues() {
         markers.import(OratureCueParser.parse(this))
-    }
-
-    constructor() : super() {
-        initializeCues()
-    }
-
-    constructor(file: File, metadata: AudioMetadata) : super(file, metadata) {
-        initializeCues()
     }
 
     constructor(file: File) : super(file) {
@@ -163,6 +157,7 @@ class OratureAudioFile : AudioFile {
     override fun update() {
         metadata.clearMarkers()
         markers.getCues().forEach { metadata.addCue(it) }
+        metadata.write()
         super.update()
     }
 
@@ -175,7 +170,7 @@ class OratureAudioFile : AudioFile {
     }
 }
 
-internal class OratureMarkers {
+class OratureMarkers {
     private val cueMap: MutableMap<OratureCueType, MutableList<AudioMarker>> = mutableMapOf(
         OratureCueType.CHUNK to mutableListOf(),
         OratureCueType.VERSE to mutableListOf(),
@@ -187,6 +182,9 @@ internal class OratureMarkers {
     fun getCues(): List<AudioCue> {
         return cueMap.values.flatMap { it.map { it.toCue() } }
     }
+
+    @Synchronized
+    fun getMarkers(): List<AudioMarker> = cueMap.values.flatten()
 
     @Synchronized
     fun getMarkers(type: OratureCueType): List<AudioMarker> {
