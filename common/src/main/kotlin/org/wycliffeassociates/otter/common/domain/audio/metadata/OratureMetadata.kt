@@ -24,10 +24,11 @@ class OratureMetadata(val audioFile: File, val markers: OratureMarkers): AudioMe
     private val wavMetadata = if (audioFormat == AudioFileFormat.WAV) WavMetadata() else null
 
     init {
+        markers.clearMarkers()
+
         when {
             (vttFile.exists() && vttFile.length() > 0) -> {
                 vttMetadata.parseVTTFile()
-                markers.import(vttMetadata.markers)
             }
             mp3Metadata != null -> {
                 markers.import(OratureCueParser.parse(mp3Metadata.getCues()))

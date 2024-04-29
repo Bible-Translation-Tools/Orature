@@ -11,11 +11,11 @@ import java.util.*
 import java.util.regex.Pattern
 
 object BiblicalReferencesParser {
-    val BOOK_TITLE_PATTERN = Pattern.compile("^.*[.|:](\\w{2,3}) 0$")
-    val CHAPTER_TITLE_PATTERN = Pattern.compile("^.*[.|:]\\w{2,3} (\\d{1,3}):0$")
-    val CHAPTER_PATTERN = Pattern.compile("^.*[.|:]\\w{2,3} (\\d{1,3})$")
-    val VERSE_TITLE_PATTERN = Pattern.compile("^.*[.|:]\\w{2,3} \\d{1,3}:\\d{1,3}:0$")
-    val VERSE_PATTERN = Pattern.compile("^.*[.|:]\\w{2,3} \\d{1,3}:(\\d{1,3})$")
+    val BOOK_TITLE_PATTERN = Pattern.compile("^(?:.*[.|:])?(\\w{2,3}) 0$")
+    val CHAPTER_TITLE_PATTERN = Pattern.compile("^(?:.*[.|:])?\\w{2,3} (\\d{1,3}):0$")
+    val CHAPTER_PATTERN = Pattern.compile("^(?:.*[.|:])?\\w{2,3} (\\d{1,3})$")
+    val VERSE_TITLE_PATTERN = Pattern.compile("^(?:.*[.|:])?\\w{2,3} \\d{1,3}:\\d{1,3}:0$")
+    val VERSE_PATTERN = Pattern.compile("^(?:.*[.|:])?\\w{2,3} \\d{1,3}:(\\d{1,3})$")
 
 
     fun parseBiblicalReference(reference: String): String {
@@ -27,7 +27,7 @@ object BiblicalReferencesParser {
 
         return when {
             bookTitle.matches() -> {
-                val title = bookTitle.group(1)!!.map { it.lowercase(Locale.US) }
+                val title = bookTitle.group(1)!!.lowercase(Locale.US)
                 "orature-book-$title"
             }
 
@@ -37,7 +37,8 @@ object BiblicalReferencesParser {
             }
 
             chapter.matches() -> {
-                reference
+                val title = chapter.group(1)!!
+                "orature-chapter-$title"
             }
 
             verseTitle.matches() -> {

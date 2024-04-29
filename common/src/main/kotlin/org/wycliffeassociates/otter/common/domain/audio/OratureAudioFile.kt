@@ -96,7 +96,7 @@ class OratureAudioFile : AudioFile {
             .plus(getMarker<VerseMarker>())
     }
 
-    inline fun <reified T: AudioMarker> getMarker(): List<T> {
+    inline fun <reified T : AudioMarker> getMarker(): List<T> {
         val type = T::class
         val enum = getMarkerTypeFromClass(type)
         return getMarker(enum).map { it as T }
@@ -107,7 +107,7 @@ class OratureAudioFile : AudioFile {
         markers.import(OratureCueParser.parse(cues))
     }
 
-    inline fun <reified T: AudioMarker> addMarker(marker: T) {
+    inline fun <reified T : AudioMarker> addMarker(marker: T) {
         val enum = getMarkerTypeFromClass(T::class)
         addMarker(enum, marker)
     }
@@ -141,7 +141,7 @@ class OratureAudioFile : AudioFile {
         }
     }
 
-    inline fun <reified T: AudioMarker> clearMarkersOfType() {
+    inline fun <reified T : AudioMarker> clearMarkersOfType() {
         val enum = getMarkerTypeFromClass(T::class)
         clearCuesFromMap(enum)
     }
@@ -194,12 +194,14 @@ class OratureMarkers {
 
     fun addMarkers(type: OratureCueType, markers: List<AudioMarker>) {
         if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
-        cueMap[type]!!.addAll(markers)
+        markers.forEach { addMarker(type, it) }
     }
 
     fun addMarker(type: OratureCueType, marker: AudioMarker) {
         if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
-        cueMap[type]!!.add(marker)
+        if (!cueMap[type]!!.any { it.label == marker.label }) {
+            cueMap[type]!!.add(marker)
+        }
     }
 
     fun clearMarkersOfType(type: OratureCueType) {
@@ -211,9 +213,15 @@ class OratureMarkers {
         }
     }
 
+    fun clearMarkers() {
+        for (key in cueMap.keys) {
+            clearMarkersOfType(key)
+        }
+    }
+
     private fun addEntry(entry: Map.Entry<OratureCueType, MutableList<AudioMarker>>) {
         if (!cueMap.containsKey(entry.key)) cueMap[entry.key] = mutableListOf()
-        cueMap[entry.key]!!.addAll(entry.value)
+        addMarkers(entry.key, entry.value)
     }
 
     /**
