@@ -63,23 +63,33 @@ object OratureMarkerConverter {
         bookSlug: String? = null,
         chapterNumber: Int? = null,
     ): String? {
-        return when (marker) {
-            is BookMarker -> {
-                "${marker.bookSlug.allCaps()} 0"
+        try {
+
+            return when (marker) {
+                is BookMarker -> {
+                    "${marker.bookSlug.allCaps()} 0"
+                }
+
+                is ChapterMarker -> {
+                    "${bookSlug!!.allCaps()} ${marker.chapterNumber}:0"
+                }
+
+                is ChunkMarker -> {
+                    "${bookSlug!!.allCaps()} ${chapterNumber!!}:${marker.chunk}"
+                }
+
+                is VerseMarker -> {
+                    val label = if (marker.end != marker.start) "${marker.start}-${marker.end}" else "${marker.start}"
+                    "${bookSlug!!.allCaps()} ${chapterNumber!!}:$label"
+                }
+
+                else -> {
+                    null
+                }
             }
-            is ChapterMarker -> {
-                "${bookSlug!!.allCaps()} ${marker.chapterNumber}:0"
-            }
-            is ChunkMarker -> {
-                "${bookSlug!!.allCaps()} ${chapterNumber!!}:${marker.chunk}"
-            }
-            is VerseMarker -> {
-                val label = if (marker.end != marker.start) "${marker.start}-${marker.end}" else "${marker.start}"
-                "${bookSlug!!.allCaps()} ${chapterNumber!!}:$label"
-            }
-            else -> {
-                null
-            }
+        } catch (e: NullPointerException) {
+            println("$marker $bookSlug $chapterNumber")
+            throw e
         }
     }
 

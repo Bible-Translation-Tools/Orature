@@ -56,5 +56,5 @@ ext {
     mp3TagVer = '0.9.3'
     tikaVer = '2.0.0'
     materialFxVer = '11.16.0' // higher versions require JavaFX 21
-    kotlinVttVer = '1.0'
+    kotlinVttVer = '1.1'
 }

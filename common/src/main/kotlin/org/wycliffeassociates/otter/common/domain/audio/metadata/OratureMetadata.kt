@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.common.domain.audio.metadata
 
 import org.wycliffeassociates.otter.common.audio.AudioCue
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.AudioMetadata
 import org.wycliffeassociates.otter.common.audio.mp3.Mp3Metadata
@@ -56,7 +57,7 @@ class OratureMetadata(val audioFile: File, val markers: OratureMarkers): AudioMe
     }
 
     fun write() {
-        vttMetadata.write()
+        vttMetadata.write(AudioFile(audioFile).totalFrames)
         mp3Metadata?.write()
         wavMetadata?.let { WavFile(audioFile, it).update() }
 
