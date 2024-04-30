@@ -48,7 +48,7 @@ class InitializeProjects @Inject constructor(
     private val rcImporterFactory: RCImporterFactory
 ) : Installable {
     override val name = "PROJECTS"
-    override val version = 1
+    override val version = 2
 
     private val log = LoggerFactory.getLogger(InitializeProjects::class.java)
     private lateinit var callback: ProjectImporterCallback
@@ -80,6 +80,7 @@ class InitializeProjects @Inject constructor(
 
     private fun migrate() {
         `migrate to version 1`()
+        migrateSourcesToVersion2()
     }
 
     private fun `migrate to version 1`() {
@@ -118,27 +119,25 @@ class InitializeProjects @Inject constructor(
         projectFilesAccessor.writeSelectedTakesFile(workbook, projectIsBook)
     }
 
-    private fun `migrate sources to version 1`() {
+    private fun migrateSourcesToVersion2() {
         resourceMetadataRepo.getAllSources().blockingGet()
             .forEach { resourceMetadata ->
-                if (resourceMetadata.path.isDirectory) {
-                    // Compress resource container
-                    val zipName = "${resourceMetadata.language.slug}_${resourceMetadata.identifier}"
-                    val tempZip = createTempFile(zipName, "zip")
-                    tempZip.parentFile.deleteOnExit()
+                if (resourceMetadata.path.isFile) {
+                    val sourceFile = resourceMetadata.path
+                    val dirName = "${resourceMetadata.language.slug}_${resourceMetadata.identifier}-source"
+                    val targetDir = sourceFile.parentFile.resolve(dirName)
+                    if (targetDir.exists() && targetDir.list().size > 0) {
+                        targetDir.deleteRecursively()
+                    }
 
-                    directoryProvider.newFileWriter(tempZip).use { fileWriter ->
-                        fileWriter.copyDirectory(resourceMetadata.path, "/")
+                    directoryProvider.newFileReader(sourceFile).use { reader ->
+                        reader.copyDirectory("/", targetDir)
                     }
 
                     // Delete old resource container
-                    resourceMetadata.path.listFiles()
-                        ?.forEach { it.deleteRecursively() }
+                    resourceMetadata.path.delete()
 
-                    val zip = resourceMetadata.path.resolve("$zipName.zip")
-                    tempZip.renameTo(zip)
-
-                    val updatedRc = resourceMetadata.copy(path = zip)
+                    val updatedRc = resourceMetadata.copy(path = targetDir)
                     resourceMetadataRepo.update(updatedRc).blockingGet()
                 }
             }
