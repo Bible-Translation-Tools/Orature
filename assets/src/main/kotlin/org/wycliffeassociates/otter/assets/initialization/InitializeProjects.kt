@@ -134,6 +134,7 @@ class InitializeProjects @Inject constructor(
                         val entries = reader.list(".").toList()
                         when {
                             entries.size == 1 -> {
+                                // root is a directory, copy its content to avoid nested dirs
                                 reader.copyDirectory(entries.first(), targetDir)
                             }
 
