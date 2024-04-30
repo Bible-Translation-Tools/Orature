@@ -126,12 +126,21 @@ class InitializeProjects @Inject constructor(
                     val sourceFile = resourceMetadata.path
                     val dirName = "${resourceMetadata.language.slug}_${resourceMetadata.identifier}-source"
                     val targetDir = sourceFile.parentFile.resolve(dirName)
-                    if (targetDir.exists() && targetDir.list().size > 0) {
+                    if (targetDir.exists() && targetDir.list()?.any() == true) {
                         targetDir.deleteRecursively()
                     }
 
                     directoryProvider.newFileReader(sourceFile).use { reader ->
-                        reader.copyDirectory("/", targetDir)
+                        val entries = reader.list(".").toList()
+                        when {
+                            entries.size == 1 -> {
+                                reader.copyDirectory(entries.first(), targetDir)
+                            }
+
+                            else -> {
+                                reader.copyDirectory("/", targetDir)
+                            }
+                        }
                     }
 
                     // Delete old resource container
