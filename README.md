@@ -13,11 +13,11 @@ More information can be found [here.](https://bibletranslationtools.org/tool/ora
 </p>
 
 # Usage
-Orature runs on OpenJDK >= 11 and <= 20. Installers for Windows, Debian-based Linux, and Mac are available in the Releases section of the repository on GitHub.
+Installers for Windows, Debian-based Linux, and Mac are available in the [Releases](https://github.com/Bible-Translation-Tools/Orature/releases) section of the repository.
 Orature uses the [Door43 Resource Container](https://resource-container.readthedocs.io/en/latest/index.html) format (in zip) for providing source content to narrate, draft, or translate. Currently, Bible content is supported in USFM format, Bible Stories and translation helps are supported in Markdown. Source Audio is supported if contained in the resource container and referrenced in the [media manifest](https://resource-container.readthedocs.io/en/latest/media.html). Note that paths should be local with respect to the container root, not a URL. Supported audio formats include 44.1khz mono 16 bit WAV, and MP3.
 
-# Quickstart
-*Requires Java version >= 11 and <= 20. JavaFX is included as a gradle dependency*
+# Developer
+*Requires JDK 21 - Liberica JDK (full version is preferred). JavaFX is included as a gradle dependency*. 
 To quickly get started with Orature, follow these steps:
 
 1. **Clone the repository:**
@@ -25,30 +25,12 @@ To quickly get started with Orature, follow these steps:
    git clone https://github.com/Bible-Translation-Tools/Orature.git
    ```
 
-2. **Generate Jooq Classes:**
-   ```bash
-   ./gradlew :jvm:workbookapp:generateJooq
-   ```
+2. **Run with gradle wrapper:**
+	```
+	./gradlew run	
+	```
 
-3. **Run Kotlin Kapt:**
-   ```bash
-   ./gradlew :jvm:workbookapp:kaptKotlin
-   ```
-
-4. **Build and Run:**
-   You can build and run the application using the following commands:
-   ```bash
-   ./gradlew :jvm:workbookapp:build
-   java -cp jvm/workbookapp/build/libs/workbookapp-<version>-all.jar org.wycliffeassociates.otter.jvm.workbookapp.MainKt
-   ```
-
-   Alternatively, you can use the following command to build an executable shadow JAR file:
-   ```bash
-   ./gradlew :jvm:workbookapp:shadowJar
-   java -jar jvm/workbookapp/build/libs/workbookapp-<version>-all.jar
-   ```
-
-# Quickstart Frequently Asked Questions (FAQ)
+# Frequently Asked Questions (FAQ)
 
 ### Q: I cloned the repository, but the application is not running. What could be the issue?
 
