@@ -32,8 +32,8 @@ class OratureVttMetadata(val vttFile: File, val markers: OratureMarkers = Oratur
         val references = vtt.getCueContentsOfTag(BIBLICAL_REFERENCES_CLASS_NAME)
         val cues = mutableListOf<AudioCue>()
         for (marker in references) {
-            val startMs = (marker.startTimeUs / 1000).toInt()
-            val startFrame = (startMs * DEFAULT_SAMPLE_RATE / 1000)
+            val startMs = (marker.startTimeUs / 1000L)
+            val startFrame = ((startMs * DEFAULT_SAMPLE_RATE) / 1000L).toInt()
 
             val oratureLabel = BiblicalReferencesParser.parseBiblicalReference(marker.content)
             if (oratureLabel != null) {
@@ -53,7 +53,7 @@ class OratureVttMetadata(val vttFile: File, val markers: OratureMarkers = Oratur
         }
     }
 
-    fun write() {
+    fun write(audioLengthFrames: Int) {
         vttFile.delete()
         val cues = markers.getMarkers()
 
@@ -85,17 +85,32 @@ class OratureVttMetadata(val vttFile: File, val markers: OratureMarkers = Oratur
                                         "</c.u23003>"
                             )
                             .build(),
-                        (((it.location * 1000L) / DEFAULT_SAMPLE_RATE.toFloat()) * 1000).toLong(),
-                        (((it.location * 1000L) / DEFAULT_SAMPLE_RATE.toFloat()) * 1000).toLong()
+                        framesToUs(it.location),
+                        framesToUs(it.location)
                     )
                 )
             }
 
+        assignEndTimes(vttCues, audioLengthFrames)
+
         WebVttDocumentWriter(vttFile).writeDocument(vttCues)
     }
 
-    override fun addCue(location: Int, label: String) {
+    private fun assignEndTimes(cues: List<WebVttCue>, audioLengthFrames: Int) {
+        cues.forEachIndexed { i, cue ->
+            if (i == cues.lastIndex) {
+                cue.endTimeUs = framesToUs(audioLengthFrames)
+            } else {
+                cues[i].endTimeUs = cues[i + 1].startTimeUs
+            }
+        }
     }
+
+    private fun framesToUs(frames: Int): Long {
+        return (((frames * 1000L) / DEFAULT_SAMPLE_RATE.toLong()) * 1000L)
+    }
+
+    override fun addCue(location: Int, label: String) {}
 
     override fun getCues(): List<AudioCue> {
         return _cues.map { it.toCue() }
