@@ -19,6 +19,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.github.thomasnield.rxkotlinfx.subscribeOnFx
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -35,22 +37,31 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
+import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.domain.IUndoable
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.ChapterTranslationBuilder
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
+import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
+import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
+import org.wycliffeassociates.otter.common.domain.translation.AddMarkerAction
+import org.wycliffeassociates.otter.common.domain.translation.DeleteMarkerAction
+import org.wycliffeassociates.otter.common.domain.translation.MoveMarkerAction
+import org.wycliffeassociates.otter.common.domain.translation.TakeEditAction
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
@@ -64,7 +75,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.SnackBarEvent
 import tornadofx.*
+import java.io.File
 import java.text.MessageFormat
+import java.time.LocalDate
 import javax.inject.Inject
 import kotlin.collections.sortBy
 
@@ -113,6 +126,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
     var subscribeOnWaveformImagesProperty = SimpleObjectProperty {}
     val cleanupWaveformProperty = SimpleObjectProperty {}
+    val initWaveformMarkerProperty = SimpleObjectProperty {}
 
     val chapterTitleProperty = workbookDataStore.activeChapterTitleBinding()
     val sourcePlayerProperty = SimpleObjectProperty<IAudioPlayer>()
@@ -126,7 +140,8 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     val compositeDisposable = CompositeDisposable()
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
-    private val pluginOpenedProperty = SimpleBooleanProperty(false)
+    val pluginOpenedProperty = SimpleBooleanProperty(false)
+    private val actionHistory = UndoableActionHistory<IUndoable>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -180,31 +195,39 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     }
 
     override fun placeMarker() {
-        super.placeMarker()
+        val location = waveformAudioPlayerProperty.get().getLocationInFrames()
+        val action = AddMarkerAction(markerModel!!, location)
+        actionHistory.execute(action)
         onUndoableAction()
     }
 
     override fun deleteMarker(id: Int) {
-        super.deleteMarker(id)
+        val action = DeleteMarkerAction(markerModel!!, id)
+        actionHistory.execute(action)
         onUndoableAction()
     }
 
     override fun moveMarker(id: Int, start: Int, end: Int) {
-        super.moveMarker(id, start, end)
+        val action = MoveMarkerAction(markerModel!!, id, start, end)
+        actionHistory.execute(action)
         onUndoableAction()
     }
 
-    override fun undoMarker() {
-        super.undoMarker()
-        val dirty = markerModel?.hasDirtyMarkers() ?: false
+    fun undo() {
+        actionHistory.undo()
+        markers.setAll(markerModel!!.markerItems.toList())
+
+        val dirty = actionHistory.canUndo()
         translationViewModel.canUndoProperty.set(dirty)
         translationViewModel.canRedoProperty.set(true)
     }
 
-    override fun redoMarker() {
-        super.redoMarker()
+    fun redo() {
+        actionHistory.redo()
+        markers.setAll(markerModel!!.markerItems.toList())
+
         translationViewModel.canUndoProperty.set(true)
-        translationViewModel.canRedoProperty.set(markerModel?.canRedo() == true)
+        translationViewModel.canRedoProperty.set(actionHistory.canRedo())
     }
 
     fun pauseAudio() = audioController?.pause()
@@ -230,10 +253,24 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     }
 
     fun processWithPlugin() {
-        workbookDataStore.chapter.getSelectedTake()?.let { take ->
-            workbookDataStore.activeChapterProperty.value?.audio?.let { audio ->
+        val chapter = workbookDataStore.chapter
+        val existingChapterTake = chapter.audio.getSelectedTake()!!
+        val oldMarkerModel = markerModel
+
+        // save current markers before sending to plugin
+        waveformAudioPlayerProperty.value?.stop()
+        waveformAudioPlayerProperty.value?.close()
+        markerModel
+            ?.writeMarkers()
+            ?.blockingAwait()
+
+        createDuplicateTake()
+            .observeOnFx()
+            .subscribe { newTake ->
+                workbookDataStore.activeTakeNumberProperty.set(newTake.number)
+                chapter.audio.insertTake(newTake) // take must be inserted before editing
+
                 val pluginType = PluginType.EDITOR
-                workbookDataStore.activeTakeNumberProperty.set(take.number)
                 audioPluginViewModel
                     .getPlugin(pluginType)
                     .doOnError { e ->
@@ -243,7 +280,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                     .flatMapSingle { plugin ->
                         pluginOpenedProperty.set(true)
                         fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
-                        audioPluginViewModel.edit(audio, take)
+                        audioPluginViewModel.edit(chapter.audio, newTake)
                     }
                     .observeOnFx()
                     .doOnError { e ->
@@ -253,17 +290,25 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                     .onErrorReturn { PluginActions.Result.NO_PLUGIN }
                     .subscribe { result: PluginActions.Result ->
                         logger.info("Returned from plugin with result: $result")
-                        FX.eventbus.fire(PluginClosedEvent(pluginType))
-
                         when (result) {
                             PluginActions.Result.NO_PLUGIN -> FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
+                            PluginActions.Result.SUCCESS -> {
+                                val action = TakeEditAction(
+                                    chapter.audio,
+                                    newTake,
+                                    existingChapterTake
+                                ).apply {
+                                    setupUndoRedo(this, oldMarkerModel)
+                                }
+                                actionHistory.execute(action)
+                            }
                             else -> {
-                                // noop }
+                                // no-op
                             }
                         }
+                        FX.eventbus.fire(PluginClosedEvent(pluginType))
                     }
             }
-        }
     }
 
     fun snackBarMessage(message: String) {
@@ -281,17 +326,11 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             .flatMap { take ->
                 loadTargetAudio(take)
             }
+            .flatMapCompletable { audio ->
+                loadMarkersAndWaveform(audio)
+            }
             .subscribeOn(Schedulers.io())
             .observeOnFx()
-            .map { audio ->
-                val sourceAudio = audioDataStore.sourceAudioProperty.value
-                    ?.let { OratureAudioFile(it.file) }
-
-                loadVerseMarkers(audio, sourceAudio)
-                createWaveformImages(audio)
-                subscribeOnWaveformImages()
-            }
-            .ignoreElement()
             .doFinally {
                 translationViewModel.loadingStepProperty.set(false)
                 navigator.blockNavigationEvents.set(false)
@@ -299,7 +338,34 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             .subscribe()
     }
 
-    private fun loadTargetAudio(take: Take) : Single<OratureAudioFile> {
+    fun reloadAudio(): Completable {
+        cleanupWaveform()
+        initWaveformMarkerProperty.value?.invoke()
+
+        val chapterTake = workbookDataStore.chapter.audio.getSelectedTake()!!
+        return loadTargetAudio(chapterTake)
+            .flatMapCompletable {
+                loadMarkersAndWaveform(it)
+            }
+            .doOnComplete {
+                onUndoableAction()
+            }
+    }
+
+    private fun loadMarkersAndWaveform(audio: OratureAudioFile): Completable {
+        return Completable
+            .fromAction {
+                val sourceAudio = audioDataStore.sourceAudioProperty.value
+                    ?.let { OratureAudioFile(it.file) }
+
+                loadVerseMarkers(audio, sourceAudio)
+                createWaveformImages(audio)
+                subscribeOnWaveformImages()
+            }
+            .subscribeOnFx()
+    }
+
+    private fun loadTargetAudio(take: Take): Single<OratureAudioFile> {
         return Single
             .fromCallable {
                 val audioPlayer: IAudioPlayer = audioConnectionFactory.getPlayer()
@@ -322,7 +388,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         markers.clear()
         val sourceMarkers = getSourceMarkers(sourceAudio)
         val placedMarkers = audio.getVerseAndTitleMarkers()
-                .map { MarkerItem(it, true) }
+            .map { MarkerItem(it, true) }
 
         totalMarkersProperty.set(sourceMarkers.size)
         markerModel = MarkerPlacementModel(
@@ -372,8 +438,77 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             }
     }
 
+    private fun createDuplicateTake(): Single<Take> {
+        return workbookDataStore.chapter.let { chapter ->
+            val namer = WorkbookFileNamerBuilder.createFileNamer(
+                workbook = workbookDataStore.workbook,
+                chapter = workbookDataStore.chapter,
+                chunk = null,
+                recordable = chapter,
+                rcSlug = workbookDataStore.workbook.sourceMetadataSlug
+            )
+            val chapterAudioDir = workbookDataStore.workbook.projectFilesAccessor.audioDir
+                .resolve(namer.formatChapterNumber())
+                .apply { mkdirs() }
+
+            chapter.audio.getNewTakeNumber()
+                .map { takeNumber ->
+                    createNewTake(
+                        takeNumber,
+                        namer.generateName(takeNumber, AudioFileFormat.WAV),
+                        chapterAudioDir
+                    )
+                }
+        }
+    }
+
+    private fun createNewTake(
+        newTakeNumber: Int,
+        filename: String,
+        audioDir: File
+    ): Take {
+        val newTakeFile = audioDir.resolve(File(filename))
+        val chapterTake = workbookDataStore.chapter.getSelectedTake()!!
+        chapterTake.file.copyTo(newTakeFile, true)
+
+        val newTake = Take(
+            name = newTakeFile.name,
+            file = newTakeFile,
+            number = newTakeNumber,
+            format = MimeType.WAV,
+            createdTimestamp = LocalDate.now(),
+            checkingState = BehaviorRelay.createDefault(
+                TakeCheckingState(CheckingStatus.VERSE, chapterTake.getSavedChecksum())
+            )
+        )
+        return newTake
+    }
+
+    private fun setupUndoRedo(action: TakeEditAction, oldMarkerModel: MarkerPlacementModel?) {
+        with(action) {
+            setUndoCallback {
+                newMarkerModel = markerModel!!
+
+                reloadAudio()
+                    .doOnComplete {
+                        markerModel = oldMarkerModel
+                    }
+                    .subscribe()
+            }
+            setRedoCallback {
+                reloadAudio()
+                    .doOnComplete {
+                        markerModel = newMarkerModel
+                        onUndoableAction()
+                    }
+                    .subscribe()
+            }
+        }
+    }
+
     private fun cleanup() {
         builder.cancel()
+        actionHistory.clear()
         compositeDisposable.clear()
         markerModel = null
         cleanupWaveform()
@@ -382,6 +517,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
 
+        builder.cancel()
         waveform = builder.buildAsync(
             audio.reader(),
             width = imageWidthProperty.value.toInt(),
@@ -392,7 +528,10 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     }
 
     private fun onUndoableAction() {
-        translationViewModel.canUndoProperty.set(true)
-        translationViewModel.canRedoProperty.set(false)
+        markers.clear()
+        markers.setAll(markerModel!!.markerItems.toList())
+
+        translationViewModel.canUndoProperty.set(actionHistory.canUndo())
+        translationViewModel.canRedoProperty.set(actionHistory.canRedo())
     }
 }
