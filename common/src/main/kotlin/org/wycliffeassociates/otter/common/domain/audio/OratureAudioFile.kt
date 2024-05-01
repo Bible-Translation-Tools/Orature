@@ -32,7 +32,6 @@ import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.OratureCueType
 import org.wycliffeassociates.otter.common.data.audio.UnknownMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
-import org.wycliffeassociates.otter.common.domain.audio.metadata.OratureMetadata
 import java.io.File
 import java.util.regex.Pattern
 import kotlin.reflect.KClass
@@ -42,10 +41,17 @@ class OratureAudioFile : AudioFile {
     val logger = LoggerFactory.getLogger(OratureAudioFile::class.java)
 
     private val markers = OratureMarkers()
-    override val metadata = OratureMetadata(file, markers)
 
     private fun initializeCues() {
         markers.import(OratureCueParser.parse(this))
+    }
+
+    constructor() : super() {
+        initializeCues()
+    }
+
+    constructor(file: File, metadata: AudioMetadata) : super(file, metadata) {
+        initializeCues()
     }
 
     constructor(file: File) : super(file) {
@@ -96,7 +102,7 @@ class OratureAudioFile : AudioFile {
             .plus(getMarker<VerseMarker>())
     }
 
-    inline fun <reified T : AudioMarker> getMarker(): List<T> {
+    inline fun <reified T: AudioMarker> getMarker(): List<T> {
         val type = T::class
         val enum = getMarkerTypeFromClass(type)
         return getMarker(enum).map { it as T }
@@ -107,7 +113,7 @@ class OratureAudioFile : AudioFile {
         markers.import(OratureCueParser.parse(cues))
     }
 
-    inline fun <reified T : AudioMarker> addMarker(marker: T) {
+    inline fun <reified T: AudioMarker> addMarker(marker: T) {
         val enum = getMarkerTypeFromClass(T::class)
         addMarker(enum, marker)
     }
@@ -141,7 +147,7 @@ class OratureAudioFile : AudioFile {
         }
     }
 
-    inline fun <reified T : AudioMarker> clearMarkersOfType() {
+    inline fun <reified T: AudioMarker> clearMarkersOfType() {
         val enum = getMarkerTypeFromClass(T::class)
         clearCuesFromMap(enum)
     }
@@ -157,7 +163,7 @@ class OratureAudioFile : AudioFile {
     override fun update() {
         metadata.clearMarkers()
         markers.getCues().forEach { metadata.addCue(it) }
-        metadata.write()
+        super.update()
     }
 
     private fun getCuesFromMap(type: OratureCueType): List<AudioMarker> {
@@ -169,7 +175,7 @@ class OratureAudioFile : AudioFile {
     }
 }
 
-class OratureMarkers {
+internal class OratureMarkers {
     private val cueMap: MutableMap<OratureCueType, MutableList<AudioMarker>> = mutableMapOf(
         OratureCueType.CHUNK to mutableListOf(),
         OratureCueType.VERSE to mutableListOf(),
@@ -183,9 +189,6 @@ class OratureMarkers {
     }
 
     @Synchronized
-    fun getMarkers(): List<AudioMarker> = cueMap.values.flatten()
-
-    @Synchronized
     fun getMarkers(type: OratureCueType): List<AudioMarker> {
         if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
         return cueMap[type]!!
@@ -193,14 +196,12 @@ class OratureMarkers {
 
     fun addMarkers(type: OratureCueType, markers: List<AudioMarker>) {
         if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
-        markers.forEach { addMarker(type, it) }
+        cueMap[type]!!.addAll(markers)
     }
 
     fun addMarker(type: OratureCueType, marker: AudioMarker) {
         if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
-        if (!cueMap[type]!!.any { it.formattedLabel == marker.formattedLabel }) {
-            cueMap[type]!!.add(marker)
-        }
+        cueMap[type]!!.add(marker)
     }
 
     fun clearMarkersOfType(type: OratureCueType) {
@@ -212,15 +213,9 @@ class OratureMarkers {
         }
     }
 
-    fun clearMarkers() {
-        for (key in cueMap.keys) {
-            clearMarkersOfType(key)
-        }
-    }
-
     private fun addEntry(entry: Map.Entry<OratureCueType, MutableList<AudioMarker>>) {
         if (!cueMap.containsKey(entry.key)) cueMap[entry.key] = mutableListOf()
-        addMarkers(entry.key, entry.value)
+        cueMap[entry.key]!!.addAll(entry.value)
     }
 
     /**
