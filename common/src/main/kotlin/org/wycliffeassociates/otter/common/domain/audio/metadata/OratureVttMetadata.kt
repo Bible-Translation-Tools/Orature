@@ -12,22 +12,21 @@ import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.BookMarker
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
-import org.wycliffeassociates.otter.common.data.audio.MarkerType
 import org.wycliffeassociates.otter.common.data.audio.OratureCueType
 import org.wycliffeassociates.otter.common.data.audio.UnknownMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
-import org.wycliffeassociates.otter.common.domain.audio.MarkerParser
 import org.wycliffeassociates.otter.common.domain.audio.OratureCueParser
-import org.wycliffeassociates.otter.common.domain.audio.OratureMarkers
 import java.io.File
 
 private const val BIBLICAL_REFERENCES_CLASS_NAME = "c.u23003"
 
-class OratureVttMetadata(val vttFile: File, val markers: OratureMarkers = OratureMarkers()) : CueMetadata {
+class OratureVttMetadata(
+    val vttFile: File,
+) : CueMetadata {
 
     private val _cues = mutableListOf<AudioMarker>()
-
-    fun parseVTTFile() {
+    private val markers = OratureMarkers()
+    fun parseVTTFile(): OratureMarkers {
         val vtt = VTTParser().parseDocument(vttFile)
         val references = vtt.getCueContentsOfTag(BIBLICAL_REFERENCES_CLASS_NAME)
         val cues = mutableListOf<AudioCue>()
@@ -51,29 +50,41 @@ class OratureVttMetadata(val vttFile: File, val markers: OratureMarkers = Oratur
                 }
             }
         }
+
+        return markers
     }
 
     fun write(audioLengthFrames: Int) {
-        vttFile.delete()
-        val cues = markers.getMarkers()
-
-        val bookSlug: String? = cues.find { it is BookMarker }
+        val markers = markers.getMarkers()
+        val bookSlug: String = markers.find { it is BookMarker }
             ?.let {
                 it as BookMarker
                 it.bookSlug
-            }
+            }!!
 
-        val chapterNumber: Int? = cues.find { it is ChapterMarker }
+        val chapterNumber: Int = markers.find { it is ChapterMarker }
             ?.let {
                 it as ChapterMarker
                 it.chapterNumber
-            }
+            }!!
 
-        if (cues.isEmpty()) {
+        write(markers, bookSlug, chapterNumber, audioLengthFrames)
+    }
+
+    fun write(
+        markers: List<AudioMarker>,
+        bookSlug: String,
+        chapterNumber: Int,
+        audioLengthFrames: Int
+    ) {
+        if (markers.isEmpty()) {
             return
         }
+
+        vttFile.delete()
         vttFile.createNewFile()
-        val vttCues = cues
+
+        val vttCues = markers
             .sortedBy { it.location }
             .map {
                 WebVttCue(
