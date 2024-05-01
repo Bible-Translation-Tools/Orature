@@ -45,6 +45,7 @@ import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuild
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import java.io.File
+import java.lang.Integer.max
 import java.time.LocalDate
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
@@ -524,7 +525,6 @@ class Narration @AssistedInject constructor(
                 )
             }
 
-
         val scratchAudio = chapterRepresentation.scratchAudio
         var start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1
         var end: Int
@@ -532,7 +532,7 @@ class Narration @AssistedInject constructor(
 
         segments.forEach { (marker, file) ->
             val verseAudio = AudioFile(file)
-            end = start + verseAudio.totalFrames - 1
+            end = max(start + verseAudio.totalFrames - 1, 0)
 
             val node = VerseNode(
                 true,
