@@ -37,7 +37,7 @@
 
 .verse-marker__icon {
     -fx-background-color: #E5E8EB;
-    -fx-translate-x: -2;
+    -fx-translate-x: 0;
     -fx-translate-y: -20;
 }
 
@@ -47,7 +47,7 @@
 
 .verse-marker__icon .ikonli-font-icon {
     -fx-icon-color: -wa-primary;
-    -fx-icon-size: 28px;
+    -fx-icon-size: 24px;
     -fx-background-color: transparent;
 }
 

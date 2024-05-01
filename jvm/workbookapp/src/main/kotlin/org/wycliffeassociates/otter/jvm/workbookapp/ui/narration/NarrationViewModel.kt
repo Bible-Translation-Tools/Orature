@@ -64,6 +64,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.NarratableItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.MARKER_AREA_WIDTH
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.MARKER_WIDTH
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.NarrationWaveformRenderer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppPreferencesStore
@@ -1077,7 +1078,7 @@ class NarrationViewModel : ViewModel() {
                         verse.location - viewport.first,
                         adjustedWidth,
                         viewport.last - viewport.first
-                    ).toDouble() - (MARKER_AREA_WIDTH / 2) + viewportOffset
+                    ).toDouble() - (MARKER_AREA_WIDTH / 2) - MARKER_WIDTH + viewportOffset
                     runLater {
                         if (marker.layoutX != newPos) {
                             marker.layoutX = newPos
