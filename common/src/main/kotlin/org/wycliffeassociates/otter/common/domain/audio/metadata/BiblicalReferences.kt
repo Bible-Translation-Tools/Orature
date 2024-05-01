@@ -64,7 +64,6 @@ object OratureMarkerConverter {
         chapterNumber: Int? = null,
     ): String? {
         try {
-
             return when (marker) {
                 is BookMarker -> {
                     "${marker.bookSlug.allCaps()} 0"
