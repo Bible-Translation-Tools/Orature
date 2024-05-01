@@ -158,7 +158,6 @@ class OratureAudioFile : AudioFile {
         metadata.clearMarkers()
         markers.getCues().forEach { metadata.addCue(it) }
         metadata.write()
-        super.update()
     }
 
     private fun getCuesFromMap(type: OratureCueType): List<AudioMarker> {
@@ -199,7 +198,7 @@ class OratureMarkers {
 
     fun addMarker(type: OratureCueType, marker: AudioMarker) {
         if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
-        if (!cueMap[type]!!.any { it.label == marker.label }) {
+        if (!cueMap[type]!!.any { it.formattedLabel == marker.formattedLabel }) {
             cueMap[type]!!.add(marker)
         }
     }
