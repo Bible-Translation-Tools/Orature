@@ -116,9 +116,15 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
             .toRelativeString(projectRoot)
             .substringBeforeLast('.')
             .split('/', '\\')
-            .asSequence()
-        val withSlug = sequenceOf(project.identifier) + fileParts.drop(1)
-        return withSlug.joinToString("_", transform = this::simplifyTitle)
+            .filter { it.isNotEmpty() } // ignore empty strings
+
+        val slugs = if (projectRoot is OtterFile.Z) {
+            listOf(project.identifier) + fileParts.drop(1)
+        } else {
+            listOf(project.identifier) + fileParts
+        }
+
+        return slugs.joinToString("_", transform = this::simplifyTitle)
     }
 
     private fun fileToSort(file: OtterFile) = when (file.nameWithoutExtension) {
