@@ -88,20 +88,20 @@ class VerseMarkersLayer : BorderPane() {
                     )
                 )
 
-
                 var delta = 0.0
                 var oldPos = 0.0
+
+                val markerLineOffset = MARKER_AREA_WIDTH / 2
 
                 minHeightProperty().bind(this@VerseMarkersLayer.heightProperty())
                 prefHeightProperty().bind(this@VerseMarkersLayer.heightProperty())
 
                 dragTarget.setOnMousePressed { event ->
-
                     event.consume()
                     userIsDraggingProperty.set(true)
                     if (!canBeMovedProperty.value) return@setOnMousePressed
                     delta = 0.0
-                    oldPos = layoutX
+                    oldPos = layoutX + markerLineOffset
 
                     FX.eventbus.fire(
                         NarrationMovingMarkerEvent(verseMarkerControl.verseIndexProperty.value)
@@ -120,7 +120,7 @@ class VerseMarkersLayer : BorderPane() {
 
                         delta = currentPos - oldPos
 
-                        layoutX = currentPos
+                        layoutX = currentPos - markerLineOffset
                     } catch (e: Exception) {
                         // This can prevent attempting to move a marker that was originally created too close together
                         // if the user spammed next verse while recording. Moving surrounding markers around will allow
@@ -131,7 +131,8 @@ class VerseMarkersLayer : BorderPane() {
 
                 dragTarget.setOnMouseReleased { event ->
                     if (delta != 0.0) {
-                        val frameDelta = pixelsToFrames(delta, width = this@VerseMarkersLayer.width.toInt())
+                        val frameDelta = pixelsToFrames(delta)
+
                         FX.eventbus.fire(
                             NarrationMarkerChangedEvent(
                                 verseMarkerControl.verseIndexProperty.value,
