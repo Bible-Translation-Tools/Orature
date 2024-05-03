@@ -80,7 +80,7 @@ class InitializeProjects @Inject constructor(
 
     private fun migrate() {
         `migrate to version 1`()
-        migrateSourcesToVersion2()
+        `migrate sources to version 2`()
     }
 
     private fun `migrate to version 1`() {
@@ -119,7 +119,7 @@ class InitializeProjects @Inject constructor(
         projectFilesAccessor.writeSelectedTakesFile(workbook, projectIsBook)
     }
 
-    private fun migrateSourcesToVersion2() {
+    private fun `migrate sources to version 2`() {
         resourceMetadataRepo.getAllSources().blockingGet()
             .forEach { resourceMetadata ->
                 if (resourceMetadata.path.isFile) {
