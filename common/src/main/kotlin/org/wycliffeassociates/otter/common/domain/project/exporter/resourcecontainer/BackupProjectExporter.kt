@@ -147,18 +147,30 @@ class BackupProjectExporter @Inject constructor(
      */
     private fun estimateSourceSize(workbook: Workbook): Long {
         val project = workbook.source.slug
-        val file = workbook.source.resourceMetadata.path
+        val sourceFile = workbook.source.resourceMetadata.path
         var size = 0L
 
-        ZipFile(file).use { zip ->
-            zip.entries()
-            .asIterator()
-            .forEach {
-                if (it.name.contains("${RcConstants.SOURCE_MEDIA_DIR}/${project}")) {
-                    size += it.compressedSize
-                }
+        if (sourceFile.isFile) {
+            ZipFile(sourceFile).use { zip ->
+                zip.entries()
+                    .asIterator()
+                    .forEach {
+                        if (it.name.contains("${RcConstants.SOURCE_MEDIA_DIR}/${project}")) {
+                            size += it.compressedSize
+                        }
+                    }
             }
+        } else {
+            sourceFile.walk()
+                .filter {
+                    it.invariantSeparatorsPath.contains("${RcConstants.SOURCE_MEDIA_DIR}/${project}") && it.isFile
+                }
+                .forEach {
+                    size += it.length()
+                }
+
         }
+
 
         return size
     }

@@ -80,10 +80,13 @@ class TestInitializeSources {
         testSub.assertComplete()
         testSub.assertNoErrors()
 
+        val sources = resourceMetadataRepository.getAllSources().blockingGet()
+
         Assert.assertEquals(init.version, database.installedEntityDao.fetchVersion(init))
         Assert.assertEquals(
-            1, resourceMetadataRepository.getAllSources().blockingGet().size
+            1, sources.size
         )
+        Assert.assertTrue(sources.all { it.path.isDirectory }) // sources are stored as directories
     }
 
     private fun prepareSource() {
