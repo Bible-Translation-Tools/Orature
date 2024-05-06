@@ -83,6 +83,17 @@ class SourceAudioAccessor(
         }
     }
 
+    fun deleteAudio() {
+        metadata.path
+            .walk()
+            .find {
+                it.invariantSeparatorsPath.endsWith("${RcConstants.SOURCE_MEDIA_DIR}/${project}")
+            }
+            ?.run {
+                deleteRecursively()
+            }
+    }
+
     private fun getChapter(
         media: Media,
         chapter: Int,
