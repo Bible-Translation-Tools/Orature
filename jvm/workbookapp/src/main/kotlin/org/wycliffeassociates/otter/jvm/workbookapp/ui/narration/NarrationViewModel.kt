@@ -25,6 +25,7 @@ import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.binding.Bindings
@@ -272,6 +273,10 @@ class NarrationViewModel : ViewModel() {
             .observeOnFx()
             .subscribe {
                 openLoadingModalProperty.set(false)
+                narrationStateMachine = TeleprompterStateMachine(narration.totalVerses)
+                subscribeNarrationStateChanged()
+                narrationStateMachine.initialize(narration.versesWithRecordings())
+                resetNarratableList()
             }
 
         narration.startMicrophone()
@@ -318,9 +323,6 @@ class NarrationViewModel : ViewModel() {
             Screen.getMainScreen().height
         )
         totalAudioSizeProperty.set(rendererAudioReader.totalFrames)
-        narrationStateMachine = TeleprompterStateMachine(narration.totalVerses)
-        subscribeNarrationStateChanged()
-        narrationStateMachine.initialize(narration.versesWithRecordings())
     }
 
     private fun getChapterList(chapters: Observable<Chapter>): Single<Chapter> {
@@ -528,20 +530,19 @@ class NarrationViewModel : ViewModel() {
             .map {
                 it.find { it.sort == chapter.sort }
             }
-            .map { chapter ->
-                chapter.chunks.take(1)
-            }
-            .flatMap { it }
+            .flatMap { c -> c.observableChunks }
             .map { injectChapterTitleText(chapter, it) }
             .observeOnFx()
             .subscribe(
                 { chunks ->
                     chunksList.setAll(chunks)
                     chunkTotalProperty.set(chunks.size)
+                    if (chunks.isNotEmpty()) {
+                        resetNarratableList()
+                    }
                 },
-                {},
-                { resetNarratableList() }
-            )
+                {}
+            ).addTo(disposables)
     }
 
     /**

@@ -62,6 +62,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm
 import org.wycliffeassociates.usfmtools.USFMParser
 import org.wycliffeassociates.usfmtools.models.markers.CMarker
 import org.wycliffeassociates.usfmtools.models.markers.VMarker
+import java.util.concurrent.TimeUnit
 
 class ProjectFilesAccessor(
     directoryProvider: IDirectoryProvider,
@@ -575,10 +576,18 @@ class ProjectFilesAccessor(
     ): Observable<Take> {
         return workbook.target.chapters
             .flatMap { chapter ->
-                chapter.chunks
-                    .take(1)
-                    .flatMapIterable { it }
-                    .cast<BookElement>()
+                val chunkCount = chapter.chunkCount.blockingGet()
+                val chunks: Observable<BookElement> = if (chunkCount > 0) {
+                    chapter.observableChunks
+                        .filter { it.isNotEmpty() }
+                        .firstOrError()
+                        .flattenAsObservable { it }
+                        .cast<BookElement>()
+                } else {
+                    Observable.empty()
+                }
+
+                chunks
                     .startWith(chapter as BookElement)
                     .concatMap { content ->
                         val takesNotEmitted = content.audio.getSelectedTake() != null &&
@@ -705,10 +714,8 @@ class ProjectFilesAccessor(
             else -> {
                 chapters.flatMap { chapter ->
                     chapter.chunks
-                        .take(1)
-                        .flatMap {
-                            it.toObservable().cast<BookElement>()
-                        }
+                        .flattenAsObservable { it }
+                        .cast<BookElement>()
                         .startWith(chapter)
                 }
             }

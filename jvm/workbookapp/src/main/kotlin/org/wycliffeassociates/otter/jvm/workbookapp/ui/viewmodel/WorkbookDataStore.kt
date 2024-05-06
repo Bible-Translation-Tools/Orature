@@ -210,8 +210,8 @@ class WorkbookDataStore : Component(), ScopedInstance {
             .map { _chapter ->
                 _chapter
                     .chunks
-                    .value
-                    ?.find { _chunk ->
+                    .blockingGet()
+                    .find { _chunk ->
                         _chunk.sort == chunk?.sort
                     }
             }

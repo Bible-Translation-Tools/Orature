@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
 import io.reactivex.Maybe
+import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
@@ -42,6 +43,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import tornadofx.*
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class TranslationViewModel2 : ViewModel() {
@@ -140,7 +142,7 @@ class TranslationViewModel2 : ViewModel() {
 
     fun selectChunk(chunkNumber: Int) {
         resetUndoRedo()
-        val chunk = workbookDataStore.chapter.chunks.value?.find { it.sort == chunkNumber } ?: return
+        val chunk = workbookDataStore.chapter.chunks.blockingGet().find { it.sort == chunkNumber } ?: return
         workbookDataStore.activeChunkProperty.set(chunk)
 
         audioDataStore.stopPlayers()
@@ -180,7 +182,7 @@ class TranslationViewModel2 : ViewModel() {
         compositeDisposable.clear()
 
         workbookDataStore.chapter
-            .chunks
+            .observableChunks
             .observeOnFx()
             .subscribe { list ->
                 val chunkList = list.filter { it.contentType == ContentType.TEXT }
@@ -273,22 +275,19 @@ class TranslationViewModel2 : ViewModel() {
 
     private fun handleSourceAudioUnavailable(chapter: Chapter) {
         showAudioMissingViewProperty.set(true)
-        val chapterHasChunks = chapter
-            .chunks
-            .take(1)
+        chapter
+            .observableChunks
             .map { chunks -> chunks.filter { it.contentType == ContentType.TEXT } }
-            .blockingFirst()
-            .isNotEmpty()
-
-        if (chapterHasChunks) {
-            noSourceAudioProperty.set(true)
-            updateStep {
-                selectedStepProperty.set(reachableStepProperty.value)
-            }
-        } else {
-            reachableStepProperty.set(null)
-            compositeDisposable.clear()
-        }
+            .subscribe { chunks ->
+                if (chunks.isNotEmpty()) {
+                    noSourceAudioProperty.set(true)
+                    updateStep {
+                        selectedStepProperty.set(reachableStepProperty.value)
+                    }
+                } else {
+                    reachableStepProperty.set(null)
+                }
+            }.addTo(compositeDisposable)
     }
 
     private fun resetUndoRedo() {

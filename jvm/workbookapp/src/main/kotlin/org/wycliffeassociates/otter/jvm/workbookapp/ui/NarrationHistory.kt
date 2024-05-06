@@ -70,8 +70,8 @@ class NarrationHistory @Inject constructor(private val directoryProvider: IDirec
             }
         }
 
-        val chunks = chapter.chunks.value
-            ?.associate { chunk ->
+        val chunks = chapter.chunks.blockingGet()
+            .associate { chunk ->
                 val chunkTake = chunk.audio.lastTake()
                 chunkTake?.file?.let { file ->
                     val chunkTemp = directoryProvider.createTempFile(
@@ -81,7 +81,7 @@ class NarrationHistory @Inject constructor(private val directoryProvider: IDirec
                     file.copyTo(chunkTemp, true)
                     chunk.sort to chunkTemp
                 } ?: (chunk.sort to null)
-            } ?: mapOf()
+            }
 
         val snapshot = Snapshot(
             chapterTemp,
@@ -160,7 +160,7 @@ class NarrationHistory @Inject constructor(private val directoryProvider: IDirec
             chapter.audio.insertTake(take)
         }
 
-        val chunks = chapter.chunks.value ?: listOf()
+        val chunks = chapter.chunks.blockingGet()
         chunks.forEach { chunk ->
             val chunkTake = chunk.audio.lastTake()
             val chunkCached = snapshot.chunks[chunk.sort]

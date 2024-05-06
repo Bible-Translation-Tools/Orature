@@ -55,8 +55,7 @@ class ResetChunks @Inject constructor() {
     }
 
     private fun markTakesForDeletion(chapter: Chapter) {
-        chapter.chunks.value
-            ?.forEach { chunk ->
+        chapter.chunks.blockingGet().forEach { chunk ->
                 chunk.draftNumber = -1
                 chunk.audio.getAllTakes()
                     .filter { it.deletedTimestamp.value?.value == null }

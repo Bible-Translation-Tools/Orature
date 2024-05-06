@@ -210,11 +210,11 @@ class BlindDraftViewModel : ViewModel() {
     private fun subscribeToChunks() {
         val chapter = workbookDataStore.chapter
         chapter
-            .chunks
-            .observeOnFx()
+            .observableChunks
             .map { contents ->
                 contents.filter { it.contentType == ContentType.TEXT } // omit titles
             }
+            .observeOnFx()
             .subscribe { chunks ->
                 translationViewModel.loadChunks(chunks)
                 (chunks.firstOrNull { !it.hasSelectedAudio() } ?: chunks.firstOrNull())
@@ -249,7 +249,7 @@ class BlindDraftViewModel : ViewModel() {
 
     private fun refreshChunkList() {
         workbookDataStore.activeChapterProperty.value?.let { chapter ->
-            chapter.chunks.value?.let { chunks ->
+            chapter.chunks.blockingGet().let { chunks ->
                 translationViewModel.loadChunks(
                     chunks.filter { it.contentType == ContentType.TEXT }
                 )
