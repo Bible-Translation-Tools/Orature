@@ -841,8 +841,8 @@ class NarrationViewModel : ViewModel() {
             .doFinally {
                 runLater {
                     resetNarratableList()
+                    openLoadingModalProperty.set(false)
                 }
-                openLoadingModalProperty.set(false)
             }
             .subscribeOn(Schedulers.io())
             .subscribe()
@@ -1233,7 +1233,7 @@ class NarrationViewModel : ViewModel() {
             }
         }
     }
-    
+
     private fun showLoadingDialog(messageKey: String = "savingProjectWait") {
         loadingModalTextProperty.set(messages[messageKey])
         openLoadingModalProperty.set(true)
