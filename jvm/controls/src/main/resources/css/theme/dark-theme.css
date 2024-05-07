@@ -20,7 +20,7 @@
 
 .dark-theme {
     /*Primary Color */
-    -wa-primary: #015AD9;
+    -wa-primary: #88A9FF; /*color brand base*/
     -wa-primary-05: #015AD90D;
     -wa-primary-10: #015AD91A;
     -wa-primary-20: #015AD933;
@@ -61,7 +61,7 @@
     -wa-highlight-text: -wa-accent-light;
     -wa-disabled-text: gray;
     -wa-disabled-background: #ffffff20;
-    -wa-status-active: -wa-blue;
+    -wa-status-active: #88A9FF; /*color brand base*/
     -wa-status-inactive: -wa-black-05-noalpha;
     -wa-status-complete: #2ec144;
     -wa-inverse-text: -wa-gray-dark;
