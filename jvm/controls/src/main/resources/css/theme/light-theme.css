@@ -40,6 +40,7 @@
     -wa-foreground-pressed: -wa-black-10;
 
     -wa-surface: inherit;
+    -wa-surface-secondary: #F2F2F2;
 
     /*Accent Color */
     -wa-accent: #FFB100;

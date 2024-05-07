@@ -54,7 +54,7 @@
 }
 
 .chunking-step:disabled {
-    -fx-background-color: #E5E8EB;
+    -fx-background-color: -wa-surface-secondary;
 }
 
 .chunking-step:focus-visible .chunking-step__header-section {
