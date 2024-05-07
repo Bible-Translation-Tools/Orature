@@ -32,10 +32,9 @@
     -wa-primary-variant-light: #b399ff;
     -wa-primary-variant-dark: #47367d;
 
-    -wa-background: #1c2031;
+    -wa-background: #1F1F1F; /*color surface secondary*/
     -wa-background-dark: #10121c;
-
-    -wa-foreground:  #373949;
+    -wa-foreground:  #343434; /*color surface primary*/
     -wa-foreground-hover: #585b74;
     -wa-foreground-pressed: #21212c;
 
