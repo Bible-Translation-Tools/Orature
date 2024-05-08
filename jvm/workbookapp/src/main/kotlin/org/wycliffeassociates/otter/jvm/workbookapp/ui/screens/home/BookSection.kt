@@ -64,7 +64,7 @@ class BookSection(
             hbox {
                 addClass("homepage__main-region__header-section")
                 button {
-                    addClass("btn", "btn--icon", "btn--borderless", "option-button")
+                    addClass("btn", "btn--icon", "btn--icon--primary", "option-button")
                     tooltip(messages["options"])
                     graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
 
