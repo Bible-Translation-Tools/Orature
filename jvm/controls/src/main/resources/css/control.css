@@ -54,7 +54,7 @@
 
 .btn--icon {
     -fx-border-width: 1px;
-    -fx-border-color: -wa-btn-icon-border-color;
+    -fx-border-color: -wa-btn-icon-border-color; /*color surface border*/
     -fx-border-radius: 12px;
     -fx-background-color: -wa-btn-icon-background;
     -fx-background-radius: 12px;
@@ -67,7 +67,7 @@
 
 .btn--icon--primary {
     -fx-border-width: 2px; /*TODO: clean up this secondary/primary*/
-    -fx-border-color: -wa-btn-icon-border-color;
+    -fx-border-color: -wa-btn-icon-border-color; /*color surface border*/
     -fx-border-radius: 12px;
     -fx-background-color: -wa-btn-icon-background;
     -fx-background-radius: 12px;
