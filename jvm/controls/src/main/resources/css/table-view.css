@@ -59,7 +59,7 @@
 
 /* override javaFX - https://gist.github.com/tmazeika/c90c03c645d18722ddb0#file-caspian-css-L2153 */
 .wa-table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled:focused:selected {
-    -fx-background-color: -wa-primary-light;
+    -fx-background-color: -wa-background;
 }
 
 /* cells */
