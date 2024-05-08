@@ -167,7 +167,7 @@
 
     /* TABLE */
     -wa-table-header-background: #4d4d4d;
-    -wa-progress-track-background: #e0edf9;
+    -wa-progress-track-background: #00102E; /*color/brand/light*/
     -wa-progress-foreground: #015AD9;
     -wa-table-row-border: -wa-list-item-border-light;
     -wa-table-row-hover: -wa-foreground-hover;
