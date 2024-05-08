@@ -17,17 +17,12 @@
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
 .app-bar {
-    -fx-background-color: #013C8E;
+    -fx-background-color: -wa-primary;
     -fx-alignment: top-center;
 }
 
 .app-bar__logo {
     -fx-focus-traversable: true;
-}
-
-.app-bar__logo .ikonli-font-icon {
-    -fx-icon-color: -wa-white;
-    -fx-icon-size: 40px;
 }
 
 .app-bar__app-content {
