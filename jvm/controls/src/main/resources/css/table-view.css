@@ -23,6 +23,9 @@
     -fx-background-radius: 10;
     -fx-background-insets: 0;
     -fx-padding: 0;
+    -fx-border-width: 1px 1px 0 1px;
+    -fx-border-color: -wa-btn-icon-border-color; /*TODO: likely use a different variable here color/surface/secondary*/
+    -fx-border-radius: 8px 8px 0 0;
 }
 
 /* header */
@@ -49,7 +52,7 @@
 }
 
 .wa-table-view .column-header-background {
-    -fx-background-color: -wa-table-header-background;
+    -fx-background-color: -wa-background;
     -fx-background-radius: 8 8 0 0;
     -fx-padding: 8 0;
 }
