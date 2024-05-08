@@ -22,7 +22,7 @@
     -fx-padding: 16px;
     -fx-background-color: -wa-foreground;
     -fx-border-width: 0 0 1 0;
-    -fx-border-color: -wa-border-light;
+    -fx-border-color: -wa-btn-icon-border-color;
 }
 
 .top-navigation-pane__title-section {
@@ -42,7 +42,7 @@
     -fx-pref-width: 360;
     -fx-background-color: -wa-foreground;
     -fx-border-width: 0 1 0 0;
-    -fx-border-color: -wa-border-light;
+    -fx-border-color: -wa-btn-icon-border-color;
 }
 
 .chunking-step-drawer:collapsed {
@@ -90,7 +90,7 @@
     -fx-alignment: center;
     -fx-padding: 16;
     -fx-border-width: 1;
-    -fx-border-color: transparent transparent -wa-border-light transparent;
+    -fx-border-color: transparent transparent -wa-btn-icon-border-color transparent;
 }
 
 .chunking-step__header-section:hover {
@@ -109,7 +109,7 @@
 .chunking-step__content-section {
     -fx-alignment: center;
     -fx-border-width: 1;
-    -fx-border-color: transparent transparent -wa-border-light transparent;
+    -fx-border-color: -wa-btn-icon-border-color;
     -fx-padding: 16;
 }
 
@@ -123,7 +123,7 @@
     -fx-min-width: 360;
     -fx-background-color: -wa-foreground;
     -fx-border-width: 0 0 0 1;
-    -fx-border-color: -wa-border-light;
+    -fx-border-color: -wa-btn-icon-border-color; /*TODO: clean this up, use other variable or something*/
 }
 
 .source-text-drawer:collapsed {
