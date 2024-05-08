@@ -107,7 +107,7 @@
     -wa-btn-icon-background-hover: -wa-foreground-hover;
     -wa-btn-icon-background-pressed: -wa-foreground-pressed;
     -wa-btn-icon-background-selected: #9bbcdd;
-    -wa-btn-icon-border-color: -wa-regular-text;
+    -wa-btn-icon-border-color: #0E0E0E; /*color surface border*/
     -wa-filter-button-background: #4d4f66;
     -wa-app-bar-btn-text: -wa-black;
 

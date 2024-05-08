@@ -65,6 +65,32 @@
     -fx-padding: 0;
 }
 
+.btn--icon--primary {
+    -fx-border-width: 2px; /*TODO: clean up this secondary/primary*/
+    -fx-border-color: -wa-btn-icon-border-color;
+    -fx-border-radius: 12px;
+    -fx-background-color: -wa-btn-icon-background;
+    -fx-background-radius: 12px;
+    -fx-pref-width: 56px;
+    -fx-min-width: 56px;
+    -fx-pref-height: 48px;
+    -fx-min-height: 48px;
+    -fx-padding: 0;
+}
+
+.btn--icon--secondary {
+    -fx-border-width: 1px; /*TODO: clean up this secondary/primary*/
+    -fx-border-color: -wa-btn-icon-border-color;
+    -fx-border-radius: 12px;
+    -fx-background-color: -wa-btn-icon-background;
+    -fx-background-radius: 12px;
+    -fx-pref-width: 56px;
+    -fx-min-width: 56px;
+    -fx-pref-height: 48px;
+    -fx-min-height: 48px;
+    -fx-padding: 0;
+}
+
 .btn--icon .ikonli-font-icon {
     -fx-icon-color: -wa-regular-text-80;
 }
