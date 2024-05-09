@@ -727,7 +727,7 @@
 }
 
 .wa-slider .thumb {
-    -fx-background-color: -wa-primary-dark;
+    -fx-background-color: -wa-slider-thumb-color;
     -fx-background-radius: 10px;
     -fx-border-radius: 10px;
     -fx-pref-width: 20px;
