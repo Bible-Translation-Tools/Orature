@@ -123,21 +123,66 @@
 }
 
 
-
-
-
 .btn--icon--secondary {
     -fx-border-width: 1px; /*TODO: clean up this secondary/primary*/
     -fx-border-color: -wa-btn-icon-border-color;
     -fx-border-radius: 12px;
     -fx-background-color: -wa-btn-icon-background;
     -fx-background-radius: 12px;
-    -fx-pref-width: 56px;
-    -fx-min-width: 56px;
-    -fx-pref-height: 48px;
-    -fx-min-height: 48px;
-    -fx-padding: 0;
 }
+
+/*
+    TODO: see if there is a better way to do this,
+     possibly make some of this behavior common for primary and secondary icon buttons
+*/
+.btn--icon--secondary .ikonli-font-icon {
+    -fx-font-size: 24px;
+    -fx-icon-color: -wa-secondary-btn-text-fill;
+}
+
+.btn--icon--secondary:hover {
+    -fx-background-color: -wa-secondary-btn-background-hover;
+    -fx-text-fill: -wa-secondary-btn-text-fill-hover;
+    -fx-underline: true;
+}
+.btn--icon--secondary:hover .ikonli-font-icon {
+    -fx-icon-color: -wa-secondary-btn-text-fill-hover;
+}
+.btn--icon--secondary:pressed {
+    -fx-background-color: -wa-secondary-btn-background-pressed;
+    -fx-text-fill: -wa-secondary-btn-text-fill-pressed;
+    -fx-underline: false;
+}
+.btn--icon--secondary:pressed .ikonli-font-icon {
+    -fx-fill: -wa-secondary-btn-text-fill-pressed;
+}
+.btn--icon--secondary:disabled {
+    -fx-cursor: disappear;
+    -fx-text-fill: -wa-disabled-text;
+    -fx-border-width: 1px;
+    -fx-underline: false;
+}
+.btn--icon--secondary:disabled .ikonli-font-icon {
+    -fx-icon-color: -wa-disabled-text;
+}
+
+.btn--icon--secondary:inactive {
+    -fx-background-color: #E5E8EB;
+    -fx-border-width: 0;
+}
+.btn--icon--secondary:inactive .text {
+    -fx-fill: #66768B;
+    -fx-text-fill: #66768B;
+}
+.btn--icon--secondary:inactive .ikonli-font-icon {
+    -fx-icon-color: #66768B;
+}
+
+.btn--icon--secondary:active {
+    -fx-background-color: -wa-foreground
+    -fx-icon-color: -wa-secondary-btn-text-fill;
+}
+
 
 .btn--icon .ikonli-font-icon {
     -fx-icon-color: -wa-regular-text-80;
