@@ -813,7 +813,7 @@
 .wa-menu-button .menu-item:focused .wa-menu-button__list-item,
 .wa-menu-button .menu-item:focused .wa-menu-button__btn-util {
     -fx-border-width: 4px;
-    -fx-border-color: -wa-button-border;
+    -fx-border-color: -wa-btn-icon-border-color; /*TODO: figure out a better variable to use*/
     -fx-border-radius: 6px;
     -fx-border-insets: -4;
 }
@@ -859,7 +859,7 @@
 }
 
 .wa-menu-button__list-item:hover {
-    -fx-background-color: -wa-btn-icon-background-selected;
+    -fx-background-color: -wa-background;
     -fx-background-radius: 6px;
 }
 
