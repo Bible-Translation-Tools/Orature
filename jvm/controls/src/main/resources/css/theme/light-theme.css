@@ -157,7 +157,7 @@
 
     -wa-marker-overlay-primary: rgba(30, 221, 118, 0.2);
     -wa-marker-overlay-secondary: rgba(1, 90, 217, 0.2);
-    -wa-marker-track-background: -wa-black-10-noalpha;
+    -wa-marker-track-background: -wa-white;
 
     /* dialog */
     -wa-dialog-overlay: -wa-black-60;

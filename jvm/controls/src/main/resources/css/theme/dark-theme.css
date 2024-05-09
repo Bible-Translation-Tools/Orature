@@ -156,7 +156,7 @@
 
     -wa-marker-overlay-primary: #0f32a542;
     -wa-marker-overlay-secondary: #3a9b6a30;
-    -wa-marker-track-background: #4f5964;
+    -wa-marker-track-background: -wa-foreground;
 
     /* dialog */
     -wa-dialog-overlay: -wa-black-80;
