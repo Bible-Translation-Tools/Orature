@@ -24,13 +24,17 @@
     -fx-text-fill: -wa-primary;
 }
 
+.chunk-item:hover {
+    -fx-background-color: -wa-background;
+}
+
 .chunk-item:completed .chunk-item__icon {
     -fx-icon-color: -wa-primary;
 }
 
 .chunk-item:selected {
     -fx-text-fill: -wa-inverse-text;
-    -fx-background-color: #001533;
+    -fx-background-color: -wa-primary;
 }
 
 .chunk-item:selected .chunk-item__icon {
