@@ -37,14 +37,6 @@
     -fx-border-insets: -2;
 }
 
-.btn:active {
-    -fx-background-color: #001533;
-}
-
-.btn:active .ikonli-font-icon {
-    -fx-icon-color: -wa-white;
-}
-
 /* -------------- Button Icon -------------- */
 .btn__icon {
     -fx-icon-color: inherit;
@@ -84,7 +76,7 @@
 /*TODO: see if there is a better way to do this*/
 .btn--icon--primary .ikonli-font-icon {
     -fx-font-size: 24px;
-    -fx-icon-color: -wa-secondary-btn-text-fill;  -wa-regular-text
+    -fx-icon-color: -wa-secondary-btn-text-fill;
 }
 
 .btn--icon--primary:hover {
@@ -125,6 +117,10 @@
     -fx-icon-color: #66768B;
 }
 
+.btn--icon--primary:active {
+    -fx-background-color: -wa-foreground
+    -fx-icon-color: -wa-secondary-btn-text-fill;
+}
 
 
 

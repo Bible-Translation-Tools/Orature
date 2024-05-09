@@ -95,7 +95,7 @@ class SimpleAudioPlayer(
         nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
 
         button {
-            addClass("btn", "btn--icon")
+            addClass("btn", "btn--icon--primary")
             textProperty().bind(playPauseTextBinding())
             tooltip {
                 textProperty().bind(playPauseTextBinding(true))
@@ -116,7 +116,7 @@ class SimpleAudioPlayer(
             hgrow = Priority.ALWAYS
             addClass("audio-player--center")
 
-            label(titleTextProperty){
+            label(titleTextProperty) {
                 addClass("h5", "h5--60", "audio-player__title")
                 visibleWhen { textProperty().isNotEmpty }
                 managedWhen(visibleProperty())
