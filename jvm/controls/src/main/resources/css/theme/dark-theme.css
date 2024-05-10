@@ -25,7 +25,7 @@
     -wa-primary-10: #88A9FF1A;
     -wa-primary-20: #88A9FF33;
     -wa-primary-30: #88A9FF4C;
-    -wa-primary-light: #CEE6FF;
+    -wa-primary-light: #00102E; /*color/brand/light*/
     -wa-primary-dark: #00377C;
 
     -wa-primary-variant: #5d37cd;
@@ -142,7 +142,7 @@
     /* audio player */
     -wa-slider-track-color: #00102E; /*color/brand/light*/
     -wa-slider-border-color: -wa-white-30;
-    -wa-slider-thumb-color: -wa-primary-light;
+    -wa-slider-thumb-color: #CEE6FF;
     -wa-minimap-slider-background: rgba(90, 149, 187, 0.22);
     -wa-recorder-controls-background: #0c0033;
 
