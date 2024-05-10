@@ -118,7 +118,7 @@
 }
 
 .btn--icon--primary:active {
-    -fx-background-color: -wa-foreground
+    -fx-background-color: -wa-foreground;
     -fx-icon-color: -wa-secondary-btn-text-fill;
 }
 
@@ -180,7 +180,7 @@
 }
 
 .btn--icon--secondary:active {
-    -fx-background-color: -wa-foreground
+    -fx-background-color: -wa-foreground;
     -fx-icon-color: -wa-secondary-btn-text-fill;
 }
 
