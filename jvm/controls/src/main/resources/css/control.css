@@ -216,7 +216,7 @@
 
 /* -------------- Primary Button -------------- */
 .btn--primary {
-    -fx-background-color: -wa-primary-gradient;
+    -fx-background-color: -wa-primary;
     -fx-background-radius: 12px;
     -fx-effect: -wa-level2;
     -fx-border-width: 1px;
