@@ -91,7 +91,6 @@ class NarrationPage : View() {
     }
 
     override val root = stackpane {
-        addClass(ColorTheme.LIGHT.styleClass)
         val narrationRoot = this
 
         createSnackBar()
