@@ -28,6 +28,16 @@
     -fx-graphic-text-gap: 8;
 }
 
+.consume__btn--secondary {
+    -fx-text-fill: -wa-primary;
+    -fx-border-color: -wa-primary;
+}
+
+.consume__btn--secondary .ikonli-font-icon {
+    -fx-font-size: 24px;
+    -fx-icon-color: -wa-primary;
+}
+
 .consume__btn:active {
     -fx-background-color: -wa-status-active;
 }

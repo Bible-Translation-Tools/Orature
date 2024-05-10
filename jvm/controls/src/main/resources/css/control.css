@@ -129,6 +129,7 @@
     -fx-border-radius: 12px;
     -fx-background-color: -wa-btn-icon-background;
     -fx-background-radius: 12px;
+    -fx-text-fill: -wa-secondary-btn-text-fill;
 }
 
 /*
