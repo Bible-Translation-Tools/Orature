@@ -93,6 +93,4 @@
 .marker-waveform .scrolling-waveform__highlight--primary,
 .marker-waveform .scrolling-waveform__highlight--secondary {
     -fx-fill: transparent;
-    -fx-stroke: -wa-border-light;
-    -fx-stroke-width: 1;
 }
