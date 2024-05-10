@@ -29,7 +29,7 @@
 }
 
 .consume__btn:active {
-    -fx-background-color: #001533;
+    -fx-background-color: -wa-status-active;
 }
 
 .vm-waveform-frame {
