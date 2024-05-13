@@ -39,6 +39,7 @@ import javafx.scene.canvas.GraphicsContext
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.BookMarker
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
@@ -98,6 +99,8 @@ class NarrationViewModel : ViewModel() {
     val narrationStateProperty = SimpleObjectProperty<NarrationStateType>()
 
     private lateinit var volumeBar: VolumeBar
+
+    val colorThemeProperty = SimpleObjectProperty(ColorTheme.LIGHT)
 
     val recordAgainVerseIndexProperty = SimpleObjectProperty<Int?>()
     var recordAgainVerseIndex by recordAgainVerseIndexProperty
@@ -305,6 +308,7 @@ class NarrationViewModel : ViewModel() {
         subscribeTaskRunnerBusyChanged()
         rendererAudioReader = narration.audioReader
         rendererAudioReader.open()
+
         renderer = NarrationWaveformRenderer(
             AudioScene(
                 rendererAudioReader,
@@ -320,7 +324,8 @@ class NarrationViewModel : ViewModel() {
                 DEFAULT_SAMPLE_RATE
             ),
             Screen.getMainScreen().width,
-            Screen.getMainScreen().height
+            Screen.getMainScreen().height,
+            colorThemeProperty.toObservable()
         )
         totalAudioSizeProperty.set(rendererAudioReader.totalFrames)
     }
