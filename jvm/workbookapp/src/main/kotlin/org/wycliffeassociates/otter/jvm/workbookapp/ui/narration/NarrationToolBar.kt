@@ -40,8 +40,7 @@ class NarrationToolBar : View() {
         addClass("narration-toolbar", "narration-toolbar__play-controls")
         alignment = Pos.CENTER_LEFT
         button {
-            addClass("btn", "btn--secondary")
-            addPseudoClass("active")
+            addClass("btn", "btn--secondary2")
             tooltip { textProperty().bind(this@button.textProperty()) }
 
             disableWhen {
@@ -54,11 +53,11 @@ class NarrationToolBar : View() {
                         if (state == NarrationStateType.PLAYING) {
                             graphic = FontIcon(MaterialDesign.MDI_PAUSE)
                             text = messages["pause"]
-                            togglePseudoClass("active", true)
+                            addPseudoClass("active")
                         } else {
                             graphic = FontIcon(MaterialDesign.MDI_PLAY)
                             text = messages["playAll"]
-                            togglePseudoClass("active", false)
+                            removePseudoClass("active")
                         }
                     }
                 }

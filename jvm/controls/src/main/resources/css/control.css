@@ -293,7 +293,7 @@
 
 
 
-/* TODO: remove this after testing and integrate it into Button Secondary*/
+/* TODO: remove this after testing and integrate it into Button Tertiary*/
 /* ------------ Button tertiary --------- */
 .btn--tertiary2 {
     -fx-background-color: inherit;
@@ -345,6 +345,75 @@
 }
 .btn--tertiary2:inactive .ikonli-font-icon {
     -fx-icon-color: -wa-button-tertiary-inactive-on-surface;
+}
+
+
+/* TODO: remove this after testing and integrate it into Button Secondary*/
+/* -------------- Secondary Button 2 -------------- */
+.btn--secondary2 {
+    -fx-background-color: -wa-button-secondary-default-surface;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-button-secondary-default-border;
+    -fx-text-fill: -wa-button-secondary-default-on-surface;
+    -fx-font-size: 1.4em;
+    -jfx-disable-visual-focus: true;
+    -fx-graphic-text-gap: 8px;
+}
+
+.btn--secondary2 .ikonli-font-icon {
+    -fx-font-size: 1.9em;
+    -fx-icon-color: -wa-button-secondary-default-on-surface;
+}
+
+.btn--secondary2:hover {
+    -fx-background-color: -wa-button-secondary-hover-surface;
+    -fx-background-radius: 12px;
+    -fx-border-color: -wa-button-secondary-hover-border;
+    -fx-border-radius: 12px;
+    -fx-underline: true;
+    -fx-text-fill: -wa-button-secondary-hover-on-surface;
+}
+
+.btn--secondary2:hover .ikonli-font-icon {
+    -fx-icon-color: -wa-button-secondary-hover-on-surface;
+}
+
+.btn--secondary2:pressed {
+    -fx-background-color: -wa-secondary-btn-background-pressed;
+    -fx-border-color: -wa-secondary-btn-text-fill-pressed;
+    -fx-text-fill: -wa-secondary-btn-text-fill-pressed;
+    -fx-underline: false;
+}
+
+.btn--secondary2:pressed .ikonli-font-icon {
+    -fx-fill: -wa-secondary-btn-text-fill-pressed;
+}
+
+.btn--secondary2:disabled {
+    -fx-cursor: disappear;
+    -fx-text-fill: -wa-disabled-text;
+    -fx-border-color: -wa-disabled-text;
+    -fx-border-width: 2px;
+    -fx-underline: false;
+}
+
+.btn--secondary2:disabled .ikonli-font-icon {
+    -fx-icon-color: -wa-disabled-text;
+}
+
+.btn--secondary2:active {
+    -fx-background-color: -wa-button-secondary-hover-surface;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-border-width: 2px;
+    -fx-border-color: transparent;
+    -fx-text-fill: -wa-button-secondary-hover-on-surface;
+}
+
+.btn--secondary2:active .ikonli-font-icon {
+    -fx-icon-color: -wa-button-secondary-hover-on-surface;
 }
 
 
