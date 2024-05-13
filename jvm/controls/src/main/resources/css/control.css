@@ -289,6 +289,65 @@
     -fx-opacity: 1;
 }
 
+
+
+
+
+/* TODO: remove this after testing and integrate it into Button Secondary*/
+/* ------------ Button tertiary --------- */
+.btn--tertiary2 {
+    -fx-background-color: inherit;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-button-tertiary-default-border;
+    -fx-text-fill: -wa-button-tertiary-default-on-surface;
+    -fx-font-size: 1.4em;
+    -jfx-disable-visual-focus: true;
+    -fx-graphic-text-gap: 8px;
+}
+
+.btn--tertiary2 .ikonli-font-icon {
+    -fx-font-size: 1.9em;
+    -fx-icon-color: -wa-button-tertiary-default-on-surface;
+}
+
+.btn--tertiary2:hover {
+    -fx-background-color: -wa-button-tertiary-hover-surface;
+    -fx-border-color: transparent;
+    -fx-text-fill: -wa-button-tertiary-hover-on-surface;
+    -fx-underline: true;
+}
+
+.btn--tertiary2:hover .ikonli-font-icon {
+    -fx-icon-color: -wa-button-tertiary-hover-on-surface;
+}
+
+.btn--tertiary2:active {
+    -fx-background-color: -wa-button-tertiary-active-surface;
+    -fx-border-color: -wa-button-tertiary-active-border;
+}
+.btn--tertiary2:active .text {
+    -fx-fill: -wa-button-tertiary-active-on-surface;
+    -fx-text-fill: -wa-button-tertiary-active-on-surface;
+}
+.btn--tertiary2:active .ikonli-font-icon {
+    -fx-icon-color: -on-surface-invert;
+}
+
+.btn--tertiary2:inactive {
+    -fx-background-color: inherit;
+    -fx-border-width: 0px;
+}
+.btn--tertiary2:inactive .text {
+    -fx-fill: -wa-button-tertiary-inactive-on-surface;
+    -fx-text-fill: -wa-button-tertiary-inactive-on-surface;
+}
+.btn--tertiary2:inactive .ikonli-font-icon {
+    -fx-icon-color: -wa-button-tertiary-inactive-on-surface;
+}
+
+
 /* -------------- Secondary Button -------------- */
 .btn--secondary {
     -fx-background-color: -wa-secondary-btn-background;

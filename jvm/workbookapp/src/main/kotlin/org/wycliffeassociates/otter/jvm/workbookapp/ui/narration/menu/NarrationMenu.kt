@@ -99,7 +99,7 @@ fun EventTarget.narrationMenuButton(
     op: Button.() -> Unit = {}
 ): Button {
     return Button().attachTo(this).apply {
-        addClass("btn", "btn--icon")
+        addClass("btn", "btn--icon", "btn--tertiary2")
         graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
         tooltip(messages["options"])
 

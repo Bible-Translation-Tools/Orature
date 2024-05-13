@@ -111,6 +111,24 @@
     -wa-filter-button-background: #4d4f66;
     -wa-app-bar-btn-text: -wa-black;
 
+
+    /* TODO: Rename/move these when finalized */
+    -on-surface-secondary: #cccccc;
+    -surface-border: #0e0e0e;
+    -surface-secondary: #1f1f1f;
+    -brand-darkest: #dae2ff;
+    -on-surface-invert: #1f1f1f;
+    -on-surface-tertiary: #808080;
+
+    -wa-button-tertiary-default-on-surface: -on-surface-secondary;
+    -wa-button-tertiary-default-border: -surface-border;
+    -wa-button-tertiary-hover-surface: -surface-secondary;
+    -wa-button-tertiary-hover-on-surface: -on-surface-secondary;
+    -wa-button-tertiary-active-surface: -brand-darkest;
+    -wa-button-tertiary-active-on-surface: -on-surface-invert;
+    -wa-button-tertiary-active-border: -brand-darkest;
+    -wa-button-tertiary-inactive-on-surface: -on-surface-tertiary;
+
     /* text field input */
     -wa-text-input-fill: -wa-black;
     -wa-text-field-border: gray;
