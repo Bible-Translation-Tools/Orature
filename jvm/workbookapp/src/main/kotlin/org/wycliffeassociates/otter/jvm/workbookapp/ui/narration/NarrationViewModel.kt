@@ -838,11 +838,15 @@ class NarrationViewModel : ViewModel() {
 
     fun importVerseAudio(verseIndex: Int, file: File) {
         showLoadingDialog()
-
         narration.onEditVerse(verseIndex, file)
-
-        resetNarratableList()
-        openLoadingModalProperty.set(false)
+            .doFinally {
+                runLater {
+                    resetNarratableList()
+                    openLoadingModalProperty.set(false)
+                }
+            }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
     }
 
     private fun stopPlayer() {
@@ -1230,7 +1234,7 @@ class NarrationViewModel : ViewModel() {
             }
         }
     }
-    
+
     private fun showLoadingDialog(messageKey: String = "savingProjectWait") {
         loadingModalTextProperty.set(messages[messageKey])
         openLoadingModalProperty.set(true)
