@@ -23,7 +23,6 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.dialog.ImportAudioDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.LoadingModal
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
@@ -115,6 +114,7 @@ class NarrationPage : View() {
 
     override fun onDock() {
         super.onDock()
+        subscribeToThemeChange()
         subscribeToEvents()
         setUpLoadingModal()
         // avoid resetting ViewModel states & action history when coming back from plugin
@@ -150,6 +150,13 @@ class NarrationPage : View() {
                 teleprompterView.onUndock()
             }
         }
+    }
+
+
+    private fun subscribeToThemeChange() {
+        settingsViewModel.appColorMode.onChangeWithDisposer {
+            it?.let { viewModel.colorThemeProperty.set(it) }
+        }.let { disposableListeners.add(it) }
     }
 
     private fun subscribeToEvents() {

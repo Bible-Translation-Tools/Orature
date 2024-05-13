@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform
 
+import io.reactivex.Observable
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.image.Image
@@ -25,7 +26,9 @@ import javafx.scene.image.PixelFormat
 import javafx.scene.image.PixelWriter
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.domain.narration.AudioScene
+import org.wycliffeassociates.otter.common.domain.theme.AppTheme
 import tornadofx.c
 import tornadofx.runLater
 import java.nio.ByteBuffer
@@ -35,15 +38,31 @@ class NarrationWaveformRenderer(
     private val renderer: AudioScene,
     val renderWidth: Int,
     val renderHeight: Int,
-    val backgroundColor: Color = c("#E5E8EB"),
-    val waveformColor: Color = c("#66768B")
+    val colorThemeObservable: Observable<ColorTheme>,
 ) {
+    private var backgroundColor: Color = c("#E5E8EB")
+    private var waveformColor: Color = c("#66768B")
     private val writableImage = WritableImage(renderWidth, renderHeight)
     var pixelFormat: PixelFormat<ByteBuffer> = PixelFormat.getByteRgbInstance()
     private val imageData = ByteArray(renderWidth * renderHeight * 3)
 
     init {
         fillImageDataWithDefaultColor()
+        colorThemeObservable.subscribe {
+            it?.let {
+                updateWaveformColors(it)
+            }
+        }
+    }
+
+    fun updateWaveformColors(theme: ColorTheme) {
+        if (theme == ColorTheme.LIGHT) {
+            backgroundColor = c("#E5E8EB")
+            waveformColor = c("#66768B")
+        } else {
+            backgroundColor = c("#343434")
+            waveformColor = c("#808080")
+        }
     }
 
     fun draw(
