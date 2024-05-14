@@ -57,7 +57,7 @@ class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
             val node = StackPane().apply {
                 button(chapter.number.toString()) {
                     addClass(
-                        "btn", "btn--tertiary2", "btn--borderless", "chapter-grid__btn"
+                        "btn", "btn--tertiary", "btn--borderless", "chapter-grid__btn"
                     )
                     togglePseudoClass("selected", chapter.selected)
                     setOnAction {

@@ -161,65 +161,6 @@
     -fx-opacity: 1;
 }
 
-
-
-
-
-/* TODO: remove this after testing and integrate it into Button Tertiary*/
-/* ------------ Button tertiary --------- */
-.btn--tertiary2 {
-    -fx-background-color: inherit;
-    -fx-border-radius: 12px;
-    -fx-background-radius: 12px;
-    -fx-border-width: 2px;
-    -fx-border-color: -wa-button-tertiary-default-border;
-    -fx-text-fill: -wa-button-tertiary-default-on-surface;
-    -fx-font-size: 1.4em;
-    -jfx-disable-visual-focus: true;
-    -fx-graphic-text-gap: 8px;
-}
-
-.btn--tertiary2 .ikonli-font-icon {
-    -fx-font-size: 1.9em;
-    -fx-icon-color: -wa-button-tertiary-default-on-surface;
-}
-
-.btn--tertiary2:hover {
-    -fx-background-color: -wa-button-tertiary-hover-surface;
-    -fx-border-color: transparent;
-    -fx-text-fill: -wa-button-tertiary-hover-on-surface;
-    -fx-underline: true;
-}
-
-.btn--tertiary2:hover .ikonli-font-icon {
-    -fx-icon-color: -wa-button-tertiary-hover-on-surface;
-}
-
-.btn--tertiary2:active {
-    -fx-background-color: -wa-button-tertiary-active-surface;
-    -fx-border-color: -wa-button-tertiary-active-border;
-}
-.btn--tertiary2:active .text {
-    -fx-fill: -wa-button-tertiary-active-on-surface;
-    -fx-text-fill: -wa-button-tertiary-active-on-surface;
-}
-.btn--tertiary2:active .ikonli-font-icon {
-    -fx-icon-color: -on-surface-invert;
-}
-
-.btn--tertiary2:inactive {
-    -fx-background-color: inherit;
-    -fx-border-width: 0px;
-}
-.btn--tertiary2:inactive .text {
-    -fx-fill: -wa-button-tertiary-inactive-on-surface;
-    -fx-text-fill: -wa-button-tertiary-inactive-on-surface;
-}
-.btn--tertiary2:inactive .ikonli-font-icon {
-    -fx-icon-color: -wa-button-tertiary-inactive-on-surface;
-}
-
-
 /* TODO: remove this after testing and integrate it into Button Secondary*/
 /* -------------- Secondary Button 2 -------------- */
 .btn--secondary2 {
@@ -457,31 +398,62 @@
     -fx-fill: -wa-white-80;
 }
 
-.btn--borderless, .btn--borderless:disabled {
-    -fx-border-width: 0;
-}
-
 /* -------------- Tertiary Button -------------- */
-/* This button is very rarely used
-/* Typically only found in misc dialogs or on very heavy screens */
 .btn--tertiary {
-    -fx-background-color: transparent;
-    -fx-border-width: 0px;
-    -fx-text-fill: -wa-secondary-btn-text-fill;
-    -fx-icon-color: -wa-secondary-btn-text-fill;
+    -fx-background-color: inherit;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-button-tertiary-default-border;
+    -fx-text-fill: -wa-button-tertiary-default-on-surface;
+    -fx-font-size: 1.4em;
+    -jfx-disable-visual-focus: true;
     -fx-graphic-text-gap: 8px;
 }
-.btn--tertiary:hover {
-    -fx-background-color: -wa-secondary-btn-background-hover;
-    -fx-text-fill: -wa-secondary-btn-text-fill-hover;
-    -fx-icon-color: -wa-secondary-btn-text-fill-hover;
+
+.btn--tertiary .ikonli-font-icon {
+    -fx-font-size: 1.9em;
+    -fx-icon-color: -wa-button-tertiary-default-on-surface;
 }
-.btn--tertiary:disabled {
-    -fx-cursor: disappear;
-    -fx-text-fill: -wa-disabled-text;
-    -fx-icon-color: -wa-disabled-text;
+
+.btn--tertiary:hover {
+    -fx-background-color: -wa-button-tertiary-hover-surface;
+    -fx-border-color: transparent;
+    -fx-text-fill: -wa-button-tertiary-hover-on-surface;
+    -fx-underline: true;
+}
+
+.btn--tertiary:hover .ikonli-font-icon {
+    -fx-icon-color: -wa-button-tertiary-hover-on-surface;
+}
+
+.btn--tertiary:active {
+    -fx-background-color: -wa-button-tertiary-active-surface;
+    -fx-border-color: -wa-button-tertiary-active-border;
+}
+.btn--tertiary:active .text {
+    -fx-fill: -wa-button-tertiary-active-on-surface;
+    -fx-text-fill: -wa-button-tertiary-active-on-surface;
+}
+.btn--tertiary:active .ikonli-font-icon {
+    -fx-icon-color: -on-surface-invert;
+}
+
+.btn--tertiary:inactive {
+    -fx-background-color: inherit;
     -fx-border-width: 0px;
-    -fx-background-color: transparent;
+}
+.btn--tertiary:inactive .text {
+    -fx-fill: -wa-button-tertiary-inactive-on-surface;
+    -fx-text-fill: -wa-button-tertiary-inactive-on-surface;
+}
+.btn--tertiary:inactive .ikonli-font-icon {
+    -fx-icon-color: -wa-button-tertiary-inactive-on-surface;
+}
+
+
+.btn--borderless, .btn--borderless:disabled {
+    -fx-border-width: 0;
 }
 /* ------------ Universal button style --------- */
 /* these button styles are for consistent design across different themes */

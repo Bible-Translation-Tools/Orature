@@ -40,7 +40,7 @@ class NarrationMenu : ContextMenu() {
         isAutoHide = true
 
         val openChapterOpt = MenuItem().apply {
-            addClass("btn", "btn--tertiary2", "btn--borderless")
+            addClass("btn", "btn--tertiary", "btn--borderless")
             graphic = label(messages["openChapterIn"]) {
                 graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
                 tooltip(text)
@@ -50,7 +50,7 @@ class NarrationMenu : ContextMenu() {
             }
         }
         val verseMarkerOpt = MenuItem().apply {
-            addClass("btn", "btn--tertiary2", "btn--borderless")
+            addClass("btn", "btn--tertiary", "btn--borderless")
             graphic = label(messages["editVerseMarkers"]) {
                 graphic = FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE)
                 tooltip(text)
@@ -64,7 +64,7 @@ class NarrationMenu : ContextMenu() {
             )
         }
         val restartChapterOpt = MenuItem().apply {
-            addClass("btn", "btn--tertiary2", "btn--borderless")
+            addClass("btn", "btn--tertiary", "btn--borderless")
             graphic = label(messages["restartChapter"]) {
                 graphic = FontIcon(MaterialDesign.MDI_DELETE)
                 tooltip(text)
@@ -79,7 +79,7 @@ class NarrationMenu : ContextMenu() {
         }
 
         val importChapterAudio = MenuItem().apply {
-            addClass("btn", "btn--tertiary2", "btn--borderless")
+            addClass("btn", "btn--tertiary", "btn--borderless")
             graphic = label(messages["import"]) {
                 graphic = FontIcon(MaterialDesign.MDI_DOWNLOAD)
                 tooltip(text)
@@ -103,7 +103,7 @@ fun EventTarget.narrationMenuButton(
     op: Button.() -> Unit = {}
 ): Button {
     return Button().attachTo(this).apply {
-        addClass("btn", "btn--icon", "btn--tertiary2")
+        addClass("btn", "btn--icon", "btn--tertiary")
         graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
         tooltip(messages["options"])
 

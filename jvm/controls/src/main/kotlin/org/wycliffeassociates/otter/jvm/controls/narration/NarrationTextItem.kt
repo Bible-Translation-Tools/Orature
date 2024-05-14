@@ -82,7 +82,7 @@ class NarrationTextItem : VBox() {
             borderpane {
                 center = stackpane {
                     button {
-                        addClass("btn", "btn--tertiary2")
+                        addClass("btn", "btn--tertiary")
                         graphic = FontIcon(MaterialDesign.MDI_PLAY)
                         tooltip(messages["play"])
 
@@ -102,7 +102,7 @@ class NarrationTextItem : VBox() {
                         )
                     }
                     button {
-                        addClass("btn", "btn--tertiary2")
+                        addClass("btn", "btn--tertiary")
                         graphic = FontIcon(MaterialDesign.MDI_PAUSE)
                         tooltip(messages["pause"])
                         enableWhen {

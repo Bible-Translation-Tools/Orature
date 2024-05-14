@@ -79,7 +79,7 @@ class NarrationHeader : View() {
             addClass("narration__header-controls")
             button {
                 tooltip = tooltip(messages["undoAction"])
-                addClass("btn", "btn--tertiary2")
+                addClass("btn", "btn--tertiary")
                 graphic = FontIcon(MaterialDesign.MDI_UNDO)
                 setOnAction {
                     FX.eventbus.fire(NarrationUndoEvent())
@@ -88,7 +88,7 @@ class NarrationHeader : View() {
             }
             button {
                 tooltip = tooltip(messages["redoAction"])
-                addClass("btn", "btn--tertiary2")
+                addClass("btn", "btn--tertiary")
                 graphic = FontIcon(MaterialDesign.MDI_REDO)
                 setOnAction {
                     FX.eventbus.fire(NarrationRedoEvent())

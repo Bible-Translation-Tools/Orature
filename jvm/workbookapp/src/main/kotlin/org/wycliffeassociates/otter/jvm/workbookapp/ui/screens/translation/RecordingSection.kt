@@ -79,7 +79,7 @@ class RecordingSection : BorderPane() {
             }
             region { hgrow = Priority.ALWAYS }
             button(messages["cancel"]) {
-                addClass("btn", "btn--tertiary2")
+                addClass("btn", "btn--tertiary")
                 graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
 
                 visibleWhen { isRecordingProperty.not() }

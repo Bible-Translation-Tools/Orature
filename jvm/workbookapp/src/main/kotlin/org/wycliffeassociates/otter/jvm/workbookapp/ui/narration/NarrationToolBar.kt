@@ -72,7 +72,7 @@ class NarrationToolBar : View() {
             }
         }
         button {
-            addClass("btn", "btn--tertiary2")
+            addClass("btn", "btn--tertiary")
             tooltip(messages["previousVerse"])
             graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
             setOnAction {
@@ -83,7 +83,7 @@ class NarrationToolBar : View() {
             }
         }
         button {
-            addClass("btn", "btn--tertiary2")
+            addClass("btn", "btn--tertiary")
             tooltip(messages["nextVerse"])
             graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
             setOnAction {
