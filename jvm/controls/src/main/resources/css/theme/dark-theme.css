@@ -25,7 +25,7 @@
     -wa-primary-10: #88A9FF1A;
     -wa-primary-20: #88A9FF33;
     -wa-primary-30: #88A9FF4C;
-    -wa-primary-light: #00102E; /*color/brand/light*/
+    -wa-primary-light: -brand-light;
     -wa-primary-dark: #00377C;
 
     -wa-primary-variant: #5d37cd;
@@ -133,6 +133,8 @@
     -surface-primary: #343434;
     -brand-dark: #b2c5ff;
     -surface-tertiary: #cccccc;
+    -brand-light: #00102e;
+    -brand-light-80: #00102ecc;
 
     -wa-button-secondary-default-surface: -surface-primary;
     -wa-button-secondary-default-on-surface: -wa-primary;
@@ -184,12 +186,13 @@
     -wa-card-shadow-lower-right-dark: -wa-level0;
 
     /* audio player */
-    -wa-slider-track-color: #00102E; /*color/brand/light*/
+    -wa-slider-track-color: -brand-light;
     -wa-slider-border-color: -wa-white-30;
     -wa-slider-thumb-color: #CEE6FF;
     -wa-minimap-slider-background: rgba(90, 149, 187, 0.22);
     -wa-recorder-controls-background: #0c0033;
 
+    -wa-narration-waveform-background: -wa-foreground;
     -wa-waveform-background: #0E0E0E; /*color/surface/tertiary*/
     -wa-waveform-background-dark: #4f5964;
     -wa-scrolling-waveform-background:  -wa-waveform-background;
@@ -212,7 +215,7 @@
 
     /* TABLE */
     -wa-table-header-background: #4d4d4d;
-    -wa-progress-track-background: #00102E; /*color/brand/light*/
+    -wa-progress-track-background: -brand-light;
     -wa-progress-foreground: #015AD9;
     -wa-table-row-border: -wa-list-item-border-light;
     -wa-table-row-hover: -wa-background;

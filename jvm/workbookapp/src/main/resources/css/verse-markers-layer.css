@@ -21,7 +21,7 @@
 }
 
 .verse-marker__drag-area:movable {
-    -fx-background-color: -wa-primary-20;
+    -fx-background-color: -brand-light-80;
 }
 
 .verse-marker__line {
@@ -36,7 +36,7 @@
 }
 
 .verse-marker__icon {
-    -fx-background-color: #E5E8EB;
+    -fx-background-color: -wa-narration-waveform-background;
     -fx-translate-x: 0;
     -fx-translate-y: -20;
 }

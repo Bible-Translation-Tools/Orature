@@ -132,6 +132,7 @@
     /* TODO: Rename/move these when finalized */
     -surface-primary: #ffffff;
     -brand-light: #eef0ff;
+    -brand-light-80: #eef0ffcc;
     -surface-tertiary: #e6e6e6;
 
     -wa-button-secondary-default-surface: -surface-primary;
@@ -190,6 +191,7 @@
     -wa-minimap-slider-background: #B3B9C2;
     -wa-recorder-controls-background: #282CBD;
 
+    -wa-narration-waveform-background: #E5E8EB;
     -wa-waveform-background: white;
     -wa-waveform-background-dark: rgb(206, 214, 227);
     -wa-scrolling-waveform-background: -wa-black-30-noalpha;
