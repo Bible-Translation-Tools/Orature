@@ -89,44 +89,62 @@
 
 /* -------------- Primary Button -------------- */
 .btn--primary {
-    -fx-background-color: -wa-primary;
+    -fx-background-color: -wa-button-primary-default-surface;
+    -fx-background-radius: 12px;
     -fx-background-radius: 12px;
     -fx-effect: -wa-level2;
     -fx-border-width: 1px;
     -fx-border-radius: 12px;
-    -fx-border-color: -wa-primary-dark;
-    -fx-text-fill: -wa-primary-btn-text-fill;
+    -fx-border-color: -wa-button-primary-default-border;
+    -fx-text-fill: -wa-button-primary-default-on-surface;
     -fx-font-size: 20px;
     -fx-underline: false;
     -fx-graphic-text-gap: 8px;
 }
 
 .btn--primary .ikonli-font-icon {
-    -fx-fill: -wa-primary-btn-text-fill;
+    -fx-fill: -wa-button-primary-default-on-surface;
     -fx-font-size: 24px;
 }
 
 .btn--primary:hover {
-    -fx-background-color: -wa-primary;
+    -fx-background-color: -wa-button-primary-hover-surface;
+    -fx-text-fill: -wa-button-primary-hover-on-surface;
+    -fx-border-color: transparent;
     -fx-underline: true;
 }
 
+.btn--primary:hover .ikonli-font-icon {
+    -fx-fill: -wa-button-primary-hover-on-surface;
+    -fx-font-size: 24px;
+}
+
+/*TODO: figure out how to style pressed state*/
 .btn--primary:pressed {
     -fx-background-color: -wa-primary-dark;
     -fx-underline: false;
 }
 
 .btn--primary:disabled {
-    -fx-background-color: -wa-disabled-background;
+    -fx-background-color: -wa-button-primary-inactive-surface;
     -fx-border-width: 0px;
-    -fx-text-fill: -wa-disabled-text;
+    -fx-text-fill: -wa-button-primary-inactive-on-surface;
     -fx-effect: -wa-level0;
     -fx-cursor: disappear;
     -fx-underline: false;
 }
 
 .btn--primary:disabled .ikonli-font-icon {
-    -fx-fill: -wa-disabled-text;
+    -fx-fill: -wa-button-primary-inactive-on-surface;
+}
+
+.btn--primary:inactive {
+    -fx-background-color: -wa-button-primary-inactive-surface;
+    -fx-border-color: transparent;
+}
+
+.btn--primary:inactive .ikonli-font-icon {
+    -fx-fill: -wa-button-primary-inactive-on-surface;
 }
 
 /* -------------- Call to Action Button -------------- */
@@ -160,67 +178,6 @@
     -fx-cursor: disappear;
     -fx-opacity: 1;
 }
-
-/* TODO: remove this after testing and integrate it into Button Secondary*/
-/* -------------- Primary Button 2 -------------- */
-.btn--primary2 {
-    -fx-background-color: -wa-button-primary-default-surface;
-    -fx-background-radius: 12px;
-    -fx-effect: -wa-level2;
-    -fx-border-width: 1px;
-    -fx-border-radius: 12px;
-    -fx-border-color: -wa-button-primary-default-border;
-    -fx-text-fill: -wa-button-primary-default-on-surface;
-    -fx-font-size: 20px;
-    -fx-underline: false;
-    -fx-graphic-text-gap: 8px;
-}
-
-.btn--primary2 .ikonli-font-icon {
-    -fx-fill: -wa-button-primary-default-on-surface;
-    -fx-font-size: 24px;
-}
-
-.btn--primary2:hover {
-    -fx-background-color: -wa-button-primary-hover-surface;
-    -fx-text-fill: -wa-button-primary-hover-on-surface;
-    -fx-border-color: transparent;
-    -fx-underline: true;
-}
-
-.btn--primary2:hover .ikonli-font-icon {
-    -fx-fill: -wa-button-primary-hover-on-surface;
-    -fx-font-size: 24px;
-}
-
-.btn--primary2:pressed {
-    -fx-background-color: -wa-primary-dark;
-    -fx-underline: false;
-}
-
-.btn--primary2:disabled {
-    -fx-background-color: -wa-button-primary-inactive-surface;
-    -fx-border-width: 0px;
-    -fx-text-fill: -wa-button-primary-inactive-on-surface;
-    -fx-effect: -wa-level0;
-    -fx-cursor: disappear;
-    -fx-underline: false;
-}
-
-.btn--primary2:disabled .ikonli-font-icon {
-    -fx-fill: -wa-button-primary-inactive-on-surface;
-}
-
-.btn--primary2:inactive {
-    -fx-background-color: -wa-button-primary-inactive-surface;
-    -fx-border-color: transparent;
-}
-
-.btn--primary2:inactive .ikonli-font-icon {
-    -fx-fill: -wa-button-primary-inactive-on-surface;
-}
-
-
 
 /* -------------- Secondary Button -------------- */
 .btn--secondary {

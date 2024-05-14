@@ -98,7 +98,7 @@ open class PeerEdit : View() {
         hbox {
             addClass("consume__bottom", "recording__bottom-section")
             button {
-                addClass("btn", "btn--primary2", "consume__btn")
+                addClass("btn", "btn--primary", "consume__btn")
                 val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
                 val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
                 textProperty().bind(viewModel.isPlayingProperty.stringBinding {

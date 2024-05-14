@@ -42,7 +42,7 @@ class StickyVerse : HBox() {
             hgrow = Priority.ALWAYS
         }
         button(resumeTextProperty) {
-            addClass("btn", "btn--primary2")
+            addClass("btn", "btn--primary")
             graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
 
             action {
