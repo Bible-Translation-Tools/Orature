@@ -40,6 +40,7 @@ object ProjectFormatIdentifier {
                 validateOratureFile(file)
                 ProjectFormat.RESOURCE_CONTAINER
             }
+            // TODO("tstudio format check")
             else -> {
                 throw IllegalArgumentException("The following file is not supported: $file")
             }
