@@ -42,7 +42,7 @@ class StickyVerse : HBox() {
             hgrow = Priority.ALWAYS
         }
         button(resumeTextProperty) {
-            addClass("btn", "btn--primary")
+            addClass("btn", "btn--primary2")
             graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
 
             action {
@@ -52,8 +52,8 @@ class StickyVerse : HBox() {
     }
 }
 
-class ResumeVerseEvent: FXEvent()
+class ResumeVerseEvent : FXEvent()
 
 fun EventTarget.stickyVerse(op: StickyVerse.() -> Unit = {}) =
     StickyVerse().attachTo(this, op) {
-}
+    }
