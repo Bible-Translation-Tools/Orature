@@ -52,7 +52,7 @@ class ChunkTakeCard(take: TakeCardModel) : HBox() {
             sideTextProperty.bind(remainingTimeProperty)
         }
         button {
-            addClass("btn", "btn--icon--primary")
+            addClass("btn", "btn--secondary2")
             tooltip(messages["delete"])
             graphic = FontIcon(MaterialDesign.MDI_DELETE)
 
@@ -68,7 +68,7 @@ class ChunkTakeCard(take: TakeCardModel) : HBox() {
             }
         }
         button {
-            addClass("btn", "btn--icon--primary")
+            addClass("btn", "btn--secondary2")
             tooltip(messages["select"])
             togglePseudoClass("active", take.selected)
 

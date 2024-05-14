@@ -55,7 +55,7 @@ class SourceTextDrawer : VBox() {
             }
             region { hgrow = Priority.ALWAYS }
             button {
-                addClass("btn", "btn--icon--secondary")
+                addClass("btn", "btn--tertiary2", "source-text-drawer__btn")
                 graphicProperty().bind(isCollapsedProperty.objectBinding {
                     if (it == true) {
                         VBox(

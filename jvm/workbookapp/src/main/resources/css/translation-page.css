@@ -131,6 +131,10 @@
     -fx-min-width: 90;
 }
 
+.source-text-drawer__btn {
+    -fx-border-width: 1px;
+}
+
 .drawer-graphic-container {
     -fx-alignment: center;
     -fx-spacing: 5;

@@ -98,7 +98,7 @@ open class PeerEdit : View() {
         hbox {
             addClass("consume__bottom", "recording__bottom-section")
             button {
-                addClass("btn", "btn--primary", "consume__btn")
+                addClass("btn", "btn--primary2", "consume__btn")
                 val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
                 val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
                 textProperty().bind(viewModel.isPlayingProperty.stringBinding {
@@ -120,7 +120,7 @@ open class PeerEdit : View() {
                 }
             }
             button(messages["confirm"]) {
-                addClass("btn", "btn--icon--secondary", "consume__btn--secondary")
+                addClass("btn", "btn--secondary2", "consume__btn--secondary")
                 graphic = FontIcon(MaterialDesign.MDI_CHECK_CIRCLE)
                 tooltip(text)
 
@@ -133,7 +133,7 @@ open class PeerEdit : View() {
             }
             region { hgrow = Priority.ALWAYS }
             button(messages["record"]) {
-                addClass("btn", "btn--icon--secondary", "consume__btn--secondary")
+                addClass("btn", "btn--secondary2", "consume__btn--secondary")
                 graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                 tooltip(text)
 
