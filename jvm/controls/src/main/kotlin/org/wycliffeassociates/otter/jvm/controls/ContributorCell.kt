@@ -63,7 +63,7 @@ class ContributorCell : HBox() {
         )
 
         button {
-            addClass("btn", "btn--icon", "btn--borderless", "contributor__list-cell__delete-btn")
+            addClass("btn", "btn--icon", "btn--tertiary", "btn--borderless", "contributor__list-cell__delete-btn")
             graphic = FontIcon(Material.DELETE).addClass("delete-icon")
             tooltip(messages["remove"])
             setOnAction {

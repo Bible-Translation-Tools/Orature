@@ -43,12 +43,12 @@ class ContributorDialog : OtterDialog() {
             spacing = 10.0
             hbox {
                 addClass("contributor-dialog__header")
-                label (messages["modifyContributors"]) {
+                label(messages["modifyContributors"]) {
                     addClass("h3")
                 }
                 region { hgrow = Priority.ALWAYS }
                 button {
-                    addClass("btn", "btn--secondary")
+                    addClass("btn", "btn--tertiary", "btn--borderless")
                     graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
                     tooltip(messages["close"])
                     action { close() }
@@ -75,7 +75,7 @@ class ContributorDialog : OtterDialog() {
             hgrow = Priority.ALWAYS
             addClass("contributor-dialog__action")
 
-            button (messages["save"]) {
+            button(messages["save"]) {
                 addClass("btn", "btn--primary", "btn--borderless", "contributor-dialog__action__confirm-btn")
                 graphic = FontIcon(MaterialDesign.MDI_CHECK_CIRCLE)
                 tooltip(this.text)
