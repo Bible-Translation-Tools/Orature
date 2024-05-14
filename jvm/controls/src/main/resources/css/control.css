@@ -593,7 +593,7 @@
 /* -------------- Radio button ---------------- */
 
 .wa-radio .radio {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-radio-button-background;
     -fx-border-width: 2px;
     -fx-border-radius: 1.0em;
     -fx-border-color: -wa-gray-darker;

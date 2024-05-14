@@ -158,13 +158,13 @@
 
 
     /* text field input */
-    -wa-text-input-fill: -wa-black;
+    -wa-text-input-fill: -wa-white;
     -wa-text-field-border: gray;
     -wa-text-field-border-focused: gray;
-    -wa-text-field-background: transparent;
-    -wa-text-field-background-hover: transparent;
-    -wa-text-field-background-focused: -wa-regular-text;
-    -wa-text-field-background-focused-hover: -wa-regular-text;
+    -wa-text-field-background: -wa-foreground;
+    -wa-text-field-background-hover: -wa-button-tertiary-hover-surface;
+    -wa-text-field-background-focused: -wa-foreground;
+    -wa-text-field-background-focused-hover: -wa-foreground;
     -wa-text-field-focused-effect: -wa-level0;
 
     /* combo box, drop down */
@@ -175,6 +175,7 @@
     -wa-checkbox-background: -wa-fill-neutral;
     -wa-checkbox-button-background: #4d4f66;
     -wa-checkbox-button-background-selected: #bdd8ff;
+    -wa-radio-button-background: -wa-foreground;
 
     /* toggle button */
     -wa-toggle-selected: -wa-white-40;
@@ -207,7 +208,7 @@
 
     /* dialog */
     -wa-dialog-overlay: -wa-black-80;
-    -wa-dialog-background: -wa-background;
+    -wa-dialog-background: -wa-foreground;
 
     /* status */
     -wa-success-color: #82A93F;
