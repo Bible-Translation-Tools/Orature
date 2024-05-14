@@ -66,7 +66,7 @@ class ExportProjectDialog : OtterDialog() {
             }
             region { hgrow = Priority.ALWAYS }
             button {
-                addClass("btn", "btn--icon", "btn--borderless")
+                addClass("btn", "btn--icon", "btn--tertiary", "btn--borderless")
                 graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
                 tooltip(messages["close"])
                 onActionProperty().bind(onCloseActionProperty)
