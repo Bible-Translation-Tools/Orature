@@ -52,7 +52,7 @@ class MarkerNodeSkin(val control: MarkerNode) : SkinBase<MarkerNode>(control) {
                     minWidth = USE_PREF_SIZE
                 }
                 button {
-                    addClass("btn", "btn--secondary2", "normal-text")
+                    addClass("btn", "btn--secondary", "normal-text")
                     graphic = FontIcon(MaterialDesign.MDI_DELETE).addClass("wa-icon")
                     tooltip(messages["remove_chunk"])
                     visibleWhen { control.canBeDeletedProperty }

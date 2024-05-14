@@ -162,76 +162,6 @@
 }
 
 /* TODO: remove this after testing and integrate it into Button Secondary*/
-/* -------------- Secondary Button 2 -------------- */
-.btn--secondary2 {
-    -fx-background-color: -wa-button-secondary-default-surface;
-    -fx-background-radius: 12px;
-    -fx-border-radius: 12px;
-    -fx-border-width: 2px;
-    -fx-border-color: -wa-button-secondary-default-border;
-    -fx-text-fill: -wa-button-secondary-default-on-surface;
-    -fx-font-size: 1.4em;
-    -jfx-disable-visual-focus: true;
-    -fx-graphic-text-gap: 8px;
-}
-
-.btn--secondary2 .ikonli-font-icon {
-    -fx-font-size: 1.9em;
-    -fx-icon-color: -wa-button-secondary-default-on-surface;
-}
-
-.btn--secondary2:hover {
-    -fx-background-color: -wa-button-secondary-hover-surface;
-    -fx-background-radius: 12px;
-    -fx-border-color: -wa-button-secondary-hover-border;
-    -fx-border-radius: 12px;
-    -fx-underline: true;
-    -fx-text-fill: -wa-button-secondary-hover-on-surface;
-}
-
-.btn--secondary2:hover .ikonli-font-icon {
-    -fx-icon-color: -wa-button-secondary-hover-on-surface;
-}
-
-.btn--secondary2:pressed {
-    -fx-background-color: -wa-secondary-btn-background-pressed;
-    -fx-border-color: -wa-secondary-btn-text-fill-pressed;
-    -fx-text-fill: -wa-secondary-btn-text-fill-pressed;
-    -fx-underline: false;
-}
-
-.btn--secondary2:pressed .ikonli-font-icon {
-    -fx-fill: -wa-secondary-btn-text-fill-pressed;
-}
-
-.btn--secondary2:disabled {
-    -fx-cursor: disappear;
-    -fx-text-fill: -wa-disabled-text;
-    -fx-border-color: -wa-disabled-text;
-    -fx-border-width: 2px;
-    -fx-underline: false;
-}
-
-.btn--secondary2:disabled .ikonli-font-icon {
-    -fx-icon-color: -wa-disabled-text;
-}
-
-.btn--secondary2:active {
-    -fx-background-color: -wa-button-secondary-hover-surface;
-    -fx-background-radius: 12px;
-    -fx-border-radius: 12px;
-    -fx-border-width: 2px;
-    -fx-border-color: transparent;
-    -fx-text-fill: -wa-button-secondary-hover-on-surface;
-}
-
-.btn--secondary2:active .ikonli-font-icon {
-    -fx-icon-color: -wa-button-secondary-hover-on-surface;
-}
-
-
-
-/* TODO: remove this after testing and integrate it into Button Secondary*/
 /* -------------- Primary Button 2 -------------- */
 .btn--primary2 {
     -fx-background-color: -wa-button-primary-default-surface;
@@ -294,28 +224,32 @@
 
 /* -------------- Secondary Button -------------- */
 .btn--secondary {
-    -fx-background-color: -wa-secondary-btn-background;
+    -fx-background-color: -wa-button-secondary-default-surface;
+    -fx-background-radius: 12px;
+    -fx-border-color: -wa-button-secondary-default-border;
     -fx-border-radius: 12px;
-    -fx-border-width: 1px;
-    -fx-border-color: -wa-secondary-btn-border;
-    -fx-text-fill: -wa-secondary-btn-text-fill;
+    -fx-border-width: 2px;
+    -fx-text-fill: -wa-button-secondary-default-on-surface;
     -fx-font-size: 1.4em;
     -jfx-disable-visual-focus: true;
     -fx-graphic-text-gap: 8px;
 }
 .btn--secondary .ikonli-font-icon {
     -fx-font-size: 1.9em;
-    -fx-icon-color: -wa-secondary-btn-text-fill;
+    -fx-icon-color: -wa-button-secondary-default-on-surface;
 }
 .btn--secondary:hover {
-    -fx-background-color: -wa-secondary-btn-background-hover;
-    -fx-border-color: -wa-secondary-btn-text-fill-hover;
-    -fx-text-fill: -wa-secondary-btn-text-fill-hover;
+    -fx-background-color: -wa-button-secondary-hover-surface;
+    -fx-background-radius: 12px;
+    -fx-border-color: -wa-button-secondary-hover-border;
+    -fx-border-radius: 12px;
+    -fx-text-fill: -wa-button-secondary-hover-on-surface;
     -fx-underline: true;
 }
 .btn--secondary:hover .ikonli-font-icon {
-    -fx-icon-color: -wa-secondary-btn-text-fill-hover;
+    -fx-icon-color: -wa-button-secondary-hover-on-surface;
 }
+/*TODO: figure out how to style these pressed states*/
 .btn--secondary:pressed {
     -fx-background-color: -wa-secondary-btn-background-pressed;
     -fx-border-color: -wa-secondary-btn-text-fill-pressed;
@@ -325,6 +259,8 @@
 .btn--secondary:pressed .ikonli-font-icon {
     -fx-fill: -wa-secondary-btn-text-fill-pressed;
 }
+
+/*TODO: figure out how to style these disabled states*/
 .btn--secondary:disabled {
     -fx-cursor: disappear;
     -fx-text-fill: -wa-disabled-text;
@@ -337,27 +273,17 @@
 }
 
 .btn--secondary:active {
-    -fx-background-color: -wa-black;
+    -fx-background-color: -wa-button-secondary-hover-surface;
+    -fx-background-radius: 12px;
+    -fx-border-color: transparent;
+    -fx-border-width: 2px;
+    -fx-border-radius: 12px;
     -fx-effect: -wa-level3;
-}
-.btn--secondary:active .text {
-    -fx-fill: -wa-white;
-    -fx-text-fill: -wa-white;
-}
-.btn--secondary:active .ikonli-font-icon {
-    -fx-icon-color: -wa-white;
+    -fx-text-fill: -wa-button-secondary-hover-on-surface;
 }
 
-.btn--secondary:inactive {
-    -fx-background-color: #E5E8EB;
-    -fx-border-width: 0;
-}
-.btn--secondary:inactive .text {
-    -fx-fill: #66768B;
-    -fx-text-fill: #66768B;
-}
-.btn--secondary:inactive .ikonli-font-icon {
-    -fx-icon-color: #66768B;
+.btn--secondary:active .ikonli-font-icon {
+    -fx-icon-color: -wa-button-secondary-hover-on-surface;
 }
 
 .btn--secondary-light {

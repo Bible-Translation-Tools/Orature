@@ -40,7 +40,7 @@ class NarrationToolBar : View() {
         addClass("narration-toolbar", "narration-toolbar__play-controls")
         alignment = Pos.CENTER_LEFT
         button {
-            addClass("btn", "btn--secondary2")
+            addClass("btn", "btn--secondary")
             tooltip { textProperty().bind(this@button.textProperty()) }
 
             disableWhen {

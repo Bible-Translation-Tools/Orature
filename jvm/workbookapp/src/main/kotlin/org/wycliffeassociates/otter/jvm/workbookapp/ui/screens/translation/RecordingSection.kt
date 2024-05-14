@@ -67,7 +67,7 @@ class RecordingSection : BorderPane() {
                 }
             }
             button(messages["save"]) {
-                addClass("btn", "btn--secondary2", "consume__btn--secondary")
+                addClass("btn", "btn--secondary", "consume__btn--secondary")
                 graphic = FontIcon(MaterialDesign.MDI_CHECK_CIRCLE)
 
                 visibleWhen { isRecordingProperty.not() }

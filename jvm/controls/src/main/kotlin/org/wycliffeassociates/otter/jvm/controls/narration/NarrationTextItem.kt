@@ -178,7 +178,7 @@ class NarrationTextItem : VBox() {
                     spacing = 16.0
                     narration_button {
                         prefWidth = 150.0
-                        addClass("btn", "btn--secondary2")
+                        addClass("btn", "btn--secondary")
                         addPseudoClass("active")
                         text = messages["pause"]
                         graphic = FontIcon(MaterialDesign.MDI_PAUSE)
@@ -186,7 +186,7 @@ class NarrationTextItem : VBox() {
                     }
                     narration_button {
                         prefWidth = 150.0
-                        addClass("btn", "btn--secondary2")
+                        addClass("btn", "btn--secondary")
 
                         onActionProperty().bind(
                             objectBinding(
@@ -235,7 +235,7 @@ class NarrationTextItem : VBox() {
                     }
                     narration_button {
                         prefWidth = 150.0
-                        addClass("btn", "btn--secondary2")
+                        addClass("btn", "btn--secondary")
 
                         onActionProperty().bind(
                             objectBinding(
@@ -285,7 +285,7 @@ class NarrationTextItem : VBox() {
                     }
                     narration_button {
                         prefWidth = 150.0
-                        addClass("btn", "btn--secondary2")
+                        addClass("btn", "btn--secondary")
                         addPseudoClass("inactive")
 
                         onActionProperty().bind(
@@ -347,7 +347,7 @@ class NarrationTextItem : VBox() {
                         alignment = Pos.CENTER
                         prefWidth = 316.0
                         styleClass.clear()
-                        addClass("btn", "btn--secondary2")
+                        addClass("btn", "btn--secondary")
                         text = messages["reRecord"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onRecordAgainActionProperty)
@@ -362,7 +362,7 @@ class NarrationTextItem : VBox() {
                         alignment = Pos.CENTER
                         prefWidth = 316.0
                         styleClass.clear()
-                        addClass("btn", "btn--secondary2")
+                        addClass("btn", "btn--secondary")
                         addPseudoClass("inactive")
                         text = messages["reRecord"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
@@ -378,7 +378,7 @@ class NarrationTextItem : VBox() {
                         alignment = Pos.CENTER
                         prefWidth = 316.0
                         styleClass.clear()
-                        addClass("btn", "btn--secondary2")
+                        addClass("btn", "btn--secondary")
                         addPseudoClass("inactive")
                         text = messages["reRecord"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
@@ -394,7 +394,7 @@ class NarrationTextItem : VBox() {
                     paddingTop = 10.0
                     spacing = 16.0
                     narration_button {
-                        addClass("btn", "btn--secondary2")
+                        addClass("btn", "btn--secondary")
                         addPseudoClass("active")
                         text = messages["pause"]
                         graphic = FontIcon(MaterialDesign.MDI_PAUSE)
@@ -415,7 +415,7 @@ class NarrationTextItem : VBox() {
                     paddingTop = 10.0
                     spacing = 16.0
                     narration_button {
-                        addClass("btn", "btn--secondary2")
+                        addClass("btn", "btn--secondary")
                         text = messages["resume"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onResumeRecordingAgainAction)
