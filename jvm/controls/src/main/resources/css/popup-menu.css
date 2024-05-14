@@ -58,7 +58,7 @@
 }
 
 .wa-context-menu .menu-item:focused {
-    -fx-background-color: -wa-foreground-hover;
+    -fx-background-color: -wa-button-tertiary-hover-surface;
 }
 
 .wa-context-menu .menu-item:focused > .label {
