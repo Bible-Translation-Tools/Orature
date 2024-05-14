@@ -144,6 +144,16 @@
     -wa-button-secondary-inactive-on-surface: -on-surface-tertiary;
     -wa-button-secondary-inactive-border: -surface-tertiary;
 
+    /* TODO: Rename/move these when finalized */
+    -wa-button-primary-default-surface: -wa-primary;
+    -wa-button-primary-default-on-surface: -on-surface-invert;
+    -wa-button-primary-default-border: -wa-primary;
+    -wa-button-primary-hover-surface: -brand-dark;
+    -wa-button-primary-hover-on-surface: -on-surface-invert;
+    -wa-button-primary-inactive-surface: -surface-secondary;
+    -wa-button-primary-inactive-on-surface: -on-surface-tertiary;
+
+
 
     /* text field input */
     -wa-text-input-fill: -wa-black;
