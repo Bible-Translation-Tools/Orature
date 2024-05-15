@@ -27,11 +27,13 @@ import kotlin.jvm.Throws
 
 object ProjectFormatIdentifier {
 
-    private val projectFormatIdentifier: ProjectFormatIdentifier
+    private val projectFormatIdentifier: IFormatIdentifier
         get() {
-            val orature = OratureFileValidator()
-            val tstudio = TstudioFileValidator()
+            // set up the chains for identifying the project format
+            val orature = OratureFileIdentifier()
+            val tstudio = TstudioFileIdentifier()
             orature.next = tstudio
+
             return orature
         }
 
@@ -43,14 +45,21 @@ object ProjectFormatIdentifier {
             ?: throw IllegalArgumentException("The following file is not supported: $file")
     }
 
-    private interface ProjectFormatIdentifier {
-        var next: ProjectFormatIdentifier?
+    /**
+     * Chains of Responsibility - getting the corresponding format of a given project file
+     */
+    private interface IFormatIdentifier {
+        var next: IFormatIdentifier?
+
+        /**
+         * Returns the project format of the given file
+         */
         fun getFormat(file: File): ProjectFormat?
     }
 
-    private class OratureFileValidator : ProjectFormatIdentifier {
+    private class OratureFileIdentifier : IFormatIdentifier {
 
-        override var next: ProjectFormatIdentifier? = null
+        override var next: IFormatIdentifier? = null
 
         override fun getFormat(file: File): ProjectFormat? {
             return try {
@@ -61,9 +70,9 @@ object ProjectFormatIdentifier {
             }
         }
     }
-    private class TstudioFileValidator : ProjectFormatIdentifier {
+    private class TstudioFileIdentifier : IFormatIdentifier {
 
-        override var next: ProjectFormatIdentifier? = null
+        override var next: IFormatIdentifier? = null
 
         override fun getFormat(file: File): ProjectFormat? {
             return if (Converter.isValidFormat(file)) {

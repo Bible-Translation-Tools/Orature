@@ -227,7 +227,7 @@ class ImportProjectViewModel : ViewModel() {
                     }
             }
         } catch (e: Exception) {
-            logger.error("Error in getting info from resource container $rc", e)
+            logger.error("Error in getting info from resource container $rc")
         }
     }
 }
