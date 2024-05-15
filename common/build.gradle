@@ -3,7 +3,7 @@ dependencies {
     implementation "com.jakewharton.rxrelay2:rxrelay:$rxrelayVer"
     implementation "org.slf4j:slf4j-api:$slf4jApiVer"
     implementation "de.sciss:jump3r:$jump3rVer"
-
+    implementation 'org.wycliffeassociates:kotlin-tstudio2rc:0.1.4-20240515.163524-1'
     // Testing
     testImplementation "junit:junit:$junitVer"
     testImplementation "io.mockk:mockk:$mockkVer"

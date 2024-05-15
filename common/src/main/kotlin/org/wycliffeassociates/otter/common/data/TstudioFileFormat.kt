@@ -5,7 +5,7 @@ enum class TstudioFileFormat(val extension: String) {
     ZIP("zip");
 
     companion object {
-        val extensionList: List<String> = OratureFileFormat.values().map { it.extension }
+        val extensionList: List<String> = entries.map { it.extension }
 
         fun isSupported(extension: String) = extension.lowercase() in extensionList
     }

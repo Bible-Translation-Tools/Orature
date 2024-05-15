@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ConflictResolution
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.ProgressStatus
+import org.wycliffeassociates.otter.common.data.TstudioFileFormat
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportCallbackParameter
@@ -180,7 +181,7 @@ class ImportProjectViewModel : ViewModel() {
                 )
                 false
             }
-            files.first().extension !in OratureFileFormat.extensionList -> {
+            files.first().extension !in (OratureFileFormat.extensionList + TstudioFileFormat.extensionList)  -> {
                 snackBarObservable.onNext(messages["importInvalidFileError"])
                 logger.error(
                     "(Drag-Drop) Invalid import file extension. Input files: ${files.first()}"

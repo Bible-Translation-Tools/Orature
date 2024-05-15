@@ -63,10 +63,7 @@ class ImportProjectUseCase @Inject constructor() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @Throws(
-        IllegalArgumentException::class,
-        InvalidResourceContainerException::class
-    )
+    @Throws(IllegalArgumentException::class)
     fun import(
         file: File,
         callback: ProjectImporterCallback?,
@@ -143,10 +140,6 @@ class ImportProjectUseCase @Inject constructor() {
      * Get the corresponding importer based on the project format.
      */
     private fun getImporter(format: ProjectFormat): IProjectImporter {
-        /*
-            If we support 2+ formats, uncomment this
-            val factory = when (format) { ... }
-        */
         val factory: IProjectImporterFactory = when(format) {
             ProjectFormat.RESOURCE_CONTAINER -> rcFactoryProvider
             ProjectFormat.TSTUDIO -> tsFactoryProvider

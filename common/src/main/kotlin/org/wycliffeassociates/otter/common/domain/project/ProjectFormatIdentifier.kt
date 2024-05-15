@@ -18,44 +18,59 @@
  */
 package org.wycliffeassociates.otter.common.domain.project
 
-import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import org.wycliffeassociates.tstudio2rc.Converter
 import java.io.File
-import java.io.InvalidObjectException
 import java.lang.Exception
 import java.lang.IllegalArgumentException
 import kotlin.jvm.Throws
 
 object ProjectFormatIdentifier {
 
-    @Throws(
-        IllegalArgumentException::class,
-        InvalidResourceContainerException::class
-    )
+    private val projectFormatIdentifier: ProjectFormatIdentifier
+        get() {
+            val orature = OratureFileValidator()
+            val tstudio = TstudioFileValidator()
+            orature.next = tstudio
+            return orature
+        }
+
+    @Throws(IllegalArgumentException::class)
     fun getProjectFormat(
         file: File
     ): ProjectFormat {
-        return when {
-            OratureFileFormat.isSupported(file.extension) || file.isDirectory -> {
-                validateOratureFile(file)
+        return projectFormatIdentifier.getFormat(file)
+            ?: throw IllegalArgumentException("The following file is not supported: $file")
+    }
+
+    private interface ProjectFormatIdentifier {
+        var next: ProjectFormatIdentifier?
+        fun getFormat(file: File): ProjectFormat?
+    }
+
+    private class OratureFileValidator : ProjectFormatIdentifier {
+
+        override var next: ProjectFormatIdentifier? = null
+
+        override fun getFormat(file: File): ProjectFormat? {
+            return try {
+                ResourceContainer.load(file).close()
                 ProjectFormat.RESOURCE_CONTAINER
-            }
-            // TODO("tstudio format check")
-            else -> {
-                throw IllegalArgumentException("The following file is not supported: $file")
+            } catch (e: Exception) {
+                next?.getFormat(file)
             }
         }
     }
+    private class TstudioFileValidator : ProjectFormatIdentifier {
 
-    private fun validateOratureFile(file: File) {
-        try {
-            ResourceContainer.load(file).close()
-        } catch (e: Exception) {
-            throw InvalidResourceContainerException("Invalid resource container file $file")
+        override var next: ProjectFormatIdentifier? = null
+
+        override fun getFormat(file: File): ProjectFormat? {
+            return if (Converter.isValidFormat(file)) {
+                ProjectFormat.TSTUDIO
+            } else {
+                next?.getFormat(file)
+            }
         }
     }
 }
-
-class InvalidResourceContainerException(
-    override val message: String
-) : InvalidObjectException(message)

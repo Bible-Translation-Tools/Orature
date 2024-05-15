@@ -4,13 +4,13 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 class TsImporterFactory @Inject constructor(): IProjectImporterFactory {
-    @Inject lateinit var tsImporter: Provider<TsImporter>
+    @Inject lateinit var tstudioImporter: Provider<TstudioImporter>
     @Inject lateinit var existingProjectImporter: Provider<ExistingSourceImporter>
     @Inject lateinit var newSourceImporter: Provider<NewSourceImporter>
 
-    private val importer: TsImporter by lazy {
+    private val importer: TstudioImporter by lazy {
         // ts file is converted to RC and then passed to source importers
-        val importer1 = tsImporter.get()
+        val importer1 = tstudioImporter.get()
         val importer2 = existingProjectImporter.get()
         val importer3 = newSourceImporter.get()
 
