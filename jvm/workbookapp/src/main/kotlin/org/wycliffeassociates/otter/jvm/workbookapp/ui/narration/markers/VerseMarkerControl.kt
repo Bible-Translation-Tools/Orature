@@ -111,7 +111,7 @@ class VerseMarkerControl : BorderPane() {
         }
 
         right = Button().apply {
-            addClass("btn", "btn--icon", "verse-marker__menu")
+            addClass("btn", "btn--icon", "btn--tertiary", "verse-marker__menu")
             setAlignment(this, Pos.BOTTOM_LEFT)
             graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
             tooltip(messages["options"])

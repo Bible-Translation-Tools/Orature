@@ -110,6 +110,8 @@
     -wa-btn-icon-border-color: #0E0E0E; /*color surface border*/
     -wa-filter-button-background: #4d4f66;
     -wa-app-bar-btn-text: -wa-black;
+    -wa-button-pressed-surface: #dbe2ff;
+    -wa-button-pressed-on-surface: -wa-button-primary-default-on-surface;
 
 
     /* TODO: Rename/move these when finalized */

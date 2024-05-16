@@ -62,7 +62,12 @@
 }
 
 .btn--icon:hover {
-    -fx-background-color: -wa-btn-icon-background-hover;
+    -fx-background-color: -wa-button-tertiary-hover-surface;
+    -fx-border-color: transparent;
+}
+
+.btn--icon:hover .ikonli-font-icon {
+    -fx-icon-color: -wa-button-tertiary-hover-on-surface;
 }
 
 .btn--icon:active:hover {
@@ -70,7 +75,14 @@
 }
 
 .btn--icon:pressed {
-    -fx-background-color: -wa-btn-icon-background-pressed;
+    -fx-background-color: -wa-button-pressed-surface;
+    -fx-border-color: transparent;
+    -fx-text-fill: -wa-button-primary-default-on-surface;
+    -fx-underline: true;
+}
+
+.btn--icon:pressed .ikonli-font-icon {
+    -fx-icon-color: -wa-button-primary-default-on-surface;
 }
 
 .btn--icon:disabled {
@@ -119,9 +131,8 @@
     -fx-font-size: 24px;
 }
 
-/*TODO: figure out how to style pressed state*/
 .btn--primary:pressed {
-    -fx-background-color: -wa-primary-dark;
+    -fx-background-color: -wa-button-pressed-surface;
     -fx-underline: false;
 }
 
@@ -206,15 +217,15 @@
 .btn--secondary:hover .ikonli-font-icon {
     -fx-icon-color: -wa-button-secondary-hover-on-surface;
 }
-/*TODO: figure out how to style these pressed states*/
+
 .btn--secondary:pressed {
-    -fx-background-color: -wa-secondary-btn-background-pressed;
+    -fx-background-color: -wa-button-pressed-surface;
     -fx-border-color: -wa-secondary-btn-text-fill-pressed;
-    -fx-text-fill: -wa-secondary-btn-text-fill-pressed;
+    -fx-text-fill: -wa-button-primary-default-on-surface;
     -fx-underline: false;
 }
 .btn--secondary:pressed .ikonli-font-icon {
-    -fx-fill: -wa-secondary-btn-text-fill-pressed;
+    -fx-icon-color: -wa-button-primary-default-on-surface;
 }
 
 /*TODO: figure out how to style these disabled states*/
@@ -308,6 +319,17 @@
 
 .btn--tertiary:hover .ikonli-font-icon {
     -fx-icon-color: -wa-button-tertiary-hover-on-surface;
+}
+
+.btn--tertiary:pressed {
+    -fx-background-color: -wa-button-pressed-surface;
+    -fx-border-color: transparent;
+    -fx-text-fill: -wa-button-primary-default-on-surface;
+    -fx-underline: true;
+}
+
+.btn--tertiary:pressed .ikonli-font-icon {
+    -fx-icon-color: -wa-button-primary-default-on-surface;
 }
 
 .btn--tertiary:active {

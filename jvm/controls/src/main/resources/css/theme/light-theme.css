@@ -111,6 +111,8 @@
     -wa-btn-icon-border-color: -wa-black-20;
     -wa-filter-button-background: -wa-black-10;
     -wa-app-bar-btn-text: -wa-white;
+    -wa-button-pressed-surface: #001952;
+    -wa-button-pressed-on-surface: -wa-button-primary-default-on-surface;
 
     /* TODO: Rename/move these when finalized */
     -on-surface-secondary: #343434;
