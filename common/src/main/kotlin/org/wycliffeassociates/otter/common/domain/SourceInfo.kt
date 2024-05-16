@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 data class SourceInfo(val metadata: ResourceMetadata)
 
-class SourceMetadataAccessor @Inject constructor(
+class SourceAudioRepository @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val resourceMetadataRepository: IResourceMetadataRepository,
     private val collectionRepository: ICollectionRepository
