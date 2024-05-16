@@ -114,7 +114,6 @@ class NarrationPage : View() {
 
     override fun onDock() {
         super.onDock()
-        subscribeToThemeChange()
         subscribeToEvents()
         setUpLoadingModal()
         // avoid resetting ViewModel states & action history when coming back from plugin
@@ -125,6 +124,7 @@ class NarrationPage : View() {
 
             false -> { // regular navigation
                 viewModel.onDock()
+                viewModel.colorThemeProperty.bind(settingsViewModel.appColorMode)
                 narrationHeader.onDock()
                 audioWorkspaceView.onDock()
                 teleprompterView.onDock()
@@ -150,13 +150,6 @@ class NarrationPage : View() {
                 teleprompterView.onUndock()
             }
         }
-    }
-
-
-    private fun subscribeToThemeChange() {
-        settingsViewModel.appColorMode.onChangeWithDisposer {
-            it?.let { viewModel.colorThemeProperty.set(it) }
-        }.let { disposableListeners.add(it) }
     }
 
     private fun subscribeToEvents() {

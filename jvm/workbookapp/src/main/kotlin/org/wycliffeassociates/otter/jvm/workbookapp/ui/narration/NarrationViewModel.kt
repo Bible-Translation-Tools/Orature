@@ -100,7 +100,7 @@ class NarrationViewModel : ViewModel() {
 
     private lateinit var volumeBar: VolumeBar
 
-    val colorThemeProperty = SimpleObjectProperty(ColorTheme.LIGHT)
+    val colorThemeProperty = SimpleObjectProperty<ColorTheme>()
 
     val recordAgainVerseIndexProperty = SimpleObjectProperty<Int?>()
     var recordAgainVerseIndex by recordAgainVerseIndexProperty
