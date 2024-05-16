@@ -74,6 +74,19 @@
     -fx-background-color: transparent;
 }
 
+.section-option-button {
+    -fx-background-color: -surface-primary;
+}
+
+.section-button:hover {
+    -fx-background-color: -surface-secondary;
+}
+
+.section-button:hover .ikonli-font-icon {
+    -fx-icon-size: 20px;
+    -fx-icon-color: -wa-regular-text;
+}
+
 .icon-xl {
     -fx-font-size: 6em;
     -fx-icon-color: -wa-primary;
