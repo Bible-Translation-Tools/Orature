@@ -28,8 +28,8 @@ import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 
 private const val USHORT_SIZE = 65535.0
-private const val WAV_COLOR_LIGHT = "#66768B"
-private const val WAV_COLOR_DARK = "#808080"
+const val WAV_COLOR_LIGHT = "#999999"
+const val WAV_COLOR_DARK = "#808080"
 
 class WaveformLayer(
     private val renderer: ActiveRecordingRenderer,

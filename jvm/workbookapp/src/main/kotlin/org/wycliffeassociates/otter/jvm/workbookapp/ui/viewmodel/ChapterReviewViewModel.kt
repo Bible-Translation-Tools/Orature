@@ -522,8 +522,8 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             audio.reader(),
             width = imageWidthProperty.value.toInt(),
             height = height,
-            wavColor = Color.web(WAV_COLOR),
-            background = Color.web(BACKGROUND_COLOR)
+            wavColor = Color.web(WAV_COLOR_LIGHT), // TODO: change this for light/dark modes
+            background = Color.web(WAV_BACKGROUND_COLOR_LIGHT) // TODO: change this for light/dark modes
         )
     }
 

@@ -30,6 +30,7 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
@@ -53,6 +54,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
     val translationViewModel: TranslationViewModel2 by inject()
+    val settingsViewModel: SettingsViewModel by inject()
 
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
@@ -142,12 +144,22 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
 
+        val backgroundColor: String
+        val waveformColor: String
+        if (settingsViewModel.appColorMode.value == ColorTheme.LIGHT) {
+            backgroundColor = WAV_BACKGROUND_COLOR_LIGHT
+            waveformColor = WAV_COLOR_LIGHT
+        } else {
+            backgroundColor = WAV_BACKGROUND_COLOR_DARK
+            waveformColor = WAV_COLOR_DARK
+        }
+
         waveform = builder.buildAsync(
             audio.reader(),
             width = imageWidthProperty.value.toInt(),
             height = height,
-            wavColor = Color.web(WAV_COLOR),
-            background = Color.web(BACKGROUND_COLOR)
+            wavColor = Color.web(waveformColor),
+            background = Color.web(backgroundColor)
         )
     }
 

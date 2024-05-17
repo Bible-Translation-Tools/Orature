@@ -54,8 +54,10 @@ import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
 import tornadofx.*
 
-const val WAV_COLOR = "#66768B"
-const val BACKGROUND_COLOR = "#fff"
+const val WAV_COLOR_LIGHT = "#999999"
+const val WAV_BACKGROUND_COLOR_LIGHT = "#FFFFFF"
+const val WAV_COLOR_DARK = "#808080"
+const val WAV_BACKGROUND_COLOR_DARK = "#343434"
 
 class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
@@ -271,8 +273,8 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             audio.reader(),
             width = imageWidthProperty.value.toInt(),
             height = height,
-            wavColor = Color.web(WAV_COLOR),
-            background = Color.web(BACKGROUND_COLOR)
+            wavColor = Color.web(WAV_COLOR_LIGHT), // TODO: change this for light/dark modes
+            background = Color.web(WAV_BACKGROUND_COLOR_LIGHT)
         )
     }
 

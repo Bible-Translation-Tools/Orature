@@ -19,6 +19,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform
 
 import io.reactivex.Observable
+import io.reactivex.Scheduler
+import io.reactivex.schedulers.Schedulers
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.image.Image
@@ -29,6 +31,10 @@ import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.domain.narration.AudioScene
 import org.wycliffeassociates.otter.common.domain.theme.AppTheme
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WAV_BACKGROUND_COLOR_DARK
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WAV_BACKGROUND_COLOR_LIGHT
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WAV_COLOR_DARK
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WAV_COLOR_LIGHT
 import tornadofx.c
 import tornadofx.runLater
 import java.nio.ByteBuffer
@@ -40,28 +46,30 @@ class NarrationWaveformRenderer(
     val renderHeight: Int,
     val colorThemeObservable: Observable<ColorTheme>,
 ) {
-    private var backgroundColor: Color = c("#E5E8EB")
-    private var waveformColor: Color = c("#66768B")
+    private var backgroundColor: Color = c(WAV_BACKGROUND_COLOR_LIGHT)
+    private var waveformColor: Color = c(WAV_COLOR_LIGHT)
     private val writableImage = WritableImage(renderWidth, renderHeight)
     var pixelFormat: PixelFormat<ByteBuffer> = PixelFormat.getByteRgbInstance()
     private val imageData = ByteArray(renderWidth * renderHeight * 3)
 
     init {
         fillImageDataWithDefaultColor()
-        colorThemeObservable.subscribe {
-            it?.let {
-                updateWaveformColors(it)
+        colorThemeObservable
+            .subscribeOn(Schedulers.io())
+            .subscribe {
+                it?.let {
+                    updateWaveformColors(it)
+                }
             }
-        }
     }
 
     fun updateWaveformColors(theme: ColorTheme) {
         if (theme == ColorTheme.LIGHT) {
-            backgroundColor = c("#E5E8EB")
-            waveformColor = c("#66768B")
+            backgroundColor = c(WAV_BACKGROUND_COLOR_LIGHT)
+            waveformColor = c(WAV_COLOR_LIGHT)
         } else {
-            backgroundColor = c("#343434")
-            waveformColor = c("#808080")
+            backgroundColor = c(WAV_BACKGROUND_COLOR_DARK)
+            waveformColor = c(WAV_COLOR_DARK)
         }
     }
 

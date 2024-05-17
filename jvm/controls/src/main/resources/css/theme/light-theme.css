@@ -194,7 +194,7 @@
     -wa-minimap-slider-background: #B3B9C2;
     -wa-recorder-controls-background: #282CBD;
 
-    -wa-narration-waveform-background: #E5E8EB;
+    -wa-narration-waveform-background: white;
     -wa-waveform-background: white;
     -wa-waveform-background-dark: rgb(206, 214, 227);
     -wa-scrolling-waveform-background: -wa-black-30-noalpha;
@@ -205,7 +205,7 @@
 
     -wa-marker-overlay-primary: rgba(30, 221, 118, 0.2);
     -wa-marker-overlay-secondary: rgba(1, 90, 217, 0.2);
-    -wa-marker-track-background: -wa-white;
+    -wa-marker-track-background: -wa-waveform-background;
 
     /* dialog */
     -wa-dialog-overlay: -wa-black-60;
