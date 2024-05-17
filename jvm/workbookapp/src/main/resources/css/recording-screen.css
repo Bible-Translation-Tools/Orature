@@ -17,7 +17,7 @@
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
 .waveform {
-    -fx-background-color: -wa-waveform-background;
+    -fx-background-color: -wa-narration-waveform-background;
 }
 
 .recording__bottom-section {
