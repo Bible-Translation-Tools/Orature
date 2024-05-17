@@ -31,6 +31,7 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
@@ -60,7 +61,7 @@ const val WAV_COLOR_DARK = "#808080"
 const val WAV_BACKGROUND_COLOR_DARK = "#343434"
 
 class ChunkingViewModel : ViewModel(), IMarkerViewModel {
-
+    val settingsViewModel: SettingsViewModel by inject()
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
     val translationViewModel: TranslationViewModel2 by inject()
@@ -129,12 +130,12 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             }
     }
 
-    fun undock() {
+    fun undock(forceSaveChanges: Boolean = false) {
         pause()
         translationViewModel.selectedStepProperty.value?.let {
             // handle when navigating to the next step
             val hasUnsavedChanges = markerCountProperty.value != 0 && markerModel?.canUndo() == true
-            if (hasUnsavedChanges && it.ordinal > ChunkingStep.CHUNKING.ordinal) {
+            if ((hasUnsavedChanges && it.ordinal > ChunkingStep.CHUNKING.ordinal) || forceSaveChanges) {
                 saveChanges()
             }
             translationViewModel.updateStep()
@@ -269,12 +270,22 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
 
+        val backgroundColor: String
+        val waveformColor: String
+        if (settingsViewModel.appColorMode.value == ColorTheme.LIGHT) {
+            backgroundColor = WAV_BACKGROUND_COLOR_LIGHT
+            waveformColor = WAV_COLOR_LIGHT
+        } else {
+            backgroundColor = WAV_BACKGROUND_COLOR_DARK
+            waveformColor = WAV_COLOR_DARK
+        }
+
         waveform = builder.buildAsync(
             audio.reader(),
             width = imageWidthProperty.value.toInt(),
             height = height,
-            wavColor = Color.web(WAV_COLOR_LIGHT), // TODO: change this for light/dark modes
-            background = Color.web(WAV_BACKGROUND_COLOR_LIGHT)
+            wavColor = Color.web(waveformColor),
+            background = Color.web(backgroundColor)
         )
     }
 
