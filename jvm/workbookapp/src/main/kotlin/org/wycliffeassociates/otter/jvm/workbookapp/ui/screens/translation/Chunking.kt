@@ -43,12 +43,15 @@ import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
 class Chunking : View() {
     private val logger = LoggerFactory.getLogger(javaClass)
+    private val disposableListeners = mutableListOf<ListenerDisposer>()
 
     val viewModel: ChunkingViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
@@ -155,6 +158,7 @@ class Chunking : View() {
         viewModel.subscribeOnWaveformImagesProperty.set(::subscribeOnWaveformImages)
         viewModel.cleanupWaveformProperty.set(waveform::cleanup)
         viewModel.dock()
+        subscribeOnThemeChange()
     }
 
     override fun onUndock() {
@@ -163,6 +167,15 @@ class Chunking : View() {
         timer?.stop()
         unsubscribeEvents()
         viewModel.undock()
+        disposableListeners.forEach { it.dispose() }
+    }
+
+    fun subscribeOnThemeChange() {
+        settingsViewModel.appColorMode.onChangeWithDisposer {
+            viewModel.onThemeChange()
+            waveform.initializeMarkers()
+            waveform.markers.bind(viewModel.markers) { it }
+        }.apply { disposableListeners.add(this) }
     }
 
     private fun isOverlappingNearbyMarker(): BooleanBinding {

@@ -31,6 +31,7 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
@@ -54,11 +55,13 @@ import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
 import tornadofx.*
 
-const val WAV_COLOR = "#66768B"
-const val BACKGROUND_COLOR = "#fff"
+const val WAV_COLOR_LIGHT = "#999999"
+const val WAV_BACKGROUND_COLOR_LIGHT = "#FFFFFF"
+const val WAV_COLOR_DARK = "#808080"
+const val WAV_BACKGROUND_COLOR_DARK = "#343434"
 
 class ChunkingViewModel : ViewModel(), IMarkerViewModel {
-
+    val settingsViewModel: SettingsViewModel by inject()
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
     val translationViewModel: TranslationViewModel2 by inject()
@@ -127,12 +130,12 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             }
     }
 
-    fun undock() {
+    fun undock(forceSaveChanges: Boolean = false) {
         pause()
         translationViewModel.selectedStepProperty.value?.let {
             // handle when navigating to the next step
             val hasUnsavedChanges = markerCountProperty.value != 0 && markerModel?.canUndo() == true
-            if (hasUnsavedChanges && it.ordinal > ChunkingStep.CHUNKING.ordinal) {
+            if ((hasUnsavedChanges && it.ordinal > ChunkingStep.CHUNKING.ordinal) || forceSaveChanges) {
                 saveChanges()
             }
             translationViewModel.updateStep()
@@ -152,6 +155,14 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
             workbook.sourceAudioAccessor.getUserMarkedChapter(chapter, workbook.target)
         }
+    }
+
+    fun onThemeChange() {
+        pause()
+        builder.cancel()
+        cleanupWaveform()
+        createWaveformImages(audio)
+        subscribeOnWaveformImages()
     }
 
     override fun placeMarker() {
@@ -267,12 +278,22 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
 
+        val backgroundColor: String
+        val waveformColor: String
+        if (settingsViewModel.appColorMode.value == ColorTheme.LIGHT) {
+            backgroundColor = WAV_BACKGROUND_COLOR_LIGHT
+            waveformColor = WAV_COLOR_LIGHT
+        } else {
+            backgroundColor = WAV_BACKGROUND_COLOR_DARK
+            waveformColor = WAV_COLOR_DARK
+        }
+
         waveform = builder.buildAsync(
             audio.reader(),
             width = imageWidthProperty.value.toInt(),
             height = height,
-            wavColor = Color.web(WAV_COLOR),
-            background = Color.web(BACKGROUND_COLOR)
+            wavColor = Color.web(waveformColor),
+            background = Color.web(backgroundColor)
         )
     }
 

@@ -208,6 +208,7 @@ open class PeerEdit : View() {
         viewModel.cleanupWaveformProperty.set(waveform::cleanup)
         viewModel.dock()
         subscribeEvents()
+        subscribeOnThemeChange()
     }
 
     override fun onUndock() {
@@ -219,6 +220,8 @@ open class PeerEdit : View() {
         if (mainSectionProperty.value == recordingView) {
             recorderViewModel.cancel()
         }
+
+        listenerDisposers.forEach { it.dispose() }
     }
 
     private fun subscribeEvents() {
@@ -243,6 +246,12 @@ open class PeerEdit : View() {
         subscribe<TranslationNavigationEvent> {
             viewModel.cleanupWaveform()
         }.also { eventSubscriptions.add(it) }
+    }
+
+    private fun subscribeOnThemeChange() {
+        settingsViewModel.appColorMode.onChangeWithDisposer {
+            viewModel.onThemeChange()
+        }.apply { listenerDisposers.add(this) }
     }
 
     private fun unsubscribeEvents() {

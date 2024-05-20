@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.github.thomasnield.rxkotlinfx.toObservable
 import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -29,6 +30,7 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
@@ -48,6 +50,7 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import tornadofx.*
 import javax.inject.Inject
 
@@ -55,6 +58,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
 
+    val settingsViewModel: SettingsViewModel by inject()
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
     val translationViewModel: TranslationViewModel2 by inject()
@@ -99,7 +103,6 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
 
     fun dock() {
         subscribeToChunks()
-
         currentChunkProperty.onChangeAndDoNowWithDisposer {
             it?.let { chunk ->
                 subscribeToSelectedTake(chunk)
@@ -246,6 +249,19 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
             }.addTo(disposable)
     }
 
+    fun onThemeChange() {
+        val take = currentChunkProperty.value.audio.getSelectedTake()
+        take?.let {
+            pause()
+            builder.cancel()
+            cleanupWaveform()
+
+            val audio = OratureAudioFile(take.file)
+            createWaveformImages(audio)
+            subscribeOnWaveformImages()
+        }
+    }
+
     private fun subscribeToSelectedTake(chunk: Chunk) {
         selectedTakeDisposable.clear()
         chunk.audio.selected
@@ -277,13 +293,23 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         cleanupWaveform()
         imageWidthProperty.set(computeImageWidth(width))
 
+        val backgroundColor: String
+        val waveformColor: String
+        if (settingsViewModel.appColorMode.value == ColorTheme.LIGHT) {
+            backgroundColor = WAV_BACKGROUND_COLOR_LIGHT
+            waveformColor = WAV_COLOR_LIGHT
+        } else {
+            backgroundColor = WAV_BACKGROUND_COLOR_DARK
+            waveformColor = WAV_COLOR_DARK
+        }
+
         builder.cancel()
         waveform = builder.buildAsync(
             audio.reader(),
             width = imageWidthProperty.value.toInt(),
             height = height,
-            wavColor = Color.web(WAV_COLOR),
-            background = Color.web(BACKGROUND_COLOR)
+            wavColor = Color.web(waveformColor),
+            background = Color.web(backgroundColor)
         )
     }
 

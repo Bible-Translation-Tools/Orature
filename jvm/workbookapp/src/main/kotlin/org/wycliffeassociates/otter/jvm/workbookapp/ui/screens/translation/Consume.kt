@@ -35,6 +35,8 @@ import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ConsumeViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
@@ -54,6 +56,7 @@ class Consume : View() {
 
     private var timer: AnimationTimer? = null
     private val eventSubscriptions = mutableListOf<EventRegistration>()
+    private val disposableListeners = mutableListOf<ListenerDisposer>()
 
     override fun onDock() {
         super.onDock()
@@ -65,6 +68,7 @@ class Consume : View() {
         waveform.initializeMarkers()
         waveform.markers.bind(viewModel.markers) { it }
         subscribeEvents()
+        subscribeOnThemeChange()
     }
 
     override fun onUndock() {
@@ -73,6 +77,15 @@ class Consume : View() {
         timer?.stop()
         viewModel.onUndockConsume()
         unsubscribeEvents()
+        disposableListeners.forEach { it.dispose() }
+    }
+
+    private fun subscribeOnThemeChange() {
+        settingsViewModel.appColorMode.onChangeWithDisposer {
+            viewModel.onThemeChange()
+            waveform.initializeMarkers()
+            waveform.markers.bind(viewModel.markers) { it }
+        }.apply { disposableListeners.add(this) }
     }
 
     private fun subscribeOnWaveformImages() {
