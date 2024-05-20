@@ -157,6 +157,14 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         }
     }
 
+    fun onThemeChange() {
+        pause()
+        builder.cancel()
+        cleanupWaveform()
+        createWaveformImages(audio)
+        subscribeOnWaveformImages()
+    }
+
     override fun placeMarker() {
         super.placeMarker()
         onUndoableAction()

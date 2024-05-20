@@ -158,10 +158,7 @@ class Chunking : View() {
         viewModel.subscribeOnWaveformImagesProperty.set(::subscribeOnWaveformImages)
         viewModel.cleanupWaveformProperty.set(waveform::cleanup)
         viewModel.dock()
-
-        settingsViewModel.appColorMode.onChangeWithDisposer {
-            updateWaveform()
-        }.apply { disposableListeners.add(this) }
+        subscribeOnThemeChange()
     }
 
     override fun onUndock() {
@@ -173,11 +170,12 @@ class Chunking : View() {
         disposableListeners.forEach { it.dispose() }
     }
 
-    fun updateWaveform() {
-        viewModel.undock(true)
-        viewModel.dock()
-        waveform.initializeMarkers()
-        waveform.markers.bind(viewModel.markers) { it }
+    fun subscribeOnThemeChange() {
+        settingsViewModel.appColorMode.onChangeWithDisposer {
+            viewModel.onThemeChange()
+            waveform.initializeMarkers()
+            waveform.markers.bind(viewModel.markers) { it }
+        }.apply { disposableListeners.add(this) }
     }
 
     private fun isOverlappingNearbyMarker(): BooleanBinding {
