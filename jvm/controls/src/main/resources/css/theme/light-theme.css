@@ -19,6 +19,26 @@
  @import "/css/base-colors.css"
 
 .light-theme {
+
+
+    /* TODO: Rename/move these when finalized */
+    -on-surface-secondary: #343434;
+    -surface-border: #e6e6e6;
+    -surface-secondary: #f2f2f2;
+    -brand-darkest: #001847;
+    -on-surface-invert: #e6e6e6;
+    -on-surface-tertiary: #999999;
+
+    /* TODO: Rename/move these when finalized */
+    -surface-primary: #ffffff;
+    -brand-light: #eef0ff;
+    -brand-light-80: #eef0ffcc;
+    -surface-tertiary: #e6e6e6;
+
+    /* TODO: Rename/move these when finalized */
+    -brand-dark: #0040a0;
+
+
     /*Primary Color */
     -wa-primary: #015AD9;
     -wa-primary-05: #015AD90D;
@@ -96,46 +116,21 @@
     -wa-take-card-placeholder: -wa-black-05;
 
     /* buttons */
-    -wa-primary-btn-text-fill: -wa-white;
-    -wa-secondary-btn-text-fill: -wa-regular-text-80;
-    -wa-secondary-btn-text-fill-hover: -wa-primary-dark;
-    -wa-secondary-btn-text-fill-pressed: -wa-primary-dark;
-    -wa-secondary-btn-background: transparent;
-    -wa-secondary-btn-background-hover: -wa-primary-05;
-    -wa-secondary-btn-background-pressed: -wa-primary-10;
-    -wa-secondary-btn-border: -wa-border-light;
     -wa-btn-icon-background: -wa-white;
-    -wa-btn-icon-background-hover: #f0f0f0;
-    -wa-btn-icon-background-pressed: #e6e6e6;
     -wa-btn-icon-background-selected: -wa-primary-10;
     -wa-btn-icon-border-color: -wa-black-20;
-    -wa-filter-button-background: -wa-black-10;
+
     -wa-app-bar-btn-text: -wa-white;
     -wa-button-pressed-surface: #001952;
     -wa-button-pressed-on-surface: -wa-button-primary-default-on-surface;
 
-    /* TODO: Rename/move these when finalized */
-    -on-surface-secondary: #343434;
-    -surface-border: #e6e6e6;
-    -surface-secondary: #f2f2f2;
-    -brand-darkest: #001847;
-    -on-surface-invert: #e6e6e6;
-    -on-surface-tertiary: #999999;
-
-    -wa-button-tertiary-default-on-surface: -on-surface-secondary;
-    -wa-button-tertiary-default-border: -surface-border;
-    -wa-button-tertiary-hover-surface: -surface-secondary;
-    -wa-button-tertiary-hover-on-surface: -on-surface-secondary;
-    -wa-button-tertiary-active-surface: -brand-darkest;
-    -wa-button-tertiary-active-on-surface: -on-surface-invert;
-    -wa-button-tertiary-active-border: -brand-darkest;
-    -wa-button-tertiary-inactive-on-surface: -on-surface-tertiary;
-
-    /* TODO: Rename/move these when finalized */
-    -surface-primary: #ffffff;
-    -brand-light: #eef0ff;
-    -brand-light-80: #eef0ffcc;
-    -surface-tertiary: #e6e6e6;
+    -wa-button-primary-default-surface: -wa-primary;
+    -wa-button-primary-default-on-surface: -on-surface-invert;
+    -wa-button-primary-default-border: -brand-darkest;
+    -wa-button-primary-hover-surface: -brand-dark;
+    -wa-button-primary-hover-on-surface: -on-surface-invert;
+    -wa-button-primary-inactive-surface: -surface-secondary;
+    -wa-button-primary-inactive-on-surface: -on-surface-tertiary;
 
     -wa-button-secondary-default-surface: -surface-primary;
     -wa-button-secondary-default-on-surface: -wa-primary;
@@ -146,17 +141,17 @@
     -wa-button-secondary-inactive-surface: -surface-primary;
     -wa-button-secondary-inactive-on-surface: -on-surface-tertiary;
     -wa-button-secondary-inactive-border: -surface-tertiary;
+    -wa-button-secondary-text-fill-pressed: -wa-primary-dark;
 
-    /* TODO: Rename/move these when finalized */
-    -brand-dark: #0040a0;
+    -wa-button-tertiary-default-on-surface: -on-surface-secondary;
+    -wa-button-tertiary-default-border: -surface-border;
+    -wa-button-tertiary-hover-surface: -surface-secondary;
+    -wa-button-tertiary-hover-on-surface: -on-surface-secondary;
+    -wa-button-tertiary-active-surface: -brand-darkest;
+    -wa-button-tertiary-active-on-surface: -on-surface-invert;
+    -wa-button-tertiary-active-border: -brand-darkest;
+    -wa-button-tertiary-inactive-on-surface: -on-surface-tertiary;
 
-    -wa-button-primary-default-surface: -wa-primary;
-    -wa-button-primary-default-on-surface: -on-surface-invert;
-    -wa-button-primary-default-border: -brand-darkest;
-    -wa-button-primary-hover-surface: -brand-dark;
-    -wa-button-primary-hover-on-surface: -on-surface-invert;
-    -wa-button-primary-inactive-surface: -surface-secondary;
-    -wa-button-primary-inactive-on-surface: -on-surface-tertiary;
 
     /* text field input */
     -wa-text-input-fill: -wa-black;

@@ -21,7 +21,7 @@
     -fx-spacing: 8px;
     -fx-background-radius: 16px;
     -fx-background-color: -wa-foreground;
-    -fx-background-color: -wa-secondary-btn-background;
+    -fx-background-color: transparent;
     -fx-border-width: 2px;
     -fx-border-color: -wa-btn-icon-border-color; /*color surface border*/
     -fx-border-radius: 16px;
@@ -40,7 +40,7 @@
 
 .translation-card--active,
 .translation-card--active:hover {
-    -fx-background-color: -wa-secondary-btn-background;
+    -fx-background-color: transparent;
     -fx-border-width: 2px;
     -fx-border-color: -wa-primary;
     -fx-border-radius: 16px;

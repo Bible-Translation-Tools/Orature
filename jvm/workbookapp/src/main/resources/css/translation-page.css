@@ -94,7 +94,7 @@
 }
 
 .chunking-step__header-section:hover {
-    -fx-background-color: -wa-secondary-btn-background-hover;
+    -fx-background-color: -wa-primary-05;
 }
 
 .chunking-step__header-section .chunking-step__title {

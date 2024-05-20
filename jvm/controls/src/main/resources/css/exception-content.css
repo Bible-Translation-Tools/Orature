@@ -36,12 +36,12 @@
 }
 
 .exception-content__show-more-btn:hover {
-    -fx-background-color: -wa-secondary-btn-background-hover;
+    -fx-background-color: -wa-primary-05;
 }
 
 .exception-content__show-more-btn * {
-    -fx-fill: -wa-secondary-btn-text-fill;
-    -fx-icon-color: -wa-secondary-btn-text-fill;
+    -fx-fill: -wa-regular-text;
+    -fx-icon-color: -wa-regular-text-80;
 }
 
 .exception-content__send-report {

@@ -220,7 +220,7 @@
 
 .btn--secondary:pressed {
     -fx-background-color: -wa-button-pressed-surface;
-    -fx-border-color: -wa-secondary-btn-text-fill-pressed;
+    -fx-border-color: -wa-button-secondary-text-fill-pressed;
     -fx-text-fill: -wa-button-primary-default-on-surface;
     -fx-underline: false;
 }
