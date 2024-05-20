@@ -39,6 +39,7 @@ import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
@@ -96,6 +97,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     @Inject
     lateinit var chapterTranslationBuilder: ChapterTranslationBuilder
 
+    val settingsViewModel: SettingsViewModel by inject()
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
     val audioPluginViewModel: AudioPluginViewModel by inject()
@@ -192,6 +194,10 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         translationViewModel.currentMarkerProperty.unbind()
         translationViewModel.currentMarkerProperty.set(-1)
         cleanup()
+    }
+
+    fun onThemeChange() {
+        reloadAudio(true).subscribe()
     }
 
     override fun placeMarker() {
@@ -302,6 +308,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                                 }
                                 actionHistory.execute(action)
                             }
+
                             else -> {
                                 // no-op
                             }
@@ -338,27 +345,29 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             .subscribe()
     }
 
-    fun reloadAudio(): Completable {
+    fun reloadAudio(keepMarkers: Boolean = false): Completable {
         cleanupWaveform()
         initWaveformMarkerProperty.value?.invoke()
 
         val chapterTake = workbookDataStore.chapter.audio.getSelectedTake()!!
+
         return loadTargetAudio(chapterTake)
             .flatMapCompletable {
-                loadMarkersAndWaveform(it)
+                loadMarkersAndWaveform(it, keepMarkers)
             }
             .doOnComplete {
                 onUndoableAction()
             }
     }
 
-    private fun loadMarkersAndWaveform(audio: OratureAudioFile): Completable {
+    private fun loadMarkersAndWaveform(audio: OratureAudioFile, keepMarkers: Boolean = false): Completable {
         return Completable
             .fromAction {
                 val sourceAudio = audioDataStore.sourceAudioProperty.value
                     ?.let { OratureAudioFile(it.file) }
-
-                loadVerseMarkers(audio, sourceAudio)
+                if (!keepMarkers) {
+                    loadVerseMarkers(audio, sourceAudio)
+                }
                 createWaveformImages(audio)
                 subscribeOnWaveformImages()
             }
@@ -517,13 +526,23 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
 
+        val backgroundColor: String
+        val waveformColor: String
+        if (settingsViewModel.appColorMode.value == ColorTheme.LIGHT) {
+            backgroundColor = WAV_BACKGROUND_COLOR_LIGHT
+            waveformColor = WAV_COLOR_LIGHT
+        } else {
+            backgroundColor = WAV_BACKGROUND_COLOR_DARK
+            waveformColor = WAV_COLOR_DARK
+        }
+
         builder.cancel()
         waveform = builder.buildAsync(
             audio.reader(),
             width = imageWidthProperty.value.toInt(),
             height = height,
-            wavColor = Color.web(WAV_COLOR_LIGHT), // TODO: change this for light/dark modes
-            background = Color.web(WAV_BACKGROUND_COLOR_LIGHT) // TODO: change this for light/dark modes
+            wavColor = Color.web(waveformColor),
+            background = Color.web(backgroundColor)
         )
     }
 

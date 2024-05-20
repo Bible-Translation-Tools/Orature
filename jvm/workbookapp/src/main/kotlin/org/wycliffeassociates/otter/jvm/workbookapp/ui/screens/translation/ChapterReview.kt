@@ -50,6 +50,8 @@ import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.SnackBarEvent
@@ -60,6 +62,7 @@ import tornadofx.*
 
 class ChapterReview : View() {
     private val logger = LoggerFactory.getLogger(javaClass)
+    private val disposableListeners = mutableListOf<ListenerDisposer>()
 
     val viewModel: ChapterReviewViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
@@ -211,6 +214,7 @@ class ChapterReview : View() {
             }
         }
         subscribeEvents()
+        subscribeToThemeChange()
     }
 
     override fun onUndock() {
@@ -220,12 +224,22 @@ class ChapterReview : View() {
             true -> {
                 /* no-op, opening plugin */
             }
+
             false -> {
                 logger.info("Final Review undocked.")
                 viewModel.undock()
             }
         }
         unsubscribeEvents()
+        disposableListeners.forEach { it.dispose() }
+    }
+
+    private fun subscribeToThemeChange() {
+        settingsViewModel.appColorMode.onChangeWithDisposer {
+            it?.let {
+                viewModel.onThemeChange()
+            }
+        }.apply { disposableListeners.add(this) }
     }
 
     private fun subscribeEvents() {
