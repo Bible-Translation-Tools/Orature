@@ -119,12 +119,6 @@ class WaveformFrame(
                     styleClass.add("scrolling-waveform-frame__center")
                     alignment = Pos.CENTER
 
-                    themeProperty.onChange {
-                        it?.let { theme ->
-                            adjustWaveformColorByTheme(theme, waveformColorEffect)
-                        }
-                    }
-
                     /**
                      * Putting this in the middle of the borderpane below will result in one of the following errors:
                      *
@@ -211,6 +205,7 @@ class WaveformFrame(
                         onRewindProperty.value?.invoke(speed)
                         it.consume()
                     }
+
                     KeyCode.RIGHT -> {
                         onFastForwardProperty.value?.invoke(speed)
                         it.consume()
@@ -225,6 +220,7 @@ class WaveformFrame(
                         onResumeMediaProperty.value?.invoke()
                         it.consume()
                     }
+
                     KeyCode.ENTER, KeyCode.SPACE -> {
                         onToggleMediaProperty.value?.invoke()
                         it.consume()
