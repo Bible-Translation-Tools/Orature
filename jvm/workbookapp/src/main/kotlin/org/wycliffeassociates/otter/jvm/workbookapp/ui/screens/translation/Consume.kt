@@ -68,10 +68,7 @@ class Consume : View() {
         waveform.initializeMarkers()
         waveform.markers.bind(viewModel.markers) { it }
         subscribeEvents()
-        
-        settingsViewModel.appColorMode.onChangeWithDisposer {
-            updateWaveform()
-        }.apply { disposableListeners.add(this) }
+        subscribeOnThemeChange()
     }
 
     override fun onUndock() {
@@ -83,11 +80,12 @@ class Consume : View() {
         disposableListeners.forEach { it.dispose() }
     }
 
-    fun updateWaveform() {
-        viewModel.onUndockConsume()
-        viewModel.onDockConsume()
-        waveform.initializeMarkers()
-        waveform.markers.bind(viewModel.markers) { it }
+    private fun subscribeOnThemeChange() {
+        settingsViewModel.appColorMode.onChangeWithDisposer {
+            viewModel.onThemeChange()
+            waveform.initializeMarkers()
+            waveform.markers.bind(viewModel.markers) { it }
+        }.apply { disposableListeners.add(this) }
     }
 
     private fun subscribeOnWaveformImages() {

@@ -123,6 +123,17 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
         translationViewModel.currentMarkerProperty.set(-1)
     }
 
+    fun onThemeChange() {
+        val audioFile = audioDataStore.sourceAudioProperty.value?.file
+        audioFile?.let {
+            pause()
+            builder.cancel()
+            cleanupWaveform()
+            createWaveformImages(OratureAudioFile(audioFile))
+            subscribeOnWaveformImages()
+        }
+    }
+
     fun pause() {
         audioController?.pause()
     }
