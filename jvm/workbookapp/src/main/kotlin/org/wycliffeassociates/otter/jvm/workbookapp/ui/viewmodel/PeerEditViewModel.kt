@@ -103,8 +103,6 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
 
     fun dock() {
         subscribeToChunks()
-        subscribeToThemeChanges()
-
         currentChunkProperty.onChangeAndDoNowWithDisposer {
             it?.let { chunk ->
                 subscribeToSelectedTake(chunk)
@@ -251,14 +249,17 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
             }.addTo(disposable)
     }
 
-    private fun subscribeToThemeChanges() {
-        settingsViewModel.appColorMode.onChangeWithDisposer {
-            it?.let {
-                currentChunkProperty.value.audio.getSelectedTake()?.let { take ->
-                    loadTargetAudio(take)
-                }
-            }
-        }.apply { disposableListeners.add(this) }
+    fun onThemeChange() {
+        val take = currentChunkProperty.value.audio.getSelectedTake()
+        take?.let {
+            pause()
+            builder.cancel()
+            cleanupWaveform()
+
+            val audio = OratureAudioFile(take.file)
+            createWaveformImages(audio)
+            subscribeOnWaveformImages()
+        }
     }
 
     private fun subscribeToSelectedTake(chunk: Chunk) {
