@@ -33,6 +33,11 @@ import tornadofx.c
 import tornadofx.runLater
 import java.nio.ByteBuffer
 
+const val WAV_COLOR_LIGHT = "#999999"
+const val WAV_BACKGROUND_COLOR_LIGHT = "#FFFFFF"
+const val WAV_COLOR_DARK = "#808080"
+const val WAV_BACKGROUND_COLOR_DARK = "#343434"
+
 // Set up the canvas for the Waveform and Volume bar
 class NarrationWaveformRenderer(
     private val renderer: AudioScene,
@@ -57,11 +62,11 @@ class NarrationWaveformRenderer(
 
     fun updateWaveformColors(theme: ColorTheme) {
         if (theme == ColorTheme.LIGHT) {
-            backgroundColor = c("#E5E8EB")
-            waveformColor = c("#66768B")
+            backgroundColor = c(WAV_BACKGROUND_COLOR_LIGHT)
+            waveformColor = c(WAV_COLOR_LIGHT)
         } else {
-            backgroundColor = c("#343434")
-            waveformColor = c("#808080")
+            backgroundColor = c(WAV_BACKGROUND_COLOR_DARK)
+            waveformColor = c(WAV_COLOR_DARK)
         }
     }
 
