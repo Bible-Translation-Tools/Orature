@@ -35,14 +35,13 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.image.Image
-import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
-import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.data.getWaveformColors
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
@@ -526,24 +525,18 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
 
-        val backgroundColor: String
-        val waveformColor: String
-        if (settingsViewModel.appColorMode.value == ColorTheme.LIGHT) {
-            backgroundColor = WAV_BACKGROUND_COLOR_LIGHT
-            waveformColor = WAV_COLOR_LIGHT
-        } else {
-            backgroundColor = WAV_BACKGROUND_COLOR_DARK
-            waveformColor = WAV_COLOR_DARK
-        }
+        val waveformColors = getWaveformColors(settingsViewModel.appColorMode.value)
 
-        builder.cancel()
-        waveform = builder.buildAsync(
-            audio.reader(),
-            width = imageWidthProperty.value.toInt(),
-            height = height,
-            wavColor = Color.web(waveformColor),
-            background = Color.web(backgroundColor)
-        )
+        waveformColors?.let {
+            builder.cancel()
+            waveform = builder.buildAsync(
+                audio.reader(),
+                width = imageWidthProperty.value.toInt(),
+                height = height,
+                wavColor = waveformColors.wavColor,
+                background = waveformColors.backgroundColor
+            )
+        }
     }
 
     private fun onUndoableAction() {
