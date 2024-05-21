@@ -228,7 +228,6 @@
     -fx-icon-color: -wa-button-primary-default-on-surface;
 }
 
-/*TODO: figure out how to style these disabled states*/
 .btn--secondary:disabled {
     -fx-cursor: disappear;
     -fx-text-fill: -wa-disabled-text;
@@ -241,17 +240,16 @@
 }
 
 .btn--secondary:active {
-    -fx-background-color: -wa-button-secondary-hover-surface;
+    -fx-background-color: -wa-button-secondary-active-surface;
     -fx-background-radius: 12px;
     -fx-border-color: transparent;
     -fx-border-width: 2px;
     -fx-border-radius: 12px;
-    -fx-effect: -wa-level3;
-    -fx-text-fill: -wa-button-secondary-hover-on-surface;
+    -fx-text-fill: -wa-button-secondary-active-on-surface;
 }
 
 .btn--secondary:active .ikonli-font-icon {
-    -fx-icon-color: -wa-button-secondary-hover-on-surface;
+    -fx-icon-color: -wa-button-secondary-active-on-surface;
 }
 
 .btn--secondary-light {

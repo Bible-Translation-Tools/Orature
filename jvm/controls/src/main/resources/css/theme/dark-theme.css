@@ -120,6 +120,9 @@
     -wa-button-secondary-hover-surface: -wa-primary-dark;
     -wa-button-secondary-hover-on-surface: -wa-on-surface-invert;
     -wa-button-secondary-hover-border: -wa-primary-dark;
+    -wa-button-secondary-active-surface: -wa-primary-dark;
+    -wa-button-secondary-active-on-surface: -wa-on-surface-invert;
+    -wa-button-secondary-active-border: -wa-primary-dark;
     -wa-button-secondary-inactive-surface: -wa-surface-primary;
     -wa-button-secondary-inactive-on-surface: -wa-on-surface-tertiary;
     -wa-button-secondary-inactive-border: -wa-surface-tertiary;

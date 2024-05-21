@@ -121,6 +121,9 @@
     -wa-button-secondary-hover-surface: -wa-primary-light;
     -wa-button-secondary-hover-on-surface: -wa-primary;
     -wa-button-secondary-hover-border: -wa-primary;
+    -wa-button-secondary-active-surface: -wa-primary-light;
+    -wa-button-secondary-active-on-surface: -wa-primary;
+    -wa-button-secondary-active-border: -wa-primary;
     -wa-button-secondary-inactive-surface: -wa-surface-primary;
     -wa-button-secondary-inactive-on-surface: -wa-on-surface-tertiary;
     -wa-button-secondary-inactive-border: -wa-surface-tertiary;
