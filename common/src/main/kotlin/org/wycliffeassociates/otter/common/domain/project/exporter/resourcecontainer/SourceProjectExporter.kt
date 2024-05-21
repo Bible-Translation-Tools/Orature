@@ -21,7 +21,10 @@ package org.wycliffeassociates.otter.common.domain.project.exporter.resourcecont
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import org.bibletranslationtools.container.BurritoContainer
+import org.bibletranslationtools.container.BurritoProjectBuilder
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
@@ -35,6 +38,7 @@ import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.project.exporter.ProjectExporterCallback
 import org.wycliffeassociates.otter.common.domain.audio.WAV_TO_MP3_COMPRESSED_RATE
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito.ScriptureBurritoUtils
 import org.wycliffeassociates.otter.common.io.zip.IFileWriter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.utils.mapNotNull
@@ -43,8 +47,12 @@ import org.wycliffeassociates.resourcecontainer.entity.Media
 import org.wycliffeassociates.resourcecontainer.entity.MediaManifest
 import org.wycliffeassociates.resourcecontainer.entity.MediaProject
 import java.io.File
+import java.nio.file.Files
 import java.util.*
 import javax.inject.Inject
+import kotlin.io.path.inputStream
+import kotlin.io.path.outputStream
+import kotlin.io.path.readText
 
 class SourceProjectExporter @Inject constructor(
     directoryProvider: IDirectoryProvider
@@ -88,7 +96,7 @@ class SourceProjectExporter @Inject constructor(
     override fun estimateExportSize(workbook: Workbook, chapterFilter: List<Int>): Long {
         return workbook.target.chapters
             .filter { it.sort in chapterFilter }
-            .mapNotNull {it.getSelectedTake()?.file }
+            .mapNotNull { it.getSelectedTake()?.file }
             .reduce(0L) { size, nextFile ->
                 when (AudioFileFormat.of(nextFile.extension)) {
                     AudioFileFormat.MP3 -> size + nextFile.length()
@@ -209,6 +217,22 @@ class SourceProjectExporter @Inject constructor(
                 )
 
                 rc.write()
+
+                val file = Files.createTempFile(directoryProvider.tempDirectory.toPath(), "out_burrito", "json")
+                ScriptureBurritoUtils.writeBurritoManifest(
+                    OratureInfo.SUITE_NAME,
+                    "1.0.0",
+                    workbook,
+                    rc,
+                    workbook.source.language,
+                    "wav",
+                    directoryProvider.tempDirectory,
+                    file.outputStream()
+                )
+                rc.accessor.write("metadata.json") {
+                    file.inputStream().transferTo(it)
+                }
+                println(file.readText())
             }
         } catch (e: Exception) {
             logger.error("Error while updating project manifest.", e)
