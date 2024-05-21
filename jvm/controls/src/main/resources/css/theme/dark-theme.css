@@ -36,18 +36,13 @@
     -wa-foreground-hover: #585b74;
     -wa-foreground-pressed: #21212c;
 
-    -wa-surface: #9097bb;
-    -wa-surface-secondary: #1F1F1F;
-
-    /* TODO: Rename/move these when finalized */
     -wa-surface-primary: #343434;
-    -surface-tertiary: #cccccc;
-
-    /* TODO: Rename/move these when finalized */
-    -on-surface-secondary: #cccccc;
-    -surface-border: #0e0e0e;
-    -on-surface-invert: #1f1f1f;
-    -on-surface-tertiary: #808080;
+    -wa-surface-secondary: #1f1f1f;
+    -wa-surface-tertiary: #cccccc;
+    -wa-surface-border: #0e0e0e;
+    -wa-on-surface-secondary: #cccccc;
+    -wa-on-surface-invert: #1f1f1f;
+    -wa-on-surface-tertiary: #808080;
 
     /*Accent Color */
     -wa-accent: #F39422;
@@ -112,32 +107,32 @@
     -wa-button-pressed-on-surface: -wa-button-primary-default-on-surface;
 
     -wa-button-primary-default-surface: -wa-primary;
-    -wa-button-primary-default-on-surface: -on-surface-invert;
+    -wa-button-primary-default-on-surface: -wa-on-surface-invert;
     -wa-button-primary-default-border: -wa-primary;
     -wa-button-primary-hover-surface: -wa-primary-dark;
-    -wa-button-primary-hover-on-surface: -on-surface-invert;
+    -wa-button-primary-hover-on-surface: -wa-on-surface-invert;
     -wa-button-primary-inactive-surface: -wa-surface-secondary;
-    -wa-button-primary-inactive-on-surface: -on-surface-tertiary;
+    -wa-button-primary-inactive-on-surface: -wa-on-surface-tertiary;
 
     -wa-button-secondary-default-surface: -wa-surface-primary;
     -wa-button-secondary-default-on-surface: -wa-primary;
     -wa-button-secondary-default-border: -wa-primary;
     -wa-button-secondary-hover-surface: -wa-primary-dark;
-    -wa-button-secondary-hover-on-surface: -on-surface-invert;
+    -wa-button-secondary-hover-on-surface: -wa-on-surface-invert;
     -wa-button-secondary-hover-border: -wa-primary-dark;
     -wa-button-secondary-inactive-surface: -wa-surface-primary;
-    -wa-button-secondary-inactive-on-surface: -on-surface-tertiary;
-    -wa-button-secondary-inactive-border: -surface-tertiary;
+    -wa-button-secondary-inactive-on-surface: -wa-on-surface-tertiary;
+    -wa-button-secondary-inactive-border: -wa-surface-tertiary;
     -wa-button-secondary-text-fill-pressed: -wa-regular-text;
 
-    -wa-button-tertiary-default-on-surface: -on-surface-secondary;
-    -wa-button-tertiary-default-border: -surface-border;
+    -wa-button-tertiary-default-on-surface: -wa-on-surface-secondary;
+    -wa-button-tertiary-default-border: -wa-surface-border;
     -wa-button-tertiary-hover-surface: -wa-surface-secondary;
-    -wa-button-tertiary-hover-on-surface: -on-surface-secondary;
+    -wa-button-tertiary-hover-on-surface: -wa-on-surface-secondary;
     -wa-button-tertiary-active-surface: -wa-primary-darkest;
-    -wa-button-tertiary-active-on-surface: -on-surface-invert;
+    -wa-button-tertiary-active-on-surface: -wa-on-surface-invert;
     -wa-button-tertiary-active-border: -wa-primary-darkest;
-    -wa-button-tertiary-inactive-on-surface: -on-surface-tertiary;
+    -wa-button-tertiary-inactive-on-surface: -wa-on-surface-tertiary;
 
     /* text field input */
     -wa-text-input-fill: -wa-white;

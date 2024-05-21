@@ -341,7 +341,7 @@
     -fx-text-fill: -wa-button-tertiary-active-on-surface;
 }
 .btn--tertiary:active .ikonli-font-icon {
-    -fx-icon-color: -on-surface-invert;
+    -fx-icon-color: -wa-on-surface-invert;
 }
 
 .btn--tertiary:inactive {
