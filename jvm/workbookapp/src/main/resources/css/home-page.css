@@ -84,11 +84,11 @@
 }
 
 .section-option-button {
-    -fx-background-color: -surface-primary;
+    -fx-background-color: -wa-surface-primary;
 }
 
 .section-button:hover {
-    -fx-background-color: -surface-secondary;
+    -fx-background-color: -wa-surface-secondary;
 }
 
 .section-button:hover .ikonli-font-icon {
