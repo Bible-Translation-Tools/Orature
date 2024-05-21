@@ -20,37 +20,15 @@
 
 .light-theme {
 
-
-    /* TODO: Rename/move these when finalized */
-    -on-surface-secondary: #343434;
-    -surface-border: #e6e6e6;
-    -surface-secondary: #f2f2f2;
-    -brand-darkest: #001847;
-    -on-surface-invert: #e6e6e6;
-    -on-surface-tertiary: #999999;
-
-    /* TODO: Rename/move these when finalized */
-    -surface-primary: #ffffff;
-    -brand-light: #eef0ff;
-    -brand-light-80: #eef0ffcc;
-    -surface-tertiary: #e6e6e6;
-
-    /* TODO: Rename/move these when finalized */
-    -brand-dark: #0040a0;
-
-
     /*Primary Color */
     -wa-primary: #015AD9;
     -wa-primary-05: #015AD90D;
     -wa-primary-10: #015AD91A;
     -wa-primary-20: #015AD933;
-    -wa-primary-30: #015AD94C;
-    -wa-primary-light: #CEE6FF;
-    -wa-primary-dark: #00377C;
-
-    -wa-primary-variant: -wa-primary;
-    -wa-primary-variant-light: -wa-primary;
-    -wa-primary-variant-dark: -wa-primary;
+    -wa-primary-light: #eef0ff;
+    -wa-primary-light-80: #eef0ffcc;
+    -wa-primary-dark: #0040a0;
+    -wa-primary-darkest: #001847;
 
     -wa-background: #f4f4f4;
     -wa-background-dark: #B3B9C2;
@@ -61,6 +39,17 @@
 
     -wa-surface: inherit;
     -wa-surface-secondary: #F2F2F2;
+
+    /* TODO: Rename/move these when finalized */
+    -on-surface-secondary: #343434;
+    -surface-border: #e6e6e6;
+    -surface-secondary: #f2f2f2;
+    -on-surface-invert: #e6e6e6;
+    -on-surface-tertiary: #999999;
+
+    /* TODO: Rename/move these when finalized */
+    -surface-primary: #ffffff;
+    -surface-tertiary: #e6e6e6;
 
     /*Accent Color */
     -wa-accent: #FFB100;
@@ -126,8 +115,8 @@
 
     -wa-button-primary-default-surface: -wa-primary;
     -wa-button-primary-default-on-surface: -on-surface-invert;
-    -wa-button-primary-default-border: -brand-darkest;
-    -wa-button-primary-hover-surface: -brand-dark;
+    -wa-button-primary-default-border: -wa-primary-darkest;
+    -wa-button-primary-hover-surface: -wa-primary-dark;
     -wa-button-primary-hover-on-surface: -on-surface-invert;
     -wa-button-primary-inactive-surface: -surface-secondary;
     -wa-button-primary-inactive-on-surface: -on-surface-tertiary;
@@ -135,7 +124,7 @@
     -wa-button-secondary-default-surface: -surface-primary;
     -wa-button-secondary-default-on-surface: -wa-primary;
     -wa-button-secondary-default-border: -wa-primary;
-    -wa-button-secondary-hover-surface: -brand-light;
+    -wa-button-secondary-hover-surface: -wa-primary-light;
     -wa-button-secondary-hover-on-surface: -wa-primary;
     -wa-button-secondary-hover-border: -wa-primary;
     -wa-button-secondary-inactive-surface: -surface-primary;
@@ -147,9 +136,9 @@
     -wa-button-tertiary-default-border: -surface-border;
     -wa-button-tertiary-hover-surface: -surface-secondary;
     -wa-button-tertiary-hover-on-surface: -on-surface-secondary;
-    -wa-button-tertiary-active-surface: -brand-darkest;
+    -wa-button-tertiary-active-surface: -wa-primary-darkest;
     -wa-button-tertiary-active-on-surface: -on-surface-invert;
-    -wa-button-tertiary-active-border: -brand-darkest;
+    -wa-button-tertiary-active-border: -wa-primary-darkest;
     -wa-button-tertiary-inactive-on-surface: -on-surface-tertiary;
 
 
