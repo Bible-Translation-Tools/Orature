@@ -19,7 +19,7 @@
 .chapter-selector__controls {
     -fx-alignment: center;
     -fx-background-radius: 6px;
-    -fx-border-color: -wa-btn-icon-border-color; /*TODO: update this variable name */
+    -fx-border-color: -wa-surface-border;
     -fx-border-radius: 16px;
     -fx-border-style: solid;
     -fx-border-width: 2px
@@ -54,7 +54,7 @@
     -fx-background-radius: 16px 0 0 16px;
     -fx-border-radius: 16px 0 0 16px;
     -fx-border-width: 0 2 0 0;
-    -fx-border-color: -wa-btn-icon-border-color;
+    -fx-border-color: -wa-surface-border;
 ;
 }
 
@@ -62,5 +62,5 @@
     -fx-background-radius: 0 16px 16px 0;
     -fx-border-radius: 0 16px 16px 0;
     -fx-border-width: 0 0 0 2;
-    -fx-border-color: -wa-btn-icon-border-color;
+    -fx-border-color: -wa-surface-border;
 }

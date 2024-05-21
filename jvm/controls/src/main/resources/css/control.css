@@ -46,7 +46,7 @@
 
 .btn--icon {
     -fx-border-width: 1px;
-    -fx-border-color: -wa-btn-icon-border-color; /*color surface border*/
+    -fx-border-color: -wa-surface-border;
     -fx-border-radius: 12px;
     -fx-background-color: -wa-btn-icon-background;
     -fx-background-radius: 12px;
@@ -798,7 +798,7 @@
 .wa-menu-button .menu-item:focused .wa-menu-button__list-item,
 .wa-menu-button .menu-item:focused .wa-menu-button__btn-util {
     -fx-border-width: 4px;
-    -fx-border-color: -wa-btn-icon-border-color; /*TODO: figure out a better variable to use*/
+    -fx-border-color: -wa-surface-border;
     -fx-border-radius: 6px;
     -fx-border-insets: -4;
 }

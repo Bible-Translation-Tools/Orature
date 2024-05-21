@@ -23,7 +23,7 @@
     -fx-background-color: -wa-foreground;
     -fx-background-color: transparent;
     -fx-border-width: 2px;
-    -fx-border-color: -wa-btn-icon-border-color; /*color surface border*/
+    -fx-border-color: -wa-surface-border;
     -fx-border-radius: 16px;
 }
 

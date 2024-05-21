@@ -21,7 +21,7 @@
 .dark-theme {
 
     /*Primary Color */
-    -wa-primary: #88A9FF; /*color brand base*/
+    -wa-primary: #88A9FF;
     -wa-primary-05: #88A9FF0D;
     -wa-primary-10: #88A9FF1A;
     -wa-primary-20: #88A9FF33;
@@ -30,12 +30,6 @@
     -wa-primary-dark: #b2c5ff;
     -wa-primary-darkest: #dae2ff;
 
-    -wa-background: #1F1F1F; /*color surface secondary*/
-    -wa-background-dark: #10121c;
-    -wa-foreground:  #343434; /*color surface primary*/
-    -wa-foreground-hover: #585b74;
-    -wa-foreground-pressed: #21212c;
-
     -wa-surface-primary: #343434;
     -wa-surface-secondary: #1f1f1f;
     -wa-surface-tertiary: #cccccc;
@@ -43,6 +37,12 @@
     -wa-on-surface-secondary: #cccccc;
     -wa-on-surface-invert: #1f1f1f;
     -wa-on-surface-tertiary: #808080;
+
+    -wa-background: -wa-surface-secondary;
+    -wa-background-dark: #10121c;
+    -wa-foreground:  -wa-surface-primary;
+    -wa-foreground-hover: #585b74;
+    -wa-foreground-pressed: #21212c;
 
     /*Accent Color */
     -wa-accent: #F39422;
@@ -100,7 +100,7 @@
     /* buttons */
     -wa-btn-icon-background: -wa-transparent;
     -wa-btn-icon-background-selected: #9bbcdd;
-    -wa-btn-icon-border-color: #0E0E0E; /*color surface border*/
+    -wa-btn-icon-border-color: -wa-surface-border;
 
     -wa-app-bar-btn-text: -wa-black;
     -wa-button-pressed-surface: #dbe2ff;
