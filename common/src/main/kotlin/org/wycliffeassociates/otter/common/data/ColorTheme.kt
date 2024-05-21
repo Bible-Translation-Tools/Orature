@@ -20,7 +20,7 @@ package org.wycliffeassociates.otter.common.data
 
 import javafx.scene.paint.Color
 
-const val WAV_COLOR_LIGHT = "#999999"
+const val WAV_COLOR_LIGHT = "#66768B"
 const val WAV_BACKGROUND_COLOR_LIGHT = "#FFFFFF"
 const val WAV_COLOR_DARK = "#808080"
 const val WAV_BACKGROUND_COLOR_DARK = "#343434"
