@@ -35,6 +35,7 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.image.Image
+import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
@@ -533,8 +534,8 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                 audio.reader(),
                 width = imageWidthProperty.value.toInt(),
                 height = height,
-                wavColor = waveformColors.wavColor,
-                background = waveformColors.backgroundColor
+                wavColor = Color.web(waveformColors.wavColorHex),
+                background = Color.web(waveformColors.backgroundColorHex)
             )
         }
     }

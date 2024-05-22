@@ -29,6 +29,7 @@ import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.getWaveformColors
 import org.wycliffeassociates.otter.common.domain.narration.AudioScene
+import tornadofx.c
 import tornadofx.runLater
 import java.nio.ByteBuffer
 
@@ -118,9 +119,9 @@ class NarrationWaveformRenderer(
         var i = 0
         for (y in 0 until renderHeight) {
             for (x in 0 until renderWidth) {
-                imageData[i] = (waveformColors.backgroundColor.red * 255).toInt().toByte()
-                imageData[i + 1] = (waveformColors.backgroundColor.green * 255).toInt().toByte()
-                imageData[i + 2] = (waveformColors.backgroundColor.blue * 255).toInt().toByte()
+                imageData[i] = (c(waveformColors.backgroundColorHex).red * 255).toInt().toByte()
+                imageData[i + 1] = (c(waveformColors.backgroundColorHex).green * 255).toInt().toByte()
+                imageData[i + 2] = (c(waveformColors.backgroundColorHex).blue * 255).toInt().toByte()
                 i += 3
             }
         }
@@ -135,9 +136,9 @@ class NarrationWaveformRenderer(
             val y2 = scaleAmplitude(buffer[x * 2 + 1].toDouble(), canvasHeight)
 
             for (y in minOf(y1.toInt(), y2.toInt())..maxOf(y1.toInt(), y2.toInt())) {
-                imageData[(x + y * renderWidth) * 3] = (waveformColors.wavColor.red * 255).toInt().toByte()
-                imageData[(x + y * renderWidth) * 3 + 1] = (waveformColors.wavColor.green * 255).toInt().toByte()
-                imageData[(x + y * renderWidth) * 3 + 2] = (waveformColors.wavColor.blue * 255).toInt().toByte()
+                imageData[(x + y * renderWidth) * 3] = (c(waveformColors.wavColorHex).red * 255).toInt().toByte()
+                imageData[(x + y * renderWidth) * 3 + 1] = (c(waveformColors.wavColorHex).green * 255).toInt().toByte()
+                imageData[(x + y * renderWidth) * 3 + 2] = (c(waveformColors.wavColorHex).blue * 255).toInt().toByte()
             }
         }
     }

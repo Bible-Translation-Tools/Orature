@@ -30,6 +30,7 @@ import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
+import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.getWaveformColors
 import javax.inject.Inject
@@ -280,8 +281,8 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
                 audio.reader(),
                 width = imageWidthProperty.value.toInt(),
                 height = height,
-                wavColor = waveformColors.wavColor,
-                background = waveformColors.backgroundColor
+                wavColor = Color.web(waveformColors.wavColorHex),
+                background = Color.web(waveformColors.backgroundColorHex)
             )
         }
     }
