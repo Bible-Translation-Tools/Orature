@@ -19,7 +19,7 @@
 package org.wycliffeassociates.otter.common.domain.project
 
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
-import org.wycliffeassociates.tstudio2rc.Converter
+import org.wycliffeassociates.tstudio2rc.Tstudio2RcConverter
 import java.io.File
 import java.lang.Exception
 import java.lang.IllegalArgumentException
@@ -75,7 +75,7 @@ object ProjectFormatIdentifier {
         override var next: IFormatIdentifier? = null
 
         override fun getFormat(file: File): ProjectFormat? {
-            return if (Converter.isValidFormat(file)) {
+            return if (Tstudio2RcConverter.isValidFormat(file)) {
                 ProjectFormat.TSTUDIO
             } else {
                 next?.getFormat(file)

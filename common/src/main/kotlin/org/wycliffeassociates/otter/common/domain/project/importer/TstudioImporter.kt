@@ -4,7 +4,7 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.tstudio2rc.Converter
+import org.wycliffeassociates.tstudio2rc.Tstudio2RcConverter
 import java.io.File
 import javax.inject.Inject
 
@@ -24,7 +24,7 @@ class TstudioImporter @Inject constructor(
                     localizeKey = "converting_file",
                     percent = 10.0
                 )
-                Converter().convertToRC(file, directoryProvider.tempDirectory)
+                Tstudio2RcConverter.convertFileToRC(file, directoryProvider.tempDirectory)
             }
             .flatMap { rcFile ->
                 next?.import(rcFile, callback, options)
