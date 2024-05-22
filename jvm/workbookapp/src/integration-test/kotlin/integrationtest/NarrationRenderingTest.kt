@@ -16,6 +16,7 @@ import org.junit.Test
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.pcm.PcmFile
 import org.wycliffeassociates.otter.common.audio.pcm.PcmOutputStream
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
@@ -28,6 +29,7 @@ import org.wycliffeassociates.otter.common.domain.narration.testDataRootFilePath
 import org.wycliffeassociates.otter.common.domain.narration.testDirWithAudio
 import org.wycliffeassociates.otter.common.domain.narration.testDirWithoutAudio
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.NarrationWaveformRenderer
+import java.awt.Color
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.Reader
@@ -127,7 +129,9 @@ class NarrationRenderingTest {
                 },
                 readerDrawable = readerDrawable
             )
-            val renderer = NarrationWaveformRenderer(scene, rendererWidth, rendererHeight)
+
+            val colorThemeObservable = Observable.just(ColorTheme.LIGHT)
+            val renderer = NarrationWaveformRenderer(scene, rendererWidth, rendererHeight, colorThemeObservable)
 
             val location = 0
             val experiments = 10
