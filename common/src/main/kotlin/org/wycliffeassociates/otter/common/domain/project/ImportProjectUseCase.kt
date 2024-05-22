@@ -35,6 +35,7 @@ import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
 import org.wycliffeassociates.otter.common.domain.project.importer.OngoingProjectImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
+import org.wycliffeassociates.otter.common.domain.project.importer.TsImporterFactory
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -49,7 +50,10 @@ const val SOURCE_PATH_TEMPLATE = "content/%s.zip"
 class ImportProjectUseCase @Inject constructor() {
 
     @Inject
-    lateinit var rcFactoryProvider: Provider<RCImporterFactory>
+    lateinit var rcFactoryProvider: RCImporterFactory
+
+    @Inject
+    lateinit var tsFactoryProvider: TsImporterFactory
 
     @Inject
     lateinit var rcImporterProvider: Provider<OngoingProjectImporter>
@@ -59,10 +63,7 @@ class ImportProjectUseCase @Inject constructor() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @Throws(
-        IllegalArgumentException::class,
-        InvalidResourceContainerException::class
-    )
+    @Throws(IllegalArgumentException::class)
     fun import(
         file: File,
         callback: ProjectImporterCallback?,
@@ -115,7 +116,7 @@ class ImportProjectUseCase @Inject constructor() {
     }
 
     fun isAlreadyImported(file: File): Boolean {
-        return rcFactoryProvider.get()
+        return rcFactoryProvider
             .makeImporter()
             .isAlreadyImported(file)
     }
@@ -139,11 +140,11 @@ class ImportProjectUseCase @Inject constructor() {
      * Get the corresponding importer based on the project format.
      */
     private fun getImporter(format: ProjectFormat): IProjectImporter {
-        /*
-            If we support 2+ formats, uncomment this
-            val factory = when (format) { ... }
-        */
-        val factory: IProjectImporterFactory = rcFactoryProvider.get()
+        val factory: IProjectImporterFactory = when(format) {
+            ProjectFormat.RESOURCE_CONTAINER -> rcFactoryProvider
+            ProjectFormat.TSTUDIO -> tsFactoryProvider
+            else -> throw Exception("Unsupported project format.")
+        }
         return factory.makeImporter()
     }
 
