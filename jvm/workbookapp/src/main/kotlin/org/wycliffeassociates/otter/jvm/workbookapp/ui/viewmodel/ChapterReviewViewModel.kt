@@ -35,7 +35,6 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.image.Image
-import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
@@ -526,18 +525,18 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
 
-//        val waveformColors = getWaveformColors(settingsViewModel.appColorMode.value)
-//
-//        waveformColors?.let {
-        builder.cancel()
-        waveform = builder.buildAsync(
-            audio.reader(),
-            width = imageWidthProperty.value.toInt(),
-            height = height,
-            wavColor = Color.web("#999999"),
-            background = Color.web("#999999")
-        )
-//        }
+        val waveformColors = getWaveformColors(settingsViewModel.appColorMode.value)
+
+        waveformColors?.let {
+            builder.cancel()
+            waveform = builder.buildAsync(
+                audio.reader(),
+                width = imageWidthProperty.value.toInt(),
+                height = height,
+                wavColor = waveformColors.wavColor,
+                background = waveformColors.backgroundColor
+            )
+        }
     }
 
     private fun onUndoableAction() {

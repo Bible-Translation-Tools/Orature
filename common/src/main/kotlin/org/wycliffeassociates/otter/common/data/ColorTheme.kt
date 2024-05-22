@@ -18,8 +18,33 @@
  */
 package org.wycliffeassociates.otter.common.data
 
+import javafx.scene.paint.Color
+
+const val WAV_COLOR_LIGHT = "#66768B"
+const val WAV_BACKGROUND_COLOR_LIGHT = "#FFFFFF"
+const val WAV_COLOR_DARK = "#808080"
+const val WAV_BACKGROUND_COLOR_DARK = "#343434"
+
 enum class ColorTheme(val titleKey: String, val styleClass: String = "") {
     LIGHT("light", "light-theme"),
     DARK("dark", "dark-theme"),
     SYSTEM("system");
+}
+
+data class WaveformColors(val wavColor: Color, val backgroundColor: Color)
+
+fun getWaveformColors(theme: ColorTheme): WaveformColors {
+    return when (theme) {
+        ColorTheme.LIGHT -> {
+            WaveformColors(Color.web(WAV_COLOR_LIGHT), Color.web(WAV_BACKGROUND_COLOR_LIGHT))
+        }
+
+        ColorTheme.DARK -> {
+            WaveformColors(Color.web(WAV_COLOR_DARK), Color.web(WAV_BACKGROUND_COLOR_DARK))
+        }
+
+        else -> {
+            WaveformColors(Color.web(WAV_COLOR_LIGHT), Color.web(WAV_BACKGROUND_COLOR_LIGHT))
+        }
+    }
 }
