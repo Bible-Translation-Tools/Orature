@@ -27,6 +27,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
+import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseRequestEvent
@@ -36,7 +37,7 @@ import tornadofx.*
 class MarkerView : PluginEntrypoint() {
     val viewModel: VerseMarkerViewModel by inject()
 
-    private val waveform = MarkerPlacementWaveform()
+    private val waveform = MarkerWaveform()
 
     private var slider: AudioSlider? = null
     private var minimap: MinimapFragment? = null
@@ -98,6 +99,7 @@ class MarkerView : PluginEntrypoint() {
                 themeProperty.bind(viewModel.themeColorProperty)
                 positionProperty.bind(viewModel.positionProperty)
                 audioPositionProperty.bind(viewModel.audioPositionProperty)
+                canDeleteMarkerProperty.set(false)
 
                 setOnSeekNext { viewModel.seekNext() }
                 setOnSeekPrevious { viewModel.seekPrevious() }
@@ -116,7 +118,7 @@ class MarkerView : PluginEntrypoint() {
                 setOnResumeMedia(viewModel::resumeMedia)
 
                 // Marker stuff
-                imageWidthProperty.bind(viewModel.imageWidthProperty)
+//                imageWidthProperty.bind(viewModel.imageWidthProperty)
 
                 setOnPositionChanged { id, position -> slider!!.updateMarker(id, position) }
                 setOnLocationRequest { viewModel.requestAudioLocation() }
