@@ -32,6 +32,7 @@
 
 .marker-node__drag-button {
     -fx-focus-traversable: false;
+    -fx-background-color: -wa-foreground;
 }
 
 .marker-node:focus-visible .marker-node__drag-button {

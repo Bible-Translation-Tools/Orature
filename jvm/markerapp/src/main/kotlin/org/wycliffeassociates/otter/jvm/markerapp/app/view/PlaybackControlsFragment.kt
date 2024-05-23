@@ -39,10 +39,6 @@ class PlaybackControlsFragment : Fragment() {
     val viewModel: VerseMarkerViewModel by inject()
 
     private val rootStyles = "vm-play-controls"
-    private val playButtonStyle = "vm-play-controls__play-btn"
-    private val roundedButtonStyle = "vm-play-controls__btn--rounded"
-    private val seekButtonStyle = "vm-play-controls__seek-btn"
-    private val continueButtonStyle = "vm-continue-button"
 
     private val playIcon = FontIcon("fa-play")
     private val pauseIcon = FontIcon("fa-pause")
@@ -53,10 +49,7 @@ class PlaybackControlsFragment : Fragment() {
     private lateinit var leftControls: Region
 
     private val playBtn = JFXButton().apply {
-        styleClass.addAll(
-            playButtonStyle,
-            roundedButtonStyle
-        )
+        addClass("btn", "btn--icon", "btn--tertiary")
         graphicProperty().bind(
             Bindings.createObjectBinding(
                 {
@@ -72,26 +65,20 @@ class PlaybackControlsFragment : Fragment() {
     }
 
     private val nextBtn = JFXButton().apply {
-        styleClass.addAll(
-            seekButtonStyle,
-            roundedButtonStyle
-        )
+        addClass("btn", "btn--tertiary")
         graphic = nextIcon
         setOnAction { viewModel.seekNext() }
     }
 
     private val previousBtn = JFXButton().apply {
-        styleClass.addAll(
-            seekButtonStyle,
-            roundedButtonStyle
-        )
+        addClass("btn", "btn--tertiary")
         graphic = previousIcon
         setOnAction { viewModel.seekPrevious() }
     }
 
     private val undoBtn = JFXButton().apply {
         text = messages["undo"]
-        addClass("btn", "btn--secondary", "btn--white-on-dark")
+        addClass("btn", "btn--tertiary")
 
         setOnAction {
             viewModel.undoMarker()
@@ -101,7 +88,7 @@ class PlaybackControlsFragment : Fragment() {
 
     private val redoBtn = JFXButton().apply {
         text = messages["redo"]
-        addClass("btn", "btn--secondary", "btn--white-on-dark")
+        addClass("btn", "btn--tertiary")
 
         setOnAction {
             viewModel.redoMarker()
@@ -112,7 +99,7 @@ class PlaybackControlsFragment : Fragment() {
     private val closeBtn = JFXButton().apply {
         text = messages["continue"]
         graphic = continueIcon
-        styleClass.addAll("btn", "btn--primary", "btn--borderless", continueButtonStyle)
+        styleClass.addAll("btn", "btn--secondary")
 
         disableProperty().bind(viewModel.isLoadingProperty)
         setOnAction {

@@ -64,7 +64,7 @@
 .vm-play-controls {
     -fx-pref-height: 88px;
     -fx-min-height: 88px;
-    -fx-background-color: -wa-recorder-controls-background;
+    -fx-background-color: -wa-foreground;
     -fx-padding: 0px 16px 0px 16px;
     -fx-spacing: 22px;
 }

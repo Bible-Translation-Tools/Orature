@@ -26,8 +26,8 @@ import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
-import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
+import org.wycliffeassociates.otter.jvm.controls.waveform.PlaceMarkerLayer
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseRequestEvent
@@ -117,11 +117,14 @@ class MarkerView : PluginEntrypoint() {
                 setOnToggleMedia(viewModel::mediaToggle)
                 setOnResumeMedia(viewModel::resumeMedia)
 
-                // Marker stuff
-//                imageWidthProperty.bind(viewModel.imageWidthProperty)
-
                 setOnPositionChanged { id, position -> slider!!.updateMarker(id, position) }
                 setOnLocationRequest { viewModel.requestAudioLocation() }
+
+                add(
+                    PlaceMarkerLayer().apply {
+                        onPlaceMarkerAction { viewModel.placeMarker() }
+                    }
+                )
             }
             bottom = vbox {
                 add<PlaybackControlsFragment>()
