@@ -40,6 +40,7 @@ import java.io.IOException
 import java.io.OutputStream
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
+import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.*
 
@@ -69,7 +70,8 @@ object ScriptureBurritoUtils {
 
         val mapper = ObjectMapper()
         mapper.registerKotlinModule()
-        mapper.configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false);
+        mapper.configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false)
+        mapper.setDateFormat(SimpleDateFormat("yyyy-MM-dd"))
         outputStream.use {
             mapper.writeValue(it, manifest)
         }
