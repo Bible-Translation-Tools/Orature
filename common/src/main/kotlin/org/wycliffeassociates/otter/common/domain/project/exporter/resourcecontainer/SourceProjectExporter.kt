@@ -21,8 +21,6 @@ package org.wycliffeassociates.otter.common.domain.project.exporter.resourcecont
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import org.bibletranslationtools.container.BurritoContainer
-import org.bibletranslationtools.container.BurritoProjectBuilder
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
@@ -37,6 +35,7 @@ import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.project.exporter.ProjectExporterCallback
 import org.wycliffeassociates.otter.common.domain.audio.WAV_TO_MP3_COMPRESSED_RATE
+import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito.ScriptureBurritoUtils
 import org.wycliffeassociates.otter.common.io.zip.IFileWriter
@@ -49,7 +48,9 @@ import org.wycliffeassociates.resourcecontainer.entity.MediaProject
 import java.io.File
 import java.nio.file.Files
 import java.util.*
+import java.util.regex.Pattern
 import javax.inject.Inject
+import kotlin.io.path.deleteIfExists
 import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 import kotlin.io.path.readText
@@ -116,23 +117,27 @@ class SourceProjectExporter @Inject constructor(
     ): Single<ExportResult> {
         val fileWriter = directoryProvider.newFileWriter(exportFile)
 
-        return exportSelectedTakes(workbook, fileWriter, contributors, options?.chapters)
-            .andThen(
-                Single.fromCallable {
-                    callback?.onNotifyProgress(80.0, "finishingUp")
+        return exportSelectedTakes(
+            workbook,
+            fileWriter,
+            contributors,
+            options?.chapters
+        ).map { takes ->
+            callback?.onNotifyProgress(80.0, "finishingUp")
 
-                    fileWriter.close() // must close before changing file extension or NoSuchFileException
-                    buildSourceProjectMetadata(
-                        exportFile,
-                        workbook.source.resourceMetadata.path,
-                        workbook
-                    )
-                    // change extension app-specific format
-                    val exportedFile = restoreFileExtension(exportFile, OratureFileFormat.ORATURE.extension)
-                    callback?.onNotifySuccess(workbook.target.toCollection(), exportedFile)
-                    ExportResult.SUCCESS
-                }
+            fileWriter.close() // must close before changing file extension or NoSuchFileException
+            buildSourceProjectMetadata(
+                exportFile,
+                workbook.source.resourceMetadata.path,
+                workbook,
+                takes
             )
+            // change extension app-specific format
+            val exportedFile = restoreFileExtension(exportFile, OratureFileFormat.ORATURE.extension)
+            callback?.onNotifySuccess(workbook.target.toCollection(), exportedFile)
+            ExportResult.SUCCESS
+        }
+
             .doOnError {
                 logger.error("Error while exporting project as source.", it)
                 fileWriter.close()
@@ -146,7 +151,7 @@ class SourceProjectExporter @Inject constructor(
         fileWriter: IFileWriter,
         contributors: List<Contributor>,
         chapterFilter: List<Int>? = null
-    ): Completable {
+    ): Single<Map<Int, List<File>>> {
         val tempExportDir = directoryProvider.tempDirectory
             .resolve("export${Date().time}")
             .apply { mkdirs() }
@@ -169,17 +174,38 @@ class SourceProjectExporter @Inject constructor(
                 )
                 Pair(take, exportPath)
             }
-            .flatMapCompletable { (take, exportPath) ->
-                exportTake(take!!, exportPath, license, contributors)
-            }.andThen {
+            .map { (take, exportPath) ->
+                exportTake(take!!, exportPath, license, contributors).blockingAwait()
+                take
+            }
+            .collectInto(mutableListOf<Take>()) { takes, take ->
+                takes.add(take)
+            }
+            .map {
                 // include the .cue files associated with takes within the same directory
                 fileWriter.copyDirectory(tempExportDir, RcConstants.SOURCE_MEDIA_DIR)
-                it.onComplete()
+                gatherAudioFilesByChapter(tempExportDir)
             }
             .subscribeOn(Schedulers.io())
             .doOnError {
                 logger.error("Error while copying takes to export file", it)
             }
+    }
+
+    private fun gatherAudioFilesByChapter(dir: File): Map<Int, List<File>> {
+        val map = mutableMapOf<Int, List<File>>()
+        dir.listFiles()?.forEach { audioFile ->
+            val chapterPattern =  Regex("""_c(\d+)""")
+
+            val chapterNumber = chapterPattern.find(audioFile.name)!!.groupValues[1].toInt()
+
+            if (map.containsKey(chapterNumber)) {
+                (map[chapterNumber]!! as MutableList).add(audioFile)
+            } else {
+                map[chapterNumber] = mutableListOf(audioFile)
+            }
+        }
+        return map
     }
 
     private fun exportTake(
@@ -205,7 +231,8 @@ class SourceProjectExporter @Inject constructor(
     private fun buildSourceProjectMetadata(
         exportFile: File,
         sourceRCFile: File,
-        workbook: Workbook
+        workbook: Workbook,
+        takes: Map<Int, List<File>>
     ) {
         try {
             ResourceContainer.load(exportFile).use { rc ->
@@ -218,21 +245,25 @@ class SourceProjectExporter @Inject constructor(
 
                 rc.write()
 
-                val file = Files.createTempFile(directoryProvider.tempDirectory.toPath(), "out_burrito", "json")
+                val tempFile = Files.createTempFile(
+                    directoryProvider.tempDirectory.toPath(),
+                    "out_burrito",
+                    "json"
+                )
                 ScriptureBurritoUtils.writeBurritoManifest(
                     OratureInfo.SUITE_NAME,
                     "1.0.0",
                     workbook,
+                    takes,
                     rc,
                     workbook.source.language,
-                    "wav",
                     directoryProvider.tempDirectory,
-                    file.outputStream()
+                    tempFile.outputStream()
                 )
                 rc.accessor.write("metadata.json") {
-                    file.inputStream().transferTo(it)
+                    tempFile.inputStream().transferTo(it)
                 }
-                println(file.readText())
+                tempFile.deleteIfExists()
             }
         } catch (e: Exception) {
             logger.error("Error while updating project manifest.", e)
@@ -246,8 +277,10 @@ class SourceProjectExporter @Inject constructor(
             exportRC.manifest.projects = projects
 
             // copy source text
-            sourceRC.accessor
-                .getInputStreams(".", "usfm").forEach { fileName, inputStream ->
+            sourceRC
+                .accessor
+                .getInputStreams(".", "usfm")
+                .forEach { (fileName, inputStream) ->
                     inputStream.use { ins ->
                         exportRC.accessor.write(fileName) {
                             it.buffered().use { out ->

@@ -2,8 +2,6 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.bibletranslationtools.scriptureburrito.Checksum
 import org.bibletranslationtools.scriptureburrito.CopyrightSchema
@@ -12,6 +10,7 @@ import org.bibletranslationtools.scriptureburrito.DerivedMetadataSchema
 import org.bibletranslationtools.scriptureburrito.Flavor
 import org.bibletranslationtools.scriptureburrito.Format
 import org.bibletranslationtools.scriptureburrito.IdAuthoritiesSchema
+import org.bibletranslationtools.scriptureburrito.IdAuthority
 import org.bibletranslationtools.scriptureburrito.IdentificationSchema
 import org.bibletranslationtools.scriptureburrito.IngredientSchema
 import org.bibletranslationtools.scriptureburrito.IngredientsSchema
@@ -25,8 +24,6 @@ import org.bibletranslationtools.scriptureburrito.MetadataSchema
 import org.bibletranslationtools.scriptureburrito.ShortStatement
 import org.bibletranslationtools.scriptureburrito.SoftwareAndUserInfoSchema
 import org.bibletranslationtools.scriptureburrito.TypeSchema
-import org.bibletranslationtools.scriptureburrito.flavor.FlavorSchema
-import org.bibletranslationtools.scriptureburrito.flavor.FlavorSchemaDeserializer
 import org.bibletranslationtools.scriptureburrito.flavor.FlavorType
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.AudioFlavorSchema
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.AudioFormat
@@ -34,17 +31,19 @@ import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Compres
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Formats
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Performance
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.io.IOException
 import java.io.OutputStream
-import java.io.UnsupportedEncodingException
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.time.Instant
 import java.util.*
 
+typealias ChapterNumber = Int
 
 object ScriptureBurritoUtils {
 
@@ -52,9 +51,9 @@ object ScriptureBurritoUtils {
         appName: String,
         appVersion: String,
         workbook: Workbook,
+        takes: Map<ChapterNumber, List<File>>,
         rc: ResourceContainer,
         language: Language,
-        audioExtension: String,
         tempDir: File,
         outputStream: OutputStream
     ) {
@@ -62,9 +61,9 @@ object ScriptureBurritoUtils {
             appName,
             appVersion,
             workbook,
+            takes,
             rc,
             language,
-            audioExtension,
             tempDir
         )
 
@@ -80,20 +79,11 @@ object ScriptureBurritoUtils {
         appName: String,
         appVersion: String,
         workbook: Workbook,
+        takes: Map<ChapterNumber, List<File>>,
         rc: ResourceContainer,
         language: Language,
-        audioExtension: String,
         tempDir: File
     ): MetadataSchema {
-        val compression = when (audioExtension) {
-            "mp3" -> Compression.MP3
-            "ogg" -> Compression.OGG
-            "wav" -> Compression.WAV
-            else -> {
-                throw UnsupportedEncodingException("Unsupported audio format: $audioExtension")
-            }
-        }
-
         val langCode = language.slug
 
         return DerivedMetadataSchema(
@@ -107,7 +97,7 @@ object ScriptureBurritoUtils {
                     softwareVersion = appVersion
                 }
             ),
-            IdAuthoritiesSchema(),
+            createWAIdAuthority(),
             IdentificationSchema(),
             confidential = false,
             copyright = CopyrightSchema().apply {
@@ -116,7 +106,8 @@ object ScriptureBurritoUtils {
             type = TypeSchema(
                 FlavorType(Flavor.SCRIPTURE).apply {
                     val formats = Formats()
-                    formats.put("format-${audioExtension}", AudioFormat(compression))
+                    formats.put("format-wav", AudioFormat(Compression.WAV))
+                    formats.put("format-mp3", AudioFormat(Compression.MP3))
                     this.flavor = AudioFlavorSchema(
                         setOf(Performance.READING, Performance.SINGLE_VOICE),
                         formats
@@ -134,13 +125,14 @@ object ScriptureBurritoUtils {
                 )
             },
             localizedNames = buildLocalizedNames(rc),
-            ingredients = buildIngredients(rc, workbook, tempDir)
+            ingredients = buildIngredients(rc, workbook, takes, tempDir)
         )
     }
 
     private fun buildIngredients(
         rc: ResourceContainer,
         workbook: Workbook,
+        takes: Map<ChapterNumber, List<File>>,
         tempDir: File
     ): IngredientsSchema {
         val ingredients = IngredientsSchema()
@@ -160,24 +152,25 @@ object ScriptureBurritoUtils {
                         this.md5 = calculateMD5(outFile)
                     }
                 }
-                ingredients["${it.identifier}/$path"] = ingredient
+                ingredients["$path"] = ingredient
             }
         }
         val book = workbook.target.slug
-        workbook.target.chapters.blockingIterable().forEach {
-            val chapterNumber = it.sort
-            val take = it.getSelectedTake()
-            if (take != null) {
-                val chapter =
-                    if (book == "psa") String.format("%03d", chapterNumber) else String.format("%02d", chapterNumber)
-                val path = "${book}/$chapter/${take.file.name}"
+        takes.forEach { (chapterNumber, audioFile) ->
+            for (take in audioFile) {
+                val path = "${RcConstants.MEDIA_DIR}/${take.name}"
                 val outFile = File(outTempDir, path).apply { parentFile.mkdirs() }
                 files[path] = outFile
                 val ingredient = IngredientSchema().apply {
-                    this.mimeType = "audio/wav"
-                    this.size = take.file.length().toInt()
+                    this.mimeType = when (outFile.extension) {
+                        "wav" -> "audio/wav"
+                        "mp3" -> "audio/mpeg"
+                        "cue" -> "application/x-cue"
+                        else -> "application/octet-stream"
+                    }
+                    this.size = take.length().toInt()
                     this.checksum = Checksum().apply {
-                        this.md5 = calculateMD5(take.file)
+                        this.md5 = calculateMD5(take)
                     }
                     scope = mutableMapOf(book.uppercase(Locale.US) to mutableListOf("$chapterNumber"))
                 }
@@ -221,5 +214,14 @@ object ScriptureBurritoUtils {
         }
 
         return names
+    }
+
+    private fun createWAIdAuthority(): IdAuthoritiesSchema {
+        val authority = IdAuthoritiesSchema()
+        val biel = IdAuthority()
+        biel.name = hashMapOf("en" to "Bible In Every Language")
+        biel.id = "https://www.bibleineverylanguage.org"
+        authority["biel"] = biel
+        return authority
     }
 }
