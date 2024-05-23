@@ -149,7 +149,7 @@
 
     /* combo box, drop down */
     -wa-combo-box-background: -wa-foreground;
-    -wa-combo-box-background-selected: -wa-primary-10;
+    -wa-combo-box-background-selected: -wa-primary-light;
 
     /* check box, radio */
     -wa-checkbox-background: -wa-fill-neutral;

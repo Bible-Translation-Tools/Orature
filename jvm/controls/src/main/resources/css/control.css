@@ -547,7 +547,7 @@
 
 .wa-combobox .list-cell:hover,
 .wa-combobox .combo-box-popup .list-cell:hover {
-    -fx-background-color: -wa-foreground-hover;
+    -fx-background-color: -wa-button-tertiary-hover-surface;
 }
 
 .wa-combobox .list-cell:pressed {
