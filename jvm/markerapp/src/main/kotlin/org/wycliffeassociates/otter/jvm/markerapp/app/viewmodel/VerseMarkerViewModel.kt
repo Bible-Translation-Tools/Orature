@@ -45,6 +45,7 @@ import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.BookMarker
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.data.getWaveformColors
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
@@ -53,9 +54,6 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
 import java.util.regex.Pattern
-
-private const val WAV_COLOR = "#0A337390"
-private const val BACKGROUND_COLOR = "#FFFFFF"
 
 class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
 
@@ -90,6 +88,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     val compositeDisposable = CompositeDisposable()
     override val positionProperty = SimpleDoubleProperty(0.0)
     override var imageWidthProperty = SimpleDoubleProperty()
+    private val onThemeChangeAction = SimpleObjectProperty<() -> Unit>()
 
     override var resumeAfterScroll = false
 
@@ -102,6 +101,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     }
 
     fun onDock(op: () -> Unit) {
+        onThemeChangeAction.set(op)
         timer?.start()
         isLoadingProperty.set(true)
         val audio = loadAudio()
@@ -122,6 +122,18 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
                 primaryStage.scene.root.styleClass
             )
         )
+    }
+
+
+    fun onThemeChange() {
+        val audioFile = loadAudio()
+        audioFile.let {
+            pause()
+            asyncBuilder.cancel()
+            cleanupWaveform()
+            createWaveformImages(OratureAudioFile(it.file))
+            onThemeChangeAction.value.invoke()
+        }
     }
 
     private fun loadAudio(): OratureAudioFile {
@@ -167,7 +179,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
         if (bookSlug == null || chapterNumber == null) return arrayOf()
 
         val chapterNumber = Integer.parseInt(chapterNumber)
-        return when(chapterNumber) {
+        return when (chapterNumber) {
             1 -> arrayOf(BookMarker(bookSlug, 0), ChapterMarker(chapterNumber, 0))
             else -> arrayOf(ChapterMarker(chapterNumber, 0))
         }
@@ -252,12 +264,14 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(SECONDS_ON_SCREEN))
 
+        val waveformColors = getWaveformColors(themeColorProperty.value)
+
         waveform = asyncBuilder.buildAsync(
             audio.reader(),
             width = imageWidthProperty.value.toInt(),
             height = Screen.getMainScreen().platformHeight,
-            wavColor = Color.web(WAV_COLOR),
-            background = Color.web(BACKGROUND_COLOR)
+            wavColor = Color.web(waveformColors.wavColorHex),
+            background = Color.web(waveformColors.backgroundColorHex)
         )
 
         asyncBuilder
@@ -265,8 +279,8 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
                 audio.reader(),
                 width = Screen.getMainScreen().platformWidth,
                 height = 50,
-                wavColor = Color.web(WAV_COLOR),
-                background = Color.web(BACKGROUND_COLOR)
+                wavColor = Color.web(waveformColors.wavColorHex),
+                background = Color.web(waveformColors.backgroundColorHex)
             )
             .observeOnFx()
             .map { image ->
