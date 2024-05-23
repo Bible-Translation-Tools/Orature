@@ -27,10 +27,12 @@ import javafx.event.EventHandler
 import javafx.geometry.NodeOrientation
 import javafx.scene.image.Image
 import javafx.scene.layout.StackPane
+import javafx.scene.shape.Line
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.marker.MarkerTrackControl
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
+import org.wycliffeassociates.otter.jvm.controls.marker.MarkersContainer
 import tornadofx.*
 
 class MarkerPlacementWaveform : StackPane() {
@@ -79,22 +81,22 @@ class MarkerPlacementWaveform : StackPane() {
     }
 
     var onRewind = SimpleObjectProperty<((ScrollSpeed) -> Unit)> {}
-    fun setOnRewind(op: (ScrollSpeed) -> Unit){
+    fun setOnRewind(op: (ScrollSpeed) -> Unit) {
         onRewind.set(op)
     }
 
     var onFastForward = SimpleObjectProperty<((ScrollSpeed) -> Unit)> {}
-    fun setOnFastForward(op: (ScrollSpeed) -> Unit){
+    fun setOnFastForward(op: (ScrollSpeed) -> Unit) {
         onFastForward.set(op)
     }
 
     var onToggleMedia = SimpleObjectProperty<(() -> Unit)> {}
-    fun setOnToggleMedia(op: () -> Unit){
+    fun setOnToggleMedia(op: () -> Unit) {
         onToggleMedia.set(op)
     }
 
     var onResumeMedia = SimpleObjectProperty<(() -> Unit)> {}
-    fun setOnResumeMedia(op: () -> Unit){
+    fun setOnResumeMedia(op: () -> Unit) {
         onResumeMedia.set(op)
     }
 
@@ -120,20 +122,21 @@ class MarkerPlacementWaveform : StackPane() {
     }
 
     init {
-        addClass("marker-placement-waveform")
+        addClass("marker-waveform")
         minHeight = 120.0
 
         nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
 
         add(MarkerViewBackground())
 
-        val topTrack = MarkerTrackControl().apply {
+        val topTrack = MarkersContainer().apply {
             top = this
             markers.bind(this@MarkerPlacementWaveform.markers, { it })
             audioPositionProperty.bind(this@MarkerPlacementWaveform.audioPositionProperty)
             canMoveMarkerProperty.bind(this@MarkerPlacementWaveform.canMoveMarkerProperty)
             onPositionChangedProperty.bind(onPositionChanged)
             onLocationRequestProperty.bind(onLocationRequest)
+            canDeleteMarkerProperty.set(false)
         }
         waveformFrame = WaveformFrame(topTrack).apply {
             themeProperty.bind(this@MarkerPlacementWaveform.themeProperty)
