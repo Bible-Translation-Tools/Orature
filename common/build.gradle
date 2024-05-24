@@ -35,5 +35,5 @@ dependencies {
 
     implementation "org.apache.tika:tika-core:$tikaVer"
 
-    implementation 'org.bibletranslationtools:kotlin-scripture-burrito:0.11.0'
+    implementation "org.bibletranslationtools:kotlin-scripture-burrito:$kotlinscriptureburritoVer"
 }

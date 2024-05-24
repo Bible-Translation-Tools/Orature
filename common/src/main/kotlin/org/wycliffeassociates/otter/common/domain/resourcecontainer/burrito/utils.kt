@@ -19,8 +19,8 @@ import org.bibletranslationtools.scriptureburrito.Languages
 import org.bibletranslationtools.scriptureburrito.LocalizedNamesSchema
 import org.bibletranslationtools.scriptureburrito.LocalizedText
 import org.bibletranslationtools.scriptureburrito.MetaVersionSchema
-import org.bibletranslationtools.scriptureburrito.MetadataDeserializer
 import org.bibletranslationtools.scriptureburrito.MetadataSchema
+import org.bibletranslationtools.scriptureburrito.ScopeSchema
 import org.bibletranslationtools.scriptureburrito.ShortStatement
 import org.bibletranslationtools.scriptureburrito.SoftwareAndUserInfoSchema
 import org.bibletranslationtools.scriptureburrito.TypeSchema
@@ -31,7 +31,6 @@ import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Compres
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Formats
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Performance
 import org.wycliffeassociates.otter.common.data.primitives.Language
-import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -92,7 +91,7 @@ object ScriptureBurritoUtils {
             Format.SCRIPTURE_BURRITO,
             DerivedMetaSchema(
                 dateCreated = Date.from(Instant.now()),
-                version = MetaVersionSchema("1.0.0"),
+                version = MetaVersionSchema._1_0_0,
                 defaultLocale = rc.manifest.dublinCore.language.identifier,
                 generator = SoftwareAndUserInfoSchema().apply {
                     softwareName = appName
@@ -103,7 +102,7 @@ object ScriptureBurritoUtils {
             IdentificationSchema(),
             confidential = false,
             copyright = CopyrightSchema().apply {
-                this.shortStatements = listOf(ShortStatement(rc.manifest.dublinCore.rights, langCode))
+                this.shortStatements = mutableListOf(ShortStatement(rc.manifest.dublinCore.rights, langCode))
             },
             type = TypeSchema(
                 FlavorType(Flavor.SCRIPTURE).apply {
@@ -111,7 +110,7 @@ object ScriptureBurritoUtils {
                     formats.put("format-wav", AudioFormat(Compression.WAV))
                     formats.put("format-mp3", AudioFormat(Compression.MP3))
                     this.flavor = AudioFlavorSchema(
-                        setOf(Performance.READING, Performance.SINGLE_VOICE),
+                        mutableSetOf(Performance.READING, Performance.SINGLE_VOICE),
                         formats
                     ).apply {
                         name = "audioTranslation"
@@ -119,12 +118,7 @@ object ScriptureBurritoUtils {
                 }
             ),
             languages = Languages().apply {
-                add(
-                    LanguageSchema().apply {
-                        tag = language.slug
-
-                    }
-                )
+                add(LanguageSchema(tag = language.slug))
             },
             localizedNames = buildLocalizedNames(rc),
             ingredients = buildIngredients(rc, workbook, takes, tempDir)
@@ -174,7 +168,7 @@ object ScriptureBurritoUtils {
                     this.checksum = Checksum().apply {
                         this.md5 = calculateMD5(take)
                     }
-                    scope = mutableMapOf(book.uppercase(Locale.US) to mutableListOf("$chapterNumber"))
+                    scope = ScopeSchema().apply { put(book.uppercase(Locale.US), mutableListOf("$chapterNumber")) }
                 }
                 ingredients[path] = ingredient
             }
