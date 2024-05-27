@@ -41,8 +41,7 @@ class MarkerView : PluginEntrypoint() {
 
     private var slider: AudioSlider? = null
     private var minimap: MinimapFragment? = null
-
-    private val disposables = mutableListOf<ListenerDisposer>()
+    private var colorThemeDisposer: ListenerDisposer? = null
 
     override fun onDock() {
         super.onDock()
@@ -65,17 +64,23 @@ class MarkerView : PluginEntrypoint() {
         subscribeOnThemeChange()
     }
 
+    override fun onUndock() {
+        super.onUndock()
+        colorThemeDisposer?.dispose()
+    }
+
 
     private fun subscribeOnThemeChange() {
-        viewModel.themeColorProperty.onChangeWithDisposer {
-            viewModel.onThemeChange()
-            slider?.let {
-                viewModel.initializeAudioController(it)
-            }
-            waveform.markers.bind(viewModel.markers) { it }
-            waveform.initializeMarkers()
+        viewModel.themeColorProperty
+            .onChangeWithDisposer {
+                viewModel.onThemeChange()
+                slider?.let {
+                    viewModel.initializeAudioController(it)
+                }
+                waveform.markers.bind(viewModel.markers) { it }
+                waveform.initializeMarkers()
 
-        }.apply { disposables.add(this) }
+            }.apply { colorThemeDisposer = this }
     }
 
 
