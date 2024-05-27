@@ -248,7 +248,16 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     }
 
     fun onThemeChange() {
-        val take = currentChunkProperty.value.audio.getSelectedTake()
+
+        // Avoids null error in createWaveformImages cause by player not yet being initialized.
+        val hasPlayer = waveformAudioPlayerProperty.value != null
+        val hasAudio = waveformAudioPlayerProperty.value.getDurationInFrames() > 0
+
+        if (!hasPlayer || !hasAudio) {
+            return
+        }
+
+        val take = currentChunkProperty.value?.audio?.getSelectedTake()
         take?.let {
             pause()
             builder.cancel()

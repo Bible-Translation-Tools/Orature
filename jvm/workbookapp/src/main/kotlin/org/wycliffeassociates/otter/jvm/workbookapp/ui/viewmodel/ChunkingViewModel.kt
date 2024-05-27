@@ -93,7 +93,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     override val totalFramesProperty = SimpleIntegerProperty(0)
     override var totalFrames: Int by totalFramesProperty // beware of divided by 0
 
-    lateinit var audio: OratureAudioFile
+    private var audio: OratureAudioFile? = null
     lateinit var waveform: Observable<Image>
     private val width = Screen.getMainScreen().platformWidth
     private val height = Integer.min(Screen.getMainScreen().platformHeight, WAVEFORM_MAX_HEIGHT.toInt())
@@ -119,9 +119,11 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             .subscribe { sa ->
                 audioDataStore.sourceAudioProperty.set(sa)
                 audio = loadAudio(sa.file)
-                createWaveformImages(audio)
-                loadChunkMarkers(audio)
-                subscribeOnWaveformImages()
+                audio?.let {
+                    createWaveformImages(it)
+                    loadChunkMarkers(it)
+                    subscribeOnWaveformImages()
+                }
             }
     }
 
@@ -153,11 +155,22 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     }
 
     fun onThemeChange() {
-        pause()
-        builder.cancel()
-        cleanupWaveform()
-        createWaveformImages(audio)
-        subscribeOnWaveformImages()
+
+        // Avoids null error in createWaveformImages cause by player not yet being initialized.
+        val hasPlayer = waveformAudioPlayerProperty.value != null
+        val hasAudio = waveformAudioPlayerProperty.value.getDurationInFrames() > 0
+
+        if (!hasPlayer || !hasAudio) {
+            return
+        }
+
+        audio?.let {
+            pause()
+            builder.cancel()
+            cleanupWaveform()
+            createWaveformImages(it)
+            subscribeOnWaveformImages()
+        }
     }
 
     override fun placeMarker() {

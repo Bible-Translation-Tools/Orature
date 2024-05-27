@@ -197,7 +197,19 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     }
 
     fun onThemeChange() {
-        reloadAudio(true).subscribe()
+
+        // Avoids null error in createWaveformImages cause by player not yet being initialized.
+        val hasPlayer = waveformAudioPlayerProperty.value != null
+        val hasAudio = waveformAudioPlayerProperty.value.getDurationInFrames() > 0
+
+        if (!hasPlayer || !hasAudio) {
+            return
+        }
+
+        // Ensures that the markerModel has been initialized before reloading audio
+        markerModel?.let {
+            reloadAudio(true).subscribe()
+        }
     }
 
     override fun placeMarker() {

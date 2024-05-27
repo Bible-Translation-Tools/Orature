@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toLazyBinding
+import com.github.thomasnield.rxkotlinfx.toObservable
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.animation.AnimationTimer
@@ -51,7 +52,6 @@ import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
-import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.SnackBarEvent
@@ -214,7 +214,7 @@ class ChapterReview : View() {
             }
         }
         subscribeEvents()
-        subscribeToThemeChange()
+        subscribeOnThemeChange()
     }
 
     override fun onUndock() {
@@ -234,12 +234,14 @@ class ChapterReview : View() {
         disposableListeners.forEach { it.dispose() }
     }
 
-    private fun subscribeToThemeChange() {
-        settingsViewModel.appColorMode.onChangeWithDisposer {
-            it?.let {
-                viewModel.onThemeChange()
-            }
-        }.apply { disposableListeners.add(this) }
+    private fun subscribeOnThemeChange() {
+        settingsViewModel.appColorMode
+            .toObservable()
+            .subscribe {
+                it?.let {
+                    viewModel.onThemeChange()
+                }
+            }.addTo(viewModel.compositeDisposable)
     }
 
     private fun subscribeEvents() {

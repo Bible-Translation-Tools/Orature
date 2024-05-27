@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.github.thomasnield.rxkotlinfx.toObservable
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.animation.AnimationTimer
@@ -56,7 +57,6 @@ class Consume : View() {
 
     private var timer: AnimationTimer? = null
     private val eventSubscriptions = mutableListOf<EventRegistration>()
-    private val disposableListeners = mutableListOf<ListenerDisposer>()
 
     override fun onDock() {
         super.onDock()
@@ -77,15 +77,16 @@ class Consume : View() {
         timer?.stop()
         viewModel.onUndockConsume()
         unsubscribeEvents()
-        disposableListeners.forEach { it.dispose() }
     }
 
     private fun subscribeOnThemeChange() {
-        settingsViewModel.appColorMode.onChangeWithDisposer {
-            viewModel.onThemeChange()
-            waveform.initializeMarkers()
-            waveform.markers.bind(viewModel.markers) { it }
-        }.apply { disposableListeners.add(this) }
+        settingsViewModel.appColorMode
+            .toObservable()
+            .subscribe {
+                viewModel.onThemeChange()
+                waveform.initializeMarkers()
+                waveform.markers.bind(viewModel.markers) { it }
+            }.addTo(viewModel.compositeDisposable)
     }
 
     private fun subscribeOnWaveformImages() {

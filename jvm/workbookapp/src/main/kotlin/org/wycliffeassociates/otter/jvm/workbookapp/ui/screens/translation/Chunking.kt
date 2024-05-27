@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.github.thomasnield.rxkotlinfx.toObservable
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.animation.AnimationTimer
@@ -51,7 +52,6 @@ import tornadofx.*
 
 class Chunking : View() {
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val disposableListeners = mutableListOf<ListenerDisposer>()
 
     val viewModel: ChunkingViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
@@ -167,15 +167,16 @@ class Chunking : View() {
         timer?.stop()
         unsubscribeEvents()
         viewModel.undock()
-        disposableListeners.forEach { it.dispose() }
     }
 
-    fun subscribeOnThemeChange() {
-        settingsViewModel.appColorMode.onChangeWithDisposer {
-            viewModel.onThemeChange()
-            waveform.initializeMarkers()
-            waveform.markers.bind(viewModel.markers) { it }
-        }.apply { disposableListeners.add(this) }
+    private fun subscribeOnThemeChange() {
+        settingsViewModel.appColorMode
+            .toObservable()
+            .subscribe {
+                viewModel.onThemeChange()
+                waveform.initializeMarkers()
+                waveform.markers.bind(viewModel.markers) { it }
+            }.addTo(viewModel.compositeDisposable)
     }
 
     private fun isOverlappingNearbyMarker(): BooleanBinding {
