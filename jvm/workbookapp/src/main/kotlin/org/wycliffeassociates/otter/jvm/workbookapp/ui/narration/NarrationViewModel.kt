@@ -177,6 +177,8 @@ class NarrationViewModel : ViewModel() {
                 onTaskRunnerIdle = {
                     FX.eventbus.fire(it.navigationRequest)
                 }
+            } else if (pluginOpenedProperty.value) {
+                navigator.navigateHomeOnPluginClosed = true
             }
         }
 
@@ -420,6 +422,7 @@ class NarrationViewModel : ViewModel() {
                     logger.error("Error in processing take with plugin type: $pluginType, ${e.message}")
                 }
                 .flatMapSingle { plugin ->
+                    navigator.blockNavigationEvents.set(true)
                     pluginOpenedProperty.set(true)
                     fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
                     when (pluginType) {
@@ -700,6 +703,7 @@ class NarrationViewModel : ViewModel() {
                 }
 
                 openLoadingModalProperty.set(false)
+                navigator.blockNavigationEvents.set(false)
                 FX.eventbus.fire(PluginClosedEvent(pluginType))
             }
             .subscribeOn(Schedulers.io())

@@ -23,6 +23,7 @@ import com.sun.javafx.util.Utils
 import javafx.geometry.Orientation
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestBlockedEvent
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
@@ -64,6 +65,11 @@ class MarkerView : PluginEntrypoint() {
         tryImportStylesheet(resources["/css/chunk-marker.css"])
 
         subscribe<PluginCloseRequestEvent> {
+            unsubscribe()
+            viewModel.saveAndQuit()
+        }
+
+        subscribe<NavigationRequestBlockedEvent> {
             unsubscribe()
             viewModel.saveAndQuit()
         }
