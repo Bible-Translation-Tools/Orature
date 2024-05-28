@@ -191,7 +191,6 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         refreshChunkList()
         translationViewModel.canRedoProperty.set(true)
         translationViewModel.canUndoProperty.set(actionHistory.canUndo())
-        chunkConfirmed.set(false)
     }
 
     fun redo() {
@@ -199,7 +198,6 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         refreshChunkList()
         translationViewModel.canUndoProperty.set(true)
         translationViewModel.canRedoProperty.set(actionHistory.canRedo())
-        chunkConfirmed.set(true)
     }
 
     fun onRecordNew() {
