@@ -22,7 +22,6 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
@@ -56,7 +55,8 @@ import kotlin.io.path.outputStream
 import kotlin.io.path.readText
 
 class SourceProjectExporter @Inject constructor(
-    directoryProvider: IDirectoryProvider
+    directoryProvider: IDirectoryProvider,
+    val burritoUtils: ScriptureBurritoUtils
 ) : RCProjectExporter(directoryProvider) {
     @Inject
     lateinit var audioExporter: AudioExporter
@@ -250,14 +250,10 @@ class SourceProjectExporter @Inject constructor(
                     "out_burrito",
                     "json"
                 )
-                ScriptureBurritoUtils.writeBurritoManifest(
-                    OratureInfo.SUITE_NAME,
-                    "1.0.0",
+                burritoUtils.writeBurritoManifest(
                     workbook,
                     takes,
                     rc,
-                    workbook.source.language,
-                    directoryProvider.tempDirectory,
                     tempFile.outputStream()
                 )
                 rc.accessor.write("metadata.json") {

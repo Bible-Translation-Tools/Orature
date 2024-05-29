@@ -9,8 +9,6 @@ import org.bibletranslationtools.scriptureburrito.DerivedMetaSchema
 import org.bibletranslationtools.scriptureburrito.DerivedMetadataSchema
 import org.bibletranslationtools.scriptureburrito.Flavor
 import org.bibletranslationtools.scriptureburrito.Format
-import org.bibletranslationtools.scriptureburrito.IdAuthoritiesSchema
-import org.bibletranslationtools.scriptureburrito.IdAuthority
 import org.bibletranslationtools.scriptureburrito.IdentificationSchema
 import org.bibletranslationtools.scriptureburrito.IngredientSchema
 import org.bibletranslationtools.scriptureburrito.IngredientsSchema
@@ -30,9 +28,11 @@ import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.AudioFo
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Compression
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Formats
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Performance
-import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.IAppInfo
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito.auth.IdAuthorityProvider
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.io.IOException
@@ -42,49 +42,50 @@ import java.security.NoSuchAlgorithmException
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.*
+import javax.inject.Inject
 
 typealias ChapterNumber = Int
 
-object ScriptureBurritoUtils {
+class ScriptureBurritoUtils @Inject constructor(
+    private val idAuthorityProvider: IdAuthorityProvider,
+    private val appInfo: IAppInfo,
+    directoryProvider: IDirectoryProvider
+) {
 
-    fun writeBurritoManifest(
-        appName: String,
-        appVersion: String,
-        workbook: Workbook,
-        takes: Map<ChapterNumber, List<File>>,
-        rc: ResourceContainer,
-        language: Language,
-        tempDir: File,
-        outputStream: OutputStream
-    ) {
-        val manifest = createBurritoManifest(
-            appName,
-            appVersion,
-            workbook,
-            takes,
-            rc,
-            language,
-            tempDir
-        )
+    private val tempDir = directoryProvider.tempDirectory
+    private val mapper = ObjectMapper()
+    private val appName = appInfo.appName
+    private val appVersion = appInfo.appVersion
 
-        val mapper = ObjectMapper()
+    init {
         mapper.registerKotlinModule()
         mapper.configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false)
         mapper.setDateFormat(SimpleDateFormat("yyyy-MM-dd"))
+    }
+
+    fun writeBurritoManifest(
+        workbook: Workbook,
+        takes: Map<ChapterNumber, List<File>>,
+        rc: ResourceContainer,
+        outputStream: OutputStream
+    ) {
+        val manifest = createBurritoManifest(
+            workbook,
+            takes,
+            rc
+        )
+
         outputStream.use {
             mapper.writeValue(it, manifest)
         }
     }
 
     fun createBurritoManifest(
-        appName: String,
-        appVersion: String,
         workbook: Workbook,
         takes: Map<ChapterNumber, List<File>>,
-        rc: ResourceContainer,
-        language: Language,
-        tempDir: File
+        rc: ResourceContainer
     ): MetadataSchema {
+        val language = workbook.target.language
         val langCode = language.slug
 
         return DerivedMetadataSchema(
@@ -98,7 +99,7 @@ object ScriptureBurritoUtils {
                     softwareVersion = appVersion
                 }
             ),
-            createWAIdAuthority(),
+            idAuthorityProvider.createIdAuthority(),
             IdentificationSchema(),
             confidential = false,
             copyright = CopyrightSchema().apply {
@@ -121,15 +122,14 @@ object ScriptureBurritoUtils {
                 add(LanguageSchema(tag = language.slug))
             },
             localizedNames = buildLocalizedNames(rc),
-            ingredients = buildIngredients(rc, workbook, takes, tempDir)
+            ingredients = buildIngredients(rc, workbook, takes)
         )
     }
 
     private fun buildIngredients(
         rc: ResourceContainer,
         workbook: Workbook,
-        takes: Map<ChapterNumber, List<File>>,
-        tempDir: File
+        takes: Map<ChapterNumber, List<File>>
     ): IngredientsSchema {
         val ingredients = IngredientsSchema()
         val files = mutableMapOf<String, File>()
@@ -210,14 +210,5 @@ object ScriptureBurritoUtils {
         }
 
         return names
-    }
-
-    private fun createWAIdAuthority(): IdAuthoritiesSchema {
-        val authority = IdAuthoritiesSchema()
-        val biel = IdAuthority()
-        biel.name = hashMapOf("en" to "Bible In Every Language")
-        biel.id = "https://www.bibleineverylanguage.org"
-        authority["biel"] = biel
-        return authority
     }
 }

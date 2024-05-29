@@ -18,10 +18,18 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.system
 
+import org.wycliffeassociates.otter.common.data.IAppInfo
 import org.wycliffeassociates.otter.jvm.device.system.Environment
+import tornadofx.FX
 import java.util.*
+import javax.inject.Inject
 
-class AppInfo : Environment() {
+class AppInfo @Inject constructor(): Environment(), IAppInfo {
+
+    override val appName: String = ResourceBundle.getBundle("Messages").getString("appName")
+
+    override val appVersion: String = getVersion() ?: ""
+
     override fun getSystemData(): List<Pair<String, String>> {
         return listOf(
             Pair("os name", System.getProperty("os.name")),
