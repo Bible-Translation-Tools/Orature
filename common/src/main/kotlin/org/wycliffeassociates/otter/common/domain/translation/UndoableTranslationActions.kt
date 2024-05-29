@@ -108,13 +108,29 @@ class TranslationTakeApproveAction(
     private val checking: CheckingStatus,
     private val oldCheckingStage: TakeCheckingState
 ) : IUndoable {
+
+    private var undoCallback: () -> Unit = {}
+    private var redoCallback: () -> Unit = {}
+
     override fun execute() {
         take.checkingState.accept(TakeCheckingState(checking, take.checksum()))
     }
 
     override fun undo() {
         take.checkingState.accept(oldCheckingStage)
+        undoCallback()
     }
 
-    override fun redo() = execute()
+    override fun redo() {
+        execute()
+        redoCallback()
+    }
+
+    fun setUndoCallback(op: () -> Unit) {
+        undoCallback = op
+    }
+
+    fun setRedoCallback(op: () -> Unit) {
+        redoCallback = op
+    }
 }
