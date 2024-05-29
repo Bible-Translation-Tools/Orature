@@ -101,7 +101,6 @@ class NavigationMediator : Component(), ScopedInstance {
                 navigateHomeOnPluginClosed = false
                 val homePage = find<HomePage2>()
                 fire(NavigationRequestEvent(homePage))
-                NavigationRequestEvent(homePage)
             }
 
         }
