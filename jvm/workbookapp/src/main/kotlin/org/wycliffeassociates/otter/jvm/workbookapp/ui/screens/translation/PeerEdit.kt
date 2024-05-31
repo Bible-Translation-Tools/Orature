@@ -223,6 +223,7 @@ open class PeerEdit : View() {
         }
 
         listenerDisposers.forEach { it.dispose() }
+        listenerDisposers.clear()
     }
 
     private fun subscribeEvents() {
