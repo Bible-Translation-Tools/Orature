@@ -282,7 +282,7 @@ class NarrationPage : View() {
     private fun setUpLoadingModal() {
         find<LoadingModal>().apply {
             orientationProperty.set(settingsViewModel.orientationProperty.value)
-            themeProperty.set(settingsViewModel.appColorMode.value)
+            themeProperty.bind(settingsViewModel.appColorMode)
             messageProperty.bind(viewModel.loadingModalTextProperty)
 
             viewModel.openLoadingModalProperty.onChangeWithDisposer {
