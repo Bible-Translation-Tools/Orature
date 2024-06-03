@@ -170,15 +170,7 @@ class Chunking : View() {
         viewModel.undock()
         disposableListeners.forEach { it.dispose() }
     }
-
-    fun subscribeOnThemeChange() {
-        settingsViewModel.appColorMode.onChangeWithDisposer {
-            viewModel.onThemeChange()
-            waveform.initializeMarkers()
-            waveform.markers.bind(viewModel.markers) { it }
-        }.apply { disposableListeners.add(this) }
-    }
-
+    
     private fun subscribeOnThemeChange() {
         settingsViewModel.appColorMode
             .toObservable()

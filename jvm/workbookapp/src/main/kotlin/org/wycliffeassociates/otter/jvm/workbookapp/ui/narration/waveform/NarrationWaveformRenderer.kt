@@ -31,11 +31,6 @@ import org.wycliffeassociates.otter.common.data.WAV_BACKGROUND_COLOR_LIGHT
 import org.wycliffeassociates.otter.common.data.WAV_COLOR_LIGHT
 import org.wycliffeassociates.otter.common.data.getWaveformColors
 import org.wycliffeassociates.otter.common.domain.narration.AudioScene
-import org.wycliffeassociates.otter.common.domain.theme.AppTheme
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WAV_BACKGROUND_COLOR_DARK
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WAV_BACKGROUND_COLOR_LIGHT
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WAV_COLOR_DARK
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WAV_COLOR_LIGHT
 import tornadofx.c
 import tornadofx.runLater
 import java.nio.ByteBuffer
