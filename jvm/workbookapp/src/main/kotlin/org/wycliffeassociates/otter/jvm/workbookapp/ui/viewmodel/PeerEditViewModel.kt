@@ -30,7 +30,7 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
-import org.wycliffeassociates.otter.common.data.ColorTheme
+import org.wycliffeassociates.otter.common.data.getWaveformColors
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
@@ -250,7 +250,16 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     }
 
     fun onThemeChange() {
-        val take = currentChunkProperty.value.audio.getSelectedTake()
+
+        // Avoids null error in createWaveformImages cause by player not yet being initialized.
+        val hasPlayer = waveformAudioPlayerProperty.value != null
+        val hasAudio = waveformAudioPlayerProperty.value.getDurationInFrames() > 0
+
+        if (!hasPlayer || !hasAudio) {
+            return
+        }
+
+        val take = currentChunkProperty.value?.audio?.getSelectedTake()
         take?.let {
             pause()
             builder.cancel()
@@ -293,24 +302,18 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         cleanupWaveform()
         imageWidthProperty.set(computeImageWidth(width))
 
-        val backgroundColor: String
-        val waveformColor: String
-        if (settingsViewModel.appColorMode.value == ColorTheme.LIGHT) {
-            backgroundColor = WAV_BACKGROUND_COLOR_LIGHT
-            waveformColor = WAV_COLOR_LIGHT
-        } else {
-            backgroundColor = WAV_BACKGROUND_COLOR_DARK
-            waveformColor = WAV_COLOR_DARK
-        }
+        val waveformColors = getWaveformColors(settingsViewModel.appColorMode.value)
 
-        builder.cancel()
-        waveform = builder.buildAsync(
-            audio.reader(),
-            width = imageWidthProperty.value.toInt(),
-            height = height,
-            wavColor = Color.web(waveformColor),
-            background = Color.web(backgroundColor)
-        )
+        waveformColors.let {
+            builder.cancel()
+            waveform = builder.buildAsync(
+                audio.reader(),
+                width = imageWidthProperty.value.toInt(),
+                height = height,
+                wavColor = Color.web(waveformColors.wavColorHex),
+                background = Color.web(waveformColors.backgroundColorHex)
+            )
+        }
     }
 
     private fun onUndoableAction() {

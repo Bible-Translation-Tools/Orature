@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.github.thomasnield.rxkotlinfx.toObservable
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.animation.AnimationTimer
@@ -222,6 +223,7 @@ open class PeerEdit : View() {
         }
 
         listenerDisposers.forEach { it.dispose() }
+        listenerDisposers.clear()
     }
 
     private fun subscribeEvents() {
@@ -249,9 +251,11 @@ open class PeerEdit : View() {
     }
 
     private fun subscribeOnThemeChange() {
-        settingsViewModel.appColorMode.onChangeWithDisposer {
-            viewModel.onThemeChange()
-        }.apply { listenerDisposers.add(this) }
+        settingsViewModel.appColorMode
+            .toObservable()
+            .subscribe {
+                viewModel.onThemeChange()
+            }.addTo(viewModel.disposable)
     }
 
     private fun unsubscribeEvents() {
