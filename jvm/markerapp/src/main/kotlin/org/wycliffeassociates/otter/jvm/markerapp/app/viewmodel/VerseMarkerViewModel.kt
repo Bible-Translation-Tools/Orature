@@ -103,7 +103,6 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     fun onDock(op: () -> Unit) {
         onThemeChangeAction.set(op)
         themeColorProperty.set(getThemeFromRoot())
-        // TODO: probably need to set the default theme here, using similar logic as below
         timer?.start()
         isLoadingProperty.set(true)
         val audio = loadAudio()
@@ -112,7 +111,6 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
         createWaveformImages(audio)
         op.invoke()
 
-        // TODO: this seems great, but we need to set the initial value correctly
         themeColorProperty.bind(
             Bindings.createObjectBinding(
                 {
