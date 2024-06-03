@@ -127,10 +127,10 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     fun onThemeChange() {
 
         // Avoids null error in createWaveformImages cause by player not yet being initialized.
-        val hasPlayer = waveformAudioPlayerProperty.value != null
-        val hasAudio = waveformAudioPlayerProperty.value.getDurationInFrames() > 0
+        val hasAudioAndPlayer =
+            waveformAudioPlayerProperty.value != null && waveformAudioPlayerProperty.value.getDurationInFrames() > 0
 
-        if (!hasPlayer || !hasAudio) {
+        if (!hasAudioAndPlayer) {
             return
         }
 
