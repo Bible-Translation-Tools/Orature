@@ -68,6 +68,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.MARKER_
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.MARKER_WIDTH
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.NarrationWaveformRenderer
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.HomePage2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppPreferencesStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -178,7 +179,11 @@ class NarrationViewModel : ViewModel() {
                 onTaskRunnerIdle = {
                     FX.eventbus.fire(it.navigationRequest)
                 }
-            } else if (pluginOpenedProperty.value) {
+            }
+        }
+
+        subscribe<NavigationRequestEvent>() {
+            if (it.view == find<HomePage2>() && pluginOpenedProperty.value) {
                 navigator.navigateHomeOnPluginClosed = true
                 fire(PluginCloseRequestEvent)
             }
