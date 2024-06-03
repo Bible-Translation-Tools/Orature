@@ -63,13 +63,8 @@ class MarkerView : PluginEntrypoint() {
         tryImportStylesheet(resources["/css/verse-marker-app.css"])
         tryImportStylesheet(resources["/css/scrolling-waveform.css"])
         tryImportStylesheet(resources["/css/chunk-marker.css"])
-
+        
         subscribe<PluginCloseRequestEvent> {
-            unsubscribe()
-            viewModel.saveAndQuit()
-        }
-
-        subscribe<NavigationRequestBlockedEvent> {
             unsubscribe()
             viewModel.saveAndQuit()
         }

@@ -71,6 +71,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.Narrat
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppPreferencesStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseRequestEvent
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
@@ -179,6 +180,7 @@ class NarrationViewModel : ViewModel() {
                 }
             } else if (pluginOpenedProperty.value) {
                 navigator.navigateHomeOnPluginClosed = true
+                fire(PluginCloseRequestEvent)
             }
         }
 
