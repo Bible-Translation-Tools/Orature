@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform
 
+import io.reactivex.Observable
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.image.Image
@@ -25,6 +26,10 @@ import javafx.scene.image.PixelFormat
 import javafx.scene.image.PixelWriter
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
+import org.wycliffeassociates.otter.common.data.ColorTheme
+import org.wycliffeassociates.otter.common.data.WAV_BACKGROUND_COLOR_LIGHT
+import org.wycliffeassociates.otter.common.data.WAV_COLOR_LIGHT
+import org.wycliffeassociates.otter.common.data.getWaveformColors
 import org.wycliffeassociates.otter.common.domain.narration.AudioScene
 import tornadofx.c
 import tornadofx.runLater
@@ -35,15 +40,28 @@ class NarrationWaveformRenderer(
     private val renderer: AudioScene,
     val renderWidth: Int,
     val renderHeight: Int,
-    val backgroundColor: Color = c("#E5E8EB"),
-    val waveformColor: Color = c("#66768B")
+    colorThemeObservable: Observable<ColorTheme>,
 ) {
+    private var wavColor = c(WAV_COLOR_LIGHT)
+    private var wavBackgroundColor = c(WAV_BACKGROUND_COLOR_LIGHT)
     private val writableImage = WritableImage(renderWidth, renderHeight)
     var pixelFormat: PixelFormat<ByteBuffer> = PixelFormat.getByteRgbInstance()
     private val imageData = ByteArray(renderWidth * renderHeight * 3)
 
     init {
         fillImageDataWithDefaultColor()
+        colorThemeObservable.subscribe {
+            it?.let {
+                updateWaveformColors(it)
+            }
+        }
+    }
+
+    fun updateWaveformColors(theme: ColorTheme) {
+        getWaveformColors(theme).let {
+            wavColor = c(it.wavColorHex)
+            wavBackgroundColor = c(it.backgroundColorHex)
+        }
     }
 
     fun draw(
@@ -107,9 +125,9 @@ class NarrationWaveformRenderer(
         var i = 0
         for (y in 0 until renderHeight) {
             for (x in 0 until renderWidth) {
-                imageData[i] = (backgroundColor.red * 255).toInt().toByte()
-                imageData[i + 1] = (backgroundColor.green * 255).toInt().toByte()
-                imageData[i + 2] = (backgroundColor.blue * 255).toInt().toByte()
+                imageData[i] = (wavBackgroundColor.red * 255).toInt().toByte()
+                imageData[i + 1] = (wavBackgroundColor.green * 255).toInt().toByte()
+                imageData[i + 2] = (wavBackgroundColor.blue * 255).toInt().toByte()
                 i += 3
             }
         }
@@ -124,9 +142,9 @@ class NarrationWaveformRenderer(
             val y2 = scaleAmplitude(buffer[x * 2 + 1].toDouble(), canvasHeight)
 
             for (y in minOf(y1.toInt(), y2.toInt())..maxOf(y1.toInt(), y2.toInt())) {
-                imageData[(x + y * renderWidth) * 3] = (waveformColor.red * 255).toInt().toByte()
-                imageData[(x + y * renderWidth) * 3 + 1] = (waveformColor.green * 255).toInt().toByte()
-                imageData[(x + y * renderWidth) * 3 + 2] = (waveformColor.blue * 255).toInt().toByte()
+                imageData[(x + y * renderWidth) * 3] = (wavColor.red * 255).toInt().toByte()
+                imageData[(x + y * renderWidth) * 3 + 1] = (wavColor.green * 255).toInt().toByte()
+                imageData[(x + y * renderWidth) * 3 + 2] = (wavColor.blue * 255).toInt().toByte()
             }
         }
     }

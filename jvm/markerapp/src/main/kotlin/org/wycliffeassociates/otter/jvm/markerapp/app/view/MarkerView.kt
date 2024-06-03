@@ -29,6 +29,7 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
@@ -40,14 +41,17 @@ class MarkerView : PluginEntrypoint() {
 
     private var slider: AudioSlider? = null
     private var minimap: MinimapFragment? = null
-
-    private val disposables = mutableListOf<ListenerDisposer>()
+    private var colorThemeDisposer: ListenerDisposer? = null
 
     override fun onDock() {
         super.onDock()
         viewModel.onDock {
             viewModel.compositeDisposable.add(
-                viewModel.waveform.observeOnFx().subscribe { waveform.addWaveformImage(it) }
+                viewModel.waveform
+                    .observeOnFx()
+                    .subscribe {
+                        waveform.addWaveformImage(it)
+                    }
             )
         }
         slider?.let {
@@ -56,7 +60,29 @@ class MarkerView : PluginEntrypoint() {
         waveform.markers.bind(viewModel.markers) { it }
         waveform.initializeMarkers()
         viewModel.cleanupWaveform = waveform::cleanup
+
+        subscribeOnThemeChange()
     }
+
+    override fun onUndock() {
+        super.onUndock()
+        colorThemeDisposer?.dispose()
+    }
+
+
+    private fun subscribeOnThemeChange() {
+        viewModel.themeColorProperty
+            .onChangeWithDisposer {
+                viewModel.onThemeChange()
+                slider?.let {
+                    viewModel.initializeAudioController(it)
+                }
+                waveform.markers.bind(viewModel.markers) { it }
+                waveform.initializeMarkers()
+
+            }.apply { colorThemeDisposer = this }
+    }
+
 
     init {
         tryImportStylesheet(resources["/css/verse-marker-app.css"])

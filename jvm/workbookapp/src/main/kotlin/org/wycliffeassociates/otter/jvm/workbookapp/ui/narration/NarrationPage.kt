@@ -126,6 +126,7 @@ class NarrationPage : View() {
 
             false -> { // regular navigation
                 viewModel.onDock()
+                viewModel.colorThemeProperty.bind(settingsViewModel.appColorMode)
                 narrationHeader.onDock()
                 audioWorkspaceView.onDock()
                 teleprompterView.onDock()

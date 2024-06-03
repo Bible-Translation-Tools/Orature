@@ -32,6 +32,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
+import org.wycliffeassociates.otter.common.data.getWaveformColors
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -54,11 +55,8 @@ import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
 import tornadofx.*
 
-const val WAV_COLOR = "#66768B"
-const val BACKGROUND_COLOR = "#fff"
-
 class ChunkingViewModel : ViewModel(), IMarkerViewModel {
-
+    val settingsViewModel: SettingsViewModel by inject()
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
     val translationViewModel: TranslationViewModel2 by inject()
@@ -95,7 +93,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     override val totalFramesProperty = SimpleIntegerProperty(0)
     override var totalFrames: Int by totalFramesProperty // beware of divided by 0
 
-    lateinit var audio: OratureAudioFile
+    private var audio: OratureAudioFile? = null
     lateinit var waveform: Observable<Image>
     private val width = Screen.getMainScreen().platformWidth
     private val height = Integer.min(Screen.getMainScreen().platformHeight, WAVEFORM_MAX_HEIGHT.toInt())
@@ -121,9 +119,11 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             .subscribe { sa ->
                 audioDataStore.sourceAudioProperty.set(sa)
                 audio = loadAudio(sa.file)
-                createWaveformImages(audio)
-                loadChunkMarkers(audio)
-                subscribeOnWaveformImages()
+                audio?.let {
+                    createWaveformImages(it)
+                    loadChunkMarkers(it)
+                    subscribeOnWaveformImages()
+                }
             }
     }
 
@@ -151,6 +151,25 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
                 .copySourceAudioToProject(sourceAudio.file)
 
             workbook.sourceAudioAccessor.getUserMarkedChapter(chapter, workbook.target)
+        }
+    }
+
+    fun onThemeChange() {
+
+        // Avoids null error in createWaveformImages cause by player not yet being initialized.
+        val hasPlayer = waveformAudioPlayerProperty.value != null
+        val hasAudio = waveformAudioPlayerProperty.value.getDurationInFrames() > 0
+
+        if (!hasPlayer || !hasAudio) {
+            return
+        }
+
+        audio?.let {
+            pause()
+            builder.cancel()
+            cleanupWaveform()
+            createWaveformImages(it)
+            subscribeOnWaveformImages()
         }
     }
 
@@ -267,13 +286,18 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
 
-        waveform = builder.buildAsync(
-            audio.reader(),
-            width = imageWidthProperty.value.toInt(),
-            height = height,
-            wavColor = Color.web(WAV_COLOR),
-            background = Color.web(BACKGROUND_COLOR)
-        )
+        val waveformColors = getWaveformColors(settingsViewModel.appColorMode.value)
+
+        waveformColors?.let {
+            builder.cancel()
+            waveform = builder.buildAsync(
+                audio.reader(),
+                width = imageWidthProperty.value.toInt(),
+                height = height,
+                wavColor = Color.web(waveformColors.wavColorHex),
+                background = Color.web(waveformColors.backgroundColorHex)
+            )
+        }
     }
 
     private fun onUndoableAction() {

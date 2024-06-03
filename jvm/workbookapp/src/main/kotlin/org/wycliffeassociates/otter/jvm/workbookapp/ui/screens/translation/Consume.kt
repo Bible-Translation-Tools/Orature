@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.github.thomasnield.rxkotlinfx.toObservable
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.animation.AnimationTimer
@@ -35,6 +36,8 @@ import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ConsumeViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
@@ -65,6 +68,7 @@ class Consume : View() {
         waveform.initializeMarkers()
         waveform.markers.bind(viewModel.markers) { it }
         subscribeEvents()
+        subscribeOnThemeChange()
     }
 
     override fun onUndock() {
@@ -73,6 +77,16 @@ class Consume : View() {
         timer?.stop()
         viewModel.onUndockConsume()
         unsubscribeEvents()
+    }
+
+    private fun subscribeOnThemeChange() {
+        settingsViewModel.appColorMode
+            .toObservable()
+            .subscribe {
+                viewModel.onThemeChange()
+                waveform.initializeMarkers()
+                waveform.markers.bind(viewModel.markers) { it }
+            }.addTo(viewModel.compositeDisposable)
     }
 
     private fun subscribeOnWaveformImages() {

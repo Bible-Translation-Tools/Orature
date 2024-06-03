@@ -29,6 +29,7 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
+import org.wycliffeassociates.otter.common.data.getWaveformColors
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
@@ -55,6 +56,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
 
+    val settingsViewModel: SettingsViewModel by inject()
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
     val translationViewModel: TranslationViewModel2 by inject()
@@ -99,7 +101,6 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
 
     fun dock() {
         subscribeToChunks()
-
         currentChunkProperty.onChangeAndDoNowWithDisposer {
             it?.let { chunk ->
                 subscribeToSelectedTake(chunk)
@@ -246,6 +247,28 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
             }.addTo(disposable)
     }
 
+    fun onThemeChange() {
+
+        // Avoids null error in createWaveformImages cause by player not yet being initialized.
+        val hasPlayer = waveformAudioPlayerProperty.value != null
+        val hasAudio = waveformAudioPlayerProperty.value.getDurationInFrames() > 0
+
+        if (!hasPlayer || !hasAudio) {
+            return
+        }
+
+        val take = currentChunkProperty.value?.audio?.getSelectedTake()
+        take?.let {
+            pause()
+            builder.cancel()
+            cleanupWaveform()
+
+            val audio = OratureAudioFile(take.file)
+            createWaveformImages(audio)
+            subscribeOnWaveformImages()
+        }
+    }
+
     private fun subscribeToSelectedTake(chunk: Chunk) {
         selectedTakeDisposable.clear()
         chunk.audio.selected
@@ -277,14 +300,18 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         cleanupWaveform()
         imageWidthProperty.set(computeImageWidth(width))
 
-        builder.cancel()
-        waveform = builder.buildAsync(
-            audio.reader(),
-            width = imageWidthProperty.value.toInt(),
-            height = height,
-            wavColor = Color.web(WAV_COLOR),
-            background = Color.web(BACKGROUND_COLOR)
-        )
+        val waveformColors = getWaveformColors(settingsViewModel.appColorMode.value)
+
+        waveformColors.let {
+            builder.cancel()
+            waveform = builder.buildAsync(
+                audio.reader(),
+                width = imageWidthProperty.value.toInt(),
+                height = height,
+                wavColor = Color.web(waveformColors.wavColorHex),
+                background = Color.web(waveformColors.backgroundColorHex)
+            )
+        }
     }
 
     private fun onUndoableAction() {

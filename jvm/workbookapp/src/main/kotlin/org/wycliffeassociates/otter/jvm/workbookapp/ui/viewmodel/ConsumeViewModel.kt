@@ -31,6 +31,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.data.getWaveformColors
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
@@ -53,6 +54,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
     val translationViewModel: TranslationViewModel2 by inject()
+    val settingsViewModel: SettingsViewModel by inject()
 
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
@@ -121,6 +123,26 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
         translationViewModel.currentMarkerProperty.set(-1)
     }
 
+    fun onThemeChange() {
+
+        // Avoids null error in createWaveformImages cause by player not yet being initialized.
+        val hasPlayer = waveformAudioPlayerProperty.value != null
+        val hasAudio = waveformAudioPlayerProperty.value.getDurationInFrames() > 0
+
+        if (!hasPlayer || !hasAudio) {
+            return
+        }
+
+        val audioFile = audioDataStore.sourceAudioProperty.value?.file
+        audioFile?.let {
+            pause()
+            builder.cancel()
+            cleanupWaveform()
+            createWaveformImages(OratureAudioFile(audioFile))
+            subscribeOnWaveformImages()
+        }
+    }
+
     fun pause() {
         audioController?.pause()
     }
@@ -142,13 +164,18 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
 
-        waveform = builder.buildAsync(
-            audio.reader(),
-            width = imageWidthProperty.value.toInt(),
-            height = height,
-            wavColor = Color.web(WAV_COLOR),
-            background = Color.web(BACKGROUND_COLOR)
-        )
+        val waveformColors = getWaveformColors(settingsViewModel.appColorMode.value)
+
+        waveformColors?.let {
+            builder.cancel()
+            waveform = builder.buildAsync(
+                audio.reader(),
+                width = imageWidthProperty.value.toInt(),
+                height = height,
+                wavColor = Color.web(waveformColors.wavColorHex),
+                background = Color.web(waveformColors.backgroundColorHex)
+            )
+        }
     }
 
     fun cleanup() {

@@ -88,29 +88,28 @@ class SettingsView : View() {
                 vbox {
                     addClass("app-drawer__section")
 
-                    // TODO: show theme color options when dark mode is ready
-//                    label(messages["colorTheme"]).apply {
-//                        addClass("app-drawer__subtitle--small")
-//                    }
-//
-//                    combobox(viewModel.selectedThemeProperty, viewModel.supportedThemes) {
-//                        addClass("wa-combobox")
-//                        fitToParentWidth()
-//
-//                        cellFormat {
-//                            val view = ComboboxItem()
-//                            graphic = view.apply {
-//                                topTextProperty.set(messages[it.titleKey])
-//                            }
-//                        }
-//
-//                        buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_BRIGHTNESS_6)) {
-//                            it?.let { FX.messages[it.titleKey] } ?: ""
-//                        }
-//                        overrideDefaultKeyEventHandler {
-//                            fire(ThemeColorEvent(this@SettingsView::class, it))
-//                        }
-//                    }
+                    label(messages["colorTheme"]).apply {
+                        addClass("app-drawer__subtitle--small")
+                    }
+
+                    combobox(viewModel.selectedThemeProperty, viewModel.supportedThemes) {
+                        addClass("wa-combobox")
+                        fitToParentWidth()
+
+                        cellFormat {
+                            val view = ComboboxItem()
+                            graphic = view.apply {
+                                topTextProperty.set(messages[it.titleKey])
+                            }
+                        }
+
+                        buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_BRIGHTNESS_6)) {
+                            it?.let { FX.messages[it.titleKey] } ?: ""
+                        }
+                        overrideDefaultKeyEventHandler {
+                            fire(ThemeColorEvent(this@SettingsView::class, it))
+                        }
+                    }
 
                     label(messages["language"]).apply {
                         addClass("app-drawer__subtitle--small")

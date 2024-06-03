@@ -42,6 +42,7 @@ import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.data.getWaveformColors
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
@@ -96,6 +97,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     @Inject
     lateinit var chapterTranslationBuilder: ChapterTranslationBuilder
 
+    val settingsViewModel: SettingsViewModel by inject()
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
     val audioPluginViewModel: AudioPluginViewModel by inject()
@@ -192,6 +194,22 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         translationViewModel.currentMarkerProperty.unbind()
         translationViewModel.currentMarkerProperty.set(-1)
         cleanup()
+    }
+
+    fun onThemeChange() {
+
+        // Avoids null error in createWaveformImages cause by player not yet being initialized.
+        val hasPlayer = waveformAudioPlayerProperty.value != null
+        val hasAudio = waveformAudioPlayerProperty.value.getDurationInFrames() > 0
+
+        if (!hasPlayer || !hasAudio) {
+            return
+        }
+
+        // Ensures that the markerModel has been initialized before reloading audio
+        markerModel?.let {
+            reloadAudio(true).subscribe()
+        }
     }
 
     override fun placeMarker() {
@@ -302,6 +320,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                                 }
                                 actionHistory.execute(action)
                             }
+
                             else -> {
                                 // no-op
                             }
@@ -338,27 +357,29 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             .subscribe()
     }
 
-    fun reloadAudio(): Completable {
+    fun reloadAudio(keepMarkers: Boolean = false): Completable {
         cleanupWaveform()
         initWaveformMarkerProperty.value?.invoke()
 
         val chapterTake = workbookDataStore.chapter.audio.getSelectedTake()!!
+
         return loadTargetAudio(chapterTake)
             .flatMapCompletable {
-                loadMarkersAndWaveform(it)
+                loadMarkersAndWaveform(it, keepMarkers)
             }
             .doOnComplete {
                 onUndoableAction()
             }
     }
 
-    private fun loadMarkersAndWaveform(audio: OratureAudioFile): Completable {
+    private fun loadMarkersAndWaveform(audio: OratureAudioFile, keepMarkers: Boolean = false): Completable {
         return Completable
             .fromAction {
                 val sourceAudio = audioDataStore.sourceAudioProperty.value
                     ?.let { OratureAudioFile(it.file) }
-
-                loadVerseMarkers(audio, sourceAudio)
+                if (!keepMarkers) {
+                    loadVerseMarkers(audio, sourceAudio)
+                }
                 createWaveformImages(audio)
                 subscribeOnWaveformImages()
             }
@@ -517,14 +538,18 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
 
-        builder.cancel()
-        waveform = builder.buildAsync(
-            audio.reader(),
-            width = imageWidthProperty.value.toInt(),
-            height = height,
-            wavColor = Color.web(WAV_COLOR),
-            background = Color.web(BACKGROUND_COLOR)
-        )
+        val waveformColors = getWaveformColors(settingsViewModel.appColorMode.value)
+
+        waveformColors?.let {
+            builder.cancel()
+            waveform = builder.buildAsync(
+                audio.reader(),
+                width = imageWidthProperty.value.toInt(),
+                height = height,
+                wavColor = Color.web(waveformColors.wavColorHex),
+                background = Color.web(waveformColors.backgroundColorHex)
+            )
+        }
     }
 
     private fun onUndoableAction() {

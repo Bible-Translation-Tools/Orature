@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.github.thomasnield.rxkotlinfx.toObservable
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.animation.AnimationTimer
@@ -208,6 +209,7 @@ open class PeerEdit : View() {
         viewModel.cleanupWaveformProperty.set(waveform::cleanup)
         viewModel.dock()
         subscribeEvents()
+        subscribeOnThemeChange()
     }
 
     override fun onUndock() {
@@ -219,6 +221,9 @@ open class PeerEdit : View() {
         if (mainSectionProperty.value == recordingView) {
             recorderViewModel.cancel()
         }
+
+        listenerDisposers.forEach { it.dispose() }
+        listenerDisposers.clear()
     }
 
     private fun subscribeEvents() {
@@ -243,6 +248,14 @@ open class PeerEdit : View() {
         subscribe<TranslationNavigationEvent> {
             viewModel.cleanupWaveform()
         }.also { eventSubscriptions.add(it) }
+    }
+
+    private fun subscribeOnThemeChange() {
+        settingsViewModel.appColorMode
+            .toObservable()
+            .subscribe {
+                viewModel.onThemeChange()
+            }.addTo(viewModel.disposable)
     }
 
     private fun unsubscribeEvents() {
