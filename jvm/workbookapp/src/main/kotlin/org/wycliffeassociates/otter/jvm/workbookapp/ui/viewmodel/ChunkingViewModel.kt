@@ -128,12 +128,12 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             }
     }
 
-    fun undock(forceSaveChanges: Boolean = false) {
+    fun undock() {
         pause()
         translationViewModel.selectedStepProperty.value?.let {
             // handle when navigating to the next step
             val hasUnsavedChanges = markerCountProperty.value != 0 && markerModel?.canUndo() == true
-            if ((hasUnsavedChanges && it.ordinal > ChunkingStep.CHUNKING.ordinal) || forceSaveChanges) {
+            if ((hasUnsavedChanges && it.ordinal > ChunkingStep.CHUNKING.ordinal)) {
                 saveChanges()
             }
             translationViewModel.updateStep()
