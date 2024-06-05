@@ -162,7 +162,7 @@ class WavFile private constructor() : AudioFormatStrategy {
                 val metadataSize = totalDataLength - nonMetadataSize
                 val bytes = ByteArray(metadataSize)
                 file.inputStream().use {
-                    val metadataStart = headerSize + totalAudioLength
+                    val metadataStart = headerSize + getWordAlignedLength(totalAudioLength)
                     it.skip(metadataStart.toLong())
                     it.read(bytes)
                 }
@@ -197,3 +197,6 @@ class WavFile private constructor() : AudioFormatStrategy {
         return WavOutputStream(this, append, buffered)
     }
 }
+
+internal fun getWordAlignedLength(length: Int) =
+    if (length % WORD_SIZE != 0) length + WORD_SIZE - (length % WORD_SIZE) else length
