@@ -183,7 +183,7 @@ class NarrationViewModel : ViewModel() {
         }
 
         subscribe<NavigationRequestEvent>() {
-            if (it.view == find<HomePage2>() && pluginOpenedProperty.value) {
+            if (it.view is HomePage2 && pluginOpenedProperty.value) {
                 navigator.navigateHomeOnPluginClosed = true
                 fire(PluginCloseRequestEvent)
             }
