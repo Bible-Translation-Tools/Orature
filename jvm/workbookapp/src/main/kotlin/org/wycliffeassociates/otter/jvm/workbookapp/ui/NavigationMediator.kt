@@ -32,6 +32,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestBlockedE
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.HomePage2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseRequestEvent
@@ -45,6 +46,7 @@ class NavigationMediator : Component(), ScopedInstance {
     private val pluginOpenedProperty = SimpleBooleanProperty(false)
     private val returningView = SimpleObjectProperty<View>(null)
     val blockNavigationEvents = SimpleBooleanProperty(false)
+    var navigateHomeOnPluginClosed = false
     private var appExitRequested = false
 
     private val recorderBreadCrumb = BreadCrumb().apply {
@@ -94,6 +96,13 @@ class NavigationMediator : Component(), ScopedInstance {
                 PluginType.MARKER -> breadCrumbsBar.removeItem(markerBreadCrumb)
             }
             pluginOpenedProperty.set(false)
+
+            if (navigateHomeOnPluginClosed) {
+                navigateHomeOnPluginClosed = false
+                val homePage = find<HomePage2>()
+                fire(NavigationRequestEvent(homePage))
+            }
+
         }
         subscribe<NavigationRequestEvent> {
 
