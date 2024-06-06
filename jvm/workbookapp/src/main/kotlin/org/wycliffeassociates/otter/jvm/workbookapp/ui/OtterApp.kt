@@ -67,13 +67,13 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
     private lateinit var snackBarRoot: Pane
 
     init {
-        DatabaseInitializer(
-            DirectoryProvider(OratureInfo.SUITE_NAME)
-        ).initialize()
         dependencyGraph.inject(this)
         Thread.setDefaultUncaughtExceptionHandler(OtterExceptionHandler(directoryProvider, localeLanguage))
         initializeLogger(directoryProvider)
         initializeAppLocale()
+        DatabaseInitializer(
+            DirectoryProvider(OratureInfo.SUITE_NAME)
+        ).initialize()
 
         logger = LoggerFactory.getLogger(OtterApp::class.java)
     }

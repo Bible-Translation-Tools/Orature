@@ -181,7 +181,10 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
                         take,
                         checkingStatus,
                         currentChecking
-                    )
+                    ).apply {
+                        setUndoCallback { chunkConfirmed.set(false) }
+                        setRedoCallback { chunkConfirmed.set(true) }
+                    }
                     actionHistory.execute(op)
                     onUndoableAction()
                     refreshChunkList()

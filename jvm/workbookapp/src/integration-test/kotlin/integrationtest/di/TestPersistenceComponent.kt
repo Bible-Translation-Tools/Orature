@@ -38,6 +38,8 @@ import integrationtest.projects.importer.TestRCImporterFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.AppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppDatabaseModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppPreferencesModule
+import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AuthModule
+import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.MetadataModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.ZipEntryTreeBuilderModule
 import javax.inject.Singleton
 
@@ -49,6 +51,8 @@ import javax.inject.Singleton
         TestDirectoryProviderModule::class,
         TestRepositoriesModule::class,
         ZipEntryTreeBuilderModule::class,
+        MetadataModule::class,
+        AuthModule::class
     ]
 )
 @Singleton

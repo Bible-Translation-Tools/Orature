@@ -89,7 +89,7 @@ class CueChunkTest {
                 }
                 val os = WavOutputStream(wav)
                 os.use {
-                    os.write(ByteArray(writeSize))
+                    os.write(ByteArray(wordAlign(writeSize)))
                 }
                 val validator = WavFile(file, WavMetadata(listOf(CueChunk())))
                 val resultMetadata = validator.metadata

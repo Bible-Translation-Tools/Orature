@@ -34,6 +34,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import javax.inject.Singleton
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AuthModule
+import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.MetadataModule
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.NarrationDebugApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.AudioWorkspaceViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.NarrationHeaderViewModel
@@ -47,7 +49,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.*
         AppPreferencesModule::class,
         DirectoryProviderModule::class,
         AppRepositoriesModule::class,
-        ZipEntryTreeBuilderModule::class
+        ZipEntryTreeBuilderModule::class,
+        MetadataModule::class,
+        AuthModule::class
     ]
 )
 @Singleton

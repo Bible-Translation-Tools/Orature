@@ -69,9 +69,11 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.MARKER_
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.MARKER_WIDTH
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.NarrationWaveformRenderer
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.HomePage2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppPreferencesStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseRequestEvent
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
@@ -180,6 +182,13 @@ class NarrationViewModel : ViewModel() {
                 onTaskRunnerIdle = {
                     FX.eventbus.fire(it.navigationRequest)
                 }
+            }
+        }
+
+        subscribe<NavigationRequestEvent>() {
+            if (it.view is HomePage2 && pluginOpenedProperty.value) {
+                navigator.navigateHomeOnPluginClosed = true
+                fire(PluginCloseRequestEvent)
             }
         }
 
@@ -425,6 +434,7 @@ class NarrationViewModel : ViewModel() {
                     logger.error("Error in processing take with plugin type: $pluginType, ${e.message}")
                 }
                 .flatMapSingle { plugin ->
+                    navigator.blockNavigationEvents.set(true)
                     pluginOpenedProperty.set(true)
                     fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
                     when (pluginType) {
@@ -705,6 +715,7 @@ class NarrationViewModel : ViewModel() {
                 }
 
                 openLoadingModalProperty.set(false)
+                navigator.blockNavigationEvents.set(false)
                 FX.eventbus.fire(PluginClosedEvent(pluginType))
             }
             .subscribeOn(Schedulers.io())
