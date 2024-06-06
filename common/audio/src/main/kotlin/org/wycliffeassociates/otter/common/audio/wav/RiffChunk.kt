@@ -24,7 +24,6 @@ internal const val RIFF_HEADER_SIZE = 12
 internal const val CHUNK_HEADER_SIZE = 8
 internal const val CHUNK_LABEL_SIZE = 4
 internal const val DWORD_SIZE = 4
-internal const val WORD_SIZE = 2
 
 // chunk data must be word aligned but the size might not account for padding
 // therefore, if odd, the size we read must add one to include the padding
