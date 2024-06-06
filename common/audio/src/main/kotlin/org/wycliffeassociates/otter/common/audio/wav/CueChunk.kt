@@ -169,6 +169,9 @@ open class CueChunk : RiffChunk {
             .sum()
     }
 
+    private fun getWordAlignedLength(length: Int) =
+        if (length % DWORD_SIZE != 0) length + DWORD_SIZE - (length % DWORD_SIZE) else length
+
     private fun wordAlignedLabel(cue: AudioCue): ByteArray {
         val label = cue.label
         val alignedLength = getWordAlignedLength(cue.label.length)
