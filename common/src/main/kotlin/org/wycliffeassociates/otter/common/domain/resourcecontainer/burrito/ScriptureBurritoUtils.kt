@@ -120,7 +120,7 @@ class ScriptureBurritoUtils @Inject constructor(
                     ).apply {
                         name = "audioTranslation"
                         currentScope = ScopeSchema().apply {
-                            this[workbook.target.slug] = takes.keys.map { "$it" }.toMutableList()
+                            this[workbook.target.slug.uppercase(Locale.US)] = takes.keys.map { "$it" }.toMutableList()
                         }
                     }
                 }
