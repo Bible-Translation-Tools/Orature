@@ -41,7 +41,6 @@ class NarrationToolBar : View() {
         alignment = Pos.CENTER_LEFT
         button {
             addClass("btn", "btn--secondary")
-            addPseudoClass("active")
             tooltip { textProperty().bind(this@button.textProperty()) }
 
             disableWhen {
@@ -54,11 +53,11 @@ class NarrationToolBar : View() {
                         if (state == NarrationStateType.PLAYING) {
                             graphic = FontIcon(MaterialDesign.MDI_PAUSE)
                             text = messages["pause"]
-                            togglePseudoClass("active", true)
+                            addPseudoClass("active")
                         } else {
                             graphic = FontIcon(MaterialDesign.MDI_PLAY)
                             text = messages["playAll"]
-                            togglePseudoClass("active", false)
+                            removePseudoClass("active")
                         }
                     }
                 }
@@ -73,7 +72,7 @@ class NarrationToolBar : View() {
             }
         }
         button {
-            addClass("btn", "btn--secondary")
+            addClass("btn", "btn--tertiary")
             tooltip(messages["previousVerse"])
             graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
             setOnAction {
@@ -84,7 +83,7 @@ class NarrationToolBar : View() {
             }
         }
         button {
-            addClass("btn", "btn--secondary")
+            addClass("btn", "btn--tertiary")
             tooltip(messages["nextVerse"])
             graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
             setOnAction {

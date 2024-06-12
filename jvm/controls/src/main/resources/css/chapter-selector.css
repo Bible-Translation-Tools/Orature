@@ -19,9 +19,10 @@
 .chapter-selector__controls {
     -fx-alignment: center;
     -fx-background-radius: 6px;
-    -fx-border-color: -wa-black-30;
+    -fx-border-color: -wa-surface-border;
     -fx-border-radius: 16px;
     -fx-border-style: solid;
+    -fx-border-width: 2px
 }
 
 .chapter-selector__title {
@@ -52,14 +53,14 @@
 .chapter-selector .btn.chapter-selector__btn-prev {
     -fx-background-radius: 16px 0 0 16px;
     -fx-border-radius: 16px 0 0 16px;
-    -fx-border-width: 0 1 0 0;
-    -fx-border-color: -wa-foreground-hover;
+    -fx-border-width: 0 2 0 0;
+    -fx-border-color: -wa-surface-border;
 ;
 }
 
 .chapter-selector .btn.chapter-selector__btn-next {
     -fx-background-radius: 0 16px 16px 0;
     -fx-border-radius: 0 16px 16px 0;
-    -fx-border-width: 0 0 0 1;
-    -fx-border-color: -wa-foreground-hover;
+    -fx-border-width: 0 0 0 2;
+    -fx-border-color: -wa-surface-border;
 }

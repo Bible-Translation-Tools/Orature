@@ -45,7 +45,7 @@ class AppBar : Fragment() {
     private val buttonsToggleGroup = ToggleGroup()
 
     private val homeButton = AppBarButton().apply {
-        addClass("bottom-border")
+        addClass("app-bar-button__icon")
         textProperty().set(messages["home"])
         graphicProperty().set(FontIcon(MaterialDesign.MDI_HOME))
 
@@ -73,7 +73,7 @@ class AppBar : Fragment() {
     }
 
     private val settingsButton = AppBarButton().apply {
-        addClass("top-border")
+        addClass("app-bar-button__icon")
         textProperty().set(messages["settings"])
         graphicProperty().set(FontIcon(MaterialDesign.MDI_SETTINGS))
         toggleGroup = buttonsToggleGroup
@@ -88,7 +88,7 @@ class AppBar : Fragment() {
     }
 
     private val infoButton = AppBarButton().apply {
-        addClass("top-border")
+        addClass("app-bar-button__icon")
         textProperty().set(messages["info"])
         graphicProperty().set(FontIcon(MaterialDesign.MDI_INFORMATION))
         toggleGroup = buttonsToggleGroup
@@ -125,7 +125,9 @@ class AppBar : Fragment() {
                         SettingsView::class -> settingsButton.requestFocus()
                         InfoView::class -> infoButton.requestFocus()
                         // If the drawer is closed from something other than the toggle buttons, deselect them all
-                        else -> { buttonsToggleGroup.toggles.forEach { it.isSelected = false } }
+                        else -> {
+                            buttonsToggleGroup.toggles.forEach { it.isSelected = false }
+                        }
                     }
                 }
             }

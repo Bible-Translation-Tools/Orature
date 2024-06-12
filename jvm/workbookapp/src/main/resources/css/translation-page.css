@@ -22,7 +22,7 @@
     -fx-padding: 16px;
     -fx-background-color: -wa-foreground;
     -fx-border-width: 0 0 1 0;
-    -fx-border-color: -wa-border-light;
+    -fx-border-color: -wa-surface-border;
 }
 
 .top-navigation-pane__title-section {
@@ -42,7 +42,7 @@
     -fx-pref-width: 360;
     -fx-background-color: -wa-foreground;
     -fx-border-width: 0 1 0 0;
-    -fx-border-color: -wa-border-light;
+    -fx-border-color: -wa-surface-border;
 }
 
 .chunking-step-drawer:collapsed {
@@ -54,7 +54,7 @@
 }
 
 .chunking-step:disabled {
-    -fx-background-color: #E5E8EB;
+    -fx-background-color: -wa-surface-secondary;
 }
 
 .chunking-step:focus-visible .chunking-step__header-section {
@@ -90,11 +90,11 @@
     -fx-alignment: center;
     -fx-padding: 16;
     -fx-border-width: 1;
-    -fx-border-color: transparent transparent -wa-border-light transparent;
+    -fx-border-color: transparent transparent -wa-btn-icon-border-color transparent;
 }
 
 .chunking-step__header-section:hover {
-    -fx-background-color: -wa-secondary-btn-background-hover;
+    -fx-background-color: -wa-primary-05;
 }
 
 .chunking-step__header-section .chunking-step__title {
@@ -109,7 +109,7 @@
 .chunking-step__content-section {
     -fx-alignment: center;
     -fx-border-width: 1;
-    -fx-border-color: transparent transparent -wa-border-light transparent;
+    -fx-border-color: -wa-surface-border;
     -fx-padding: 16;
 }
 
@@ -123,12 +123,16 @@
     -fx-min-width: 360;
     -fx-background-color: -wa-foreground;
     -fx-border-width: 0 0 0 1;
-    -fx-border-color: -wa-border-light;
+    -fx-border-color: -wa-surface-border;
 }
 
 .source-text-drawer:collapsed {
     -fx-max-width: 90;
     -fx-min-width: 90;
+}
+
+.source-text-drawer__btn {
+    -fx-border-width: 1px;
 }
 
 .drawer-graphic-container {

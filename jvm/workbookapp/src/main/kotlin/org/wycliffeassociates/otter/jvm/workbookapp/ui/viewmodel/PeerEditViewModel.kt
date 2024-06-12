@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.github.thomasnield.rxkotlinfx.toObservable
 import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -49,6 +50,7 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import tornadofx.*
 import javax.inject.Inject
 
@@ -253,10 +255,10 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     fun onThemeChange() {
 
         // Avoids null error in createWaveformImages cause by player not yet being initialized.
-        val hasPlayer = waveformAudioPlayerProperty.value != null
-        val hasAudio = waveformAudioPlayerProperty.value.getDurationInFrames() > 0
+        val hasAudioAndPlayer =
+            waveformAudioPlayerProperty.value != null && waveformAudioPlayerProperty.value.getDurationInFrames() > 0
 
-        if (!hasPlayer || !hasAudio) {
+        if (!hasAudioAndPlayer) {
             return
         }
 

@@ -18,10 +18,12 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
+import com.github.thomasnield.rxkotlinfx.toObservable
 import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
@@ -41,6 +43,8 @@ import javax.inject.Inject
 
 class RecorderViewModel : ViewModel() {
 
+    val settingsViewModel: SettingsViewModel by inject()
+
     enum class Result {
         SUCCESS,
         CANCELLED
@@ -51,6 +55,7 @@ class RecorderViewModel : ViewModel() {
 
     val targetFileProperty = SimpleObjectProperty<File>(null)
     var hasWrittenProperty = SimpleBooleanProperty(false)
+
     @Volatile
     var recordingProperty = SimpleBooleanProperty(false)
     var isRecording by recordingProperty
@@ -98,8 +103,9 @@ class RecorderViewModel : ViewModel() {
             renderedWidth,
             secondsOnScreen = 10
         )
+
         volumeCanvas.addDrawable(VolumeBar(recorder.getAudioStream()))
-        val waveformLayer = WaveformLayer(renderer)
+        val waveformLayer = WaveformLayer(renderer, settingsViewModel.appColorMode.toObservable())
         waveformCanvas.addDrawable(BaseWaveLine())
         waveformCanvas.addDrawable(waveformLayer)
 
@@ -174,7 +180,7 @@ class RecorderViewModel : ViewModel() {
     }
 
     private fun createTempRecordingTake(): File {
-        return kotlin.io.path.createTempFile("otter-take",".wav").toFile()
+        return kotlin.io.path.createTempFile("otter-take", ".wav").toFile()
             .also {
                 it.deleteOnExit()
                 targetFileProperty.value?.copyTo(it, true)

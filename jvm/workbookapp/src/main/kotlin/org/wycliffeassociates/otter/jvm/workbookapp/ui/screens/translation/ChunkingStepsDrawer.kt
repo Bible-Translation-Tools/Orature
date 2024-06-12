@@ -77,24 +77,49 @@ class ChunkingStepsDrawer(
             vgrow = Priority.ALWAYS
             isFitToWidth = true
             vbox {
-                chunkingStep(ChunkingStep.CONSUME_AND_VERBALIZE,selectedStepProperty,reachableStepProperty, isCollapsedProperty)
+                chunkingStep(
+                    ChunkingStep.CONSUME_AND_VERBALIZE,
+                    selectedStepProperty,
+                    reachableStepProperty,
+                    isCollapsedProperty
+                )
                 chunkingStep(ChunkingStep.CHUNKING, selectedStepProperty, reachableStepProperty, isCollapsedProperty) {
                     visibleWhen(noSourceAudioProperty.not())
                     managedWhen(visibleProperty())
                 }
-                chunkingStep(ChunkingStep.BLIND_DRAFT, selectedStepProperty, reachableStepProperty, isCollapsedProperty) {
+                chunkingStep(
+                    ChunkingStep.BLIND_DRAFT,
+                    selectedStepProperty,
+                    reachableStepProperty,
+                    isCollapsedProperty
+                ) {
                     chunkListProperty.bind(chunksProperty)
                 }
                 chunkingStep(ChunkingStep.PEER_EDIT, selectedStepProperty, reachableStepProperty, isCollapsedProperty) {
                     chunkListProperty.bind(chunksProperty)
                 }
-                chunkingStep(ChunkingStep.KEYWORD_CHECK, selectedStepProperty, reachableStepProperty, isCollapsedProperty) {
+                chunkingStep(
+                    ChunkingStep.KEYWORD_CHECK,
+                    selectedStepProperty,
+                    reachableStepProperty,
+                    isCollapsedProperty
+                ) {
                     chunkListProperty.bind(chunksProperty)
                 }
-                chunkingStep(ChunkingStep.VERSE_CHECK, selectedStepProperty, reachableStepProperty, isCollapsedProperty) {
+                chunkingStep(
+                    ChunkingStep.VERSE_CHECK,
+                    selectedStepProperty,
+                    reachableStepProperty,
+                    isCollapsedProperty
+                ) {
                     chunkListProperty.bind(chunksProperty)
                 }
-                chunkingStep(ChunkingStep.FINAL_REVIEW, selectedStepProperty, reachableStepProperty, isCollapsedProperty)
+                chunkingStep(
+                    ChunkingStep.FINAL_REVIEW,
+                    selectedStepProperty,
+                    reachableStepProperty,
+                    isCollapsedProperty
+                )
             }
 
             runLater { customizeScrollbarSkin() }

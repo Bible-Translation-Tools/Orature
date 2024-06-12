@@ -46,6 +46,8 @@ class VerseMenu : ContextMenu() {
         addClass("wa-context-menu")
 
         val playOpt = MenuItem().apply {
+            addClass("btn", "btn--tertiary", "btn--borderless")
+
             graphic = label(messages["play"]) {
                 graphic = FontIcon(MaterialDesign.MDI_PLAY)
                 tooltip(text)
@@ -58,6 +60,8 @@ class VerseMenu : ContextMenu() {
             }
         }
         val recordAgainOpt = MenuItem().apply {
+            addClass("btn", "btn--tertiary", "btn--borderless")
+
             graphic = label(messages["recordAgain"]) {
                 graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                 tooltip(text)
@@ -70,6 +74,8 @@ class VerseMenu : ContextMenu() {
             }
         }
         val editVerseOpt = MenuItem().apply {
+            addClass("btn", "btn--tertiary", "btn--borderless")
+
             graphic = label(messages["openIn"]) {
                 graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
                 tooltip(text)
@@ -83,6 +89,8 @@ class VerseMenu : ContextMenu() {
         }
 
         val importVerseAudio = MenuItem().apply {
+            addClass("btn", "btn--tertiary", "btn--borderless")
+
             graphic = label(messages["import"]) {
                 graphic = FontIcon(MaterialDesign.MDI_DOWNLOAD)
                 tooltip(text)

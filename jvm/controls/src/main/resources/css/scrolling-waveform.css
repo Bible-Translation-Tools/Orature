@@ -63,7 +63,7 @@
 }
 
 .scrolling-waveform-frame__image-container {
-    -fx-background-color: white;
+    -fx-background-color: -wa-marker-track-background;
 }
 
 .scrolling-waveform-frame__top-track {

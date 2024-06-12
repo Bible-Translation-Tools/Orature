@@ -44,7 +44,7 @@
     -fx-spacing: 16;
     -fx-padding: 16 12;
     -fx-text-alignment: justify;
-    -fx-background-color: -wa-dialog-background;
+    -fx-background-color: -wa-foreground;
     -fx-alignment: center;
 }
 

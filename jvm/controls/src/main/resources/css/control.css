@@ -37,14 +37,6 @@
     -fx-border-insets: -2;
 }
 
-.btn:active {
-    -fx-background-color: #001533;
-}
-
-.btn:active .ikonli-font-icon {
-    -fx-icon-color: -wa-white;
-}
-
 /* -------------- Button Icon -------------- */
 .btn__icon {
     -fx-icon-color: inherit;
@@ -54,7 +46,7 @@
 
 .btn--icon {
     -fx-border-width: 1px;
-    -fx-border-color: -wa-btn-icon-border-color;
+    -fx-border-color: -wa-surface-border;
     -fx-border-radius: 12px;
     -fx-background-color: -wa-btn-icon-background;
     -fx-background-radius: 12px;
@@ -70,7 +62,12 @@
 }
 
 .btn--icon:hover {
-    -fx-background-color: -wa-btn-icon-background-hover;
+    -fx-background-color: -wa-button-tertiary-hover-surface;
+    -fx-border-color: transparent;
+}
+
+.btn--icon:hover .ikonli-font-icon {
+    -fx-icon-color: -wa-button-tertiary-hover-on-surface;
 }
 
 .btn--icon:active:hover {
@@ -78,7 +75,14 @@
 }
 
 .btn--icon:pressed {
-    -fx-background-color: -wa-btn-icon-background-pressed;
+    -fx-background-color: -wa-button-pressed-surface;
+    -fx-border-color: transparent;
+    -fx-text-fill: -wa-button-primary-default-on-surface;
+    -fx-underline: true;
+}
+
+.btn--icon:pressed .ikonli-font-icon {
+    -fx-icon-color: -wa-button-primary-default-on-surface;
 }
 
 .btn--icon:disabled {
@@ -97,44 +101,61 @@
 
 /* -------------- Primary Button -------------- */
 .btn--primary {
-    -fx-background-color: -wa-primary-gradient;
+    -fx-background-color: -wa-button-primary-default-surface;
+    -fx-background-radius: 12px;
     -fx-background-radius: 12px;
     -fx-effect: -wa-level2;
     -fx-border-width: 1px;
     -fx-border-radius: 12px;
-    -fx-border-color: -wa-primary-dark;
-    -fx-text-fill: -wa-primary-btn-text-fill;
+    -fx-border-color: -wa-button-primary-default-border;
+    -fx-text-fill: -wa-button-primary-default-on-surface;
     -fx-font-size: 20px;
     -fx-underline: false;
     -fx-graphic-text-gap: 8px;
 }
 
 .btn--primary .ikonli-font-icon {
-    -fx-fill: -wa-primary-btn-text-fill;
+    -fx-fill: -wa-button-primary-default-on-surface;
     -fx-font-size: 24px;
 }
 
 .btn--primary:hover {
-    -fx-background-color: -wa-primary;
+    -fx-background-color: -wa-button-primary-hover-surface;
+    -fx-text-fill: -wa-button-primary-hover-on-surface;
+    -fx-border-color: transparent;
     -fx-underline: true;
 }
 
+.btn--primary:hover .ikonli-font-icon {
+    -fx-fill: -wa-button-primary-hover-on-surface;
+    -fx-font-size: 24px;
+}
+
 .btn--primary:pressed {
-    -fx-background-color: -wa-primary-dark;
+    -fx-background-color: -wa-button-pressed-surface;
     -fx-underline: false;
 }
 
 .btn--primary:disabled {
-    -fx-background-color: -wa-disabled-background;
+    -fx-background-color: -wa-button-primary-inactive-surface;
     -fx-border-width: 0px;
-    -fx-text-fill: -wa-disabled-text;
+    -fx-text-fill: -wa-button-primary-inactive-on-surface;
     -fx-effect: -wa-level0;
     -fx-cursor: disappear;
     -fx-underline: false;
 }
 
 .btn--primary:disabled .ikonli-font-icon {
-    -fx-fill: -wa-disabled-text;
+    -fx-fill: -wa-button-primary-inactive-on-surface;
+}
+
+.btn--primary:inactive {
+    -fx-background-color: -wa-button-primary-inactive-surface;
+    -fx-border-color: transparent;
+}
+
+.btn--primary:inactive .ikonli-font-icon {
+    -fx-fill: -wa-button-primary-inactive-on-surface;
 }
 
 /* -------------- Call to Action Button -------------- */
@@ -171,37 +192,42 @@
 
 /* -------------- Secondary Button -------------- */
 .btn--secondary {
-    -fx-background-color: -wa-secondary-btn-background;
+    -fx-background-color: -wa-button-secondary-default-surface;
+    -fx-background-radius: 12px;
+    -fx-border-color: -wa-button-secondary-default-border;
     -fx-border-radius: 12px;
-    -fx-border-width: 1px;
-    -fx-border-color: -wa-secondary-btn-border;
-    -fx-text-fill: -wa-secondary-btn-text-fill;
+    -fx-border-width: 2px;
+    -fx-text-fill: -wa-button-secondary-default-on-surface;
     -fx-font-size: 1.4em;
     -jfx-disable-visual-focus: true;
     -fx-graphic-text-gap: 8px;
 }
 .btn--secondary .ikonli-font-icon {
     -fx-font-size: 1.9em;
-    -fx-icon-color: -wa-secondary-btn-text-fill;
+    -fx-icon-color: -wa-button-secondary-default-on-surface;
 }
 .btn--secondary:hover {
-    -fx-background-color: -wa-secondary-btn-background-hover;
-    -fx-border-color: -wa-secondary-btn-text-fill-hover;
-    -fx-text-fill: -wa-secondary-btn-text-fill-hover;
+    -fx-background-color: -wa-button-secondary-hover-surface;
+    -fx-background-radius: 12px;
+    -fx-border-color: -wa-button-secondary-hover-border;
+    -fx-border-radius: 12px;
+    -fx-text-fill: -wa-button-secondary-hover-on-surface;
     -fx-underline: true;
 }
 .btn--secondary:hover .ikonli-font-icon {
-    -fx-icon-color: -wa-secondary-btn-text-fill-hover;
+    -fx-icon-color: -wa-button-secondary-hover-on-surface;
 }
+
 .btn--secondary:pressed {
-    -fx-background-color: -wa-secondary-btn-background-pressed;
-    -fx-border-color: -wa-secondary-btn-text-fill-pressed;
-    -fx-text-fill: -wa-secondary-btn-text-fill-pressed;
+    -fx-background-color: -wa-button-pressed-surface;
+    -fx-border-color: -wa-button-secondary-text-fill-pressed;
+    -fx-text-fill: -wa-button-primary-default-on-surface;
     -fx-underline: false;
 }
 .btn--secondary:pressed .ikonli-font-icon {
-    -fx-fill: -wa-secondary-btn-text-fill-pressed;
+    -fx-icon-color: -wa-button-primary-default-on-surface;
 }
+
 .btn--secondary:disabled {
     -fx-cursor: disappear;
     -fx-text-fill: -wa-disabled-text;
@@ -214,27 +240,16 @@
 }
 
 .btn--secondary:active {
-    -fx-background-color: -wa-black;
-    -fx-effect: -wa-level3;
-}
-.btn--secondary:active .text {
-    -fx-fill: -wa-white;
-    -fx-text-fill: -wa-white;
-}
-.btn--secondary:active .ikonli-font-icon {
-    -fx-icon-color: -wa-white;
+    -fx-background-color: -wa-button-secondary-active-surface;
+    -fx-background-radius: 12px;
+    -fx-border-color: transparent;
+    -fx-border-width: 2px;
+    -fx-border-radius: 12px;
+    -fx-text-fill: -wa-button-secondary-active-on-surface;
 }
 
-.btn--secondary:inactive {
-    -fx-background-color: #E5E8EB;
-    -fx-border-width: 0;
-}
-.btn--secondary:inactive .text {
-    -fx-fill: #66768B;
-    -fx-text-fill: #66768B;
-}
-.btn--secondary:inactive .ikonli-font-icon {
-    -fx-icon-color: #66768B;
+.btn--secondary:active .ikonli-font-icon {
+    -fx-icon-color: -wa-button-secondary-active-on-surface;
 }
 
 .btn--secondary-light {
@@ -275,31 +290,73 @@
     -fx-fill: -wa-white-80;
 }
 
-.btn--borderless, .btn--borderless:disabled {
-    -fx-border-width: 0;
-}
-
 /* -------------- Tertiary Button -------------- */
-/* This button is very rarely used
-/* Typically only found in misc dialogs or on very heavy screens */
 .btn--tertiary {
-    -fx-background-color: transparent;
-    -fx-border-width: 0px;
-    -fx-text-fill: -wa-secondary-btn-text-fill;
-    -fx-icon-color: -wa-secondary-btn-text-fill;
+    -fx-background-color: inherit;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-button-tertiary-default-border;
+    -fx-text-fill: -wa-button-tertiary-default-on-surface;
+    -fx-font-size: 1.4em;
+    -jfx-disable-visual-focus: true;
     -fx-graphic-text-gap: 8px;
 }
-.btn--tertiary:hover {
-    -fx-background-color: -wa-secondary-btn-background-hover;
-    -fx-text-fill: -wa-secondary-btn-text-fill-hover;
-    -fx-icon-color: -wa-secondary-btn-text-fill-hover;
+
+.btn--tertiary .ikonli-font-icon {
+    -fx-font-size: 1.9em;
+    -fx-icon-color: -wa-button-tertiary-default-on-surface;
 }
-.btn--tertiary:disabled {
-    -fx-cursor: disappear;
-    -fx-text-fill: -wa-disabled-text;
-    -fx-icon-color: -wa-disabled-text;
+
+.btn--tertiary:hover {
+    -fx-background-color: -wa-button-tertiary-hover-surface;
+    -fx-border-color: transparent;
+    -fx-text-fill: -wa-button-tertiary-hover-on-surface;
+    -fx-underline: true;
+}
+
+.btn--tertiary:hover .ikonli-font-icon {
+    -fx-icon-color: -wa-button-tertiary-hover-on-surface;
+}
+
+.btn--tertiary:pressed {
+    -fx-background-color: -wa-button-pressed-surface;
+    -fx-border-color: transparent;
+    -fx-text-fill: -wa-button-primary-default-on-surface;
+    -fx-underline: true;
+}
+
+.btn--tertiary:pressed .ikonli-font-icon {
+    -fx-icon-color: -wa-button-primary-default-on-surface;
+}
+
+.btn--tertiary:active {
+    -fx-background-color: -wa-button-tertiary-active-surface;
+    -fx-border-color: -wa-button-tertiary-active-border;
+}
+.btn--tertiary:active .text {
+    -fx-fill: -wa-button-tertiary-active-on-surface;
+    -fx-text-fill: -wa-button-tertiary-active-on-surface;
+}
+.btn--tertiary:active .ikonli-font-icon {
+    -fx-icon-color: -wa-on-surface-invert;
+}
+
+.btn--tertiary:inactive {
+    -fx-background-color: inherit;
     -fx-border-width: 0px;
-    -fx-background-color: transparent;
+}
+.btn--tertiary:inactive .text {
+    -fx-fill: -wa-button-tertiary-inactive-on-surface;
+    -fx-text-fill: -wa-button-tertiary-inactive-on-surface;
+}
+.btn--tertiary:inactive .ikonli-font-icon {
+    -fx-icon-color: -wa-button-tertiary-inactive-on-surface;
+}
+
+
+.btn--borderless, .btn--borderless:disabled {
+    -fx-border-width: 0;
 }
 /* ------------ Universal button style --------- */
 /* these button styles are for consistent design across different themes */
@@ -490,7 +547,7 @@
 
 .wa-combobox .list-cell:hover,
 .wa-combobox .combo-box-popup .list-cell:hover {
-    -fx-background-color: -wa-foreground-hover;
+    -fx-background-color: -wa-button-tertiary-hover-surface;
 }
 
 .wa-combobox .list-cell:pressed {
@@ -556,7 +613,7 @@
 /* -------------- Radio button ---------------- */
 
 .wa-radio .radio {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-radio-button-background;
     -fx-border-width: 2px;
     -fx-border-radius: 1.0em;
     -fx-border-color: -wa-gray-darker;
@@ -653,7 +710,7 @@
 }
 
 .wa-slider .thumb {
-    -fx-background-color: -wa-primary-dark;
+    -fx-background-color: -wa-slider-thumb-color;
     -fx-background-radius: 10px;
     -fx-border-radius: 10px;
     -fx-pref-width: 20px;
@@ -739,7 +796,7 @@
 .wa-menu-button .menu-item:focused .wa-menu-button__list-item,
 .wa-menu-button .menu-item:focused .wa-menu-button__btn-util {
     -fx-border-width: 4px;
-    -fx-border-color: -wa-button-border;
+    -fx-border-color: -wa-surface-border;
     -fx-border-radius: 6px;
     -fx-border-insets: -4;
 }
@@ -785,7 +842,7 @@
 }
 
 .wa-menu-button__list-item:hover {
-    -fx-background-color: -wa-btn-icon-background-selected;
+    -fx-background-color: -wa-background;
     -fx-background-radius: 6px;
 }
 

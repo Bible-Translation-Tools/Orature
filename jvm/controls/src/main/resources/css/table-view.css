@@ -23,6 +23,9 @@
     -fx-background-radius: 10;
     -fx-background-insets: 0;
     -fx-padding: 0;
+    -fx-border-width: 1px 1px 0 1px;
+    -fx-border-color: -wa-surface-border;
+    -fx-border-radius: 8px 8px 0 0;
 }
 
 /* header */
@@ -49,14 +52,14 @@
 }
 
 .wa-table-view .column-header-background {
-    -fx-background-color: -wa-table-header-background;
+    -fx-background-color: -wa-background;
     -fx-background-radius: 8 8 0 0;
     -fx-padding: 8 0;
 }
 
 /* override javaFX - https://gist.github.com/tmazeika/c90c03c645d18722ddb0#file-caspian-css-L2153 */
 .wa-table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled:focused:selected {
-    -fx-background-color: -wa-primary-light;
+    -fx-background-color: -wa-background;
 }
 
 /* cells */
@@ -75,7 +78,7 @@
 }
 
 .wa-table-view .table-row-cell:hover {
-    -fx-background-color: -wa-foreground-hover;
+    -fx-background-color: -wa-table-row-hover;
 }
 
 .wa-table-view .table-row-cell:focused:selected .label {

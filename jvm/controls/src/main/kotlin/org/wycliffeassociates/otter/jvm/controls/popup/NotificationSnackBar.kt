@@ -35,9 +35,9 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 import tornadofx.FX.Companion.primaryStage
 
-private const val SNACK_BAR_TO_SCREEN_RATIO = 9.0/10.0
+private const val SNACK_BAR_TO_SCREEN_RATIO = 9.0 / 10.0
 
-class NotificationSnackBar(notification: NotificationViewData): HBox() {
+class NotificationSnackBar(notification: NotificationViewData) : HBox() {
 
     val titleProperty = SimpleStringProperty(notification.title)
     val messageProperty = SimpleStringProperty(notification.message)
@@ -65,11 +65,13 @@ class NotificationSnackBar(notification: NotificationViewData): HBox() {
                             addClass("active-icon")
                         }
                     }
+
                     NotificationStatusType.FAILED, NotificationStatusType.WARNING -> {
                         FontIcon(MaterialDesign.MDI_ALERT).apply {
                             addClass("danger-icon")
                         }
                     }
+
                     else -> Region()
                 }
             })
@@ -104,7 +106,7 @@ class NotificationSnackBar(notification: NotificationViewData): HBox() {
         }
 
         button {
-            addClass("btn", "btn--icon", "btn--borderless")
+            addClass("btn", "btn--icon", "btn--tertiary")
             tooltip(messages["dismiss"])
             graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE).apply {
                 addClass("dismiss-icon")

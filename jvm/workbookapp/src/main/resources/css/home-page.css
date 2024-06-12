@@ -74,6 +74,28 @@
     -fx-background-color: transparent;
 }
 
+.option-button:pressed {
+    -fx-background-color: -wa-button-pressed-surface;
+    -fx-text-fill: -wa-button-primary-default-on-surface;
+}
+
+.option-button:pressed .ikonli-font-icon {
+    -fx-icon-color: -wa-button-primary-default-on-surface;
+}
+
+.section-option-button {
+    -fx-background-color: -wa-surface-primary;
+}
+
+.section-button:hover {
+    -fx-background-color: -wa-surface-secondary;
+}
+
+.section-button:hover .ikonli-font-icon {
+    -fx-icon-size: 20px;
+    -fx-icon-color: -wa-regular-text;
+}
+
 .icon-xl {
     -fx-font-size: 6em;
     -fx-icon-color: -wa-primary;

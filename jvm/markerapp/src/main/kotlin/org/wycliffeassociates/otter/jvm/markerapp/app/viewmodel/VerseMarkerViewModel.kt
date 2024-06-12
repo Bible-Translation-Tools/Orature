@@ -62,7 +62,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     private val width = Screen.getMainScreen().platformWidth
     private val height = min(Screen.getMainScreen().platformHeight, WAVEFORM_MAX_HEIGHT.toInt())
 
-    val themeColorProperty = SimpleObjectProperty(ColorTheme.LIGHT)
+    val themeColorProperty = SimpleObjectProperty<ColorTheme>()
 
     private val asyncBuilder = ObservableWaveformBuilder()
     lateinit var waveform: Observable<Image>
@@ -102,6 +102,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
 
     fun onDock(op: () -> Unit) {
         onThemeChangeAction.set(op)
+        themeColorProperty.set(getThemeFromRoot())
         timer?.start()
         isLoadingProperty.set(true)
         val audio = loadAudio()
@@ -113,17 +114,20 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
         themeColorProperty.bind(
             Bindings.createObjectBinding(
                 {
-                    if (primaryStage.scene.root.styleClass.contains(ColorTheme.DARK.styleClass)) {
-                        ColorTheme.DARK
-                    } else {
-                        ColorTheme.LIGHT
-                    }
+                    getThemeFromRoot()
                 },
                 primaryStage.scene.root.styleClass
             )
         )
     }
 
+    private fun getThemeFromRoot(): ColorTheme {
+        return if (primaryStage.scene.root.styleClass.contains(ColorTheme.DARK.styleClass)) {
+            ColorTheme.DARK
+        } else {
+            ColorTheme.LIGHT
+        }
+    }
 
     fun onThemeChange() {
         val audioFile = loadAudio()

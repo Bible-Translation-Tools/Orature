@@ -20,7 +20,11 @@
     -fx-padding: 12px 16px;
     -fx-spacing: 8px;
     -fx-background-radius: 16px;
-    -fx-background-color: #e4f0fd;
+    -fx-background-color: -wa-foreground;
+    -fx-background-color: transparent;
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-surface-border;
+    -fx-border-radius: 16px;
 }
 
 .translation-card:hover {
@@ -36,7 +40,7 @@
 
 .translation-card--active,
 .translation-card--active:hover {
-    -fx-background-color: -wa-secondary-btn-background;
+    -fx-background-color: transparent;
     -fx-border-width: 2px;
     -fx-border-color: -wa-primary;
     -fx-border-radius: 16px;
@@ -51,12 +55,12 @@
 }
 
 .translation-card__header .translation-card__header__text {
-    -fx-text-fill: -wa-status-active;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .translation-card__header .ikonli-font-icon,
 .translation-card__body .ikonli-font-icon {
-    -fx-icon-color: -wa-status-active;
+    -fx-icon-color: -wa-regular-text;
     -fx-font-size: 22px;
 }
 
@@ -67,7 +71,7 @@
 
 .translation-card__language {
     -fx-graphic-text-gap: 0.6em;
-    -fx-text-fill: -wa-status-active;
+    -fx-text-fill: -wa-regular-text;
     -fx-font-size: 1.4em;
 }
 
@@ -117,7 +121,7 @@
 }
 
 .translation-type-card__text-cell > .translation-type-card__text-cell__title {
-    -fx-text-fill: -wa-status-active;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .translation-type-card__action-cell {

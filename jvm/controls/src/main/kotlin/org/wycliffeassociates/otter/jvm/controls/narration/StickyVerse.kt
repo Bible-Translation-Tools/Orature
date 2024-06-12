@@ -52,8 +52,8 @@ class StickyVerse : HBox() {
     }
 }
 
-class ResumeVerseEvent: FXEvent()
+class ResumeVerseEvent : FXEvent()
 
 fun EventTarget.stickyVerse(op: StickyVerse.() -> Unit = {}) =
     StickyVerse().attachTo(this, op) {
-}
+    }

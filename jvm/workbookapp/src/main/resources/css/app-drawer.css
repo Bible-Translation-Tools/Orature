@@ -222,7 +222,7 @@
 }
 
 .app-drawer-progress-text {
-    -fx-text-fill: -wa-primary-btn-text-fill;
+    -fx-text-fill: -wa-button-primary-default-on-surface;
     -fx-font-size: 20px;
     -fx-alignment: center;
 }

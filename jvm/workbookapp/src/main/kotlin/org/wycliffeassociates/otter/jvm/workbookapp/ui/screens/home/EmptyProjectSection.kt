@@ -32,10 +32,11 @@ class EmptyProjectSection : VBox() {
         hbox {
             addClass("homepage__main-region__header-section")
             button {
-                addClass("btn", "btn--icon", "btn--borderless", "option-button")
+                addClass("btn", "btn--icon", "btn--tertiary", "section-option-button")
                 graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
             }
             label(FX.messages["home"]) { addClass("h4") }
+
         }
 
         vbox {

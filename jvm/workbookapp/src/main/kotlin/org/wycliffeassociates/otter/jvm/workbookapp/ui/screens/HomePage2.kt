@@ -366,7 +366,8 @@ class HomePage2 : View() {
     private fun setUpLoadingModal() {
         find<LoadingModal>().apply {
             orientationProperty.set(settingsViewModel.orientationProperty.value)
-            themeProperty.set(settingsViewModel.appColorMode.value)
+            themeProperty.bind(settingsViewModel.appColorMode)
+
             viewModel.isLoadingProperty.onChangeWithDisposer {
                 if (it == true) {
                     messageProperty.set(messages["loadingProjectWait"])
@@ -444,7 +445,10 @@ class HomePage2 : View() {
                     dialog.percentageProperty.set(percent)
                 }
                 if (progressStatus.titleKey != null && progressStatus.titleMessage != null) {
-                    val message = MessageFormat.format(messages[progressStatus.titleKey!!], messages[progressStatus.titleMessage!!])
+                    val message = MessageFormat.format(
+                        messages[progressStatus.titleKey!!],
+                        messages[progressStatus.titleMessage!!]
+                    )
                     dialog.progressMessageProperty.set(message)
                 } else if (progressStatus.titleKey != null) {
                     dialog.progressMessageProperty.set(messages[progressStatus.titleKey!!])

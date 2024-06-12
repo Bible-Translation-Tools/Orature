@@ -67,7 +67,7 @@ class RecordingSection : BorderPane() {
                 }
             }
             button(messages["save"]) {
-                addClass("btn", "btn--secondary")
+                addClass("btn", "btn--secondary", "consume__btn--secondary")
                 graphic = FontIcon(MaterialDesign.MDI_CHECK_CIRCLE)
 
                 visibleWhen { isRecordingProperty.not() }
@@ -79,7 +79,7 @@ class RecordingSection : BorderPane() {
             }
             region { hgrow = Priority.ALWAYS }
             button(messages["cancel"]) {
-                addClass("btn", "btn--secondary")
+                addClass("btn", "btn--tertiary")
                 graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
 
                 visibleWhen { isRecordingProperty.not() }

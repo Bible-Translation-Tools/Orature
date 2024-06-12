@@ -23,15 +23,16 @@
 }
 
 .marker-node .title-section {
-    -fx-pref-height: 80;
+    -fx-pref-height: 78;
     -fx-alignment: center-left;
     -fx-spacing: 10;
     -fx-padding: 0 2 0 16;
-    -fx-background-color: linear-gradient(to right, -wa-white-80, -wa-white-70, -wa-white-10);
+    -fx-background-color: -wa-foreground;
 }
 
 .marker-node__drag-button {
     -fx-focus-traversable: false;
+    -fx-background-color: -wa-foreground;
 }
 
 .marker-node:focus-visible .marker-node__drag-button {

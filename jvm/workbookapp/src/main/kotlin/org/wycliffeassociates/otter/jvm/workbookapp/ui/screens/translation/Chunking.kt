@@ -52,6 +52,7 @@ import tornadofx.*
 
 class Chunking : View() {
     private val logger = LoggerFactory.getLogger(javaClass)
+    private val disposableListeners = mutableListOf<ListenerDisposer>()
 
     val viewModel: ChunkingViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
@@ -114,13 +115,13 @@ class Chunking : View() {
                     addClass("chunking-bottom__media-btn-group")
 
                     button {
-                        addClass("btn", "btn--icon")
+                        addClass("btn", "btn--icon", "btn--tertiary")
                         graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
                         tooltip(messages["previousChunk"])
                         action { viewModel.seekPrevious() }
                     }
                     button {
-                        addClass("btn", "btn--icon")
+                        addClass("btn", "btn--icon", "btn--tertiary")
                         val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
                         val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
                         tooltipProperty().bind(
@@ -139,7 +140,7 @@ class Chunking : View() {
                         action { viewModel.mediaToggle() }
                     }
                     button {
-                        addClass("btn", "btn--icon")
+                        addClass("btn", "btn--icon", "btn--tertiary")
                         graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
                         tooltip(messages["nextChunk"])
                         action { viewModel.seekNext() }
@@ -167,8 +168,9 @@ class Chunking : View() {
         timer?.stop()
         unsubscribeEvents()
         viewModel.undock()
+        disposableListeners.forEach { it.dispose() }
     }
-
+    
     private fun subscribeOnThemeChange() {
         settingsViewModel.appColorMode
             .toObservable()

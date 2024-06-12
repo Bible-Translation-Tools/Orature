@@ -28,19 +28,21 @@
     <children>
         <HBox styleClass="chapter-selector__controls">
             <children>
-                <Button fx:id="prevChapterBtn" styleClass="btn, btn--secondary, btn--borderless, chapter-selector__btn-prev">
+                <Button fx:id="prevChapterBtn"
+                        styleClass="btn, btn--tertiary, btn--borderless, chapter-selector__btn-prev">
                     <graphic>
-                        <FontIcon iconLiteral="mdi-chevron-left" />
+                        <FontIcon iconLiteral="mdi-chevron-left"/>
                     </graphic>
                 </Button>
                 <Button fx:id="chapterTitle" text="Chapter 2" styleClass="chapter-selector__title">
                     <graphic>
-                        <FontIcon iconLiteral="mdi-file" />
+                        <FontIcon iconLiteral="mdi-file"/>
                     </graphic>
                 </Button>
-                <Button fx:id="nextChapterBtn" styleClass="btn, btn--secondary, btn--borderless, chapter-selector__btn-next">
+                <Button fx:id="nextChapterBtn"
+                        styleClass="btn, btn--tertiary, btn--borderless, chapter-selector__btn-next">
                     <graphic>
-                        <FontIcon iconLiteral="mdi-chevron-right" />
+                        <FontIcon iconLiteral="mdi-chevron-right"/>
                     </graphic>
                 </Button>
             </children>

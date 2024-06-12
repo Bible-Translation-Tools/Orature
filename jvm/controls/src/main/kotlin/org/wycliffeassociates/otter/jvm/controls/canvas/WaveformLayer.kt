@@ -18,17 +18,47 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.canvas
 
+import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.paint.Paint
+import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 
 private const val USHORT_SIZE = 65535.0
+const val WAV_COLOR_LIGHT = "#999999"
+const val WAV_COLOR_DARK = "#808080"
 
-class WaveformLayer(private val renderer: ActiveRecordingRenderer) : IDrawable {
+class WaveformLayer(
+    private val renderer: ActiveRecordingRenderer,
+    colorThemeObservable: Observable<ColorTheme>
+) : IDrawable {
+
+    private val logger = LoggerFactory.getLogger(WaveformLayer::class.java)
+
+    private var waveformColor = WAV_COLOR_LIGHT
+
+    init {
+        colorThemeObservable
+            .subscribeOn(Schedulers.io())
+            .doOnError { e ->
+                logger.error("Error in the volume bar", e)
+            }
+            .subscribe {
+                it?.let {
+                    if (it == ColorTheme.LIGHT) {
+                        waveformColor = WAV_COLOR_LIGHT
+                    } else {
+                        waveformColor = WAV_COLOR_DARK
+                    }
+                }
+            }
+    }
 
     override fun draw(context: GraphicsContext, canvas: Canvas) {
-        context.stroke = Paint.valueOf("#66768B")
+        context.stroke = Paint.valueOf(waveformColor)
         context.lineWidth = 1.0
 
         val buffer = renderer.floatBuffer.array

@@ -57,6 +57,7 @@ class Consume : View() {
 
     private var timer: AnimationTimer? = null
     private val eventSubscriptions = mutableListOf<EventRegistration>()
+    private val disposableListeners = mutableListOf<ListenerDisposer>()
 
     override fun onDock() {
         super.onDock()
@@ -77,8 +78,9 @@ class Consume : View() {
         timer?.stop()
         viewModel.onUndockConsume()
         unsubscribeEvents()
+        disposableListeners.forEach { it.dispose() }
     }
-
+    
     private fun subscribeOnThemeChange() {
         settingsViewModel.appColorMode
             .toObservable()

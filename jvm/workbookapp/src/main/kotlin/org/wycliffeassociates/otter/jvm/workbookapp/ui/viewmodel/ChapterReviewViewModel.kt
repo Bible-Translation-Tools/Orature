@@ -39,6 +39,7 @@ import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
@@ -199,10 +200,10 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     fun onThemeChange() {
 
         // Avoids null error in createWaveformImages cause by player not yet being initialized.
-        val hasPlayer = waveformAudioPlayerProperty.value != null
-        val hasAudio = waveformAudioPlayerProperty.value.getDurationInFrames() > 0
+        val hasAudioAndPlayer =
+            waveformAudioPlayerProperty.value != null && waveformAudioPlayerProperty.value.getDurationInFrames() > 0
 
-        if (!hasPlayer || !hasAudio) {
+        if (!hasAudioAndPlayer) {
             return
         }
 

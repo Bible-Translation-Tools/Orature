@@ -23,7 +23,6 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.dialog.ImportAudioDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.LoadingModal
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
@@ -91,7 +90,6 @@ class NarrationPage : View() {
     }
 
     override val root = stackpane {
-        addClass(ColorTheme.LIGHT.styleClass)
         val narrationRoot = this
 
         createSnackBar()
@@ -284,7 +282,7 @@ class NarrationPage : View() {
     private fun setUpLoadingModal() {
         find<LoadingModal>().apply {
             orientationProperty.set(settingsViewModel.orientationProperty.value)
-            themeProperty.set(settingsViewModel.appColorMode.value)
+            themeProperty.bind(settingsViewModel.appColorMode)
             messageProperty.bind(viewModel.loadingModalTextProperty)
 
             viewModel.openLoadingModalProperty.onChangeWithDisposer {

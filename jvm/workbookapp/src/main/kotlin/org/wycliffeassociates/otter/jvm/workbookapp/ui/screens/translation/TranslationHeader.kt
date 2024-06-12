@@ -62,7 +62,7 @@ class TranslationHeader : HBox() {
             addClass("top-navigation-pane__control-section")
 
             button {
-                addClass("btn", "btn--secondary")
+                addClass("btn", "btn--tertiary")
                 tooltip = tooltip(messages["undoAction"])
                 graphic = FontIcon(MaterialDesign.MDI_UNDO)
                 enableWhen(canUndoProperty)
@@ -72,7 +72,7 @@ class TranslationHeader : HBox() {
                 }
             }
             button {
-                addClass("btn", "btn--secondary")
+                addClass("btn", "btn--tertiary")
                 tooltip = tooltip(messages["redoAction"])
                 graphic = FontIcon(MaterialDesign.MDI_REDO)
                 enableWhen(canRedoProperty)
@@ -82,7 +82,7 @@ class TranslationHeader : HBox() {
                 }
             }
             button {
-                addClass("btn", "btn--secondary")
+                addClass("btn", "btn--tertiary")
                 tooltip = tooltip(messages["openIn"])
                 graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
 

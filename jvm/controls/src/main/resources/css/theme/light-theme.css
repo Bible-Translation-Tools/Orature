@@ -19,18 +19,16 @@
  @import "/css/base-colors.css"
 
 .light-theme {
+
     /*Primary Color */
     -wa-primary: #015AD9;
     -wa-primary-05: #015AD90D;
     -wa-primary-10: #015AD91A;
     -wa-primary-20: #015AD933;
-    -wa-primary-30: #015AD94C;
-    -wa-primary-light: #CEE6FF;
-    -wa-primary-dark: #00377C;
-
-    -wa-primary-variant: -wa-primary;
-    -wa-primary-variant-light: -wa-primary;
-    -wa-primary-variant-dark: -wa-primary;
+    -wa-primary-light: #eef0ff;
+    -wa-primary-light-80: #eef0ffcc;
+    -wa-primary-dark: #0040a0;
+    -wa-primary-darkest: #001847;
 
     -wa-background: #f4f4f4;
     -wa-background-dark: #B3B9C2;
@@ -39,7 +37,13 @@
     -wa-foreground-hover: #E5E8EB;
     -wa-foreground-pressed: -wa-black-10;
 
-    -wa-surface: inherit;
+    -wa-surface-primary: #ffffff;
+    -wa-surface-secondary: #F2F2F2;
+    -wa-surface-tertiary: #e6e6e6;
+    -wa-surface-border: #e6e6e6;
+    -wa-on-surface-secondary: #343434;
+    -wa-on-surface-invert: #e6e6e6;
+    -wa-on-surface-tertiary: #999999;
 
     /*Accent Color */
     -wa-accent: #FFB100;
@@ -95,21 +99,45 @@
     -wa-take-card-placeholder: -wa-black-05;
 
     /* buttons */
-    -wa-primary-btn-text-fill: -wa-white;
-    -wa-secondary-btn-text-fill: -wa-regular-text-80;
-    -wa-secondary-btn-text-fill-hover: -wa-primary-dark;
-    -wa-secondary-btn-text-fill-pressed: -wa-primary-dark;
-    -wa-secondary-btn-background: transparent;
-    -wa-secondary-btn-background-hover: -wa-primary-05;
-    -wa-secondary-btn-background-pressed: -wa-primary-10;
-    -wa-secondary-btn-border: -wa-border-light;
     -wa-btn-icon-background: -wa-white;
-    -wa-btn-icon-background-hover: #f0f0f0;
-    -wa-btn-icon-background-pressed: #e6e6e6;
     -wa-btn-icon-background-selected: -wa-primary-10;
     -wa-btn-icon-border-color: -wa-black-20;
-    -wa-filter-button-background: -wa-black-10;
+
     -wa-app-bar-btn-text: -wa-white;
+    -wa-button-pressed-surface: #001952;
+    -wa-button-pressed-on-surface: -wa-button-primary-default-on-surface;
+
+    -wa-button-primary-default-surface: -wa-primary;
+    -wa-button-primary-default-on-surface: -wa-on-surface-invert;
+    -wa-button-primary-default-border: -wa-primary-darkest;
+    -wa-button-primary-hover-surface: -wa-primary-dark;
+    -wa-button-primary-hover-on-surface: -wa-on-surface-invert;
+    -wa-button-primary-inactive-surface: -wa-surface-secondary;
+    -wa-button-primary-inactive-on-surface: -wa-on-surface-tertiary;
+
+    -wa-button-secondary-default-surface: -wa-surface-primary;
+    -wa-button-secondary-default-on-surface: -wa-primary;
+    -wa-button-secondary-default-border: -wa-primary;
+    -wa-button-secondary-hover-surface: -wa-primary-light;
+    -wa-button-secondary-hover-on-surface: -wa-primary;
+    -wa-button-secondary-hover-border: -wa-primary;
+    -wa-button-secondary-active-surface: -wa-primary-light;
+    -wa-button-secondary-active-on-surface: -wa-primary;
+    -wa-button-secondary-active-border: -wa-primary;
+    -wa-button-secondary-inactive-surface: -wa-surface-primary;
+    -wa-button-secondary-inactive-on-surface: -wa-on-surface-tertiary;
+    -wa-button-secondary-inactive-border: -wa-surface-tertiary;
+    -wa-button-secondary-text-fill-pressed: -wa-primary-dark;
+
+    -wa-button-tertiary-default-on-surface: -wa-on-surface-secondary;
+    -wa-button-tertiary-default-border: -wa-surface-border;
+    -wa-button-tertiary-hover-surface: -wa-surface-secondary;
+    -wa-button-tertiary-hover-on-surface: -wa-on-surface-secondary;
+    -wa-button-tertiary-active-surface: -wa-primary-darkest;
+    -wa-button-tertiary-active-on-surface: -wa-on-surface-invert;
+    -wa-button-tertiary-active-border: -wa-primary-darkest;
+    -wa-button-tertiary-inactive-on-surface: -wa-on-surface-tertiary;
+
 
     /* text field input */
     -wa-text-input-fill: -wa-black;
@@ -123,12 +151,13 @@
 
     /* combo box, drop down */
     -wa-combo-box-background: -wa-white;
-    -wa-combo-box-background-selected: -wa-primary-10;
+    -wa-combo-box-background-selected: -wa-primary-light;
 
     /* check box, radio */
     -wa-checkbox-background: -wa-white;
     -wa-checkbox-button-background: -wa-foreground;
     -wa-checkbox-button-background-selected: -wa-primary-10;
+    -wa-radio-button-background: -wa-white;
 
     /* toggle button */
     -wa-toggle-selected: -wa-primary;
@@ -142,9 +171,11 @@
     /* audio player */
     -wa-slider-track-color: -wa-black-05;
     -wa-slider-border-color: -wa-black-20;
+    -wa-slider-thumb-color: -wa-primary-dark;
     -wa-minimap-slider-background: #B3B9C2;
     -wa-recorder-controls-background: #282CBD;
 
+    -wa-narration-waveform-background: white;
     -wa-waveform-background: white;
     -wa-waveform-background-dark: rgb(206, 214, 227);
     -wa-scrolling-waveform-background: -wa-black-30-noalpha;
@@ -155,7 +186,7 @@
 
     -wa-marker-overlay-primary: rgba(30, 221, 118, 0.2);
     -wa-marker-overlay-secondary: rgba(1, 90, 217, 0.2);
-    -wa-marker-track-background: -wa-black-10-noalpha;
+    -wa-marker-track-background: -wa-waveform-background;
 
     /* dialog */
     -wa-dialog-overlay: -wa-black-60;

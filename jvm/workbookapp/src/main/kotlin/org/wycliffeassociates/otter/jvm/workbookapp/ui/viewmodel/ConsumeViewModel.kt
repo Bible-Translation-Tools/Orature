@@ -30,6 +30,7 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.getWaveformColors
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -126,10 +127,10 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     fun onThemeChange() {
 
         // Avoids null error in createWaveformImages cause by player not yet being initialized.
-        val hasPlayer = waveformAudioPlayerProperty.value != null
-        val hasAudio = waveformAudioPlayerProperty.value.getDurationInFrames() > 0
+        val hasAudioAndPlayer =
+            waveformAudioPlayerProperty.value != null && waveformAudioPlayerProperty.value.getDurationInFrames() > 0
 
-        if (!hasPlayer || !hasAudio) {
+        if (!hasAudioAndPlayer) {
             return
         }
 

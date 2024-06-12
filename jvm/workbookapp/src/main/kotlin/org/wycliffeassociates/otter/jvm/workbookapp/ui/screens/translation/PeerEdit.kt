@@ -121,7 +121,7 @@ open class PeerEdit : View() {
                 }
             }
             button(messages["confirm"]) {
-                addClass("btn", "btn--secondary")
+                addClass("btn", "btn--secondary", "consume__btn--secondary")
                 graphic = FontIcon(MaterialDesign.MDI_CHECK_CIRCLE)
                 tooltip(text)
 
@@ -134,7 +134,7 @@ open class PeerEdit : View() {
             }
             region { hgrow = Priority.ALWAYS }
             button(messages["record"]) {
-                addClass("btn", "btn--secondary")
+                addClass("btn", "btn--secondary", "consume__btn--secondary")
                 graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                 tooltip(text)
 

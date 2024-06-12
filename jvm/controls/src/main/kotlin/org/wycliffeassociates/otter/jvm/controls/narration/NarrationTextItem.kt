@@ -82,10 +82,9 @@ class NarrationTextItem : VBox() {
             borderpane {
                 center = stackpane {
                     button {
-                        addClass("btn", "btn--secondary")
+                        addClass("btn", "btn--tertiary")
                         graphic = FontIcon(MaterialDesign.MDI_PLAY)
                         tooltip(messages["play"])
-
 
                         enableWhen {
                             isPlayEnabledProperty
@@ -103,7 +102,7 @@ class NarrationTextItem : VBox() {
                         )
                     }
                     button {
-                        addClass("btn", "btn--secondary")
+                        addClass("btn", "btn--tertiary")
                         graphic = FontIcon(MaterialDesign.MDI_PAUSE)
                         tooltip(messages["pause"])
                         enableWhen {
@@ -333,7 +332,7 @@ class NarrationTextItem : VBox() {
                         alignment = Pos.CENTER
                         prefWidth = 316.0
                         styleClass.clear()
-                        addClass("btn", "btn--secondary")
+                        addClass("btn", "btn--primary")
                         addPseudoClass("inactive")
                         text = messages["record"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
