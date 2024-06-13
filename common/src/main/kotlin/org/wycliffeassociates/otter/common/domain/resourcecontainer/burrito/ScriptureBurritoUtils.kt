@@ -18,9 +18,12 @@ import org.bibletranslationtools.scriptureburrito.LocalizedNamesSchema
 import org.bibletranslationtools.scriptureburrito.LocalizedText
 import org.bibletranslationtools.scriptureburrito.MetaVersionSchema
 import org.bibletranslationtools.scriptureburrito.MetadataSchema
+import org.bibletranslationtools.scriptureburrito.PrimaryIdentification
 import org.bibletranslationtools.scriptureburrito.ScopeSchema
 import org.bibletranslationtools.scriptureburrito.ShortStatement
 import org.bibletranslationtools.scriptureburrito.SoftwareAndUserInfoSchema
+import org.bibletranslationtools.scriptureburrito.SourceMetaSchema
+import org.bibletranslationtools.scriptureburrito.SourceMetadataSchema
 import org.bibletranslationtools.scriptureburrito.TypeSchema
 import org.bibletranslationtools.scriptureburrito.flavor.FlavorType
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.AudioFlavorSchema
@@ -31,6 +34,7 @@ import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Perform
 import org.wycliffeassociates.otter.common.data.IAppInfo
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito.auth.AuthProvider
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito.auth.IdAuthorityProvider
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -47,7 +51,7 @@ import javax.inject.Inject
 typealias ChapterNumber = Int
 
 class ScriptureBurritoUtils @Inject constructor(
-    private val idAuthorityProvider: IdAuthorityProvider,
+    private val idAuthorityProvider: AuthProvider,
     private val appInfo: IAppInfo,
     directoryProvider: IDirectoryProvider
 ) {
@@ -88,9 +92,9 @@ class ScriptureBurritoUtils @Inject constructor(
         val language = workbook.target.language
         val langCode = language.slug
 
-        return DerivedMetadataSchema(
+        return SourceMetadataSchema(
             Format.SCRIPTURE_BURRITO,
-            DerivedMetaSchema(
+            SourceMetaSchema(
                 dateCreated = Date.from(Instant.now()),
                 version = MetaVersionSchema._1_0_0,
                 defaultLocale = rc.manifest.dublinCore.language.identifier,
@@ -100,7 +104,7 @@ class ScriptureBurritoUtils @Inject constructor(
                 }
             ),
             idAuthorityProvider.createIdAuthority(),
-            IdentificationSchema(),
+            idAuthorityProvider.createIdentification(),
             confidential = false,
             copyright = CopyrightSchema().apply {
                 this.shortStatements = mutableListOf(ShortStatement(rc.manifest.dublinCore.rights, langCode))
@@ -115,11 +119,22 @@ class ScriptureBurritoUtils @Inject constructor(
                         formats
                     ).apply {
                         name = "audioTranslation"
+                        currentScope = ScopeSchema().apply {
+                            this[workbook.target.slug.uppercase(Locale.US)] = takes.keys.map { "$it" }.toMutableList()
+                        }
                     }
                 }
             ),
             languages = Languages().apply {
-                add(LanguageSchema(tag = language.slug))
+                add(
+                    LanguageSchema(
+                        tag = language.slug,
+                        name = hashMapOf(
+                            language.slug to language.name,
+                            "en" to language.anglicizedName
+                        )
+                    )
+                )
             },
             localizedNames = buildLocalizedNames(rc),
             ingredients = buildIngredients(rc, workbook, takes)
