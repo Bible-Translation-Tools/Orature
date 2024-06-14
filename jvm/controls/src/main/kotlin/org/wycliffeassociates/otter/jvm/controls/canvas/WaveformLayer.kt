@@ -25,11 +25,11 @@ import javafx.scene.canvas.GraphicsContext
 import javafx.scene.paint.Paint
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
+import org.wycliffeassociates.otter.common.data.WAV_COLOR_DARK
+import org.wycliffeassociates.otter.common.data.WAV_COLOR_LIGHT
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 
 private const val USHORT_SIZE = 65535.0
-const val WAV_COLOR_LIGHT = "#999999"
-const val WAV_COLOR_DARK = "#808080"
 
 class WaveformLayer(
     private val renderer: ActiveRecordingRenderer,
