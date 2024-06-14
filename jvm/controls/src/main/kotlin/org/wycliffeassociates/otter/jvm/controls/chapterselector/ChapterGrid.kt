@@ -32,7 +32,6 @@ private const val GRID_COLUMNS = 5
 
 class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
     private val logger = LoggerFactory.getLogger(ChapterGrid::class.java)
-    var scrollTo: (() -> Unit)? = null
 
     init {
         addClass("chapter-grid")

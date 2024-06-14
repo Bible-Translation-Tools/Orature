@@ -27,6 +27,7 @@ import javafx.stage.Window
 import org.wycliffeassociates.otter.jvm.controls.chapterselector.ChapterGrid
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import tornadofx.*
 
 class ChapterSelectorPopup : PopupControl() {
@@ -41,7 +42,6 @@ class ChapterSelectorPopup : PopupControl() {
     override fun show(owner: Window?) {
         super.show(owner)
         chapterGrid.focusOnSelectedChapter()
-        chapterGrid.scrollTo?.let { it() }
     }
 
     override fun createDefaultSkin(): Skin<*> {
@@ -70,11 +70,18 @@ class ChapterSelectorPopupSkin(
             addClass("chapter-selector-popup__scroll-pane")
             isFitToWidth = true
 
-            chapterGrid.scrollTo = { scrollToSelected() }
             add(chapterGrid)
 
             runLater {
                 customizeScrollbarSkin()
+            }
+        }
+    }
+
+    init {
+        control.showingProperty().onChangeWithDisposer {
+            if (it == true) {
+                scrollToSelected()
             }
         }
     }
