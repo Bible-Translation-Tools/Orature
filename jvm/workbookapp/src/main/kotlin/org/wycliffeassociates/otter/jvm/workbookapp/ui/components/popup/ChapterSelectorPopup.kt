@@ -41,6 +41,7 @@ class ChapterSelectorPopup : PopupControl() {
     override fun show(owner: Window?) {
         super.show(owner)
         chapterGrid.focusOnSelectedChapter()
+        chapterGrid.scrollTo?.let { it() }
     }
 
     override fun createDefaultSkin(): Skin<*> {
@@ -57,19 +58,33 @@ class ChapterSelectorPopup : PopupControl() {
 
 class ChapterSelectorPopupSkin(
     val control: ChapterSelectorPopup,
-    chapterGrid: ChapterGrid
+    val chapterGrid: ChapterGrid
 ) : Skin<ChapterSelectorPopup> {
+
+    private lateinit var scrollPane: ScrollPane
 
     private val root = VBox().apply {
         addClass("chapter-selector-popup")
-
         scrollpane {
+            scrollPane = this
             addClass("chapter-selector-popup__scroll-pane")
             isFitToWidth = true
 
+            chapterGrid.scrollTo = { scrollToSelected() }
             add(chapterGrid)
 
-            runLater { customizeScrollbarSkin() }
+            runLater {
+                customizeScrollbarSkin()
+            }
+        }
+    }
+
+    private fun scrollToSelected() {
+        val selectedNode = chapterGrid.getSelectedChapter()
+        selectedNode?.let {
+            val contentBounds = scrollPane.content.layoutBounds
+            val nodeBounds = selectedNode.boundsInParent
+            scrollPane.vvalue = nodeBounds.minY / contentBounds.height
         }
     }
 
