@@ -91,7 +91,8 @@ class ChapterSelectorPopupSkin(
         selectedNode?.let {
             val contentBounds = scrollPane.content.layoutBounds
             val nodeBounds = selectedNode.boundsInParent
-            scrollPane.vvalue = nodeBounds.minY / contentBounds.height
+            val viewportHeight = scrollPane.viewportBounds.height
+            scrollPane.vvalue = (nodeBounds.minY) / (contentBounds.height - viewportHeight)
         }
     }
 
