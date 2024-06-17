@@ -27,6 +27,7 @@ import javafx.stage.Window
 import org.wycliffeassociates.otter.jvm.controls.chapterselector.ChapterGrid
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import tornadofx.*
 
@@ -62,6 +63,7 @@ class ChapterSelectorPopupSkin(
 ) : Skin<ChapterSelectorPopup> {
 
     private lateinit var scrollPane: ScrollPane
+    private val openListenerDisposer: ListenerDisposer
 
     private val root = VBox().apply {
         addClass("chapter-selector-popup")
@@ -83,7 +85,7 @@ class ChapterSelectorPopupSkin(
             if (it == true) {
                 scrollToSelected()
             }
-        }
+        }.apply { openListenerDisposer = this }
     }
 
     private fun scrollToSelected() {
@@ -105,6 +107,6 @@ class ChapterSelectorPopupSkin(
     }
 
     override fun dispose() {
-
+        openListenerDisposer.dispose()
     }
 }
