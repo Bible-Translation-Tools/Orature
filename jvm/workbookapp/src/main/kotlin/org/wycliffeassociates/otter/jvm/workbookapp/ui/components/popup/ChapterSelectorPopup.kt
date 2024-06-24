@@ -27,6 +27,8 @@ import javafx.stage.Window
 import org.wycliffeassociates.otter.jvm.controls.chapterselector.ChapterGrid
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import tornadofx.*
 
 class ChapterSelectorPopup : PopupControl() {
@@ -57,19 +59,42 @@ class ChapterSelectorPopup : PopupControl() {
 
 class ChapterSelectorPopupSkin(
     val control: ChapterSelectorPopup,
-    chapterGrid: ChapterGrid
+    val chapterGrid: ChapterGrid
 ) : Skin<ChapterSelectorPopup> {
+
+    private lateinit var scrollPane: ScrollPane
+    private val openListenerDisposer: ListenerDisposer
 
     private val root = VBox().apply {
         addClass("chapter-selector-popup")
-
         scrollpane {
+            scrollPane = this
             addClass("chapter-selector-popup__scroll-pane")
             isFitToWidth = true
 
             add(chapterGrid)
 
-            runLater { customizeScrollbarSkin() }
+            runLater {
+                customizeScrollbarSkin()
+            }
+        }
+    }
+
+    init {
+        control.showingProperty().onChangeWithDisposer {
+            if (it == true) {
+                scrollToSelected()
+            }
+        }.apply { openListenerDisposer = this }
+    }
+
+    private fun scrollToSelected() {
+        val selectedNode = chapterGrid.getSelectedChapter()
+        selectedNode?.let {
+            val contentBounds = scrollPane.content.layoutBounds
+            val nodeBounds = selectedNode.boundsInParent
+            val viewportHeight = scrollPane.viewportBounds.height
+            scrollPane.vvalue = (nodeBounds.minY) / (contentBounds.height - viewportHeight)
         }
     }
 
@@ -82,6 +107,6 @@ class ChapterSelectorPopupSkin(
     }
 
     override fun dispose() {
-
+        openListenerDisposer.dispose()
     }
 }

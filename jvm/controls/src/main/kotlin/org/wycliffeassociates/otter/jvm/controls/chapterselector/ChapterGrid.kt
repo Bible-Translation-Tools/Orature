@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.chapterselector
 
+import javafx.scene.Node
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.StackPane
 import org.kordamp.ikonli.javafx.FontIcon
@@ -41,6 +42,12 @@ class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
         logger.info("Selecting chapter ${chapterIndex}")
         FX.eventbus.fire(NavigateChapterEvent(chapterIndex))
     }
+
+    fun getSelectedChapter(): Node? {
+        val selectedChapterIndex = this.list.indexOfFirst { it.selected }
+        return if (selectedChapterIndex in this.children.indices) this.children[selectedChapterIndex] else null
+    }
+
 
     fun focusOnSelectedChapter() {
         lookupAll(":selected").firstOrNull()?.requestFocus()
