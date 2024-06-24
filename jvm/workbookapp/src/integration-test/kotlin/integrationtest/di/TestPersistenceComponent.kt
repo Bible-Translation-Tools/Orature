@@ -32,6 +32,7 @@ import integrationtest.projects.TestSideloadSourceProject
 import integrationtest.projects.export.TestBackupProjectExporter
 import integrationtest.projects.importer.TestExistingSourceImporter
 import integrationtest.projects.export.TestSourceProjectExporter
+import integrationtest.projects.importer.BurritoImportTest
 import integrationtest.projects.importer.TestAudioProjectExporter
 import integrationtest.projects.importer.TestOngoingProjectImporter
 import integrationtest.projects.importer.TestRCImporterFactory
@@ -73,4 +74,5 @@ interface TestPersistenceComponent : AppDependencyGraph {
     fun inject(test: TestAudioProjectExporter)
     fun inject(test: MergeMediaTest)
     fun inject(test: NarrationRenderingTest)
+    fun inject(test: BurritoImportTest)
 }
