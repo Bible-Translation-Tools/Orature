@@ -104,7 +104,10 @@ class ScriptureBurritoUtils @Inject constructor(
                 }
             ),
             idAuthorityProvider.createIdAuthority(),
-            idAuthorityProvider.createIdentification(),
+            idAuthorityProvider.createIdentification().apply {
+                this.name["en"] = workbook.target.resourceMetadata.title
+                this.abbreviation["en"] = workbook.target.resourceMetadata.identifier
+            },
             confidential = false,
             copyright = CopyrightSchema().apply {
                 this.shortStatements = mutableListOf(ShortStatement(rc.manifest.dublinCore.rights, langCode))
@@ -149,19 +152,21 @@ class ScriptureBurritoUtils @Inject constructor(
         val ingredients = IngredientsSchema()
         val files = mutableMapOf<String, File>()
         val outTempDir = File(tempDir, "burritoDir").apply { mkdirs() }
-        val usfmFiles = rc.manifest.projects.map {
-            if (it.path.contains(".usfm")) {
-                val path = "${it.path.removePrefix("./")}"
-                val bookDir = File(outTempDir, "${it.identifier}").mkdirs()
+        val usfmFiles = rc.manifest.projects.map { project ->
+            if (project.path.contains(".usfm")) {
+                val path = "${project.path.removePrefix("./")}"
+                val bookDir = File(outTempDir, "${project.identifier}").mkdirs()
                 val outFile = File(outTempDir, path).apply { createNewFile() }
-                rc.accessor.getInputStream(it.path.removePrefix("./")).transferTo(outFile.outputStream())
-                files["${it.identifier}/$path"] = outFile
+                rc.accessor.getInputStream(project.path.removePrefix("./")).transferTo(outFile.outputStream())
+                files["${project.identifier}/$path"] = outFile
                 val ingredient = IngredientSchema().apply {
                     this.mimeType = "text/usfm"
                     this.size = outFile.length().toInt()
                     this.checksum = Checksum().apply {
                         this.md5 = calculateMD5(outFile)
                     }
+                    this.scope = ScopeSchema().apply { put(project.identifier.uppercase(Locale.US), mutableListOf()) }
+
                 }
                 ingredients["$path"] = ingredient
             }
@@ -169,7 +174,7 @@ class ScriptureBurritoUtils @Inject constructor(
         val book = workbook.target.slug
         takes.forEach { (chapterNumber, audioFile) ->
             for (take in audioFile) {
-                val path = "${RcConstants.MEDIA_DIR}/${take.name}"
+                val path = "${RcConstants.SOURCE_MEDIA_DIR}/${take.name}"
                 val outFile = File(outTempDir, path).apply { parentFile.mkdirs() }
                 files[path] = outFile
                 val ingredient = IngredientSchema().apply {
