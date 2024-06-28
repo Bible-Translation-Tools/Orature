@@ -21,7 +21,6 @@ package org.wycliffeassociates.otter.common.data
 enum class OratureFileFormat(val extension: String) {
     ORATURE("orature"),
     ZIP("zip"),
-    SCRIPTURE_BURRITO("burrito");
 
     companion object {
         val extensionList: List<String> = values().map { it.extension }
