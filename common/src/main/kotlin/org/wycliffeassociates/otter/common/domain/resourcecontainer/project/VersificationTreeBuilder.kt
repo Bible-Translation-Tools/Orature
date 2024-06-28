@@ -37,7 +37,8 @@ class VersificationTreeBuilder @Inject constructor(
 ) {
     fun build(container: ResourceContainer): List<OtterTree<CollectionOrContent>>? {
         val versification = getVersification(container) ?: return null
-        return constructTree(versification, container)
+        val constructedTree = constructTree(versification, container)
+        return constructedTree
     }
 
     private fun getVersification(container: ResourceContainer): Versification? {
@@ -55,13 +56,22 @@ class VersificationTreeBuilder @Inject constructor(
         val versificationSlug = container.manifest.projects.firstOrNull()?.versification ?: DEFAULT_VERSIFICATION
         val bookSlugs = versification.getBookSlugs()
         for (book in bookSlugs) {
+            val hasBook = container.manifest.projects
+                .firstOrNull { it.identifier == book }
+
+            // Ensures that only books that exists are added.
+            if (hasBook == null) {
+                continue
+            }
+
             val project = container.manifest.projects
-                .firstOrNull {it.identifier == book}
+                .firstOrNull { it.identifier == book }
                 ?: Project(
+                    // TODO: ask Tony why we are defaulting to this when there is no project for the book
                     title = "",
                     versification = versificationSlug,
                     identifier = book,
-                    sort = Int.MAX_VALUE,
+                    sort = Int.MAX_VALUE, // TODO NOTE: ask if I can use this as a check later on to see if the book is present.
                     path = "",
                     categories = listOf(),
                 )

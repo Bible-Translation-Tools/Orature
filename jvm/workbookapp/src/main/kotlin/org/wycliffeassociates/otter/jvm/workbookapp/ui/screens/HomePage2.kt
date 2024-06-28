@@ -99,9 +99,14 @@ class HomePage2 : View() {
             fire(NavigationRequestEvent(this@HomePage2))
         }
     }
-    private val bookFragment = BookSection(viewModel.bookList, viewModel.sortedBooks).apply {
-        bookSearchQueryProperty.bindBidirectional(viewModel.bookSearchQueryProperty)
-    }
+    private val bookFragment =
+    // TODO NOTE: this is a secondary solution. If there is a reason that we want to include books without text
+    //  in sortedBooks, then this approach works, otherwise, I think this solution leaks to much logic from
+    //  the VersificationTreeBuilder class. 
+//        BookSection(viewModel.bookList, viewModel.sortedBooks.filtered { it.sort != Int.MAX_VALUE }).apply {
+        BookSection(viewModel.bookList, viewModel.sortedBooks).apply {
+            bookSearchQueryProperty.bindBidirectional(viewModel.bookSearchQueryProperty)
+        }
     private val wizardFragment: ProjectWizardSection by lazy {
         ProjectWizardSection(
             projectWizardViewModel.sortedSourceLanguages,
