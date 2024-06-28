@@ -5,11 +5,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.bibletranslationtools.scriptureburrito.Checksum
 import org.bibletranslationtools.scriptureburrito.CopyrightSchema
-import org.bibletranslationtools.scriptureburrito.DerivedMetaSchema
-import org.bibletranslationtools.scriptureburrito.DerivedMetadataSchema
 import org.bibletranslationtools.scriptureburrito.Flavor
 import org.bibletranslationtools.scriptureburrito.Format
-import org.bibletranslationtools.scriptureburrito.IdentificationSchema
 import org.bibletranslationtools.scriptureburrito.IngredientSchema
 import org.bibletranslationtools.scriptureburrito.IngredientsSchema
 import org.bibletranslationtools.scriptureburrito.LanguageSchema
@@ -18,7 +15,6 @@ import org.bibletranslationtools.scriptureburrito.LocalizedNamesSchema
 import org.bibletranslationtools.scriptureburrito.LocalizedText
 import org.bibletranslationtools.scriptureburrito.MetaVersionSchema
 import org.bibletranslationtools.scriptureburrito.MetadataSchema
-import org.bibletranslationtools.scriptureburrito.PrimaryIdentification
 import org.bibletranslationtools.scriptureburrito.ScopeSchema
 import org.bibletranslationtools.scriptureburrito.ShortStatement
 import org.bibletranslationtools.scriptureburrito.SoftwareAndUserInfoSchema
@@ -35,7 +31,6 @@ import org.wycliffeassociates.otter.common.data.IAppInfo
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito.auth.AuthProvider
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito.auth.IdAuthorityProvider
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
@@ -113,20 +108,19 @@ class ScriptureBurritoUtils @Inject constructor(
                 this.shortStatements = mutableListOf(ShortStatement(rc.manifest.dublinCore.rights, langCode))
             },
             type = TypeSchema(
-                FlavorType(Flavor.SCRIPTURE).apply {
-                    val formats = Formats()
-                    formats.put("format-wav", AudioFormat(Compression.WAV))
-                    formats.put("format-mp3", AudioFormat(Compression.MP3))
-                    this.flavor = AudioFlavorSchema(
+                FlavorType(
+                    name = Flavor.SCRIPTURE,
+                    AudioFlavorSchema(
                         mutableSetOf(Performance.READING, Performance.SINGLE_VOICE),
-                        formats
-                    ).apply {
-                        name = "audioTranslation"
-                        currentScope = ScopeSchema().apply {
-                            this[workbook.target.slug.uppercase(Locale.US)] = takes.keys.map { "$it" }.toMutableList()
+                        formats = Formats().apply {
+                            put("format-wav", AudioFormat(Compression.WAV))
+                            put("format-mp3", AudioFormat(Compression.MP3))
                         }
+                    ),
+                    currentScope = ScopeSchema().apply {
+                        this[workbook.target.slug.uppercase(Locale.US)] = takes.keys.map { "$it" }.toMutableList()
                     }
-                }
+                )
             ),
             languages = Languages().apply {
                 add(
