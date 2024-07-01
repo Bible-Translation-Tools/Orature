@@ -56,13 +56,15 @@ class InitializePlugins @Inject constructor(
     private fun copyOcenaudioPlugin() {
         if (!File(directoryProvider.audioPluginDirectory, "ocenaudio.yaml").exists()) {
             log.info("Copying ocenaudio plugin")
-            ClassLoader.getSystemResourceAsStream("plugins/ocenaudio.yaml")
-                .transferTo(
+            ClassLoader
+                .getSystemResourceAsStream("plugins/ocenaudio.yaml")?.use { ifs ->
                     File(
                         directoryProvider.audioPluginDirectory.absolutePath,
                         "ocenaudio.yaml"
-                    ).outputStream()
-                )
+                    ).outputStream().use { ofs ->
+                        ifs.transferTo(ofs)
+                    }
+                }
         } else {
             log.info("Ocenaudio plugin not initialized but ocenaudio.yaml exists in plugins directory")
         }
