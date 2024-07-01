@@ -296,9 +296,10 @@ class BurritoToResourceContainerConverter @Inject constructor() {
             val (usfmFile, ingredient) = usfmFiles.first()
             if (inputAccessor.fileExists(usfmFile)) {
                 val newPath = "$bookNumber-${book.uppercase(Locale.US)}.usfm"
-                val ifs = inputAccessor.getInputStream(usfmFile)
-                outputAccessor.write(newPath) {
-                    ifs.transferTo(it)
+                inputAccessor.getInputStream(usfmFile).use { ifs ->
+                    outputAccessor.write(newPath) {
+                        ifs.transferTo(it)
+                    }
                 }
             }
         }
@@ -326,9 +327,10 @@ class BurritoToResourceContainerConverter @Inject constructor() {
                         getFilename(languageCode, titleCode, book, extension)
                             .replace("{chapter}", chapter)
                     }"
-                    val ifs = inputAccessor.getInputStream(audioFile)
-                    outputAccessor.write(newPath) {
-                        ifs.transferTo(it)
+                    inputAccessor.getInputStream(audioFile).use { ifs ->
+                        outputAccessor.write(newPath) {
+                            ifs.transferTo(it)
+                        }
                     }
                 }
             }
