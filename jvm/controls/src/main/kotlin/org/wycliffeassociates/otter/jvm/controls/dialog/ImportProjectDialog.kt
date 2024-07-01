@@ -29,6 +29,8 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
+import org.wycliffeassociates.otter.common.data.ScriptureBurritoFileFormat
+import org.wycliffeassociates.otter.common.data.TstudioFileFormat
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectImportEvent
 import tornadofx.*
 import java.io.File
@@ -106,7 +108,9 @@ class ImportProjectDialog : OtterDialog() {
                             arrayOf(
                                 FileChooser.ExtensionFilter(
                                     messages["oratureFileTypes"],
-                                    *OratureFileFormat.extensionList.map { "*.$it" }.toTypedArray()
+                                    *OratureFileFormat.extensionList.map { "*.$it" }.toTypedArray(),
+                                    *ScriptureBurritoFileFormat.extensionList.map { "*.$it" }.toTypedArray(),
+                                    *TstudioFileFormat.extensionList.map { "*.$it" }.toTypedArray(),
                                 )
                             ),
                             mode = FileChooserMode.Single,

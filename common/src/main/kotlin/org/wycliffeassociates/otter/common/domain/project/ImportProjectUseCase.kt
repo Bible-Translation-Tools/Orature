@@ -29,6 +29,7 @@ import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.domain.project.importer.BurritoImporterFactory
 import org.wycliffeassociates.otter.common.domain.project.importer.IProjectImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.IProjectImporterFactory
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
@@ -48,6 +49,9 @@ const val SOURCES_JSON_FILE = "gl_sources.json"
 const val SOURCE_PATH_TEMPLATE = "content/%s.zip"
 
 class ImportProjectUseCase @Inject constructor() {
+
+    @Inject
+    lateinit var burritoFactoryProvider: BurritoImporterFactory
 
     @Inject
     lateinit var rcFactoryProvider: RCImporterFactory
@@ -157,7 +161,8 @@ class ImportProjectUseCase @Inject constructor() {
      * Get the corresponding importer based on the project format.
      */
     private fun getImporter(format: ProjectFormat): IProjectImporter {
-        val factory: IProjectImporterFactory = when (format) {
+        val factory: IProjectImporterFactory = when(format) {
+            ProjectFormat.SCRIPTURE_BURRITO -> burritoFactoryProvider
             ProjectFormat.RESOURCE_CONTAINER -> rcFactoryProvider
             ProjectFormat.TSTUDIO -> tsFactoryProvider
             else -> throw Exception("Unsupported project format.")
