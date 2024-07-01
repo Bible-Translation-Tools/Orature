@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.common.domain.project
 
 enum class ProjectFormat {
+    SCRIPTURE_BURRITO,
     RESOURCE_CONTAINER,
     TSTUDIO,
     EPUB

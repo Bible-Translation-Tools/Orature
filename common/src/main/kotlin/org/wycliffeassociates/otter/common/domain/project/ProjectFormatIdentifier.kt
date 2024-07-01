@@ -18,6 +18,8 @@
  */
 package org.wycliffeassociates.otter.common.domain.project
 
+import org.bibletranslationtools.scriptureburrito.container.BurritoContainer
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito.BurritoToResourceContainerConverter
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.tstudio2rc.Tstudio2RcConverter
 import java.io.File
@@ -32,7 +34,10 @@ object ProjectFormatIdentifier {
             // set up the chains for identifying the project format
             val orature = OratureFileIdentifier()
             val tstudio = TstudioFileIdentifier()
+            val burrito = ScriptureBurritoFileIdentifier()
+
             orature.next = tstudio
+            tstudio.next = burrito
 
             return orature
         }
@@ -78,6 +83,19 @@ object ProjectFormatIdentifier {
             return if (Tstudio2RcConverter.isValidFormat(file)) {
                 ProjectFormat.TSTUDIO
             } else {
+                next?.getFormat(file)
+            }
+        }
+    }
+
+    private class ScriptureBurritoFileIdentifier : IFormatIdentifier {
+        override var next: IFormatIdentifier? = null
+
+        override fun getFormat(file: File): ProjectFormat? {
+            return try {
+                BurritoContainer.load(file).close()
+                ProjectFormat.SCRIPTURE_BURRITO
+            } catch (e: Exception) {
                 next?.getFormat(file)
             }
         }

@@ -5,11 +5,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.bibletranslationtools.scriptureburrito.Checksum
 import org.bibletranslationtools.scriptureburrito.CopyrightSchema
-import org.bibletranslationtools.scriptureburrito.DerivedMetaSchema
-import org.bibletranslationtools.scriptureburrito.DerivedMetadataSchema
 import org.bibletranslationtools.scriptureburrito.Flavor
 import org.bibletranslationtools.scriptureburrito.Format
-import org.bibletranslationtools.scriptureburrito.IdentificationSchema
 import org.bibletranslationtools.scriptureburrito.IngredientSchema
 import org.bibletranslationtools.scriptureburrito.IngredientsSchema
 import org.bibletranslationtools.scriptureburrito.LanguageSchema
@@ -18,7 +15,6 @@ import org.bibletranslationtools.scriptureburrito.LocalizedNamesSchema
 import org.bibletranslationtools.scriptureburrito.LocalizedText
 import org.bibletranslationtools.scriptureburrito.MetaVersionSchema
 import org.bibletranslationtools.scriptureburrito.MetadataSchema
-import org.bibletranslationtools.scriptureburrito.PrimaryIdentification
 import org.bibletranslationtools.scriptureburrito.ScopeSchema
 import org.bibletranslationtools.scriptureburrito.ShortStatement
 import org.bibletranslationtools.scriptureburrito.SoftwareAndUserInfoSchema
@@ -35,7 +31,6 @@ import org.wycliffeassociates.otter.common.data.IAppInfo
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito.auth.AuthProvider
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito.auth.IdAuthorityProvider
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
@@ -104,26 +99,30 @@ class ScriptureBurritoUtils @Inject constructor(
                 }
             ),
             idAuthorityProvider.createIdAuthority(),
-            idAuthorityProvider.createIdentification(),
+            idAuthorityProvider.createIdentification().apply {
+                this.name["en"] = workbook.target.resourceMetadata.title
+                this.abbreviation["en"] = workbook.target.resourceMetadata.identifier
+            },
             confidential = false,
             copyright = CopyrightSchema().apply {
-                this.shortStatements = mutableListOf(ShortStatement(rc.manifest.dublinCore.rights, langCode))
+                this.shortStatements =
+                    mutableListOf(ShortStatement(rc.manifest.dublinCore.rights, langCode))
             },
             type = TypeSchema(
-                FlavorType(Flavor.SCRIPTURE).apply {
-                    val formats = Formats()
-                    formats.put("format-wav", AudioFormat(Compression.WAV))
-                    formats.put("format-mp3", AudioFormat(Compression.MP3))
-                    this.flavor = AudioFlavorSchema(
+                FlavorType(
+                    name = Flavor.SCRIPTURE,
+                    AudioFlavorSchema(
                         mutableSetOf(Performance.READING, Performance.SINGLE_VOICE),
-                        formats
-                    ).apply {
-                        name = "audioTranslation"
-                        currentScope = ScopeSchema().apply {
-                            this[workbook.target.slug.uppercase(Locale.US)] = takes.keys.map { "$it" }.toMutableList()
+                        formats = Formats().apply {
+                            put("format-wav", AudioFormat(Compression.WAV))
+                            put("format-mp3", AudioFormat(Compression.MP3))
                         }
+                    ),
+                    currentScope = ScopeSchema().apply {
+                        this[workbook.target.slug.uppercase(Locale.US)] =
+                            takes.keys.map { "$it" }.toMutableList()
                     }
-                }
+                )
             ),
             languages = Languages().apply {
                 add(
@@ -149,19 +148,33 @@ class ScriptureBurritoUtils @Inject constructor(
         val ingredients = IngredientsSchema()
         val files = mutableMapOf<String, File>()
         val outTempDir = File(tempDir, "burritoDir").apply { mkdirs() }
-        val usfmFiles = rc.manifest.projects.map {
-            if (it.path.contains(".usfm")) {
-                val path = "${it.path.removePrefix("./")}"
-                val bookDir = File(outTempDir, "${it.identifier}").mkdirs()
+        val usfmFiles = rc.manifest.projects.map { project ->
+            if (project.path.contains(".usfm")) {
+                val path = "${project.path.removePrefix("./")}"
+                val bookDir = File(outTempDir, "${project.identifier}").mkdirs()
                 val outFile = File(outTempDir, path).apply { createNewFile() }
-                rc.accessor.getInputStream(it.path.removePrefix("./")).transferTo(outFile.outputStream())
-                files["${it.identifier}/$path"] = outFile
+
+                rc.accessor
+                    .getInputStream(project.path.removePrefix("./")).use { ifs ->
+                        outFile.outputStream().use { ofs ->
+                            ifs.transferTo(ofs)
+                        }
+                    }
+
+                files["${project.identifier}/$path"] = outFile
                 val ingredient = IngredientSchema().apply {
                     this.mimeType = "text/usfm"
                     this.size = outFile.length().toInt()
                     this.checksum = Checksum().apply {
                         this.md5 = calculateMD5(outFile)
                     }
+                    this.scope = ScopeSchema().apply {
+                        put(
+                            project.identifier.uppercase(Locale.US),
+                            mutableListOf()
+                        )
+                    }
+
                 }
                 ingredients["$path"] = ingredient
             }
@@ -169,7 +182,7 @@ class ScriptureBurritoUtils @Inject constructor(
         val book = workbook.target.slug
         takes.forEach { (chapterNumber, audioFile) ->
             for (take in audioFile) {
-                val path = "${RcConstants.MEDIA_DIR}/${take.name}"
+                val path = "${RcConstants.SOURCE_MEDIA_DIR}/${take.name}"
                 val outFile = File(outTempDir, path).apply { parentFile.mkdirs() }
                 files[path] = outFile
                 val ingredient = IngredientSchema().apply {
@@ -183,7 +196,12 @@ class ScriptureBurritoUtils @Inject constructor(
                     this.checksum = Checksum().apply {
                         this.md5 = calculateMD5(take)
                     }
-                    scope = ScopeSchema().apply { put(book.uppercase(Locale.US), mutableListOf("$chapterNumber")) }
+                    scope = ScopeSchema().apply {
+                        put(
+                            book.uppercase(Locale.US),
+                            mutableListOf("$chapterNumber")
+                        )
+                    }
                 }
                 ingredients[path] = ingredient
             }

@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ConflictResolution
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.ProgressStatus
+import org.wycliffeassociates.otter.common.data.ScriptureBurritoFileFormat
 import org.wycliffeassociates.otter.common.data.TstudioFileFormat
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
@@ -57,8 +58,11 @@ class ImportProjectViewModel : ViewModel() {
 
     val settingsViewModel: SettingsViewModel by inject()
 
-    @Inject lateinit var directoryProvider: IDirectoryProvider
-    @Inject lateinit var importProjectProvider : Provider<ImportProjectUseCase>
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
+
+    @Inject
+    lateinit var importProjectProvider: Provider<ImportProjectUseCase>
 
     val showImportSuccessDialogProperty = SimpleBooleanProperty(false)
     val showImportErrorDialogProperty = SimpleBooleanProperty(false)
@@ -174,6 +178,7 @@ class ImportProjectViewModel : ViewModel() {
                 )
                 false
             }
+
             files.first().isDirectory -> {
                 snackBarObservable.onNext(messages["importDirectoryError"])
                 logger.error(
@@ -181,13 +186,19 @@ class ImportProjectViewModel : ViewModel() {
                 )
                 false
             }
-            files.first().extension !in (OratureFileFormat.extensionList + TstudioFileFormat.extensionList)  -> {
+
+            files.first().extension !in (
+                OratureFileFormat.extensionList +
+                TstudioFileFormat.extensionList +
+                ScriptureBurritoFileFormat.extensionList
+            ) -> {
                 snackBarObservable.onNext(messages["importInvalidFileError"])
                 logger.error(
                     "(Drag-Drop) Invalid import file extension. Input files: ${files.first()}"
                 )
                 false
             }
+
             else -> true
         }
     }
