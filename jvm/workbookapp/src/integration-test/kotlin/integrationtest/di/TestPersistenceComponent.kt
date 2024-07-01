@@ -74,5 +74,4 @@ interface TestPersistenceComponent : AppDependencyGraph {
     fun inject(test: TestAudioProjectExporter)
     fun inject(test: MergeMediaTest)
     fun inject(test: NarrationRenderingTest)
-    fun inject(test: BurritoImportTest)
 }
