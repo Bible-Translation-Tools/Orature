@@ -387,7 +387,12 @@ class BurritoToResourceContainerConverter @Inject constructor() {
         return ""
     }
 
-    private fun getFilename(languageCode: String, titleCode: String, bookSlug: String, extension: String): String {
+    private fun getFilename(
+        languageCode: String,
+        titleCode: String,
+        bookSlug: String,
+        extension: String
+    ): String {
         val titleCode = if (titleCode.isEmpty()) DEFAULT_TITLE_CODE else titleCode
         return filenamePattern
             .replace("{book}", bookSlug)

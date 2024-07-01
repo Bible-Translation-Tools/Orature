@@ -105,7 +105,8 @@ class ScriptureBurritoUtils @Inject constructor(
             },
             confidential = false,
             copyright = CopyrightSchema().apply {
-                this.shortStatements = mutableListOf(ShortStatement(rc.manifest.dublinCore.rights, langCode))
+                this.shortStatements =
+                    mutableListOf(ShortStatement(rc.manifest.dublinCore.rights, langCode))
             },
             type = TypeSchema(
                 FlavorType(
@@ -118,7 +119,8 @@ class ScriptureBurritoUtils @Inject constructor(
                         }
                     ),
                     currentScope = ScopeSchema().apply {
-                        this[workbook.target.slug.uppercase(Locale.US)] = takes.keys.map { "$it" }.toMutableList()
+                        this[workbook.target.slug.uppercase(Locale.US)] =
+                            takes.keys.map { "$it" }.toMutableList()
                     }
                 )
             ),
@@ -151,7 +153,14 @@ class ScriptureBurritoUtils @Inject constructor(
                 val path = "${project.path.removePrefix("./")}"
                 val bookDir = File(outTempDir, "${project.identifier}").mkdirs()
                 val outFile = File(outTempDir, path).apply { createNewFile() }
-                rc.accessor.getInputStream(project.path.removePrefix("./")).transferTo(outFile.outputStream())
+
+                rc.accessor
+                    .getInputStream(project.path.removePrefix("./")).use { ifs ->
+                        outFile.outputStream().use { ofs ->
+                            ifs.transferTo(ofs)
+                        }
+                    }
+
                 files["${project.identifier}/$path"] = outFile
                 val ingredient = IngredientSchema().apply {
                     this.mimeType = "text/usfm"
@@ -159,7 +168,12 @@ class ScriptureBurritoUtils @Inject constructor(
                     this.checksum = Checksum().apply {
                         this.md5 = calculateMD5(outFile)
                     }
-                    this.scope = ScopeSchema().apply { put(project.identifier.uppercase(Locale.US), mutableListOf()) }
+                    this.scope = ScopeSchema().apply {
+                        put(
+                            project.identifier.uppercase(Locale.US),
+                            mutableListOf()
+                        )
+                    }
 
                 }
                 ingredients["$path"] = ingredient
@@ -182,7 +196,12 @@ class ScriptureBurritoUtils @Inject constructor(
                     this.checksum = Checksum().apply {
                         this.md5 = calculateMD5(take)
                     }
-                    scope = ScopeSchema().apply { put(book.uppercase(Locale.US), mutableListOf("$chapterNumber")) }
+                    scope = ScopeSchema().apply {
+                        put(
+                            book.uppercase(Locale.US),
+                            mutableListOf("$chapterNumber")
+                        )
+                    }
                 }
                 ingredients[path] = ingredient
             }
