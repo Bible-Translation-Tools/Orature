@@ -10,7 +10,6 @@ class BurritoImporterFactory @Inject constructor() : IProjectImporterFactory {
     @Inject lateinit var newSourceImporter: Provider<NewSourceImporter>
 
     private val importer: BurritoImporter by lazy {
-        // ts file is converted to RC and then passed to source importers
         val importer1 = burritoImporter.get()
         val importer2 = existingProjectImporter.get()
         val importer3 = newSourceImporter.get()

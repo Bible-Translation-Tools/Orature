@@ -394,7 +394,7 @@ class BurritoToResourceContainerConverter @Inject constructor() {
             .replace("{extension}", extension)
     }
 
-    private fun getIngredientsByBook(burrito: MetadataSchema): Map<String, List<Pair<String, IngredientSchema>>> {
+    private fun getIngredientsByBook(burrito: MetadataSchema): IngredientsByBook {
         val slugs = burrito.type!!.flavorType.currentScope.keys.map { it.lowercase(Locale.US) }
         val ingredientsByBook = slugs.associateWith { mutableListOf<Pair<String, IngredientSchema>>() }
         burrito.ingredients.forEach { filepath, item ->
