@@ -62,7 +62,7 @@ class ExportProjectDialog : OtterDialog() {
             label {
                 textProperty().bind(workbookDescriptorProperty.stringBinding {
                     val title = it?.title.takeIf { !it.isNullOrEmpty() }
-                        ?: it?.slug?.uppercase(Locale.getDefault())
+                        ?: it?.slug?.toUpperCase()
                     MessageFormat.format(messages["bookNameExportTitle"], title)
                 })
                 addClass("h3")

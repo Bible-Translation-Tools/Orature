@@ -106,7 +106,7 @@ class NarrationToolbarViewModel : ViewModel() {
     val titleProperty = workbookDataStore.activeWorkbookProperty.stringBinding {
         it?.let {
             val title = it.target.title.takeIf { bookTitle -> bookTitle.isNotEmpty() }
-                ?: it.target.slug.uppercase(Locale.getDefault())
+                ?: it.target.slug.toUpperCase()
 
             MessageFormat.format(
                 messages["narrationTitle"],
