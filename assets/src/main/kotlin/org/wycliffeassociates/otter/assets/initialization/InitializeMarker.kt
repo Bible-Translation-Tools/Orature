@@ -67,8 +67,13 @@ class InitializeMarker @Inject constructor(
     private fun importOtterMarker(): Completable {
         val pluginsDir = directoryProvider.audioPluginDirectory
         val jar = File(pluginsDir, "OratureMarker.jar")
-        ClassLoader.getSystemResourceAsStream("plugins/jars/markerapp")
-            ?.transferTo(FileOutputStream(jar))
+        ClassLoader
+            .getSystemResourceAsStream("plugins/jars/markerapp")
+            ?.use { ifs ->
+                FileOutputStream(jar).use { ofs ->
+                    ifs.transferTo(ofs)
+                }
+            }
         return pluginRepository.insert(
             AudioPluginData(
                 0,
