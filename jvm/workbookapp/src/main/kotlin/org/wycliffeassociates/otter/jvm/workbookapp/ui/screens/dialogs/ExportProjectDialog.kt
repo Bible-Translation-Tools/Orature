@@ -60,7 +60,9 @@ class ExportProjectDialog : OtterDialog() {
             addClass("confirm-dialog__header")
             label {
                 textProperty().bind(workbookDescriptorProperty.stringBinding {
-                    MessageFormat.format(messages["bookNameExportTitle"], it?.title)
+                    val title = it?.title.takeIf { !it.isNullOrEmpty() }
+                        ?: it?.slug?.replaceFirstChar { firstChar -> firstChar.uppercaseChar() }
+                    MessageFormat.format(messages["bookNameExportTitle"], title)
                 })
                 addClass("h3")
             }
