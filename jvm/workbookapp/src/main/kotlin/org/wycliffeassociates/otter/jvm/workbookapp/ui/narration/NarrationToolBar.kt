@@ -32,6 +32,7 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.text.MessageFormat
+import java.util.*
 
 class NarrationToolBar : View() {
     private val viewModel: NarrationToolbarViewModel by inject()
@@ -105,7 +106,7 @@ class NarrationToolbarViewModel : ViewModel() {
     val titleProperty = workbookDataStore.activeWorkbookProperty.stringBinding {
         it?.let {
             val title = it.target.title.takeIf { bookTitle -> bookTitle.isNotEmpty() }
-                ?: it.target.slug.replaceFirstChar { firstChar -> firstChar.uppercaseChar() }
+                ?: it.target.slug.uppercase(Locale.getDefault())
 
             MessageFormat.format(
                 messages["narrationTitle"],
