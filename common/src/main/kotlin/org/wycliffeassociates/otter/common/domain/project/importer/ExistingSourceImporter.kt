@@ -62,7 +62,6 @@ class ExistingSourceImporter @Inject constructor(
 
         var sameVersion: Boolean
         var sameVersification: Boolean
-
         try {
             ResourceContainer.load(file).use { rc ->
                 sameVersion = (rc.manifest.dublinCore.version == existingSource.version)
@@ -146,6 +145,9 @@ class ExistingSourceImporter @Inject constructor(
             .fromCallable {
                 try {
                     ResourceContainer.load(file).use { rc ->
+                        // Ensures that the existing source creator value stays the same after updating.
+                        rc.manifest.dublinCore.creator = metadata.creator
+
                         val tree = try {
                             IProjectReader.constructContainerTree(rc, zipEntryTreeBuilder)
                         } catch (e: ImportException) {
