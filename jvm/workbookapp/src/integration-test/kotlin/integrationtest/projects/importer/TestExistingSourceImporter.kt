@@ -19,7 +19,6 @@
 package integrationtest.projects.importer
 
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
@@ -46,7 +45,6 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZip
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
-import org.wycliffeassociates.otter.jvm.workbookapp.domain.resourcecontainer.project.ZipEntryTreeBuilder
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Project
 import java.io.File
@@ -324,5 +322,27 @@ class TestExistingSourceImporter {
         assertEquals("Different Versification", startingContent?.text)
         assertNotNull(secondContent)
         assertEquals("Different Versification", secondContent?.text)
+    }
+
+    @Test
+    fun ImportSourceAudioFromOrature() {
+        //Initial import.
+        importer.import(getSourceFile("resource-containers/en_ulb.zip"))
+            .blockingGet()
+            .let {
+                Assert.assertEquals(ImportResult.SUCCESS, it)
+            }
+
+        // Ensures that the initial source has a creator that is not Orature
+        val oldSource = resourceMetadataRepository.getAllSources().blockingGet().single()
+        Assert.assertEquals("Door43 World Missions Community", oldSource.creator)
+
+        // Imports psa 1 narration that was exported as source and has a source.creator equal to Orature
+        importer.import(getSourceFile("resource-containers/en-ulb-psa-source-test.zip"))
+
+        val newSource = resourceMetadataRepository.getAllSources().blockingGet().single()
+
+        // Verifies that the source.creator value was not overwritten
+        Assert.assertEquals(oldSource.creator, newSource.creator)
     }
 }
