@@ -337,12 +337,19 @@ class TestExistingSourceImporter {
         val oldSource = resourceMetadataRepository.getAllSources().blockingGet().single()
         Assert.assertEquals("Door43 World Missions Community", oldSource.creator)
 
-        // Imports psa 1 narration that was exported as source and has a source.creator equal to Orature
-        importer.import(getSourceFile("resource-containers/en-ulb-psa-source-test.zip"))
+        val base = ResourceContainerBuilder()
+            .setVersion(12)
+            .setTargetLanguage(Language("en", "English", "English", "ltr", false, "Western Europe"))
+            .build()
+        base.manifest.dublinCore.subject = "Bible"
 
-        val newSource = resourceMetadataRepository.getAllSources().blockingGet().single()
+        // Verifies that the new resource source creator is Orature
+        Assert.assertEquals("Orature", base.manifest.dublinCore.creator)
+
+        importer.import(base.file)
 
         // Verifies that the source.creator value was not overwritten
+        val newSource = resourceMetadataRepository.getAllSources().blockingGet().single()
         Assert.assertEquals(oldSource.creator, newSource.creator)
     }
 }
