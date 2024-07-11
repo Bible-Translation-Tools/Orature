@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import org.bibletranslationtools.kotlinscripturealignment.BurritoAudioAlignment
 import org.bibletranslationtools.scriptureburrito.Checksum
 import org.bibletranslationtools.scriptureburrito.CopyrightSchema
 import org.bibletranslationtools.scriptureburrito.Flavor
@@ -29,6 +30,9 @@ import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Formats
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Performance
 import org.wycliffeassociates.otter.common.data.IAppInfo
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.metadata.BurritoAlignmentMetadata
+import org.wycliffeassociates.otter.common.domain.audio.metadata.OratureVttMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito.auth.AuthProvider
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -203,11 +207,55 @@ class ScriptureBurritoUtils @Inject constructor(
                         )
                     }
                 }
+                if (outFile.extension in listOf("wav", "mp3")) {
+                    val (timingIngredient, timingPath) = buildTimingFile(
+                        rc,
+                        outTempDir,
+                        book,
+                        chapterNumber,
+                        take
+                    )
+                    ingredients[timingPath] = timingIngredient
+                }
                 ingredients[path] = ingredient
             }
         }
 
         return ingredients
+    }
+
+    private fun buildTimingFile(
+        rc: ResourceContainer,
+        tempDir: File,
+        book: String,
+        chapterNumber: ChapterNumber,
+        audioFile: File
+    ): Pair<IngredientSchema, String> {
+        val timingFile = File(tempDir, "${audioFile.nameWithoutExtension}.json")
+        val alignment = BurritoAudioAlignment.create(audioFile, timingFile)
+        val oratureAudio = OratureAudioFile(audioFile)
+        val metadata = BurritoAlignmentMetadata(timingFile)
+            .write(oratureAudio.getMarkers(),book, chapterNumber,oratureAudio.totalFrames)
+        val ingredient = IngredientSchema().apply {
+            this.mimeType = "application/json"
+            this.size = timingFile.length().toInt()
+            this.checksum = Checksum().apply {
+                this.md5 = calculateMD5(timingFile)
+            }
+            scope = ScopeSchema().apply {
+                put(
+                    book.uppercase(Locale.US),
+                    mutableListOf("$chapterNumber")
+                )
+            }
+        }
+        val pathInRC = "${RcConstants.SOURCE_MEDIA_DIR}/${timingFile.name}"
+        rc.accessor.write(pathInRC) { ofs ->
+            timingFile.inputStream().use {  ifs ->
+                ifs.transferTo(ofs)
+            }
+        }
+        return Pair(ingredient, pathInRC)
     }
 
     @Throws(IOException::class, NoSuchAlgorithmException::class)
