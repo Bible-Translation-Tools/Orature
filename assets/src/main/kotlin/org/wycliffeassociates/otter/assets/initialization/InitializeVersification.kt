@@ -49,8 +49,7 @@ class InitializeVersification @Inject constructor(
             directoryProvider.versificationDirectory.listFiles()?.forEach { file ->
                 if (file.extension == "json") {
                     logger.info("Inserting versification: ${file.name}")
-                    versificationRepository.insertVersification(file.nameWithoutExtension, file)
-                        .blockingAwait()
+                    versificationRepository.insertVersification(file.nameWithoutExtension, file).blockingAwait()
                 }
             }
         }.subscribeOn(Schedulers.io())
@@ -61,24 +60,20 @@ class InitializeVersification @Inject constructor(
         if (!File(directoryProvider.versificationDirectory, ULB_VERSIFICATION_FILE).exists()) {
             directoryProvider.versificationDirectory.mkdirs()
             logger.info("Copying ulb versification")
-            ClassLoader
-                .getSystemResourceAsStream(ULB_VERSIFICATION_RESOURCE_PATH)?.use { ifs ->
+            ClassLoader.getSystemResourceAsStream(ULB_VERSIFICATION_RESOURCE_PATH)
+                .transferTo(
                     File(
                         directoryProvider.versificationDirectory.absolutePath,
                         ULB_VERSIFICATION_FILE
-                    ).outputStream().use { ofs ->
-                        ifs.transferTo(ofs)
-                    }
-                }
-            ClassLoader
-                .getSystemResourceAsStream(ULB_VERSIFICATION_RESOURCE_PATH)?.use { ifs ->
+                    ).outputStream()
+                )
+            ClassLoader.getSystemResourceAsStream(ULB_VERSIFICATION_RESOURCE_PATH)
+                .transferTo(
                     File(
                         directoryProvider.versificationDirectory.absolutePath,
                         UFW_VERSIFICATION_FILE
-                    ).outputStream().use { ofs ->
-                        ifs.transferTo(ofs)
-                    }
-                }
+                    ).outputStream()
+                )
         }
     }
 }

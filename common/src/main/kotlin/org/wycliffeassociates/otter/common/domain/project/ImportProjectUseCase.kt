@@ -82,10 +82,7 @@ class ImportProjectUseCase @Inject constructor() {
                 it.import(file, callback, options)
             }
             .onErrorReturn {
-                logger.error(
-                    "Failed to import project file: $file. See exception detail below.",
-                    it
-                )
+                logger.error("Failed to import project file: $file. See exception detail below.", it)
                 ImportResult.FAILED
             }
     }
@@ -100,12 +97,7 @@ class ImportProjectUseCase @Inject constructor() {
                 getEmbeddedSource(language)
             }
             .subscribeOn(Schedulers.io())
-            .doOnError {
-                logger.error(
-                    "Failed to get embedded source file for ${language.slug}",
-                    it
-                )
-            }
+            .doOnError { logger.error("Failed to get embedded source file for ${language.slug}", it) }
             .flatMap { sourceFile ->
                 import(sourceFile, null, null)
             }
@@ -116,21 +108,13 @@ class ImportProjectUseCase @Inject constructor() {
         val resourceName = glSources.find { it.languageCode == language.slug }?.name
         val pathToSource = SOURCE_PATH_TEMPLATE.format(resourceName)
 
-        val sourceFile = javaClass
-            .classLoader
-            .getResource(pathToSource)
-            .openStream()
-            .use { input ->
-                val tempFile = File.createTempFile(
-                    resourceName,
-                    ".zip",
-                    directoryProvider.tempDirectory
-                )
-                tempFile.outputStream().use { output ->
-                    input.transferTo(output)
-                }
-                tempFile
+        val sourceFile = javaClass.classLoader.getResource(pathToSource).openStream().use { input ->
+            val tempFile = File.createTempFile(resourceName, ".zip", directoryProvider.tempDirectory)
+            tempFile.outputStream().use { output ->
+                input.transferTo(output)
             }
+            tempFile
+        }
 
         return sourceFile
     }
@@ -152,7 +136,6 @@ class ImportProjectUseCase @Inject constructor() {
             ProjectFormat.RESOURCE_CONTAINER -> {
                 rcImporterProvider.get().getSourceMetadata(file)
             }
-
             else -> Maybe.empty()
         }
     }

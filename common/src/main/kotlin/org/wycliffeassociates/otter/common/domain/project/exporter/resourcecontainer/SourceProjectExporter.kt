@@ -256,8 +256,8 @@ class SourceProjectExporter @Inject constructor(
                     rc,
                     tempFile.outputStream()
                 )
-                rc.accessor.write("metadata.json") { ofs ->
-                    tempFile.inputStream().use { ifs -> ifs.transferTo(ofs) }
+                rc.accessor.write("metadata.json") {
+                    tempFile.inputStream().transferTo(it)
                 }
                 tempFile.deleteIfExists()
             }

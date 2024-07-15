@@ -55,21 +55,17 @@ class InitializeArtwork @Inject constructor(
             }
     }
 
-    private fun copyBibleArtworkContainers(
-        artwork: List<String> = listOf("en_art_wa.zip", "en_art_sp.zip")
-    ) {
+    private fun copyBibleArtworkContainers(artwork: List<String> = listOf("en_art_wa.zip", "en_art_sp.zip")) {
         for (art in artwork) {
             if (!File(directoryProvider.resourceContainerDirectory, art).exists()) {
                 log.info("Copying bible artwork")
-                ClassLoader
-                    .getSystemResourceAsStream("content/$art").use { ifs ->
+                ClassLoader.getSystemResourceAsStream("content/$art")
+                    .transferTo(
                         File(
                             directoryProvider.resourceContainerDirectory.absolutePath,
                             art
-                        ).outputStream().use { ofs ->
-                            ifs.transferTo(ofs)
-                        }
-                    }
+                        ).outputStream()
+                    )
             } else {
                 log.info("Artwork not initialized but $art exists in rc directory")
             }

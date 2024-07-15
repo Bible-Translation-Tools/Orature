@@ -180,10 +180,7 @@ class ProjectFilesAccessor(
                     val ext = it.substringAfterLast(".")
                     when (dir) {
                         RcConstants.SOURCE_DIR -> OratureFileFormat.isSupported(ext)
-                        RcConstants.SOURCE_AUDIO_DIR -> AudioFileFormat.isSupported(ext) || AudioMetadataFileFormat.isSupported(
-                            ext
-                        )
-
+                        RcConstants.SOURCE_AUDIO_DIR -> AudioFileFormat.isSupported (ext) || AudioMetadataFileFormat.isSupported(ext)
                         else -> false
                     }
                 }
@@ -199,11 +196,7 @@ class ProjectFilesAccessor(
 
                 if (!outFile.exists()) {
                     val stream = fileReader.stream(path)
-                    stream.use { ifs ->
-                        outFile.outputStream().use { ofs ->
-                            ifs.transferTo(ofs)
-                        }
-                    }
+                    stream.transferTo(outFile.outputStream())
                 }
             }
         }
@@ -309,11 +302,7 @@ class ProjectFilesAccessor(
     fun copySelectedTakesFile(fileReader: IFileReader) {
         val outFile = projectDir.resolve(RcConstants.SELECTED_TAKES_FILE)
         if (!outFile.exists()) {
-            fileReader.stream(RcConstants.SELECTED_TAKES_FILE).use { ifs ->
-                outFile.outputStream().use { ofs ->
-                    ifs.transferTo(ofs)
-                }
-            }
+            fileReader.stream(RcConstants.SELECTED_TAKES_FILE).transferTo(outFile.outputStream())
         }
     }
 
@@ -383,7 +372,7 @@ class ProjectFilesAccessor(
     fun writeTakeCheckingStatus(
         fileWriter: IFileWriter,
         workbook: Workbook,
-        takeFilter: (String) -> Boolean = { true }
+        takeFilter: (String) -> Boolean =  { true }
     ): Completable {
         return fetchTakes(workbook)
             .filter { takeFilter(it.name) }
@@ -473,11 +462,7 @@ class ProjectFilesAccessor(
         }
     }
 
-    fun getChapterContent(
-        projectSlug: String,
-        chapterNumber: Int,
-        showVerseNumber: Boolean = true
-    ): List<Content> {
+    fun getChapterContent(projectSlug: String, chapterNumber: Int, showVerseNumber: Boolean = true): List<Content> {
         val chapterContent = arrayListOf<Content>()
 
         ResourceContainer.load(sourceMetadata.path).use { rc ->
@@ -508,7 +493,7 @@ class ProjectFilesAccessor(
                         chapterContent.add(content)
 
                         // the rest of bridged verses should be marked bridged
-                        for (i in vm.startingVerse + 1..vm.endingVerse) {
+                        for (i in vm.startingVerse+1..vm.endingVerse) {
                             chapterContent.add(
                                 Content(
                                     sort = chapterContent.size,
@@ -531,11 +516,7 @@ class ProjectFilesAccessor(
         return chapterContent
     }
 
-    fun getChapterText(
-        projectSlug: String,
-        chapterNumber: Int,
-        showVerseNumber: Boolean = true
-    ): List<String> {
+    fun getChapterText(projectSlug: String, chapterNumber: Int, showVerseNumber: Boolean = true): List<String> {
         val chapterText = arrayListOf<String>()
 
         ResourceContainer.load(sourceMetadata.path).use { rc ->
@@ -578,8 +559,7 @@ class ProjectFilesAccessor(
                 val chap = chapters.find { it.number == chapterNumber }
                 chap?.let {
                     for (i in startVerse..endVerse) {
-                        val verse =
-                            it.getChildMarkers(VMarker::class.java).find { it.startingVerse == i }
+                        val verse = it.getChildMarkers(VMarker::class.java).find { it.startingVerse == i }
                         verse?.let {
                             chunkText.add("${it.verseNumber}. ${it.getText()}")
                         }
@@ -752,10 +732,7 @@ class ProjectFilesAccessor(
             }
     }
 
-    private fun deletedTakeFilePaths(
-        workbook: Workbook,
-        workbookRepository: IWorkbookRepository
-    ): List<String> {
+    private fun deletedTakeFilePaths(workbook: Workbook, workbookRepository: IWorkbookRepository): List<String> {
         val deletedTakes = workbookRepository
             .getSoftDeletedTakes(workbook.source)
             .blockingGet()
@@ -826,11 +803,7 @@ class ProjectFilesAccessor(
     fun copyChunkFile(fileReader: IFileReader) {
         val outFile = projectDir.resolve(RcConstants.CHUNKS_FILE)
         if (!outFile.exists() && fileReader.exists(RcConstants.CHUNKS_FILE)) {
-            fileReader.stream(RcConstants.CHUNKS_FILE).use { ifs ->
-                outFile.outputStream().use { ofs ->
-                    ifs.transferTo(ofs)
-                }
-            }
+            fileReader.stream(RcConstants.CHUNKS_FILE).transferTo(outFile.outputStream())
         }
     }
 
@@ -838,8 +811,7 @@ class ProjectFilesAccessor(
         val file = projectDir.resolve(RcConstants.PROJECT_MODE_FILE)
         return if (file.exists() && file.length() > 0) {
             val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
-            val serialized: SerializableProjectMode =
-                mapper.readValue(file, object : TypeReference<SerializableProjectMode>() {})
+            val serialized: SerializableProjectMode = mapper.readValue(file, object : TypeReference<SerializableProjectMode>() {})
             serialized.mode
         } else {
             null
@@ -864,11 +836,7 @@ class ProjectFilesAccessor(
     fun copyProjectModeFile(fileReader: IFileReader) {
         val modeFile = projectDir.resolve(RcConstants.PROJECT_MODE_FILE)
         if (fileReader.exists(RcConstants.PROJECT_MODE_FILE)) {
-            fileReader.stream(RcConstants.PROJECT_MODE_FILE).use { ifs ->
-                modeFile.outputStream().use { ofs ->
-                    ifs.transferTo(ofs)
-                }
-            }
+            fileReader.stream(RcConstants.PROJECT_MODE_FILE).transferTo(modeFile.outputStream())
         }
     }
 
