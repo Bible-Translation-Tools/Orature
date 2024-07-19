@@ -21,6 +21,8 @@ package org.wycliffeassociates.otter.jvm.controls.waveform
 import javafx.beans.binding.IntegerBinding
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.collections.ObservableList
+import org.wycliffeassociates.otter.common.data.audio.BookMarker
+import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
@@ -87,11 +89,12 @@ interface IMarkerViewModel : IWaveformViewModel {
     }
 
     private fun updateCurrentPlaybackMarker(currentFrame: Int) {
+        val excludedMarkerCount = markers.count { it.marker is BookMarker || it.marker is ChapterMarker }
         markerModel?.let { markerModel ->
             val currentMarkerFrame = markerModel.seekCurrent(currentFrame)
             val currentMarker = markers.find { it.frame == currentMarkerFrame }
             val index = currentMarker?.let { markers.indexOf(it) } ?: 0
-            currentMarkerNumberProperty.set(index)
+            currentMarkerNumberProperty.set(index - excludedMarkerCount)
         }
     }
 
