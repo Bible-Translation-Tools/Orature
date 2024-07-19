@@ -21,17 +21,21 @@ package org.wycliffeassociates.otter.jvm.controls.waveform
 import javafx.beans.binding.IntegerBinding
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.collections.ObservableList
+import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
+
+private val highlightableMarkers = setOf(VerseMarker::class, ChunkMarker::class)
 
 interface IMarkerViewModel : IWaveformViewModel {
     var markerModel: MarkerPlacementModel?
     val markers: ObservableList<MarkerItem>
     val markerCountProperty: IntegerBinding
     var audioController: AudioPlayerController?
-    val currentMarkerNumberProperty: SimpleIntegerProperty
+    val highlightedMarkerIndexProperty: SimpleIntegerProperty
 
     var resumeAfterScroll: Boolean
 
@@ -83,15 +87,16 @@ interface IMarkerViewModel : IWaveformViewModel {
 
     fun seek(location: Int) {
         audioController?.seek(location)
-        updateCurrentPlaybackMarker(location)
+        updateHighlightedIndex(location)
     }
 
-    private fun updateCurrentPlaybackMarker(currentFrame: Int) {
+    private fun updateHighlightedIndex(currentFrame: Int) {
+        val excludedMarkerCount = markers.count { it.marker::class !in highlightableMarkers }
         markerModel?.let { markerModel ->
             val currentMarkerFrame = markerModel.seekCurrent(currentFrame)
             val currentMarker = markers.find { it.frame == currentMarkerFrame }
             val index = currentMarker?.let { markers.indexOf(it) } ?: 0
-            currentMarkerNumberProperty.set(index)
+            highlightedMarkerIndexProperty.set(index - excludedMarkerCount)
         }
     }
 
@@ -139,16 +144,16 @@ interface IMarkerViewModel : IWaveformViewModel {
     fun mediaToggle() {
         if (audioController?.isPlayingProperty?.value == false) {
             /* trigger change to auto-scroll when it starts playing */
-            val currentMarkerIndex = currentMarkerNumberProperty.value
-            currentMarkerNumberProperty.set(-1)
-            currentMarkerNumberProperty.set(currentMarkerIndex)
+            val currentMarkerIndex = highlightedMarkerIndexProperty.value
+            highlightedMarkerIndexProperty.set(-1)
+            highlightedMarkerIndexProperty.set(currentMarkerIndex)
         }
         audioController?.toggle()
     }
 
     override fun calculatePosition() {
         super.calculatePosition()
-        updateCurrentPlaybackMarker(audioPositionProperty.value ?: 0)
+        updateHighlightedIndex(audioPositionProperty.value ?: 0)
     }
 
     private fun isPlaying(): Boolean {

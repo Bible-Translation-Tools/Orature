@@ -39,7 +39,6 @@ import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
-import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
@@ -109,7 +108,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     override val markers = observableListOf<MarkerItem>()
 
     override val markerCountProperty = markers.sizeProperty
-    override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
+    override val highlightedMarkerIndexProperty = SimpleIntegerProperty(-1)
     override var resumeAfterScroll: Boolean = false
 
     override var audioController: AudioPlayerController? = null
@@ -155,7 +154,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     fun dock() {
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
         workbookDataStore.activeChunkProperty.set(null)
-        translationViewModel.currentMarkerProperty.bind(currentMarkerNumberProperty)
+        translationViewModel.currentMarkerProperty.bind(highlightedMarkerIndexProperty)
 
         Completable
             .fromAction {
