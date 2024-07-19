@@ -30,7 +30,6 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
-import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.getWaveformColors
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -70,7 +69,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     override var markerModel: MarkerPlacementModel? = null
     override val markers = observableListOf<MarkerItem>()
     override val markerCountProperty = markers.sizeProperty
-    override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
+    override val highlightedMarkerIndexProperty = SimpleIntegerProperty(-1)
     override var resumeAfterScroll: Boolean = false
 
     override var audioController: AudioPlayerController? = null
@@ -114,7 +113,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
                 loadSourceMarkers(audio)
             }
 
-        translationViewModel.currentMarkerProperty.bind(currentMarkerNumberProperty)
+        translationViewModel.currentMarkerProperty.bind(highlightedMarkerIndexProperty)
     }
 
     fun onUndockConsume() {
