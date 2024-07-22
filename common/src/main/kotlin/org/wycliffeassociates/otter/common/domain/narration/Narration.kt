@@ -332,6 +332,27 @@ class Narration @AssistedInject constructor(
         }
     }
 
+    fun onGenerateVerse(verseIndex: Int, generatedFile: File): Completable {
+
+        return Completable.fromAction {
+            val frameSize = chapterRepresentation.frameSizeInBytes
+            val action = NewVerseAction(verseIndex, frameSize)
+            execute(action)
+            seek(totalVerses[verseIndex].location)
+
+            val scratchAudio = chapterRepresentation.scratchAudio
+            audioFileUtils.appendFile(scratchAudio, generatedFile)
+
+            NarrationTakeModifier.modifyAudioData(
+                takeToModify,
+                chapterRepresentation.getAudioFileReader(),
+                activeVerses
+            )
+
+            finalizeVerse(verseIndex)
+        }
+    }
+
     fun onResetAll() {
         val action = ResetAllAction(chapter.audio)
         execute(action)

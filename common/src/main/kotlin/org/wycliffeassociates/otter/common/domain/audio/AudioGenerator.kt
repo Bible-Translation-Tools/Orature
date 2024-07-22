@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.common.domain.audio
 
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.wycliffeassociates.otter.common.domain.narration.AudioFileUtils
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 import java.net.URI
@@ -11,18 +12,21 @@ import java.net.http.HttpResponse
 import javax.inject.Inject
 
 class AudioGenerator @Inject constructor(
-    private val directoryProvider: IDirectoryProvider
+    private val directoryProvider: IDirectoryProvider,
+    private val audioUtils: AudioFileUtils
 ) {
 
     fun convertTextToAudio(text: String): File {
+        val generated = File.createTempFile("temp-tts", ".mp3", directoryProvider.tempDirectory)
+        request(text, generated)
         val outputFile = File.createTempFile("tts", ".mp3", directoryProvider.tempDirectory)
-        request(text, outputFile)
+        audioUtils.resampleAudio(generated, outputFile)
         return outputFile
     }
 
     private fun request(content: String, outputFile: File) {
-        val apiUrl = ""
-        val apiKey = "" // Replace with your actual API key
+        val apiUrl = "https://api.openai.com/v1/audio/speech"
+        val apiKey = System.getenv("OPEN_AI_KEY")
 
         // Create an HttpClient instance
         val client = HttpClient.newHttpClient()

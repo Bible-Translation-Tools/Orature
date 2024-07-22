@@ -21,6 +21,10 @@ package org.wycliffeassociates.otter.common.domain.narration
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import ws.schild.jave.Encoder
+import ws.schild.jave.MultimediaObject
+import ws.schild.jave.encode.AudioAttributes
+import ws.schild.jave.encode.EncodingAttributes
 import java.io.File
 import javax.inject.Inject
 
@@ -54,5 +58,22 @@ class AudioFileUtils @Inject constructor(private val directoryProvider: IDirecto
                 }
             }
         }
+    }
+
+    fun resampleAudio(source: File, target: File, targetSampleRate: Int = 44100) {
+        val audio = AudioAttributes().apply {
+            setCodec("libmp3lame")
+            setBitRate(128000)
+            setChannels(1)  // Set to mono
+            setSamplingRate(targetSampleRate)
+        }
+
+        val attrs = EncodingAttributes().apply {
+            setOutputFormat("mp3")
+            setAudioAttributes(audio)
+        }
+
+        val encoder = Encoder()
+        encoder.encode(MultimediaObject(source), target, attrs)
     }
 }

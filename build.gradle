@@ -60,6 +60,7 @@ allprojects {
 
 subprojects {
     repositories {
+        mavenCentral()
         maven { url "https://nexus-registry.walink.org/repository/maven-public/" }
     }
 

@@ -22,6 +22,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
 import com.jakewharton.rxrelay2.ReplayRelay
 import com.sun.glass.ui.Screen
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -870,8 +871,22 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun generateVerseAudio(verseIndex: Int, text: String) {
-        val file = audioGenerator.convertTextToAudio(text)
-        importVerseAudio(verseIndex, file)
+        showLoadingDialog("pleaseWait")
+        Single
+            .fromCallable {
+                audioGenerator.convertTextToAudio(text)
+            }
+            .flatMapCompletable { f ->
+                narration.onGenerateVerse(verseIndex, f)
+            }
+            .doFinally {
+                runLater {
+                    resetNarratableList()
+                    openLoadingModalProperty.set(false)
+                }
+            }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
     }
 
     private fun stopPlayer() {
