@@ -150,7 +150,7 @@ class NarrationTextItem : VBox() {
                         prefWidth = 316.0
                         styleClass.clear()
                         addClass("btn", "btn--primary")
-                        text = messages["record"]
+                        text = "Generate"
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onBeginRecordingAction)
                     }
@@ -165,7 +165,7 @@ class NarrationTextItem : VBox() {
                         prefWidth = 316.0
                         styleClass.clear()
                         addClass("btn", "btn--primary")
-                        text = messages["record"]
+                        text = "Generate"
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onRecordActionProperty)
                     }

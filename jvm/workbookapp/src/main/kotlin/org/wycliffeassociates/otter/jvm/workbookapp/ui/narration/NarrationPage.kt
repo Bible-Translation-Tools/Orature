@@ -179,6 +179,11 @@ class NarrationPage : View() {
             viewModel.redo()
         }.let { eventSubscriptions.add(it) }
 
+        subscribe<GenerateVerseEvent> {
+            /** GENERATE AUDIO FROM TTS */
+            viewModel.generateVerseAudio(it.index, it.text)
+        }.let {eventSubscriptions.add(it)}
+
         subscribe<RecordVerseEvent> {
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }

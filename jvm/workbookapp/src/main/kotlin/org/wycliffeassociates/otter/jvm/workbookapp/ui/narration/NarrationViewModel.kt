@@ -51,6 +51,7 @@ import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.domain.audio.AudioGenerator
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.*
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.*
@@ -94,6 +95,9 @@ class NarrationViewModel : ViewModel() {
 
     @Inject
     lateinit var appPreferencesRepo: IAppPreferencesRepository
+
+    @Inject
+    lateinit var audioGenerator: AudioGenerator
 
     private lateinit var narration: Narration
     private lateinit var renderer: NarrationWaveformRenderer
@@ -863,6 +867,11 @@ class NarrationViewModel : ViewModel() {
             }
             .subscribeOn(Schedulers.io())
             .subscribe()
+    }
+
+    fun generateVerseAudio(verseIndex: Int, text: String) {
+        val file = audioGenerator.convertTextToAudio(text)
+        importVerseAudio(verseIndex, file)
     }
 
     private fun stopPlayer() {

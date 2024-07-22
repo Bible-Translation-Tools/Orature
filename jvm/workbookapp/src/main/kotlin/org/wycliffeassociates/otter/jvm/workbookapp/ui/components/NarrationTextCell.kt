@@ -82,7 +82,7 @@ class NarrationTextCell(
             nextChunkTextProperty.set(nextChunkText)
 
             onRecordActionProperty.set(DebouncedEventHandler {
-                FX.eventbus.fire(RecordVerseEvent(index, item.chunk))
+                FX.eventbus.fire(GenerateVerseEvent(index, verseTextProperty.value))
             })
 
             onNextVerseActionProperty.set(DebouncedEventHandler {
@@ -126,7 +126,7 @@ class NarrationTextCell(
             })
 
             onBeginRecordingAction.set(DebouncedEventHandler {
-                FX.eventbus.fire(BeginRecordingEvent(index, item.chunk))
+                FX.eventbus.fire(GenerateVerseEvent(index, verseTextProperty.value))
             })
 
             onPauseRecordingAction.set(DebouncedEventHandler {
