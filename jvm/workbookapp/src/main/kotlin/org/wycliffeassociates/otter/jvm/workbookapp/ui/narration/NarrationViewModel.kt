@@ -811,7 +811,7 @@ class NarrationViewModel : ViewModel() {
     fun record(index: Int): NarrationStateTransition? {
         val selectedPluginName = audioPluginViewModel.selectedRecorderProperty.value.name
         return if (selectedPluginName != DEFAULT_RECORDER_NAME) {
-            processChapterWithPlugin(PluginType.RECORDER)
+            openInAudioPlugin(index)
             null
         } else {
             narration.onNewVerse(index)
