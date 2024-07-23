@@ -538,7 +538,7 @@ class Narration @AssistedInject constructor(
             }
 
         val scratchAudio = chapterRepresentation.scratchAudio
-        var start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1
+        var start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames
         var end: Int
         val frameSizeInBytes = chapterRepresentation.frameSizeInBytes
 
