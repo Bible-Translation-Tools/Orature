@@ -157,7 +157,7 @@ internal class ChapterRepresentation(
     fun finalizeVerse(verseIndex: Int, history: NarrationHistory? = null): Int {
         val endIndex = frameToIndex(scratchAudio.totalFrames)
 
-        history?.finalizeVerse(endIndex, totalVerses)
+        history?.finalizeVerse(endIndex - 1, totalVerses)
         onVersesUpdated()
         return endIndex - 1 // subtract 1 due to the sector being finalized with `until`
     }

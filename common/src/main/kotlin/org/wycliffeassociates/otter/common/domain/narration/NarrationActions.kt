@@ -53,7 +53,7 @@ internal class NewVerseAction(
     override fun execute(
         totalVerses: MutableList<VerseNode>, workingAudio: AudioFile
     ) {
-        val start = (if (workingAudio.totalFrames == 0) 0 else workingAudio.totalFrames + 1) * frameSizeInBytes
+        val start = (if (workingAudio.totalFrames == 0) 0 else workingAudio.totalFrames) * frameSizeInBytes
         val end = start
 
         logger.info("New marker added: ${totalVerses[verseIndex].marker.formattedLabel} at $start")

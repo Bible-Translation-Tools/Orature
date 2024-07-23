@@ -63,7 +63,7 @@ internal data class VerseNode(
         if (sectors.isNotEmpty()) {
             val last = sectors.last()
             sectors.removeLast()
-            sectors.add(last.first until end)
+            sectors.add(last.first..end)
         } else {
             throw IllegalStateException("Tried to finalize VerseNode ${marker.label} that was not started!")
         }

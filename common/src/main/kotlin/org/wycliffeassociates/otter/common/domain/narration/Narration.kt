@@ -310,9 +310,10 @@ class Narration @AssistedInject constructor(
 
         return Completable.fromAction {
             val scratchAudio = chapterRepresentation.scratchAudio
-            val start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1
+            val start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames
             audioFileUtils.appendFile(chapterRepresentation.scratchAudio, editedFile)
-            val end = chapterRepresentation.scratchAudio.totalFrames
+            val verseAudio = AudioFile(editedFile)
+            val end = max(start + verseAudio.totalFrames, 0)
 
             /* When a new verse recorded with an EXTERNAL plugin comes back empty,
             {start} could be greater than {end} by 1, which is invalid and may cause a crash.
