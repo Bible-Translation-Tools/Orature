@@ -37,6 +37,7 @@ import javafx.collections.ObservableList
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.assets.initialization.DEFAULT_RECORDER_NAME
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.ColorTheme
@@ -438,7 +439,7 @@ class NarrationViewModel : ViewModel() {
                     pluginOpenedProperty.set(true)
                     fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
                     when (pluginType) {
-                        PluginType.EDITOR -> audioPluginViewModel.edit(audio, take)
+                        PluginType.RECORDER, PluginType.EDITOR -> audioPluginViewModel.edit(audio, take)
                         PluginType.MARKER -> audioPluginViewModel.mark(audio, take)
                         else -> null
                     }
@@ -453,17 +454,7 @@ class NarrationViewModel : ViewModel() {
 
                     when (result) {
                         PluginActions.Result.NO_PLUGIN -> FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
-                        else -> {
-                            when (pluginType) {
-                                PluginType.EDITOR, PluginType.MARKER -> {
-                                    onChapterReturnFromPlugin(pluginType)
-                                }
-
-                                else -> {
-                                    logger.error("Plugin returned with result $result, plugintype: $pluginType did not match a known plugin.")
-                                }
-                            }
-                        }
+                        else -> onChapterReturnFromPlugin(pluginType)
                     }
                 }
         }
@@ -674,16 +665,24 @@ class NarrationViewModel : ViewModel() {
         audioPlayer.pause()
     }
 
-    fun recordAgain(verseIndex: Int) {
-        stopPlayer()
-        renderer.clearActiveRecordingData()
-        narration.onRecordAgain(verseIndex)
+    fun recordAgain(verseIndex: Int): NarrationStateTransition? {
+        val selectedPluginName = audioPluginViewModel.selectedRecorderProperty.value.name
+        return if (selectedPluginName != DEFAULT_RECORDER_NAME) {
+            openInAudioPlugin(verseIndex)
+            null
+        } else {
+            stopPlayer()
+            renderer.clearActiveRecordingData()
+            narration.onRecordAgain(verseIndex)
 
-        recordAgainVerseIndex = verseIndex
-        recordingVerseIndex.set(verseIndex)
+            recordAgainVerseIndex = verseIndex
+            recordingVerseIndex.set(verseIndex)
+
+            NarrationStateTransition.RECORD_AGAIN
+        }
     }
 
-    fun saveRecording(verseIndex: Int) {
+    fun saveRecording(verseIndex: Int): NarrationStateTransition {
         logger.info("Saving recording for: ${narration.totalVerses[verseIndex].formattedLabel}")
 
         stopPlayer()
@@ -691,6 +690,8 @@ class NarrationViewModel : ViewModel() {
         narration.onSaveRecording(verseIndex)
         isPrependRecording = false
         renderer.clearActiveRecordingData()
+
+        return NarrationStateTransition.START_SAVE
     }
 
     fun openInAudioPlugin(index: Int) {
@@ -737,7 +738,7 @@ class NarrationViewModel : ViewModel() {
             }
     }
 
-    fun onNext(currentIndex: Int) {
+    fun onNext(currentIndex: Int): NarrationStateTransition {
         val nextIndex = totalVerses.indexOfFirst { item ->
             item.sort > totalVerses[currentIndex].sort && item !in recordedVerses
         }
@@ -766,6 +767,8 @@ class NarrationViewModel : ViewModel() {
         } else {
             prependRecordingVerseIndex.set(null)
         }
+
+        return NarrationStateTransition.NEXT
     }
 
     fun startMoveMarker(index: Int) {
@@ -805,19 +808,26 @@ class NarrationViewModel : ViewModel() {
         resetNarratableList()
     }
 
-    fun record(index: Int) {
-        narration.onNewVerse(index)
+    fun record(index: Int): NarrationStateTransition? {
+        val selectedPluginName = audioPluginViewModel.selectedRecorderProperty.value.name
+        return if (selectedPluginName != DEFAULT_RECORDER_NAME) {
+            openInAudioPlugin(index)
+            null
+        } else {
+            narration.onNewVerse(index)
+            recordingVerseIndex.set(index)
 
-        recordingVerseIndex.set(index)
+            val anyRecordedAfter = recordedVerses.any { it.sort > totalVerses[index].sort }
+            if (anyRecordedAfter) {
+                prependRecordingVerseIndex.set(index)
+            }
+            isPrependRecordingProperty.set(anyRecordedAfter)
 
-        val anyRecordedAfter = recordedVerses.any { it.sort > totalVerses[index].sort }
-        if (anyRecordedAfter) {
-            prependRecordingVerseIndex.set(index)
+            NarrationStateTransition.RECORD
         }
-        isPrependRecordingProperty.set(anyRecordedAfter)
     }
 
-    fun pauseRecording(index: Int) {
+    fun pauseRecording(index: Int): NarrationStateTransition {
         logger.info("Pausing recording for: ${narration.totalVerses[index].formattedLabel}")
 
         narration.pauseRecording()
@@ -826,30 +836,37 @@ class NarrationViewModel : ViewModel() {
         if (!isPrependRecording) {
             renderer.clearActiveRecordingData()
         }
+
+        return NarrationStateTransition.PAUSE_RECORDING
     }
 
 
-    fun pauseRecordAgain(index: Int) {
+    fun pauseRecordAgain(index: Int): NarrationStateTransition {
         logger.info("Pausing record again for: ${narration.totalVerses[index].formattedLabel}")
 
         narration.pauseRecording()
         narration.finalizeVerse(index)
+
+        return NarrationStateTransition.PAUSE_RECORD_AGAIN
     }
 
-    fun resumeRecordingAgain() {
+    fun resumeRecordingAgain(): NarrationStateTransition {
         logger.info("Resuming record again for: ${narration.totalVerses[recordingVerseIndex.value].formattedLabel}")
 
         stopPlayer()
 
         narration.resumeRecordingAgain()
+        return NarrationStateTransition.RESUME_RECORD_AGAIN
     }
 
-    fun resumeRecording() {
+    fun resumeRecording(): NarrationStateTransition {
         logger.info("Resuming record ${narration.totalVerses[recordingVerseIndex.value].formattedLabel}")
 
         stopPlayer()
 
         narration.resumeRecording(recordingVerseIndex.value)
+
+        return NarrationStateTransition.RECORD
     }
 
     fun importVerseAudio(verseIndex: Int, file: File) {
@@ -1139,67 +1156,59 @@ class NarrationViewModel : ViewModel() {
 
     fun handleEvent(event: FXEvent) {
 
-        val index: Int
-        val transition: NarrationStateTransition = when (event) {
+        var index: Int? = null
+        val transition: NarrationStateTransition? = when (event) {
 
             is BeginRecordingEvent -> {
-                record(event.index)
                 index = event.index
-                NarrationStateTransition.RECORD
+                record(event.index)
             }
 
             is NextVerseEvent -> {
-                onNext(event.currentIndex)
                 index = event.currentIndex
-                NarrationStateTransition.NEXT
+                onNext(event.currentIndex)
             }
 
             is PauseRecordingEvent -> {
-                pauseRecording(event.index)
                 index = event.index
-                NarrationStateTransition.PAUSE_RECORDING
+                pauseRecording(event.index)
             }
 
-
             is ResumeRecordingEvent -> {
-                resumeRecording()
                 index = event.index
-                NarrationStateTransition.RECORD
+                resumeRecording()
             }
 
             is RecordVerseEvent -> {
-                record(event.index)
                 index = event.index
-                NarrationStateTransition.RECORD
+                record(event.index)
             }
 
             is RecordAgainEvent -> {
-                recordAgain(event.index)
                 index = event.index
-                NarrationStateTransition.RECORD_AGAIN
+                recordAgain(event.index)
             }
 
             is PauseRecordAgainEvent -> {
-                pauseRecordAgain(event.index)
                 index = event.index
-                NarrationStateTransition.PAUSE_RECORD_AGAIN
+                pauseRecordAgain(event.index)
             }
 
             is ResumeRecordingAgainEvent -> {
-                resumeRecordingAgain()
                 index = event.index
-                NarrationStateTransition.RESUME_RECORD_AGAIN
+                resumeRecordingAgain()
             }
 
             is SaveRecordingEvent -> {
-                saveRecording(event.index)
                 index = event.index
-                NarrationStateTransition.START_SAVE
+                saveRecording(event.index)
             }
 
-            else -> {
-                return
-            }
+            else -> null
+        }
+
+        if (transition == null) {
+            return
         }
 
         performNarrationStateMachineTransition(transition, index)

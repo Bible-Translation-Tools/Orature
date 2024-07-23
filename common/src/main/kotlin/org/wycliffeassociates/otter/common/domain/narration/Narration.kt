@@ -309,17 +309,19 @@ class Narration @AssistedInject constructor(
     fun onEditVerse(verseIndex: Int, editedFile: File): Completable {
 
         return Completable.fromAction {
-            loadSectionIntoPlayer(totalVerses[verseIndex])
-
             val scratchAudio = chapterRepresentation.scratchAudio
             val start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1
             audioFileUtils.appendFile(chapterRepresentation.scratchAudio, editedFile)
             val end = chapterRepresentation.scratchAudio.totalFrames
 
-            val frameSize = chapterRepresentation.frameSizeInBytes
-
-            val action = EditVerseAction(verseIndex, start * frameSize, end * frameSize)
-            execute(action)
+            /* When a new verse recorded with an EXTERNAL plugin comes back empty,
+            {start} could be greater than {end} by 1, which is invalid and may cause a crash.
+            */
+            if (start < end) {
+                val frameSize = chapterRepresentation.frameSizeInBytes
+                val action = EditVerseAction(verseIndex, start * frameSize, end * frameSize)
+                execute(action)
+            }
 
             NarrationTakeModifier.modifyAudioData(
                 takeToModify,
@@ -328,7 +330,7 @@ class Narration @AssistedInject constructor(
             )
 
             audioLoaded = false
-            loadChapterIntoPlayer()
+            loadSectionIntoPlayer(totalVerses[verseIndex])
         }
     }
 
@@ -411,12 +413,22 @@ class Narration @AssistedInject constructor(
     }
 
     fun getSectionAsFile(index: Int): File {
-        lockToVerse(index)
-        chapterReaderConnection.seek(0)
-        return audioFileUtils.getSectionAsFile(
-            chapterRepresentation.scratchAudio,
-            chapterReaderConnection
-        )
+        return if (totalVerses[index] !in activeVerses) {
+            // create new file for unrecorded item
+            chapterReaderConnection.seek(0)
+            File.createTempFile(
+                "tempAudio",
+                ".pcm",
+                directoryProvider.tempDirectory
+            )
+        } else {
+            lockToVerse(index)
+            chapterReaderConnection.seek(0)
+            audioFileUtils.getSectionAsFile(
+                chapterRepresentation.scratchAudio,
+                chapterReaderConnection
+            )
+        }
     }
 
     fun loadSectionIntoPlayer(verse: AudioMarker) {
