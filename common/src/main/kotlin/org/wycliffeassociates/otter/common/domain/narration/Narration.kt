@@ -314,6 +314,7 @@ class Narration @AssistedInject constructor(
             audioFileUtils.appendFile(chapterRepresentation.scratchAudio, editedFile)
             val end = chapterRepresentation.scratchAudio.totalFrames
 
+            // when the new audio is empty, {start} could be greater than {end} by 1, which is invalid
             if (start < end) {
                 val frameSize = chapterRepresentation.frameSizeInBytes
                 val action = EditVerseAction(verseIndex, start * frameSize, end * frameSize)
