@@ -549,10 +549,9 @@ class Narration @AssistedInject constructor(
             val node = VerseNode(
                 true,
                 marker,
-                mutableListOf(start * frameSizeInBytes until end * frameSizeInBytes)
+                mutableListOf(start * frameSizeInBytes..end * frameSizeInBytes + 1)
             )
             nodes.add(node)
-
             start = end + 1
         }
 
