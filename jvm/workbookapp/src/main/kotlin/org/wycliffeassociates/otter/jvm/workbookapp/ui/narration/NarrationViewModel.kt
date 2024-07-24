@@ -903,6 +903,7 @@ class NarrationViewModel : ViewModel() {
             .flatMapSingle { plugin ->
                 pluginOpenedProperty.set(true)
                 workbookDataStore.activeTakeNumberProperty.set(1)
+                workbookDataStore.activeChunkProperty.set(chunksList[verseIndex])
                 FX.eventbus.fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
                 audioPluginViewModel.edit(file)
             }
