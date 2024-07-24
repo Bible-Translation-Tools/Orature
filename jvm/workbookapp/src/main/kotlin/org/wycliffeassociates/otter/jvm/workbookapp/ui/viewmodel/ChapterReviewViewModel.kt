@@ -325,6 +325,10 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                                 // no-op
                             }
                         }
+
+                        /* set pluginOpenedProperty to false to allow invoking dock()
+                        which refreshes the chapter audio. */
+                        pluginOpenedProperty.set(false)
                         FX.eventbus.fire(PluginClosedEvent(pluginType))
                     }
             }

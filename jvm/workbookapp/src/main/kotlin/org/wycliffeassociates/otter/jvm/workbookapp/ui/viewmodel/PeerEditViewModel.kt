@@ -318,7 +318,6 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         createWaveformImages(audio)
         subscribeOnWaveformImages()
     }
-
     private fun recordWithExternalPlugin() {
         val pluginType = PluginType.RECORDER
         audioPluginViewModel.getPlugin(pluginType)
@@ -346,6 +345,10 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
 
                 val take = newTakeProperty.value
                 if (AudioFile(take.file).totalFrames > 0) {
+                    /* set pluginOpenedProperty to false will allow invoking dock(),
+                    which updates chunk status and auto navigates to incomplete chunk.
+                    This only applies to non-empty recording. */
+                    pluginOpenedProperty.set(false)
                     currentChunkProperty.value.audio.insertTake(take)
                     chapterReviewViewModel.invalidateChapterTake()
                     // any change(s) to chunk's take requires checking again
@@ -390,3 +393,4 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         }
     }
 }
+

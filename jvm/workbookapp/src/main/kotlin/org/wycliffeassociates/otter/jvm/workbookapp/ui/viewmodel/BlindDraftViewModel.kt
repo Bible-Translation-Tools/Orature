@@ -354,7 +354,6 @@ class BlindDraftViewModel : ViewModel() {
             }
             .flatMap { take ->
                 recordedTakeProperty.set(take)
-                // doesn't need to create take since .record() will do
                 audioPluginViewModel.edit(take.file)
             }
             .observeOnFx()
