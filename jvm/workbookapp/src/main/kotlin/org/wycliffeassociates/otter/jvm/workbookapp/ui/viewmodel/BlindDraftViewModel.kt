@@ -48,6 +48,7 @@ import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeDel
 import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeRecordAction
 import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeSelectAction
 import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
+import org.wycliffeassociates.otter.common.domain.plugins.IAudioPlugin
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -135,10 +136,11 @@ class BlindDraftViewModel : ViewModel() {
     }
 
     fun onRecordNew(toggleViewCallback: () -> Unit = {}) {
-        val selectedPlugin = audioPluginViewModel.getPlugin(PluginType.RECORDER)
+        val pluginType = PluginType.RECORDER
+        val selectedPlugin = audioPluginViewModel.getPlugin(pluginType)
             .blockingGet()
         if (!selectedPlugin.isNativePlugin()) {
-            recordWithExternalPlugin()
+            recordWithExternalPlugin(selectedPlugin, pluginType)
         } else {
             newTakeFile()
                 .observeOnFx()
@@ -340,18 +342,11 @@ class BlindDraftViewModel : ViewModel() {
         }
     }
 
-    private fun recordWithExternalPlugin() {
-        val pluginType = PluginType.RECORDER
-        audioPluginViewModel.getPlugin(pluginType)
-            .doOnError { e ->
-                logger.error("Error in processing take with plugin type: $pluginType", e)
-            }
-            .flatMapSingle { plugin ->
-                pluginOpenedProperty.set(true)
-                workbookDataStore.activeTakeNumberProperty.set(1)
-                FX.eventbus.fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
-                newTakeFile()
-            }
+    private fun recordWithExternalPlugin(plugin: IAudioPlugin, pluginType: PluginType) {
+        pluginOpenedProperty.set(true)
+        workbookDataStore.activeTakeNumberProperty.set(1)
+        FX.eventbus.fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
+        newTakeFile()
             .flatMap { take ->
                 recordedTakeProperty.set(take)
                 audioPluginViewModel.edit(take.file)
