@@ -206,7 +206,7 @@ class ChapterReview : View() {
                 viewModel.reloadAudio().subscribe()
             }
 
-            else -> {
+            false -> {
                 logger.info("Final Review docked.")
                 viewModel.subscribeOnWaveformImagesProperty.set(::subscribeOnWaveformImages)
                 viewModel.cleanupWaveformProperty.set(waveform::cleanup)

@@ -175,11 +175,19 @@ class BlindDraft : View() {
 
     override fun onDock() {
         super.onDock()
-        logger.info("Blind Draft docked.")
         recorderViewModel.waveformCanvas = recordingView.waveformCanvas
         recorderViewModel.volumeCanvas = recordingView.volumeCanvas
         mainSectionProperty.set(takesView)
-        viewModel.dockBlindDraft()
+        when (viewModel.pluginOpenedProperty.value) {
+            true -> {
+                // navigate back from plugin
+                viewModel.pluginOpenedProperty.set(false)
+            }
+            false -> {
+                logger.info("Blind Draft docked.")
+                viewModel.dockBlindDraft()
+            }
+        }
         subscribeEvents()
     }
 
