@@ -150,11 +150,25 @@ class ChunkingTranslationPage : View() {
 
     override fun onDock() {
         super.onDock()
-        viewModel.dockPage()
+        when (viewModel.pluginOpenedProperty.value) {
+            true -> {
+                // no-op, returning from plugin
+            }
+            false -> {
+                viewModel.dockPage()
+            }
+        }
     }
 
     override fun onUndock() {
         super.onUndock()
-        viewModel.undockPage()
+        when (viewModel.pluginOpenedProperty.value) {
+            true -> {
+                // no-op, opening plugin
+            }
+            false -> {
+                viewModel.undockPage()
+            }
+        }
     }
 }
