@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import com.github.thomasnield.rxkotlinfx.toObservable
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
@@ -34,6 +35,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
+import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
@@ -44,9 +46,12 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.PeerEditViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
 open class PeerEdit : View() {
@@ -55,6 +60,8 @@ open class PeerEdit : View() {
     val viewModel: PeerEditViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
     val recorderViewModel: RecorderViewModel by inject()
+    val workbookDataStore: WorkbookDataStore by inject()
+    val translationViewModel: TranslationViewModel2 by inject()
 
     private lateinit var waveform: MarkerWaveform
     private val audioScrollBar = createAudioScrollBar(
@@ -68,6 +75,7 @@ open class PeerEdit : View() {
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
     private val playbackView = createPlaybackView()
     private val recordingView = createRecordingView()
+    private val pluginOpenedPage = createPluginOpenedPage()
     private val eventSubscriptions = mutableListOf<EventRegistration>()
     private val listenerDisposers = mutableListOf<ListenerDisposer>()
 
@@ -141,10 +149,11 @@ open class PeerEdit : View() {
                 disableWhen { viewModel.isPlayingProperty }
 
                 action {
-                    viewModel.onRecordNew()
-                    mainSectionProperty.set(recordingView)
-                    recorderViewModel.onViewReady(container.width.toInt()) // use the width of the existing component
-                    recorderViewModel.toggle()
+                    viewModel.onRecordNew {
+                        mainSectionProperty.set(recordingView)
+                        recorderViewModel.onViewReady(container.width.toInt()) // use the width of the existing component
+                        recorderViewModel.toggle()
+                    }
                 }
             }
         }
@@ -200,24 +209,42 @@ open class PeerEdit : View() {
 
     override fun onDock() {
         super.onDock()
-        logger.info("Checking docked.")
         recorderViewModel.waveformCanvas = recordingView.waveformCanvas
         recorderViewModel.volumeCanvas = recordingView.volumeCanvas
         mainSectionProperty.set(playbackView)
         timer = startAnimationTimer { viewModel.calculatePosition() }
-        viewModel.subscribeOnWaveformImagesProperty.set(::subscribeOnWaveformImages)
-        viewModel.cleanupWaveformProperty.set(waveform::cleanup)
-        viewModel.dock()
+
+        when (viewModel.pluginOpenedProperty.value) {
+            true -> { // navigate back from plugin
+                viewModel.pluginOpenedProperty.set(false)
+                translationViewModel.loadingStepProperty.set(false)
+            }
+
+            false -> {
+                logger.info("Checking docked.")
+                viewModel.subscribeOnWaveformImagesProperty.set(::subscribeOnWaveformImages)
+                viewModel.cleanupWaveformProperty.set(waveform::cleanup)
+                viewModel.dock()
+            }
+        }
         subscribeEvents()
         subscribeOnThemeChange()
     }
 
     override fun onUndock() {
         super.onUndock()
-        logger.info("Checking undocked.")
         timer?.stop()
+
+        when (viewModel.pluginOpenedProperty.value) {
+            true -> {
+                /* no-op, opening plugin */
+            }
+            false ->{
+                logger.info("Checking undocked.")
+                viewModel.undock()
+            }
+        }
         unsubscribeEvents()
-        viewModel.undock()
         if (mainSectionProperty.value == recordingView) {
             recorderViewModel.cancel()
         }
@@ -245,6 +272,12 @@ open class PeerEdit : View() {
             viewModel.redo()
         }.also { eventSubscriptions.add(it) }
 
+        subscribe<PluginOpenedEvent> { pluginInfo ->
+            if (!pluginInfo.isNative) {
+                workspace.dock(pluginOpenedPage)
+            }
+        }.let { eventSubscriptions.add(it) }
+
         subscribe<TranslationNavigationEvent> {
             viewModel.cleanupWaveform()
         }.also { eventSubscriptions.add(it) }
@@ -271,6 +304,30 @@ open class PeerEdit : View() {
                 waveform.addWaveformImage(it)
             }
             .addTo(viewModel.disposable)
+    }
+
+    private fun createPluginOpenedPage(): PluginOpenedPage {
+        return find<PluginOpenedPage>().apply {
+            licenseProperty.bind(workbookDataStore.sourceLicenseProperty)
+            sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
+            sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
+            orientationProperty.bind(settingsViewModel.orientationProperty)
+            sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
+
+            sourceSpeedRateProperty.bind(
+                workbookDataStore.activeWorkbookProperty.select {
+                    it.translation.sourceRate.toLazyBinding()
+                }
+            )
+
+            targetSpeedRateProperty.bind(
+                workbookDataStore.activeWorkbookProperty.select {
+                    it.translation.targetRate.toLazyBinding()
+                }
+            )
+
+            playerProperty.bind(viewModel.sourcePlayerProperty)
+        }
     }
 
     private fun addShortcut() {

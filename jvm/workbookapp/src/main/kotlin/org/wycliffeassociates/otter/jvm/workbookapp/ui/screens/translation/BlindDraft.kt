@@ -45,6 +45,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BlindDraftViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
@@ -55,6 +56,7 @@ class BlindDraft : View() {
     val recorderViewModel: RecorderViewModel by inject()
     val workbookDataStore: WorkbookDataStore by inject()
     val settingsViewModel: SettingsViewModel by inject()
+    val translationViewModel: TranslationViewModel2 by inject()
 
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
     private val takesView = buildTakesArea()
@@ -182,6 +184,7 @@ class BlindDraft : View() {
             true -> {
                 // navigate back from plugin
                 viewModel.pluginOpenedProperty.set(false)
+                translationViewModel.loadingStepProperty.set(false)
             }
             false -> {
                 logger.info("Blind Draft docked.")

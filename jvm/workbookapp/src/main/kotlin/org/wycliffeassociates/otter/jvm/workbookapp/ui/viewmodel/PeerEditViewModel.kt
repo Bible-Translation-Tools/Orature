@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import com.github.thomasnield.rxkotlinfx.toObservable
 import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -30,6 +29,8 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
+import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.getWaveformColors
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
@@ -38,8 +39,10 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.IUndoable
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeApproveAction
 import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.waveform.IWaveformViewModel
@@ -50,11 +53,14 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
-import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import tornadofx.*
 import javax.inject.Inject
 
 class PeerEditViewModel : ViewModel(), IWaveformViewModel {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
 
@@ -65,6 +71,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     val blindDraftViewModel: BlindDraftViewModel by inject()
     val recorderViewModel: RecorderViewModel by inject()
     val chapterReviewViewModel: ChapterReviewViewModel by inject()
+    val audioPluginViewModel: AudioPluginViewModel by inject()
 
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override val positionProperty = SimpleDoubleProperty(0.0)
@@ -76,6 +83,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     val chunkConfirmed = SimpleBooleanProperty(false)
     val sourcePlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val isPlayingProperty = SimpleBooleanProperty(false)
+    val pluginOpenedProperty = SimpleBooleanProperty(false)
     val disposable = CompositeDisposable()
 
     lateinit var waveform: Observable<Image>
@@ -114,6 +122,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         }.also { disposableListeners.add(it) }
 
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
+        translationViewModel.pluginOpenedProperty.bind(pluginOpenedProperty)
         translationViewModel.loadingStepProperty.set(false)
     }
 
@@ -125,6 +134,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         sourcePlayerProperty.unbind()
         currentChunkProperty.set(null)
         selectedTakeDisposable.clear()
+        translationViewModel.pluginOpenedProperty.unbind()
         disposable.clear()
         disposableListeners.forEach { it.dispose() }
         disposableListeners.clear()
@@ -206,13 +216,21 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         translationViewModel.canRedoProperty.set(actionHistory.canRedo())
     }
 
-    fun onRecordNew() {
-        blindDraftViewModel.newTakeFile()
-            .observeOnFx()
-            .subscribe { take ->
-                newTakeProperty.set(take)
-                recorderViewModel.targetFileProperty.set(take.file)
-            }
+    fun onRecordNew(toggleViewCallback: () -> Unit = {}) {
+        val selectedPlugin = audioPluginViewModel.getPlugin(PluginType.RECORDER)
+            .blockingGet()
+        if (!selectedPlugin.isNativePlugin()) {
+            recordWithExternalPlugin()
+        } else {
+            blindDraftViewModel.newTakeFile()
+                .observeOnFx()
+                .subscribe { take ->
+                    newTakeProperty.set(take)
+                    recorderViewModel.targetFileProperty.set(take.file)
+                }
+
+            toggleViewCallback()
+        }
     }
 
     fun onRecordFinish(result: RecorderViewModel.Result) {
@@ -299,6 +317,45 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         val audio = OratureAudioFile(take.file)
         createWaveformImages(audio)
         subscribeOnWaveformImages()
+    }
+
+    private fun recordWithExternalPlugin() {
+        val pluginType = PluginType.RECORDER
+        audioPluginViewModel.getPlugin(pluginType)
+            .doOnError { e ->
+                logger.error("Error in processing take with plugin type: $pluginType", e)
+            }
+            .flatMapSingle { plugin ->
+                pluginOpenedProperty.set(true)
+                workbookDataStore.activeTakeNumberProperty.set(1)
+                FX.eventbus.fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
+                blindDraftViewModel.newTakeFile()
+            }
+            .flatMap { take ->
+                newTakeProperty.set(take)
+                // doesn't need to create take since .record() will do
+                audioPluginViewModel.edit(take.file)
+            }
+            .observeOnFx()
+            .doOnError { e ->
+                logger.error("Error in processing take with plugin type: $pluginType", e)
+            }
+            .onErrorReturn { PluginActions.Result.NO_PLUGIN }
+            .subscribe { result ->
+                logger.info("Returned from plugin with result: $result")
+
+                val take = newTakeProperty.value
+                if (AudioFile(take.file).totalFrames > 0) {
+                    currentChunkProperty.value.audio.insertTake(take)
+                    chapterReviewViewModel.invalidateChapterTake()
+                    // any change(s) to chunk's take requires checking again
+                    translationViewModel.selectedStepProperty.set(null)
+                    translationViewModel.navigateStep(ChunkingStep.PEER_EDIT)
+                }
+
+                newTakeProperty.set(null)
+                FX.eventbus.fire(PluginClosedEvent(pluginType))
+            }
     }
 
     private fun createWaveformImages(audio: OratureAudioFile) {
