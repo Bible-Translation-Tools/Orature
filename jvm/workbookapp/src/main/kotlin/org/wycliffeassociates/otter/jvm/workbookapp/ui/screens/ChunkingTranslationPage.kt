@@ -27,6 +27,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToPreviousChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ReturnFromPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.BlindDraft
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.Chunking
@@ -152,7 +153,8 @@ class ChunkingTranslationPage : View() {
         super.onDock()
         when (viewModel.pluginOpenedProperty.value) {
             true -> {
-                // no-op, returning from plugin
+                // returning from plugin
+                FX.eventbus.fire(ReturnFromPluginEvent())
             }
             false -> {
                 viewModel.dockPage()

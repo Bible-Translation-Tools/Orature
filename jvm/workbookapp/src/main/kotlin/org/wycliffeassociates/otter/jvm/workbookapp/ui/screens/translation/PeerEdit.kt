@@ -38,6 +38,7 @@ import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ReturnFromPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
@@ -276,6 +277,16 @@ open class PeerEdit : View() {
             if (!pluginInfo.isNative) {
                 workspace.dock(pluginOpenedPage)
             }
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<ReturnFromPluginEvent> {
+            /* When leaving the plugin, the flow is: Plugin undock > main page dock > PeerEdit dock.
+            * If the there's no change to the audio (empty), we want to keep the current Peer Edit view unchanged,
+            * which means avoiding refresh and navigation. Therefore, we only set it
+            * AFTER the main page has accessed this property and fired off the event.
+            * This ensures the correct value of the property when navigating away from PeerEdit.
+            * */
+            viewModel.pluginOpenedProperty.set(false)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<TranslationNavigationEvent> {
