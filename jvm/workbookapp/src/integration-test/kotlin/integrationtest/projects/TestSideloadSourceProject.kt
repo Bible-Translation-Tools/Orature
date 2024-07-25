@@ -36,9 +36,8 @@ class TestSideloadSourceProject {
 
         fun langFromCode(code: String) = Language(code, "", "", "", true, "")
 
-        val sourceRetriever = ImportProjectUseCase()
         val missingSources = reachableSources.filter {
-            sourceRetriever.getEmbeddedSource(langFromCode(it.languageCode)).exists().not()
+            importer.getEmbeddedSource(langFromCode(it.languageCode)).exists().not()
         }
 
         val sb = StringBuilder()
