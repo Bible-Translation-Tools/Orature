@@ -112,7 +112,7 @@ class ImportProjectUseCase @Inject constructor() {
             .ignoreElement()
     }
 
-    private fun getEmbeddedSource(language: Language): File {
+    fun getEmbeddedSource(language: Language): File {
         val resourceName = glSources.find { it.languageCode == language.slug }?.name
         val pathToSource = SOURCE_PATH_TEMPLATE.format(resourceName)
 

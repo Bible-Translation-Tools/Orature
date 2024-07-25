@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.spyk
 import io.mockk.verify
 import io.reactivex.Single
+import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
@@ -32,6 +33,21 @@ class TestSideloadSourceProject {
             .filter {
                 urlExists(it.url)
             }
+
+        fun langFromCode(code: String) = Language(code, "", "", "", true, "")
+
+        val sourceRetriever = ImportProjectUseCase()
+        val missingSources = reachableSources.filter {
+            sourceRetriever.getEmbeddedSource(langFromCode(it.languageCode)).exists().not()
+        }
+
+        val sb = StringBuilder()
+        missingSources.forEach {
+            sb.append(it.languageCode)
+            sb.append(", ")
+        }
+
+        Assert.assertEquals("Expected Orature to have all reachable sources, missing: ${sb}", reachableSources.size, missingSources.size)
 
         reachableSources.forEach {
             val language = Language(slug = it.languageCode, "", "", "", true, "")
