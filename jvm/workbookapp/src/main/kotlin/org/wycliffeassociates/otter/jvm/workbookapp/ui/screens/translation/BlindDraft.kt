@@ -37,6 +37,7 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkTakeCard
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ReturnFromPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.TakeAction
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
@@ -268,6 +269,10 @@ class BlindDraft : View() {
             if (!pluginInfo.isNative) {
                 workspace.dock(pluginOpenedPage)
             }
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<ReturnFromPluginEvent> {
+            viewModel.pluginOpenedProperty.set(false)
         }.let { eventSubscriptions.add(it) }
     }
 
