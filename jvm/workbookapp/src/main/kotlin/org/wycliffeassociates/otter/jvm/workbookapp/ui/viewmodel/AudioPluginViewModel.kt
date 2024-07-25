@@ -81,6 +81,11 @@ class AudioPluginViewModel : ViewModel() {
         )
     }
 
+    fun record(take: Take): Single<PluginActions.Result> {
+        val params = constructPluginParameters()
+        return pluginActions.record(take, params)
+    }
+
     fun import(recordable: Recordable, take: File): Completable {
         return pluginActions.import(
             audio = recordable.audio,

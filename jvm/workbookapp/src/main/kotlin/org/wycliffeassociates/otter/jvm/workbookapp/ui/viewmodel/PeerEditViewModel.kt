@@ -328,7 +328,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
             .flatMap { take ->
                 newTakeProperty.set(take)
                 // doesn't need to create take since .record() will do
-                audioPluginViewModel.edit(take.file)
+                audioPluginViewModel.record(take)
             }
             .observeOnFx()
             .doOnError { e ->

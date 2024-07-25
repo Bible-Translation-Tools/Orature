@@ -349,7 +349,7 @@ class BlindDraftViewModel : ViewModel() {
         newTakeFile()
             .flatMap { take ->
                 recordedTakeProperty.set(take)
-                audioPluginViewModel.edit(take.file)
+                audioPluginViewModel.record(take)
             }
             .observeOnFx()
             .doOnError { e ->
