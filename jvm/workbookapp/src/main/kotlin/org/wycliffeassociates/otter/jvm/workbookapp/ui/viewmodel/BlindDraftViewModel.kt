@@ -23,9 +23,11 @@ import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import javafx.application.Platform
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.transformation.FilteredList
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
@@ -35,6 +37,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.IUndoable
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
+import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
@@ -45,7 +48,12 @@ import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeDel
 import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeRecordAction
 import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeSelectAction
 import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
+import org.wycliffeassociates.otter.common.domain.plugins.IAudioPlugin
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.SnackBarEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel.Result
 import tornadofx.*
 import java.io.File
@@ -57,6 +65,7 @@ class BlindDraftViewModel : ViewModel() {
 
     @Inject
     lateinit var waveFileCreator: IWaveFileCreator
+
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
 
@@ -65,6 +74,7 @@ class BlindDraftViewModel : ViewModel() {
     val translationViewModel: TranslationViewModel2 by inject()
     val recorderViewModel: RecorderViewModel by inject()
     val chapterReviewViewModel: ChapterReviewViewModel by inject()
+    val audioPluginViewModel: AudioPluginViewModel by inject()
 
     val sourcePlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val currentChunkProperty = SimpleObjectProperty<Chunk>()
@@ -72,6 +82,7 @@ class BlindDraftViewModel : ViewModel() {
     val takes = observableListOf<TakeCardModel>()
     val selectedTake = FilteredList<TakeCardModel>(takes) { it.selected }
     val availableTakes = FilteredList<TakeCardModel>(takes) { !it.selected }
+    val pluginOpenedProperty = SimpleBooleanProperty(false)
 
     private val recordedTakeProperty = SimpleObjectProperty<Take>()
     private val actionHistory = UndoableActionHistory<IUndoable>()
@@ -99,6 +110,7 @@ class BlindDraftViewModel : ViewModel() {
             actionHistory.clear()
         }.also { disposableListeners.add(it) }
 
+        translationViewModel.pluginOpenedProperty.bind(pluginOpenedProperty)
         translationViewModel.loadingStepProperty.set(false)
     }
 
@@ -115,6 +127,7 @@ class BlindDraftViewModel : ViewModel() {
         }
         sourcePlayerProperty.unbind()
         currentChunkProperty.set(null)
+        translationViewModel.pluginOpenedProperty.unbind()
         translationViewModel.updateSourceText().subscribe()
         selectedTakeDisposable.clear()
         disposables.clear()
@@ -122,13 +135,22 @@ class BlindDraftViewModel : ViewModel() {
         disposableListeners.clear()
     }
 
-    fun onRecordNew() {
-        newTakeFile()
-            .observeOnFx()
-            .subscribe { take ->
-                recordedTakeProperty.set(take)
-                recorderViewModel.targetFileProperty.set(take.file)
-            }
+    fun onRecordNew(toggleViewCallback: () -> Unit = {}) {
+        val pluginType = PluginType.RECORDER
+        val selectedPlugin = audioPluginViewModel.getPlugin(pluginType)
+            .blockingGet()
+        if (!selectedPlugin.isNativePlugin()) {
+            recordWithExternalPlugin(selectedPlugin, pluginType)
+        } else {
+            newTakeFile()
+                .observeOnFx()
+                .subscribe { take ->
+                    recordedTakeProperty.set(take)
+                    recorderViewModel.targetFileProperty.set(take.file)
+                }
+            toggleViewCallback()
+        }
+
     }
 
     fun onRecordFinish(result: Result) {
@@ -318,6 +340,54 @@ class BlindDraftViewModel : ViewModel() {
                 }
             }
         }
+    }
+
+    private fun recordWithExternalPlugin(plugin: IAudioPlugin, pluginType: PluginType) {
+        pluginOpenedProperty.set(true)
+        workbookDataStore.activeTakeNumberProperty.set(1)
+        FX.eventbus.fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
+        newTakeFile()
+            .flatMap { take ->
+                recordedTakeProperty.set(take)
+                audioPluginViewModel.record(take)
+            }
+            .observeOnFx()
+            .doOnError { e ->
+                logger.error("Error in processing take with plugin type: $pluginType", e)
+            }
+            .onErrorReturn { PluginActions.Result.NO_PLUGIN }
+            .subscribe { result ->
+                logger.info("Returned from plugin with result: $result")
+
+                when (result) {
+                    PluginActions.Result.NO_PLUGIN -> {
+                        FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
+                    }
+
+                    PluginActions.Result.SUCCESS -> {
+                        // handle nonempty take returned from plugin
+                        val file = recordedTakeProperty.value.file
+                        if (AudioFile(file).totalFrames > 0) {
+                            workbookDataStore.chunk?.let { chunk ->
+                                val op = TranslationTakeRecordAction(
+                                    chunk,
+                                    recordedTakeProperty.value,
+                                    chunk.audio.getSelectedTake()
+                                )
+                                actionHistory.execute(op)
+                                onUndoableAction()
+                                loadTakes(chunk)
+                            }
+                        }
+                    }
+
+                    else -> {
+                        // no audio - no op
+                    }
+                }
+                recordedTakeProperty.set(null)
+                FX.eventbus.fire(PluginClosedEvent(pluginType))
+            }
     }
 
     private fun onUndoableAction() {

@@ -43,3 +43,9 @@ class RedoChunkingPageEvent: FXEvent()
 class GoToNextChapterEvent: FXEvent()
 class GoToPreviousChapterEvent: FXEvent()
 class OpenInPluginEvent: FXEvent()
+
+/**
+ * Use this event to avoid unwanted refresh of steps or chunk list
+ * when returning from an external plugin.
+ */
+class ReturnFromPluginEvent: FXEvent()

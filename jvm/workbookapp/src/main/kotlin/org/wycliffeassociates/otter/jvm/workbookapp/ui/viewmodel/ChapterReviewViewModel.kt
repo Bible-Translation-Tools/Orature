@@ -147,14 +147,13 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-
-        translationViewModel.pluginOpenedProperty.bind(pluginOpenedProperty)
     }
 
     fun dock() {
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
         workbookDataStore.activeChunkProperty.set(null)
         translationViewModel.currentMarkerProperty.bind(highlightedMarkerIndexProperty)
+        translationViewModel.pluginOpenedProperty.bind(pluginOpenedProperty)
 
         Completable
             .fromAction {
@@ -191,6 +190,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             ?.writeMarkers()
             ?.blockingAwait()
 
+        translationViewModel.pluginOpenedProperty.unbind()
         translationViewModel.currentMarkerProperty.unbind()
         translationViewModel.currentMarkerProperty.set(-1)
         cleanup()
@@ -325,6 +325,10 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                                 // no-op
                             }
                         }
+
+                        /* set pluginOpenedProperty to false to allow invoking dock()
+                        which refreshes the chapter audio. */
+                        pluginOpenedProperty.set(false)
                         FX.eventbus.fire(PluginClosedEvent(pluginType))
                     }
             }

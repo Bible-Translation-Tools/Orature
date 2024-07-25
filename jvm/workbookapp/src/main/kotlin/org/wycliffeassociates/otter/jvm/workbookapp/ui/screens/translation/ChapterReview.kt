@@ -57,6 +57,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.SnackBarEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterReviewViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
@@ -67,6 +68,7 @@ class ChapterReview : View() {
     val viewModel: ChapterReviewViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
+    private val translationViewModel: TranslationViewModel2 by inject()
 
     private lateinit var waveform: MarkerWaveform
     private val audioScrollBar = createAudioScrollBar(
@@ -203,10 +205,11 @@ class ChapterReview : View() {
         when (viewModel.pluginOpenedProperty.value) {
             true -> { // navigate back from plugin
                 viewModel.pluginOpenedProperty.set(false)
+                translationViewModel.loadingStepProperty.set(false)
                 viewModel.reloadAudio().subscribe()
             }
 
-            else -> {
+            false -> {
                 logger.info("Final Review docked.")
                 viewModel.subscribeOnWaveformImagesProperty.set(::subscribeOnWaveformImages)
                 viewModel.cleanupWaveformProperty.set(waveform::cleanup)

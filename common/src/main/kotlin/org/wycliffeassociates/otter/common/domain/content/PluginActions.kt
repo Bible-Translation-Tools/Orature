@@ -131,6 +131,11 @@ class PluginActions @Inject constructor(
             }
     }
 
+    fun record(take: Take, params: PluginParameters): Single<Result> {
+        return launchPlugin(PluginType.RECORDER, take, params)
+            .map { it.second }
+    }
+
     fun import(
         audio: AssociatedAudio,
         projectAudioDir: File,

@@ -37,7 +37,6 @@ import javafx.collections.ObservableList
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.assets.initialization.DEFAULT_RECORDER_NAME
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.ColorTheme
@@ -666,8 +665,9 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun recordAgain(verseIndex: Int): NarrationStateTransition? {
-        val selectedPluginName = audioPluginViewModel.selectedRecorderProperty.value.name
-        return if (selectedPluginName != DEFAULT_RECORDER_NAME) {
+        val selectedPlugin = audioPluginViewModel.getPlugin(PluginType.RECORDER)
+            .blockingGet()
+        return if (!selectedPlugin.isNativePlugin()) {
             openInAudioPlugin(verseIndex)
             null
         } else {
@@ -809,8 +809,9 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun record(index: Int): NarrationStateTransition? {
-        val selectedPluginName = audioPluginViewModel.selectedRecorderProperty.value.name
-        return if (selectedPluginName != DEFAULT_RECORDER_NAME) {
+        val selectedPlugin = audioPluginViewModel.getPlugin(PluginType.RECORDER)
+            .blockingGet()
+        return if (!selectedPlugin.isNativePlugin()) {
             openInAudioPlugin(index)
             null
         } else {
@@ -902,6 +903,7 @@ class NarrationViewModel : ViewModel() {
             .flatMapSingle { plugin ->
                 pluginOpenedProperty.set(true)
                 workbookDataStore.activeTakeNumberProperty.set(1)
+                workbookDataStore.activeChunkProperty.set(chunksList[verseIndex])
                 FX.eventbus.fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
                 audioPluginViewModel.edit(file)
             }

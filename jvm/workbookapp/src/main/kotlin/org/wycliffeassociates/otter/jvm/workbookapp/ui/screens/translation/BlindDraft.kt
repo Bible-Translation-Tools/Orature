@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
+import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Side
 import javafx.scene.Node
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.TakeSelectionAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
+import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkTakeCard
@@ -39,8 +41,11 @@ import org.wycliffeassociates.otter.jvm.controls.event.TakeAction
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BlindDraftViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
@@ -50,12 +55,16 @@ class BlindDraft : View() {
     val viewModel: BlindDraftViewModel by inject()
     val recorderViewModel: RecorderViewModel by inject()
     val workbookDataStore: WorkbookDataStore by inject()
+    val settingsViewModel: SettingsViewModel by inject()
+    val translationViewModel: TranslationViewModel2 by inject()
+
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
     private val takesView = buildTakesArea()
     private val recordingView = buildRecordingArea()
     private val hideSourceAudio = mainSectionProperty.booleanBinding { it == recordingView }
     private val eventSubscriptions = mutableListOf<EventRegistration>()
     private val listenerDisposers = mutableListOf<ListenerDisposer>()
+    private val pluginOpenedPage = createPluginOpenedPage()
 
     override val root = borderpane {
         addClass("blind-draft")
@@ -131,10 +140,11 @@ class BlindDraft : View() {
                     graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
 
                     action {
-                        viewModel.onRecordNew()
-                        mainSectionProperty.set(recordingView)
-                        recorderViewModel.onViewReady(takesView.width.toInt()) // use the width of the existing component
-                        recorderViewModel.toggle()
+                        viewModel.onRecordNew {
+                            mainSectionProperty.set(recordingView)
+                            recorderViewModel.onViewReady(takesView.width.toInt()) // use the width of the existing component
+                            recorderViewModel.toggle()
+                        }
                     }
                 }
             }
@@ -167,21 +177,61 @@ class BlindDraft : View() {
 
     override fun onDock() {
         super.onDock()
-        logger.info("Blind Draft docked.")
         recorderViewModel.waveformCanvas = recordingView.waveformCanvas
         recorderViewModel.volumeCanvas = recordingView.volumeCanvas
         mainSectionProperty.set(takesView)
-        viewModel.dockBlindDraft()
+        when (viewModel.pluginOpenedProperty.value) {
+            true -> {
+                // navigate back from plugin
+                viewModel.pluginOpenedProperty.set(false)
+                translationViewModel.loadingStepProperty.set(false)
+            }
+            false -> {
+                logger.info("Blind Draft docked.")
+                viewModel.dockBlindDraft()
+            }
+        }
         subscribeEvents()
     }
 
     override fun onUndock() {
         super.onUndock()
-        logger.info("Blind Draft undocked.")
+        when (viewModel.pluginOpenedProperty.value) {
+            true -> {
+                /* no-op, opening plugin */
+            }
+            false -> {
+                logger.info("Blind Draft undocked.")
+                viewModel.undockBlindDraft()
+            }
+        }
         unsubscribeEvents()
-        viewModel.undockBlindDraft()
         if (mainSectionProperty.value == recordingView) {
             recorderViewModel.cancel()
+        }
+    }
+
+    private fun createPluginOpenedPage(): PluginOpenedPage {
+        return find<PluginOpenedPage>().apply {
+            licenseProperty.bind(workbookDataStore.sourceLicenseProperty)
+            sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
+            sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
+            orientationProperty.bind(settingsViewModel.orientationProperty)
+            sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
+
+            sourceSpeedRateProperty.bind(
+                workbookDataStore.activeWorkbookProperty.select {
+                    it.translation.sourceRate.toLazyBinding()
+                }
+            )
+
+            targetSpeedRateProperty.bind(
+                workbookDataStore.activeWorkbookProperty.select {
+                    it.translation.targetRate.toLazyBinding()
+                }
+            )
+
+            playerProperty.bind(viewModel.sourcePlayerProperty)
         }
     }
 
@@ -213,6 +263,12 @@ class BlindDraft : View() {
         subscribe<RedoChunkingPageEvent> {
             viewModel.redo()
         }.also { eventSubscriptions.add(it) }
+
+        subscribe<PluginOpenedEvent> { pluginInfo ->
+            if (!pluginInfo.isNative) {
+                workspace.dock(pluginOpenedPage)
+            }
+        }.let { eventSubscriptions.add(it) }
     }
 
     private fun unsubscribeEvents() {
