@@ -153,7 +153,7 @@ class ChunkingTranslationPage : View() {
         super.onDock()
         when (viewModel.pluginOpenedProperty.value) {
             true -> {
-                // returning from plugin
+                // returning from plugin, notify child view without triggering onDock()
                 FX.eventbus.fire(ReturnFromPluginEvent())
             }
             false -> {
