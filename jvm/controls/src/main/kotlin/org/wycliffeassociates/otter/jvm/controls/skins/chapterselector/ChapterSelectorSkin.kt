@@ -43,6 +43,8 @@ class ChapterSelectorSkin(val selector: ChapterSelector) : SkinBase<ChapterSelec
     private fun initializeControl() {
         prevChapterBtn.disableProperty().bind(selector.prevDisabledProperty)
         nextChapterBtn.disableProperty().bind(selector.nextDisabledProperty)
+        prevChapterBtn.focusTraversableProperty().bind(prevChapterBtn.disableProperty().not())
+        nextChapterBtn.focusTraversableProperty().bind(nextChapterBtn.disableProperty().not())
         chapterTitle.disableProperty().bind(selector.prevDisabledProperty.and(selector.nextDisabledProperty))
 
         bindText()

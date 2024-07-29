@@ -25,6 +25,10 @@
     -fx-border-width: 2px
 }
 
+.chapter-selector__controls:focus-within {
+    -fx-border-color: red;
+}
+
 .chapter-selector__title {
     -fx-background-color: -wa-foreground;
     -fx-text-fill: -wa-regular-text;
