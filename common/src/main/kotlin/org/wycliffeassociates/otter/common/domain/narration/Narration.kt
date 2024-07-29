@@ -545,15 +545,15 @@ class Narration @AssistedInject constructor(
 
         segments.forEach { (marker, file) ->
             val verseAudio = AudioFile(file)
-            end = max(start + verseAudio.totalFrames - 1, 0)
+            end = max(start + verseAudio.totalFrames, 0)
 
             val node = VerseNode(
                 true,
                 marker,
-                mutableListOf(start * frameSizeInBytes..end * frameSizeInBytes + 1)
+                mutableListOf(start * frameSizeInBytes until end * frameSizeInBytes)
             )
             nodes.add(node)
-            start = end + 1
+            start = end
         }
 
         return nodes.sortedBy { it.marker.sort } // sort order of book-chapter-verse
