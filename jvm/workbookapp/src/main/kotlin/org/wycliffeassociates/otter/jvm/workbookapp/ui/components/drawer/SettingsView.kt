@@ -149,8 +149,15 @@ class SettingsView : View() {
                 vbox {
                     addClass("app-drawer__section")
 
-                    label(messages["playbackSettings"]).apply {
-                        addClass("app-drawer__subtitle--small")
+                    hbox {
+                        spacing = 10.0
+                        label(messages["playbackSettings"]).apply {
+                            addClass("app-drawer__subtitle--small")
+                        }
+                        progressindicator {
+                            prefWidth = 25.0
+                            prefHeight = 25.0
+                        }
                     }
 
                     combobox(viewModel.selectedOutputDeviceProperty, viewModel.outputDevices) {
@@ -174,8 +181,15 @@ class SettingsView : View() {
                         }
                     }
 
-                    label(messages["recordSettings"]).apply {
-                        addClass("app-drawer__subtitle--small")
+                    hbox {
+                        spacing = 10.0
+                        label(messages["recordSettings"]).apply {
+                            addClass("app-drawer__subtitle--small")
+                        }
+                        progressindicator {
+                            prefWidth = 25.0
+                            prefHeight = 25.0
+                        }
                     }
                     combobox(viewModel.selectedInputDeviceProperty, viewModel.inputDevices) {
                         addClass("wa-combobox")
@@ -415,9 +429,7 @@ class SettingsView : View() {
         // Devices are refreshed on dock and on drawer event otherwise it is not loaded the first time.
         subscribe<DrawerEvent<UIComponent>> {
             if (it.action == DrawerEventAction.OPEN) {
-                viewModel.refreshDevices()
-                focusCloseButton()
-                resetUpdateLanguagesStatus()
+                openDrawer()
             }
         }
     }
@@ -466,8 +478,16 @@ class SettingsView : View() {
         }
     }
 
+    private fun openDrawer() {
+        viewModel.refreshDevices()
+        focusCloseButton()
+        resetUpdateLanguagesStatus()
+        viewModel.watchForNewDevices()
+    }
+
     private fun collapse() {
         fire(DrawerEvent(this::class, DrawerEventAction.CLOSE))
+        viewModel.onDrawerCollapsed()
     }
 
     private fun initChangeLanguageDialog() {
