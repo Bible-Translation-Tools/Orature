@@ -51,6 +51,7 @@ class ChapterSelector : StackPane() {
             button(chapterTitleProperty) {
                 addClass("chapter-selector__title")
                 graphic = FontIcon(MaterialDesign.MDI_FILE)
+                fitToParentHeight()
                 disableProperty().bind(prevDisabledProperty.and(nextDisabledProperty))
                 onActionProperty().bind(onChapterSelectorOpenedProperty)
             }

@@ -19,26 +19,25 @@
 .chapter-selector__controls {
     -fx-alignment: center;
     -fx-background-radius: 6px;
-    -fx-border-color: -wa-surface-border;
-    -fx-border-radius: 16px;
-    -fx-border-style: solid;
-    -fx-border-width: 2px
-}
-
-.chapter-selector__controls:focus-within {
-    -fx-border-color: red;
 }
 
 .chapter-selector__title {
     -fx-background-color: -wa-foreground;
+    -fx-border-width: 2 0 2 0;
+    -fx-border-color: -wa-button-tertiary-default-border;
     -fx-text-fill: -wa-regular-text;
     -fx-padding: 0 20px;
     -fx-font-size: 20px;
     -fx-cursor: hand;
 }
 
-.chapter-selector__title: hover {
+.chapter-selector__title:hover {
     -fx-underline: true;
+}
+
+.chapter-selector__title:focus-visible {
+    -fx-border-width: 4 4 4 4;
+    -fx-border-color: -wa-button-border;
 }
 
 .chapter-selector__title .ikonli-font-icon {
@@ -50,21 +49,17 @@
     -fx-effect: null;
 }
 
-.chapter-selector .btn:focused {
-    -fx-border-width: 0;
-}
-
-.chapter-selector .btn.chapter-selector__btn-prev {
+.chapter-selector .chapter-selector__btn-prev {
     -fx-background-radius: 16px 0 0 16px;
     -fx-border-radius: 16px 0 0 16px;
-    -fx-border-width: 0 2 0 0;
-    -fx-border-color: -wa-surface-border;
-;
 }
 
-.chapter-selector .btn.chapter-selector__btn-next {
+.chapter-selector .chapter-selector__btn-next {
     -fx-background-radius: 0 16px 16px 0;
     -fx-border-radius: 0 16px 16px 0;
-    -fx-border-width: 0 0 0 2;
-    -fx-border-color: -wa-surface-border;
+}
+
+.chapter-selector__btn-prev:focus-visible,
+.chapter-selector__btn-next:focus-visible {
+    -fx-border-color: -wa-button-border;
 }
