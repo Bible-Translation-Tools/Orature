@@ -105,7 +105,7 @@ internal class RecordAgainAction(
         logger.info("Recording again for: ${totalVerses[verseIndex].marker.formattedLabel}")
         previous = totalVerses[verseIndex].copy()
 
-        val start = (if (workingAudio.totalFrames == 0) 0 else workingAudio.totalFrames + 1) * frameSizeInBytes
+        val start = (if (workingAudio.totalFrames == 0) 0 else workingAudio.totalFrames) * frameSizeInBytes
         val end = start
 
         node = VerseNode(
