@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import javafx.application.Platform
@@ -28,18 +27,13 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.transformation.FilteredList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
-import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
-import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.IUndoable
-import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
-import org.wycliffeassociates.otter.common.domain.content.Recordable
-import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
@@ -56,8 +50,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.SnackBarEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel.Result
 import tornadofx.*
-import java.io.File
-import java.time.LocalDate
 import javax.inject.Inject
 
 class BlindDraftViewModel : ViewModel() {
@@ -142,7 +134,8 @@ class BlindDraftViewModel : ViewModel() {
         if (!selectedPlugin.isNativePlugin()) {
             recordWithExternalPlugin(selectedPlugin, pluginType)
         } else {
-            newTakeFile()
+            val chunk = workbookDataStore.chunk!!
+            audioPluginViewModel.createTake(chunk, chunk, createEmpty = true)
                 .observeOnFx()
                 .subscribe { take ->
                     recordedTakeProperty.set(take)
@@ -279,57 +272,6 @@ class BlindDraftViewModel : ViewModel() {
         }
     }
 
-    fun newTakeFile(): Single<Take> {
-        return workbookDataStore.chunk!!.let { chunk ->
-            val namer = getFileNamer(chunk)
-            val chapter = namer.formatChapterNumber()
-            val chapterAudioDir = workbookDataStore.workbook.projectFilesAccessor.audioDir
-                .resolve(chapter)
-                .apply { mkdirs() }
-
-            chunk.audio.getNewTakeNumber()
-                .map { takeNumber ->
-                    createNewTake(
-                        takeNumber,
-                        namer.generateName(takeNumber, AudioFileFormat.WAV),
-                        chapterAudioDir,
-                        true
-                    )
-                }
-        }
-    }
-
-    private fun createNewTake(
-        newTakeNumber: Int,
-        filename: String,
-        audioDir: File,
-        createEmpty: Boolean
-    ): Take {
-        val takeFile = audioDir.resolve(File(filename))
-        val newTake = Take(
-            name = takeFile.name,
-            file = takeFile,
-            number = newTakeNumber,
-            format = MimeType.WAV,
-            createdTimestamp = LocalDate.now()
-        )
-        if (createEmpty) {
-            newTake.file.createNewFile()
-            waveFileCreator.createEmpty(newTake.file)
-        }
-        return newTake
-    }
-
-    private fun getFileNamer(recordable: Recordable): FileNamer {
-        return WorkbookFileNamerBuilder.createFileNamer(
-            workbook = workbookDataStore.workbook,
-            chapter = workbookDataStore.chapter,
-            chunk = workbookDataStore.chunk,
-            recordable = recordable,
-            rcSlug = workbookDataStore.workbook.sourceMetadataSlug
-        )
-    }
-
     private fun handlePostDeleteTake(take: Take, selectAnotherTake: Boolean) {
         Platform.runLater {
             takes.removeIf { it.take == take }
@@ -346,7 +288,9 @@ class BlindDraftViewModel : ViewModel() {
         pluginOpenedProperty.set(true)
         workbookDataStore.activeTakeNumberProperty.set(1)
         FX.eventbus.fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
-        newTakeFile()
+
+        val chunk = workbookDataStore.chunk!!
+        audioPluginViewModel.createTake(chunk, chunk, createEmpty = true)
             .flatMap { take ->
                 recordedTakeProperty.set(take)
                 audioPluginViewModel.record(take)

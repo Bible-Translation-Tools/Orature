@@ -25,13 +25,16 @@ import io.reactivex.Maybe
 import io.reactivex.Single
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
+import org.wycliffeassociates.otter.common.domain.content.TakeCreator
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
@@ -51,6 +54,7 @@ class AudioPluginViewModel : ViewModel() {
     @Inject lateinit var pluginRepository: IAudioPluginRepository
     @Inject lateinit var launchPlugin: LaunchPlugin
     @Inject lateinit var pluginActions: PluginActions
+    @Inject lateinit var takeCreator: TakeCreator
     @Inject lateinit var localeLanguage: LocaleLanguage
 
     private val workbookDataStore: WorkbookDataStore by inject()
@@ -93,6 +97,29 @@ class AudioPluginViewModel : ViewModel() {
             namer = createFileNamer(recordable),
             take = take
         )
+    }
+
+    fun createTake(recordable: Recordable, chunk: Chunk?, createEmpty: Boolean): Single<Take> {
+        val namer = WorkbookFileNamerBuilder.createFileNamer(
+            workbook = workbookDataStore.workbook,
+            chapter = workbookDataStore.chapter,
+            chunk = chunk,
+            recordable = recordable,
+            rcSlug = workbookDataStore.workbook.sourceMetadataSlug
+        )
+        val chapterAudioDir = workbookDataStore.workbook.projectFilesAccessor.audioDir
+            .resolve(namer.formatChapterNumber())
+            .apply { mkdirs() }
+
+        return recordable.audio.getNewTakeNumber()
+            .map { takeNumber ->
+                takeCreator.createNewTake(
+                    takeNumber,
+                    namer.generateName(takeNumber, AudioFileFormat.WAV),
+                    chapterAudioDir,
+                    createEmpty
+                )
+            }
     }
 
     private fun constructPluginParameters(action: String = ""): PluginParameters {
