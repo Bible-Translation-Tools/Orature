@@ -19,13 +19,20 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.toObservable
+import io.reactivex.Single
 import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.ColorTheme
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.content.Recordable
+import org.wycliffeassociates.otter.common.domain.content.TakeCreator
+import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 import org.wycliffeassociates.otter.common.recorder.RecordingTimer
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
@@ -44,6 +51,8 @@ import javax.inject.Inject
 class RecorderViewModel : ViewModel() {
 
     val settingsViewModel: SettingsViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
+    @Inject lateinit var takeCreator: TakeCreator
 
     enum class Result {
         SUCCESS,
@@ -170,6 +179,30 @@ class RecorderViewModel : ViewModel() {
         // clear waveform
         renderer.clearData()
         renderer.setRecordingStatusObservable(writer.isWriting)
+    }
+
+
+    fun createTake(recordable: Recordable, chunk: Chunk?, createEmpty: Boolean): Single<Take> {
+        val namer = WorkbookFileNamerBuilder.createFileNamer(
+            workbook = workbookDataStore.workbook,
+            chapter = workbookDataStore.chapter,
+            chunk = chunk,
+            recordable = recordable,
+            rcSlug = workbookDataStore.workbook.sourceMetadataSlug
+        )
+        val chapterAudioDir = workbookDataStore.workbook.projectFilesAccessor.audioDir
+            .resolve(namer.formatChapterNumber())
+            .apply { mkdirs() }
+
+        return recordable.audio.getNewTakeNumber()
+            .map { takeNumber ->
+                takeCreator.createNewTake(
+                    takeNumber,
+                    namer.generateName(takeNumber, AudioFileFormat.WAV),
+                    chapterAudioDir,
+                    createEmpty
+                )
+            }
     }
 
     private fun initializeAudio() {

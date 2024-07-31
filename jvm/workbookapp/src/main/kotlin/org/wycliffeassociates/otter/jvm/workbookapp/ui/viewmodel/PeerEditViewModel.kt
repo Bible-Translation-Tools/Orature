@@ -225,7 +225,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
             recordWithExternalPlugin(selectedPlugin, pluginType)
         } else {
             val chunk = workbookDataStore.chunk!!
-            audioPluginViewModel.createTake(chunk, chunk, createEmpty = true)
+            recorderViewModel.createTake(chunk, chunk, createEmpty = true)
                 .observeOnFx()
                 .subscribe { take ->
                     newTakeProperty.set(take)
@@ -327,7 +327,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         FX.eventbus.fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
 
         val chunk = workbookDataStore.chunk!!
-        audioPluginViewModel.createTake(chunk, chunk, createEmpty = true)
+        recorderViewModel.createTake(chunk, chunk, createEmpty = true)
             .flatMap { take ->
                 newTakeProperty.set(take)
                 // doesn't need to create take since .record() will do

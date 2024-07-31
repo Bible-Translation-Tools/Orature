@@ -99,29 +99,6 @@ class AudioPluginViewModel : ViewModel() {
         )
     }
 
-    fun createTake(recordable: Recordable, chunk: Chunk?, createEmpty: Boolean): Single<Take> {
-        val namer = WorkbookFileNamerBuilder.createFileNamer(
-            workbook = workbookDataStore.workbook,
-            chapter = workbookDataStore.chapter,
-            chunk = chunk,
-            recordable = recordable,
-            rcSlug = workbookDataStore.workbook.sourceMetadataSlug
-        )
-        val chapterAudioDir = workbookDataStore.workbook.projectFilesAccessor.audioDir
-            .resolve(namer.formatChapterNumber())
-            .apply { mkdirs() }
-
-        return recordable.audio.getNewTakeNumber()
-            .map { takeNumber ->
-                takeCreator.createNewTake(
-                    takeNumber,
-                    namer.generateName(takeNumber, AudioFileFormat.WAV),
-                    chapterAudioDir,
-                    createEmpty
-                )
-            }
-    }
-
     private fun constructPluginParameters(action: String = ""): PluginParameters {
         val workbook = workbookDataStore.workbook
         val sourceAudio = audioDataStore.getSourceAudio()

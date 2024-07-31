@@ -135,7 +135,7 @@ class BlindDraftViewModel : ViewModel() {
             recordWithExternalPlugin(selectedPlugin, pluginType)
         } else {
             val chunk = workbookDataStore.chunk!!
-            audioPluginViewModel.createTake(chunk, chunk, createEmpty = true)
+            recorderViewModel.createTake(chunk, chunk, createEmpty = true)
                 .observeOnFx()
                 .subscribe { take ->
                     recordedTakeProperty.set(take)
@@ -290,7 +290,7 @@ class BlindDraftViewModel : ViewModel() {
         FX.eventbus.fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
 
         val chunk = workbookDataStore.chunk!!
-        audioPluginViewModel.createTake(chunk, chunk, createEmpty = true)
+        recorderViewModel.createTake(chunk, chunk, createEmpty = true)
             .flatMap { take ->
                 recordedTakeProperty.set(take)
                 audioPluginViewModel.record(take)
