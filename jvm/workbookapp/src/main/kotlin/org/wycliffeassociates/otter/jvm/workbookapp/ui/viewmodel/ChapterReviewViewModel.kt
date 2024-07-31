@@ -54,6 +54,7 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.ChapterTranslationBuilder
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
+import org.wycliffeassociates.otter.common.domain.content.TakeCreator
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
@@ -96,6 +97,9 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
     @Inject
     lateinit var chapterTranslationBuilder: ChapterTranslationBuilder
+
+    @Inject
+    lateinit var takeCreator: TakeCreator
 
     val settingsViewModel: SettingsViewModel by inject()
     val workbookDataStore: WorkbookDataStore by inject()
@@ -476,37 +480,23 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                 .resolve(namer.formatChapterNumber())
                 .apply { mkdirs() }
 
+            val chapterTake = workbookDataStore.chapter.getSelectedTake()!!
+
             chapter.audio.getNewTakeNumber()
                 .map { takeNumber ->
-                    createNewTake(
+                    val newTake = takeCreator.createNewTake(
                         takeNumber,
                         namer.generateName(takeNumber, AudioFileFormat.WAV),
-                        chapterAudioDir
+                        chapterAudioDir,
+                        createEmpty = false
                     )
+                    chapterTake.file.copyTo(newTake.file, overwrite = true)
+                    newTake.checkingState.accept(
+                        TakeCheckingState(CheckingStatus.VERSE, chapterTake.getSavedChecksum())
+                    )
+                    newTake
                 }
         }
-    }
-
-    private fun createNewTake(
-        newTakeNumber: Int,
-        filename: String,
-        audioDir: File
-    ): Take {
-        val newTakeFile = audioDir.resolve(File(filename))
-        val chapterTake = workbookDataStore.chapter.getSelectedTake()!!
-        chapterTake.file.copyTo(newTakeFile, true)
-
-        val newTake = Take(
-            name = newTakeFile.name,
-            file = newTakeFile,
-            number = newTakeNumber,
-            format = MimeType.WAV,
-            createdTimestamp = LocalDate.now(),
-            checkingState = BehaviorRelay.createDefault(
-                TakeCheckingState(CheckingStatus.VERSE, chapterTake.getSavedChecksum())
-            )
-        )
-        return newTake
     }
 
     private fun setupUndoRedo(action: TakeEditAction, oldMarkerModel: MarkerPlacementModel?) {

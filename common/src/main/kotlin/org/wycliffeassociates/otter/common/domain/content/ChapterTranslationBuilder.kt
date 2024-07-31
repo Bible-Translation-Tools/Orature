@@ -34,7 +34,8 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 class ChapterTranslationBuilder @Inject constructor(
-    private val concatenateAudio: ConcatenateAudio
+    private val concatenateAudio: ConcatenateAudio,
+    private val takeCreator: TakeCreator
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -104,29 +105,15 @@ class ChapterTranslationBuilder @Inject constructor(
 
         return chapter.audio.getNewTakeNumber()
             .map { takeNumber ->
-                createNewTake(
+                takeCreator.createNewTake(
                     takeNumber,
                     namer.generateName(takeNumber, AudioFileFormat.WAV),
-                    chapterAudioDir
+                    chapterAudioDir,
+                    createEmpty = false
                 ).also {
                     file.copyTo(it.file, overwrite = true)
                 }
             }
-    }
-
-    private fun createNewTake(
-        newTakeNumber: Int,
-        filename: String,
-        audioDir: File
-    ): Take {
-        val takeFile = audioDir.resolve(File(filename))
-        return Take(
-            name = takeFile.name,
-            file = takeFile,
-            number = newTakeNumber,
-            format = MimeType.WAV,
-            createdTimestamp = LocalDate.now()
-        )
     }
 
     private fun getFileNamer(
