@@ -181,7 +181,6 @@ class RecorderViewModel : ViewModel() {
         renderer.setRecordingStatusObservable(writer.isWriting)
     }
 
-
     fun createTake(recordable: Recordable, chunk: Chunk?, createEmpty: Boolean): Single<Take> {
         val namer = WorkbookFileNamerBuilder.createFileNamer(
             workbook = workbookDataStore.workbook,

@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.subscribeOnFx
-import com.jakewharton.rxrelay2.BehaviorRelay
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -44,7 +43,6 @@ import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.getWaveformColors
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
-import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
@@ -77,9 +75,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.SnackBarEvent
 import tornadofx.*
-import java.io.File
 import java.text.MessageFormat
-import java.time.LocalDate
 import javax.inject.Inject
 import kotlin.collections.sortBy
 
