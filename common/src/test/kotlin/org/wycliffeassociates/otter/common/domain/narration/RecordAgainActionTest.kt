@@ -47,8 +47,8 @@ class RecordAgainActionTest {
     }
 
     fun initializeTotalVerses() {
-        for(i in 0 until numTestVerses){
-            val verseMarker = VerseMarker((i+1), (i+1), 0)
+        for (i in 0 until numTestVerses) {
+            val verseMarker = VerseMarker((i + 1), (i + 1), 0)
             val sectors = mutableListOf<IntRange>()
             val verseNode = VerseNode(false, verseMarker, sectors)
             totalVerses.add(verseNode)
@@ -74,7 +74,7 @@ class RecordAgainActionTest {
         recordAgainAction.execute(totalVerses, workingAudioFile)
 
         // verify that RecordAgainAction.node is valid
-        val expectedEnd = workingAudioFile.totalFrames + 1
+        val expectedEnd = workingAudioFile.totalFrames
         Assert.assertEquals(
             expectedEnd * frameSizeInBytes..expectedEnd * frameSizeInBytes,
             recordAgainAction.node?.sectors?.last()
@@ -112,7 +112,7 @@ class RecordAgainActionTest {
         recordAgainAction.execute(totalVerses, workingAudioFile)
 
         // verify that RecordAgainAction.node is valid
-        val expectedEnd = workingAudioFile.totalFrames + 1
+        val expectedEnd = workingAudioFile.totalFrames
         Assert.assertEquals(
             expectedEnd * frameSizeInBytes..expectedEnd * frameSizeInBytes,
             recordAgainAction.node?.sectors?.last()
@@ -140,7 +140,7 @@ class RecordAgainActionTest {
         try {
             recordAgainAction.execute(totalVerses, workingAudioFile)
             Assert.fail("expecting IndexOutOfBoundsException")
-        } catch (illegalIndex: IndexOutOfBoundsException){
+        } catch (illegalIndex: IndexOutOfBoundsException) {
             // Success: expecting IndexOutOfBoundsException
         }
     }
@@ -172,7 +172,7 @@ class RecordAgainActionTest {
         recordAgainAction.execute(totalVerses, workingAudioFile)
 
         // verify that totalVerses[verseIndex] is valid
-        val expectedEnd = workingAudioFile.totalFrames + 1
+        val expectedEnd = workingAudioFile.totalFrames
         Assert.assertEquals(
             expectedEnd * frameSizeInBytes..expectedEnd * frameSizeInBytes,
             totalVerses[verseIndex].sectors.last()
@@ -198,7 +198,7 @@ class RecordAgainActionTest {
         recordAgainAction.execute(totalVerses, workingAudioFile)
 
         // verify that totalVerses[verseIndex] is valid
-        val expectedEnd = workingAudioFile.totalFrames + 1
+        val expectedEnd = workingAudioFile.totalFrames
         Assert.assertEquals(
             expectedEnd * frameSizeInBytes..expectedEnd * frameSizeInBytes,
             totalVerses[verseIndex].sectors.last()
@@ -215,8 +215,7 @@ class RecordAgainActionTest {
 
         // verify that totalVerses[verseIndex] is redone
         Assert.assertEquals(
-            expectedEnd * frameSizeInBytes..expectedEnd * frameSizeInBytes
-            , totalVerses[verseIndex].sectors.last()
+            expectedEnd * frameSizeInBytes..expectedEnd * frameSizeInBytes, totalVerses[verseIndex].sectors.last()
         )
         Assert.assertTrue(totalVerses[verseIndex].placed)
     }
@@ -251,7 +250,7 @@ class RecordAgainActionTest {
         recordAgainAction.execute(totalVerses, workingAudioFile)
 
         // Verify that totalVerse[verseIndex] has been updated
-        val expectedEnd = workingAudioFile.totalFrames + 1
+        val expectedEnd = workingAudioFile.totalFrames
         Assert.assertEquals(
             expectedEnd * frameSizeInBytes..expectedEnd * frameSizeInBytes,
             totalVerses[verseIndex].sectors.last()
@@ -262,7 +261,7 @@ class RecordAgainActionTest {
 
         // Verify that totalVerse[verseIndex] has been finalized
         Assert.assertEquals(
-            expectedEnd * frameSizeInBytes .. 882000 * frameSizeInBytes,
+            expectedEnd * frameSizeInBytes..882000 * frameSizeInBytes,
             totalVerses[verseIndex].sectors.last()
         )
         Assert.assertTrue(previousNode.placed)

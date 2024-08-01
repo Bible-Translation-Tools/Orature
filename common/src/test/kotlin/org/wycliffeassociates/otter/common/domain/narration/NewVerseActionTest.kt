@@ -49,8 +49,8 @@ class NewVerseActionTest {
     }
 
     fun initializeTotalVerses() {
-        for(i in 0 until numTestVerses){
-            val verseMarker = VerseMarker((i+1), (i+1), 0)
+        for (i in 0 until numTestVerses) {
+            val verseMarker = VerseMarker((i + 1), (i + 1), 0)
             val sectors = mutableListOf<IntRange>()
             val verseNode = VerseNode(false, verseMarker, sectors)
             totalVerses.add(verseNode)
@@ -95,7 +95,8 @@ class NewVerseActionTest {
         newVerseAction.execute(totalVerses, workingAudioFile)
 
         // verify that NewVerseAction.node is valid
-        val expectedIndexRange = (totalFramesInTestAudio + 1) * frameSizeInBytes..(totalFramesInTestAudio + 1) * frameSizeInBytes
+        val expectedIndexRange =
+            (totalFramesInTestAudio) * frameSizeInBytes..(totalFramesInTestAudio) * frameSizeInBytes
         Assert.assertEquals(expectedIndexRange, newVerseAction.node?.sectors?.last())
         Assert.assertEquals(true, newVerseAction?.node?.placed)
 
@@ -112,7 +113,7 @@ class NewVerseActionTest {
         try {
             newVerseAction.undo(totalVerses)
             Assert.fail("expecting IndexOutOfBoundsException")
-        } catch (illegalIndex: IndexOutOfBoundsException){
+        } catch (illegalIndex: IndexOutOfBoundsException) {
             // Success: expecting IndexOutOfBoundsException
         }
     }
