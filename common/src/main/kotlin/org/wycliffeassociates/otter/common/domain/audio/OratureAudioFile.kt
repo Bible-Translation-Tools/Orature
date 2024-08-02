@@ -175,6 +175,12 @@ class OratureAudioFile : AudioFile {
         markers.clearMarkersOfType(type)
     }
 
+    fun clearMarkers() {
+        OratureCueType.entries.forEach {
+            markers.clearMarkersOfType(it)
+        }
+    }
+
     fun getMarkers(): List<AudioMarker> {
         return markers.getMarkers()
     }

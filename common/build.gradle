@@ -27,6 +27,7 @@ dependencies {
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVer"
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-csv:$jacksonVer"
     implementation project(':common:audio')
+    implementation project(':kotlin-scripture-alignment')
 
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:$retrofitVer"

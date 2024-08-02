@@ -159,7 +159,8 @@ class ScriptureBurritoUtils @Inject constructor(
                 val outFile = File(outTempDir, path).apply { createNewFile() }
 
                 rc.accessor
-                    .getInputStream(project.path.removePrefix("./")).use { ifs ->
+                    .getInputStream(project.path.removePrefix("./"))
+                    .use { ifs ->
                         outFile.outputStream().use { ofs ->
                             ifs.transferTo(ofs)
                         }
@@ -232,10 +233,12 @@ class ScriptureBurritoUtils @Inject constructor(
         audioFile: File
     ): Pair<IngredientSchema, String> {
         val timingFile = File(tempDir, "${audioFile.nameWithoutExtension}.json")
-        val alignment = BurritoAudioAlignment.create(audioFile, timingFile)
         val oratureAudio = OratureAudioFile(audioFile)
-        val metadata = BurritoAlignmentMetadata(timingFile)
-            .write(oratureAudio.getMarkers(),book, chapterNumber,oratureAudio.totalFrames)
+
+        BurritoAudioAlignment.create(audioFile, timingFile)
+        BurritoAlignmentMetadata(timingFile)
+            .write(oratureAudio.getMarkers(), book, chapterNumber, oratureAudio.totalFrames)
+
         val ingredient = IngredientSchema().apply {
             this.mimeType = "application/json"
             this.size = timingFile.length().toInt()
@@ -248,10 +251,11 @@ class ScriptureBurritoUtils @Inject constructor(
                     mutableListOf("$chapterNumber")
                 )
             }
+            role = "timing"
         }
         val pathInRC = "${RcConstants.SOURCE_MEDIA_DIR}/${timingFile.name}"
         rc.accessor.write(pathInRC) { ofs ->
-            timingFile.inputStream().use {  ifs ->
+            timingFile.inputStream().use { ifs ->
                 ifs.transferTo(ofs)
             }
         }
