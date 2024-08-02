@@ -350,13 +350,8 @@ class BurritoToResourceContainerConverter @Inject constructor(
     ): MediaManifest {
         val (titleCode, _) = getTitleFromBurrito(burrito)
         val languageCode = getLanguageFromBurrito(burrito).identifier
-        return MediaManifest(
-            projects = chapterAudioByBook.map { (book, chapterIngredients) ->
-                val audioEntries = chapterIngredients
-                    .map { (chapterFile, _) ->
-                        File(chapterFile).extension
-                    }
-                    .toSet()
+        val mediaProjects = chapterAudioByBook.map { (book, chapterIngredients) ->
+                val audioEntries = setOf("mp3", "wav", "cue")
                     .map { extension ->
                         Media(
                             identifier = extension,
@@ -375,7 +370,7 @@ class BurritoToResourceContainerConverter @Inject constructor(
                     media = audioEntries
                 )
             }
-        )
+        return MediaManifest(projects = mediaProjects)
     }
 
     private fun moveUSFMFiles(
