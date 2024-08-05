@@ -197,6 +197,8 @@ class ProjectWizardViewModel : ViewModel() {
     }
 
     fun dock() {
+        updateExistingLanguagePairs()
+
         selectedModeProperty.onChangeWithDisposer {
             loadSourceLanguages()
         }.apply { disposableListeners.add(this) }
