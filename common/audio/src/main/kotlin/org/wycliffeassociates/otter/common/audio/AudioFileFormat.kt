@@ -24,7 +24,7 @@ enum class AudioFileFormat(val extension: String) {
     PCM("pcm");
 
     companion object {
-        private val extensionList: List<String> = values().map { it.extension }
+        val extensions: List<String> = values().map { it.extension }
         private val map = values().associateBy { it.extension.lowercase() }
 
         /** @throws IllegalArgumentException */
@@ -32,6 +32,6 @@ enum class AudioFileFormat(val extension: String) {
             map[extension.lowercase()]
                 ?: throw IllegalArgumentException("Audio extension $extension not supported")
 
-        fun isSupported(extension: String) = extension.lowercase() in extensionList
+        fun isSupported(extension: String) = extension.lowercase() in extensions
     }
 }

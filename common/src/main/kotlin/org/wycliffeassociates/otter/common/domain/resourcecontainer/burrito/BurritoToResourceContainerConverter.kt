@@ -9,6 +9,7 @@ import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.AudioFo
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Compression
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.TrackConfiguration
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.audio.mp3.MP3FileReader
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.BookMarker
@@ -44,8 +45,8 @@ internal val books = arrayOf(
     "phm", "heb", "jas", "1pe", "2pe", "1jn", "2jn", "3jn", "jud", "rev"
 )
 
-internal val ot = books.slice(0 until 41)
-internal val nt = books.slice(41 until 66)
+internal val ot = books.slice(0 until 40)
+internal val nt = books.slice(40 until 66)
 
 internal fun getBookSort(bookSlug: String): Int {
     return books.indexOf(bookSlug) + 1
@@ -329,7 +330,7 @@ class BurritoToResourceContainerConverter @Inject constructor(
         return arrayOf(
             format.compression == Compression.WAV,
             // don't fail if sampling rate or configuration are not provided
-            format.samplingRate?.equals(44100) ?: true,
+            format.samplingRate?.equals(DEFAULT_SAMPLE_RATE) ?: true,
             format.trackConfiguration?.equals(TrackConfiguration.MONO) ?: true,
             format.bitDepth?.equals(16) ?: true
         ).all { it }
@@ -339,7 +340,7 @@ class BurritoToResourceContainerConverter @Inject constructor(
         return arrayOf(
             format.compression == Compression.MP3,
             // don't fail if sampling rate or configuration are not provided
-            format.samplingRate?.equals(44100) ?: true,
+            format.samplingRate?.equals(DEFAULT_SAMPLE_RATE) ?: true,
             format.trackConfiguration?.equals(TrackConfiguration.MONO) ?: true,
         ).all { it }
     }
@@ -351,7 +352,7 @@ class BurritoToResourceContainerConverter @Inject constructor(
         val (titleCode, _) = getTitleFromBurrito(burrito)
         val languageCode = getLanguageFromBurrito(burrito).identifier
         val mediaProjects = chapterAudioByBook.map { (book, chapterIngredients) ->
-                val audioEntries = setOf("mp3", "wav", "cue")
+                val audioEntries = AudioFileFormat.extensions
                     .map { extension ->
                         Media(
                             identifier = extension,
@@ -383,7 +384,7 @@ class BurritoToResourceContainerConverter @Inject constructor(
             if (usfmFiles.isEmpty()) continue
             val bookIndex = books.indexOf(book.lowercase(Locale.US))
             // NT starts at 41
-            val bookNumber = if (bookIndex <= 38) bookIndex + 1 else bookIndex + 2
+            val bookNumber = if (bookIndex <= ot.size) bookIndex + 1 else bookIndex + 2
             val (usfmFile, ingredient) = usfmFiles.first()
             if (inputAccessor.fileExists(usfmFile)) {
                 val newPath = "$bookNumber-${book.uppercase(Locale.US)}.usfm"
@@ -408,7 +409,7 @@ class BurritoToResourceContainerConverter @Inject constructor(
             if (audioFiles.isEmpty()) continue
             val bookIndex = books.indexOf(book.lowercase(Locale.US))
             // NT starts at 41
-            val bookNumber = if (bookIndex <= 38) bookIndex + 1 else bookIndex + 2
+            val bookNumber = if (bookIndex <= ot.size) bookIndex + 1 else bookIndex + 2
             for (af in audioFiles) {
                 val (audioFile, ingredient) = af
                 val chapter = ingredient!!.scope?.get(book.uppercase(Locale.US))?.single()!!
