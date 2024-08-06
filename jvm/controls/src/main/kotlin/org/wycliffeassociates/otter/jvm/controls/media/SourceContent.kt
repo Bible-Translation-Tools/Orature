@@ -497,7 +497,7 @@ class SourceContent : StackPane() {
 
             highlightedChunk.onChangeAndDoNowWithDisposer { highlightedIndex ->
                 val isHighlighted = highlightedIndex == index
-                toggleClass("source-content__text--highlighted", isHighlighted)
+                togglePseudoClass("highlighted", isHighlighted)
                 if (isHighlighted) {
                     sourceTextChunksContainer.scrollTo(index)
                 }

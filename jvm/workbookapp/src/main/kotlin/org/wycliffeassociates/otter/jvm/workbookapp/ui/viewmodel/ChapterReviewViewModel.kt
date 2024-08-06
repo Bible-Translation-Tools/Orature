@@ -39,7 +39,6 @@ import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
-import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
@@ -109,7 +108,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     override val markers = observableListOf<MarkerItem>()
 
     override val markerCountProperty = markers.sizeProperty
-    override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
+    override val highlightedMarkerIndexProperty = SimpleIntegerProperty(-1)
     override var resumeAfterScroll: Boolean = false
 
     override var audioController: AudioPlayerController? = null
@@ -148,14 +147,13 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-
-        translationViewModel.pluginOpenedProperty.bind(pluginOpenedProperty)
     }
 
     fun dock() {
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
         workbookDataStore.activeChunkProperty.set(null)
-        translationViewModel.currentMarkerProperty.bind(currentMarkerNumberProperty)
+        translationViewModel.currentMarkerProperty.bind(highlightedMarkerIndexProperty)
+        translationViewModel.pluginOpenedProperty.bind(pluginOpenedProperty)
 
         Completable
             .fromAction {
@@ -192,6 +190,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             ?.writeMarkers()
             ?.blockingAwait()
 
+        translationViewModel.pluginOpenedProperty.unbind()
         translationViewModel.currentMarkerProperty.unbind()
         translationViewModel.currentMarkerProperty.set(-1)
         cleanup()
@@ -326,6 +325,10 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                                 // no-op
                             }
                         }
+
+                        /* set pluginOpenedProperty to false to allow invoking dock()
+                        which refreshes the chapter audio. */
+                        pluginOpenedProperty.set(false)
                         FX.eventbus.fire(PluginClosedEvent(pluginType))
                     }
             }

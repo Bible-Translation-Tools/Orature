@@ -33,6 +33,8 @@ import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
 
+const val DEFAULT_RECORDER_NAME = "OratureRecorder"
+
 class InitializeRecorder @Inject constructor(
     val directoryProvider: IDirectoryProvider,
     val pluginRepository: IAudioPluginRepository,
@@ -69,12 +71,17 @@ class InitializeRecorder @Inject constructor(
     private fun importOtterRecorder(): Completable {
         val pluginsDir = directoryProvider.audioPluginDirectory
         val jar = File(pluginsDir, "OratureRecorder.jar")
-        ClassLoader.getSystemResourceAsStream("plugins/jars/recorderapp")
-            ?.transferTo(FileOutputStream(jar))
+        ClassLoader
+            .getSystemResourceAsStream("plugins/jars/recorderapp")
+            ?.use { ifs ->
+                FileOutputStream(jar).use { ofs ->
+                    ifs.transferTo(ofs)
+                }
+            }
         return pluginRepository.insert(
             AudioPluginData(
                 0,
-                "OratureRecorder",
+                DEFAULT_RECORDER_NAME,
                 "$version.0.0",
                 canEdit = false,
                 canRecord = true,

@@ -50,6 +50,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.text.MessageFormat
+import java.util.*
 import javax.inject.Inject
 
 class NarrationHeader : View() {
@@ -142,9 +143,12 @@ class NarrationHeaderViewModel : ViewModel() {
 
     val titleProperty = workbookDataStore.activeWorkbookProperty.stringBinding {
         it?.let {
+            val title = it.target.title.takeIf { bookTitle -> bookTitle.isNotEmpty() }
+                ?: it.target.slug.toUpperCase()
+
             MessageFormat.format(
                 messages["narrationTitle"],
-                it.target.title
+                title
             )
         } ?: ""
     }

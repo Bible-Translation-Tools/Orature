@@ -82,7 +82,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     override val markers = observableListOf<MarkerItem>()
 
     override val markerCountProperty = markers.sizeProperty
-    override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
+    override val highlightedMarkerIndexProperty = SimpleIntegerProperty(-1)
     override var resumeAfterScroll: Boolean = false
 
     override var audioController: AudioPlayerController? = null

@@ -58,7 +58,9 @@ abstract class RCImporter(
 
         return Single
             .fromCallable {
-                stream.transferTo(outFile.outputStream())
+                outFile.outputStream().use { ofs ->
+                    stream.transferTo(ofs)
+                }
             }
             .flatMap {
                 import(outFile)

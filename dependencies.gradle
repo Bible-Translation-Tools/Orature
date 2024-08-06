@@ -45,7 +45,7 @@ ext {
     ikonliVer = '12.2.0'
     controlsfxVer = '11.0.1'
     sentryVer = '5.2.4'
-    usfmToolsVer = "1.7.1"
+    usfmToolsVer = "1.9.2-proprosedfix"
     testFxVer = '4.0.17'
     testFxMonocleVer = 'jfx-21'
     jlayerVer = '1.0'

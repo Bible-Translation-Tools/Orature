@@ -107,6 +107,7 @@
     -fx-wrap-text: true;
 }
 
+.source-content__text:highlighted,
 .source-content__chunk:highlighted .label {
     -fx-text-fill: -wa-highlight-text;
 }

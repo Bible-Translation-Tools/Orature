@@ -40,6 +40,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.expo
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportEvent
 import tornadofx.*
 import java.text.MessageFormat
+import java.util.*
 import kotlin.math.roundToInt
 
 class ExportProjectDialog : OtterDialog() {
@@ -60,7 +61,9 @@ class ExportProjectDialog : OtterDialog() {
             addClass("confirm-dialog__header")
             label {
                 textProperty().bind(workbookDescriptorProperty.stringBinding {
-                    MessageFormat.format(messages["bookNameExportTitle"], it?.title)
+                    val title = it?.title.takeIf { !it.isNullOrEmpty() }
+                        ?: it?.slug?.toUpperCase()
+                    MessageFormat.format(messages["bookNameExportTitle"], title)
                 })
                 addClass("h3")
             }

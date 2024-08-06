@@ -68,7 +68,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     lateinit var waveform: Observable<Image>
     val waveformMinimapImage = SimpleObjectProperty<Image>()
 
-    override val currentMarkerNumberProperty = SimpleIntegerProperty(0)
+    override val highlightedMarkerIndexProperty = SimpleIntegerProperty(0)
     override val audioPositionProperty = SimpleIntegerProperty()
     override var markerModel: MarkerPlacementModel? = null
     override val markers = observableListOf<MarkerItem>()
@@ -235,7 +235,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
         timer?.stop()
         compositeDisposable.clear()
         waveformMinimapImage.set(null)
-        currentMarkerNumberProperty.set(-1)
+        highlightedMarkerIndexProperty.set(-1)
         audioController!!.release()
         audioController = null
         asyncBuilder.cancel()

@@ -43,3 +43,10 @@ class RedoChunkingPageEvent: FXEvent()
 class GoToNextChapterEvent: FXEvent()
 class GoToPreviousChapterEvent: FXEvent()
 class OpenInPluginEvent: FXEvent()
+
+/**
+ * Use this event to avoid unwanted auto-navigation or state refresh
+ * when returning from an external plugin. Only fire this event inside
+ * onDock() of main view in Translation.
+ */
+class ReturnFromPluginEvent: FXEvent()
