@@ -20,6 +20,9 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jthemedetecor.OsThemeDetector
+import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -41,6 +44,7 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.ThemeColorEvent
 import tornadofx.*
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class SettingsViewModel : ViewModel() {
@@ -80,6 +84,7 @@ class SettingsViewModel : ViewModel() {
     val appColorMode = SimpleObjectProperty<ColorTheme>()
     private val osThemeDetector = OsThemeDetector.getDetector()
     private val isOSDarkMode = SimpleBooleanProperty(osThemeDetector.isDark)
+    private val disposableDeviceWatcher = CompositeDisposable()
 
     val orientationProperty = SimpleObjectProperty<NodeOrientation>()
     val orientationScaleProperty = orientationProperty.doubleBinding {
@@ -125,6 +130,7 @@ class SettingsViewModel : ViewModel() {
         loadCurrentInputDevice()
         loadLanguageNamesUrl()
         loadDefaultLanguageNamesUrl()
+        watchForNewDevices()
 
         supportedThemes.setAll(ColorTheme.values().asList())
         theme.preferredTheme
@@ -257,6 +263,21 @@ class SettingsViewModel : ViewModel() {
         loadInputDevices()
         loadCurrentOutputDevice()
         loadCurrentInputDevice()
+    }
+
+    fun watchForNewDevices() {
+        disposableDeviceWatcher.clear()
+        Observable
+            .interval(2, 2, TimeUnit.SECONDS)
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
+            .subscribe {
+                refreshDevices()
+            }.addTo(disposableDeviceWatcher)
+    }
+
+    fun onDrawerCollapsed() {
+        disposableDeviceWatcher.clear()
     }
 
     fun updateLanguage(language: Language) {

@@ -97,6 +97,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     override var totalFrames: Int by totalFramesProperty // beware of divided by 0
 
     private val newTakeProperty = SimpleObjectProperty<Take>(null)
+    private val currentStep: ChunkingStep by translationViewModel.selectedStepProperty
     private val builder = ObservableWaveformBuilder()
     private val height = Integer.min(Screen.getMainScreen().platformHeight, WAVEFORM_MAX_HEIGHT.toInt())
     private val width = Screen.getMainScreen().platformWidth
@@ -115,7 +116,6 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         currentChunkProperty.onChangeAndDoNowWithDisposer {
             it?.let { chunk ->
                 subscribeToSelectedTake(chunk)
-                val currentStep = translationViewModel.selectedStepProperty.value
                 val isConfirmed = chunk.checkingStatus().ordinal >= checkingStatusFromStep(currentStep).ordinal
                 chunkConfirmed.set(isConfirmed)
             }
@@ -180,9 +180,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     fun confirmChunk() {
         currentChunkProperty.value?.let { chunk ->
             chunkConfirmed.set(true)
-            val checkingStatus = checkingStatusFromStep(
-                translationViewModel.selectedStepProperty.value
-            )
+            val checkingStatus = checkingStatusFromStep(currentStep)
             val take = chunk.audio.getSelectedTake()!!
             take.checkingState
                 .take(1)
@@ -265,10 +263,13 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
             .observeOnFx()
             .subscribe { chunks ->
                 translationViewModel.loadChunks(chunks)
-                (chunks.firstOrNull { it.checkingStatus() == CheckingStatus.UNCHECKED } ?: chunks.firstOrNull())
-                    ?.let { chunk ->
-                        translationViewModel.selectChunk(chunk.sort)
-                    }
+
+                val chunkToSelect = chunks.firstOrNull { c ->
+                    c.checkingStatus().ordinal < checkingStatusFromStep(currentStep).ordinal
+                } ?: chunks.firstOrNull()
+                chunkToSelect?.let { chunk ->
+                    translationViewModel.selectChunk(chunk.sort)
+                }
             }.addTo(disposable)
     }
 

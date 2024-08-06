@@ -42,6 +42,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.OpenInPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ReturnFromPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.marker.MARKER_WIDTH_APPROX
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
@@ -278,6 +279,12 @@ class ChapterReview : View() {
             if (!pluginInfo.isNative) {
                 workspace.dock(pluginOpenedPage)
             }
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<ReturnFromPluginEvent> {
+            viewModel.pluginOpenedProperty.set(false)
+            translationViewModel.loadingStepProperty.set(false)
+            viewModel.reloadAudio().subscribe()
         }.let { eventSubscriptions.add(it) }
 
         subscribe<SnackBarEvent> {
