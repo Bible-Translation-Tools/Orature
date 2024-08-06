@@ -1224,6 +1224,32 @@ class NarrationViewModel : ViewModel() {
         }
     }
 
+    fun handleRecordShortcut() {
+        narratableList.find {
+            it.verseState == TeleprompterItemState.RECORD || it.verseState == TeleprompterItemState.BEGIN_RECORDING
+        }?.let {
+            val index = totalVerses.indexOf(it.marker)
+            FX.eventbus.fire(RecordVerseEvent(index))
+            return
+        }
+
+        narratableList.find {
+            it.verseState == TeleprompterItemState.RECORDING_PAUSED
+        }?.let {
+            val index = totalVerses.indexOf(it.marker)
+            FX.eventbus.fire(ResumeRecordingEvent(index))
+            return
+        }
+
+        narratableList.find {
+            it.verseState == TeleprompterItemState.RECORD_ACTIVE
+        }?.let {
+            val index = totalVerses.indexOf(it.marker)
+            FX.eventbus.fire(PauseRecordingEvent(index))
+            return
+        }
+    }
+
     private fun performNarrationStateMachineTransition(transition: NarrationStateTransition, index: Int? = null) {
         val newVerseStates = narrationStateMachine.transition(transition, index)
 
