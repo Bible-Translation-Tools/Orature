@@ -310,9 +310,10 @@ class Narration @AssistedInject constructor(
 
         return Completable.fromAction {
             val scratchAudio = chapterRepresentation.scratchAudio
-            val start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1
+            val start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames
             audioFileUtils.appendFile(chapterRepresentation.scratchAudio, editedFile)
-            val end = chapterRepresentation.scratchAudio.totalFrames
+            val verseAudio = AudioFile(editedFile)
+            val end = max(start + verseAudio.totalFrames, 0)
 
             /* When a new verse recorded with an EXTERNAL plugin comes back empty,
             {start} could be greater than {end} by 1, which is invalid and may cause a crash.
@@ -538,13 +539,13 @@ class Narration @AssistedInject constructor(
             }
 
         val scratchAudio = chapterRepresentation.scratchAudio
-        var start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1
+        var start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames
         var end: Int
         val frameSizeInBytes = chapterRepresentation.frameSizeInBytes
 
         segments.forEach { (marker, file) ->
             val verseAudio = AudioFile(file)
-            end = max(start + verseAudio.totalFrames - 1, 0)
+            end = max(start + verseAudio.totalFrames, 0)
 
             val node = VerseNode(
                 true,
@@ -552,8 +553,7 @@ class Narration @AssistedInject constructor(
                 mutableListOf(start * frameSizeInBytes until end * frameSizeInBytes)
             )
             nodes.add(node)
-
-            start = end + 1
+            start = end
         }
 
         return nodes.sortedBy { it.marker.sort } // sort order of book-chapter-verse
