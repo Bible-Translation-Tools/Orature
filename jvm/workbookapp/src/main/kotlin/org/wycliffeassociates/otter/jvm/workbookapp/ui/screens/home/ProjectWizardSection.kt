@@ -130,7 +130,9 @@ class ProjectWizardSection(
             selectedModeProperty.onChange {
                 if (it == ProjectMode.NARRATION) {
                     val duplicated = existingLanguagePairs
+                        .filter { it.first == it.second }
                         .map { it.first }
+
                     disabledLanguages.setAll(duplicated)
                 } else {
                     disabledLanguages.clear()
