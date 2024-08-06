@@ -22,7 +22,4 @@ include ':common',
         ':jvm:workbookapp', 
         ':jvm:recorderapp', 
         ':jvm',
-        ':assets',
-        ':kotlin-scripture-alignment'
-
-project(':kotlin-scripture-alignment').projectDir = new File("../kotlin-scripture-alignment")
+        ':assets'

@@ -1,17 +1,13 @@
 group = 'org.wycliffeassociates.otter.common'
 version = '0.4.3'
 
-repositories {
-    // maven { url 'https://jitpack.io' }
-}
-
 dependencies {
     testImplementation "junit:junit:$junitVer"
 
     implementation "org.slf4j:slf4j-api:$slf4jApiVer"
     implementation "javazoom.jl:SeekableJlayer:$jlayerVer"
     implementation "org.digitalmediaserver:cuelib-core:$cuelibVer"
-    implementation 'org.bibletranslationtools:kotlin-vtt:1.0'
+    implementation "org.bibletranslationtools:kotlin-vtt:$kotlinVttVer"
     implementation "com.mpatric:mp3agic:$mp3TagVer"
     implementation "be.tarsos:tarsosdsp:$tarsosDspVer"
 }

@@ -27,7 +27,6 @@ dependencies {
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVer"
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-csv:$jacksonVer"
     implementation project(':common:audio')
-    implementation project(':kotlin-scripture-alignment')
 
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:$retrofitVer"
@@ -38,5 +37,6 @@ dependencies {
 
     implementation "org.bibletranslationtools:kotlin-scripture-burrito:$kotlinscriptureburritoVer"
     implementation "org.bibletranslationtools:kotlin-vtt:$kotlinVttVer"
+    implementation "org.bibletranslationtools:kotlin-scripture-alignment:$kotlinScriptureAlignmentVer"
     implementation("com.google.guava:guava:33.1.0-jre")
 }
