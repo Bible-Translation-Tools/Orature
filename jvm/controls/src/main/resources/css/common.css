@@ -66,7 +66,7 @@
 }
 
 .jfx-snackbar-content .label {
-    -fx-text-fill: -wa-white;
+    -fx-text-fill: -wa-regular-text;
     -fx-font-size: 14pt;
 }
 
