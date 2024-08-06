@@ -240,7 +240,6 @@ class SettingsViewModel : ViewModel() {
 
     private fun loadOutputDevices() {
         val devices = audioDeviceProvider.getOutputDeviceNames()
-        println(devices.size)
         outputDevices.setAll(devices)
     }
 
