@@ -32,7 +32,6 @@ import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.OratureCueType
 import org.wycliffeassociates.otter.common.data.audio.UnknownMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
-import org.wycliffeassociates.otter.common.domain.audio.metadata.OratureMarkers
 import java.io.File
 import java.util.regex.Pattern
 import kotlin.reflect.KClass
@@ -174,14 +173,68 @@ class OratureAudioFile : AudioFile {
     fun clearCuesFromMap(type: OratureCueType) {
         markers.clearMarkersOfType(type)
     }
+}
 
-    fun clearMarkers() {
-        OratureCueType.entries.forEach {
-            markers.clearMarkersOfType(it)
+internal class OratureMarkers {
+    private val cueMap: MutableMap<OratureCueType, MutableList<AudioMarker>> = mutableMapOf(
+        OratureCueType.CHUNK to mutableListOf(),
+        OratureCueType.VERSE to mutableListOf(),
+        OratureCueType.CHAPTER_TITLE to mutableListOf(),
+        OratureCueType.BOOK_TITLE to mutableListOf(),
+        OratureCueType.LICENSE to mutableListOf(),
+    )
+
+    fun getCues(): List<AudioCue> {
+        return cueMap.values.flatMap { it.map { it.toCue() } }
+    }
+
+    @Synchronized
+    fun getMarkers(type: OratureCueType): List<AudioMarker> {
+        if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
+        return cueMap[type]!!
+    }
+
+    fun addMarkers(type: OratureCueType, markers: List<AudioMarker>) {
+        if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
+        cueMap[type]!!.addAll(markers)
+    }
+
+    fun addMarker(type: OratureCueType, marker: AudioMarker) {
+        if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
+        cueMap[type]!!.add(marker)
+    }
+
+    fun clearMarkersOfType(type: OratureCueType) {
+        if (!cueMap.containsKey(type)) {
+            cueMap[type] = mutableListOf()
+            return
+        } else {
+            cueMap[type]!!.clear()
         }
     }
 
-    fun getMarkers(): List<AudioMarker> {
-        return markers.getMarkers()
+    private fun addEntry(entry: Map.Entry<OratureCueType, MutableList<AudioMarker>>) {
+        if (!cueMap.containsKey(entry.key)) cueMap[entry.key] = mutableListOf()
+        cueMap[entry.key]!!.addAll(entry.value)
+    }
+
+    /**
+     * Deep copies markers into a new instance of OratureMarkers
+     */
+    fun copy(): OratureMarkers {
+        val newCopy = OratureMarkers()
+        cueMap.forEach { newCopy.addEntry(it) }
+        return newCopy
+    }
+
+    /**
+     * Copies all markers from the provided markers to the internal map of markers
+     *
+     * @param markers the markers to copy from
+     */
+    fun import(markers: OratureMarkers) {
+        markers.cueMap.entries.forEach {
+            addEntry(it)
+        }
     }
 }

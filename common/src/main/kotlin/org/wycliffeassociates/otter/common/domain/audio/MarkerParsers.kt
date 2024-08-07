@@ -22,7 +22,6 @@ import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioMetadata
 import org.wycliffeassociates.otter.common.data.audio.*
-import org.wycliffeassociates.otter.common.domain.audio.metadata.OratureMarkers
 import java.util.regex.Pattern
 
 internal object OratureCueParser {

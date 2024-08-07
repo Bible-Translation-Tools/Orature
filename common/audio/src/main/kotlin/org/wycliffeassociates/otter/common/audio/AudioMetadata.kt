@@ -18,18 +18,13 @@
  */
 package org.wycliffeassociates.otter.common.audio
 
-interface AudioMetadata: CueMetadata, AudioContentMetadata
-
-interface CueMetadata {
+interface AudioMetadata {
     fun addCue(audioCue: AudioCue) {
         addCue(audioCue.location, audioCue.label)
     }
     fun addCue(location: Int, label: String)
     fun getCues(): List<AudioCue>
     fun clearMarkers()
-}
-
-interface AudioContentMetadata {
     fun artists(): List<String>
     fun setArtists(artists: List<String>)
     fun getLegalInformationUrl(): String
