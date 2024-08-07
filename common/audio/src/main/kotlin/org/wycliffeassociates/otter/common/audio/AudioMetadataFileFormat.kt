@@ -19,7 +19,8 @@
 package org.wycliffeassociates.otter.common.audio
 
 enum class AudioMetadataFileFormat(val extension: String) {
-    CUE("cue");
+    CUE("cue"),
+    VTT("vtt");
 
     companion object {
         private val extensionList: List<String> = values().map { it.extension }
