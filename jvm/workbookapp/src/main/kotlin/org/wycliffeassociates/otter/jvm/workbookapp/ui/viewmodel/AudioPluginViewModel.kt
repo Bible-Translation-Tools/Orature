@@ -32,6 +32,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
+import org.wycliffeassociates.otter.common.domain.content.TakeCreator
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
@@ -51,6 +52,7 @@ class AudioPluginViewModel : ViewModel() {
     @Inject lateinit var pluginRepository: IAudioPluginRepository
     @Inject lateinit var launchPlugin: LaunchPlugin
     @Inject lateinit var pluginActions: PluginActions
+    @Inject lateinit var takeCreator: TakeCreator
     @Inject lateinit var localeLanguage: LocaleLanguage
 
     private val workbookDataStore: WorkbookDataStore by inject()
