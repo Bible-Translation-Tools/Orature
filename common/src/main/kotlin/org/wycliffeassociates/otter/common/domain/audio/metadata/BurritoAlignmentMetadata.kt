@@ -19,7 +19,7 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureCueParser
 import java.io.File
 
 class BurritoAlignmentMetadata(
-    val burritoTimingFile: File,
+    private val burritoTimingFile: File,
 ) : CueMetadata {
 
     private val _cues = mutableListOf<AudioMarker>()
