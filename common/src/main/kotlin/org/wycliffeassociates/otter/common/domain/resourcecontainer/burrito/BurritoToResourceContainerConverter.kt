@@ -9,6 +9,7 @@ import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.AudioFo
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Compression
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.TrackConfiguration
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
+import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.audio.mp3.MP3FileReader
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
@@ -167,7 +168,8 @@ class BurritoToResourceContainerConverter @Inject constructor(
     ): Pair<List<Project>, MediaManifest> {
         val ingredientsByBook = getIngredientsByBook(burrito)
         val usfmFilesByBook = getUSFMIngredients(ingredientsByBook)
-        val chapterAudioByBook = createChapterAudioIngredients(burrito, ingredientsByBook, inputAccessor, outputAccessor)
+        val chapterAudioByBook =
+            createChapterAudioIngredients(burrito, ingredientsByBook, inputAccessor, outputAccessor)
 
         val versification = getVersification(burrito, usfmFilesByBook, chapterAudioByBook)
 
@@ -212,7 +214,12 @@ class BurritoToResourceContainerConverter @Inject constructor(
                     scope.size == 1 -> {
                         val timing = findMatchingTimingFile(item.first, ingredients)
                         timing?.let {
-                            convertBurritoTimingToOratureTiming(file, timing.first, inputAccessor, outputAccessor)
+                            convertBurritoTimingToOratureTiming(
+                                file,
+                                timing.first,
+                                inputAccessor,
+                                outputAccessor
+                            )
                         }
                         val chapterNumber = scope.single().toInt()
                         if (groupedByChapter.containsKey(chapterNumber)) {
@@ -352,25 +359,28 @@ class BurritoToResourceContainerConverter @Inject constructor(
         val (titleCode, _) = getTitleFromBurrito(burrito)
         val languageCode = getLanguageFromBurrito(burrito).identifier
         val mediaProjects = chapterAudioByBook.map { (book, chapterIngredients) ->
-                val audioEntries = AudioFileFormat.extensions
-                    .map { extension ->
-                        Media(
-                            identifier = extension,
-                            chapterUrl = "media/${
-                                getFilename(
-                                    languageCode,
-                                    titleCode,
-                                    book,
-                                    extension
-                                )
-                            }"
-                        )
-                    }
-                MediaProject(
-                    identifier = book,
-                    media = audioEntries
-                )
-            }
+            val audioEntries = setOf(
+                *AudioFileFormat.extensions.toTypedArray(),
+                *AudioMetadataFileFormat.extensions.toTypedArray()
+            )
+                .map { extension ->
+                    Media(
+                        identifier = extension,
+                        chapterUrl = "media/${
+                            getFilename(
+                                languageCode,
+                                titleCode,
+                                book,
+                                extension
+                            )
+                        }"
+                    )
+                }
+            MediaProject(
+                identifier = book,
+                media = audioEntries
+            )
+        }
         return MediaManifest(projects = mediaProjects)
     }
 
