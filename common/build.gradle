@@ -38,5 +38,4 @@ dependencies {
     implementation "org.bibletranslationtools:kotlin-scripture-burrito:$kotlinscriptureburritoVer"
     implementation "org.bibletranslationtools:kotlin-vtt:$kotlinVttVer"
     implementation "org.bibletranslationtools:kotlin-scripture-alignment:$kotlinScriptureAlignmentVer"
-    implementation("com.google.guava:guava:33.1.0-jre")
 }
