@@ -72,7 +72,7 @@ jobs:
           -e GITHUB_TOKEN \
           -e SONAR_TOKEN \
           wycliffeassociates/install4j-docker:10.0.6 \
-          ./gradlew build --stacktrace :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx2048m -Dnet.bytebuddy.experimental=true -XX:MaxMetaspaceSize=512m"
+          ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx2048m -Dnet.bytebuddy.experimental=true -XX:MaxMetaspaceSize=512m"
         env:
           UPDATE_PATH: ${{ needs.set-env-vars.outputs.UPDATE_PATH }}
           ORG_GRADLE_PROJECT_gradlewCommandVersionProp: ${{ needs.set-env-vars.outputs.GHA_VERSION }}
