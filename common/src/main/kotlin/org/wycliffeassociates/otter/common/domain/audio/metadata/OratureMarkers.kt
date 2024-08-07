@@ -17,11 +17,13 @@ class OratureMarkers {
         return cueMap.values.flatMap { it.map { it.toCue() } }
     }
 
+    @Synchronized
     fun getMarkers(type: OratureCueType): List<AudioMarker> {
         if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
         return cueMap[type]!!
     }
 
+    @Synchronized
     fun getMarkers(): List<AudioMarker> = cueMap.values.flatten()
 
     fun addMarkers(type: OratureCueType, markers: List<AudioMarker>) {
