@@ -15,7 +15,7 @@ object BiblicalReferencesParser {
     val CHAPTER_TITLE_PATTERN = Pattern.compile("^(?:.*[.|:])?\\w{2,3} (\\d{1,3}):0$")
     val CHAPTER_PATTERN = Pattern.compile("^(?:.*[.|:])?\\w{2,3} (\\d{1,3})$")
     val VERSE_TITLE_PATTERN = Pattern.compile("^(?:.*[.|:])?\\w{2,3} \\d{1,3}:\\d{1,3}:0$")
-    val VERSE_PATTERN = Pattern.compile("^(?:.*[.|:])?\\w{2,3} \\d{1,3}:(\\d{1,3})$")
+    val VERSE_PATTERN = Pattern.compile("^(?:.*[.|:])?\\w{2,3} \\d{1,3}:(\\d{1,3})(?:-(\\d{1,3}))?$")
 
 
     fun parseBiblicalReference(reference: String): String {
@@ -46,8 +46,9 @@ object BiblicalReferencesParser {
             }
 
             verse.matches() -> {
-                val verse = verse.group(1)!!
-                "orature-vm-$verse"
+                val verseStart = verse.group(1)!!
+                val verseEnd = if (verse.groupCount() == 2) verse.group(2) else null
+                if (verseEnd != null) "orature-vm-${verseStart}-${verseEnd}" else "orature-vm-$verseStart"
             }
 
             else -> {
@@ -79,7 +80,7 @@ object OratureMarkerConverter {
 
                 is VerseMarker -> {
                     val label = if (marker.end != marker.start) "${marker.start}-${marker.end}" else "${marker.start}"
-                    "${bookSlug!!.allCaps()} ${chapterNumber!!}:$label"
+                    "${bookSlug!!.allCaps()} ${chapterNumber!!}:${marker.label}"
                 }
 
                 else -> {

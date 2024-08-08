@@ -32,7 +32,6 @@ import org.wycliffeassociates.otter.common.data.IAppInfo
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.audio.metadata.BurritoAlignmentMetadata
-import org.wycliffeassociates.otter.common.domain.audio.metadata.OratureVttMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito.auth.AuthProvider
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider

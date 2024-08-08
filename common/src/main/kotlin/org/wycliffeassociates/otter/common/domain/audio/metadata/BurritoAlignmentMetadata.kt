@@ -30,7 +30,7 @@ class BurritoAlignmentMetadata(
         val references = timings.getVttCues()
         val cues = mutableListOf<AudioCue>()
         for (marker in references) {
-            val startMs = (marker.startTimeUs / 1000L)
+            val startMs = (marker.startTimeUs / 1000.0)
             val startFrame = ((startMs * DEFAULT_SAMPLE_RATE) / 1000L).toInt()
 
             val oratureLabel = BiblicalReferencesParser.parseBiblicalReference(marker.content)
@@ -118,10 +118,6 @@ class BurritoAlignmentMetadata(
         }
     }
 
-    private fun framesToUs(frames: Int): Long {
-        return (((frames * 1000L) / DEFAULT_SAMPLE_RATE.toLong()) * 1000L)
-    }
-
     override fun addCue(location: Int, label: String) {}
 
     override fun getCues(): List<AudioCue> {
@@ -129,4 +125,9 @@ class BurritoAlignmentMetadata(
     }
 
     override fun clearMarkers() {}
+}
+
+internal fun framesToUs(frames: Int): Long {
+    val us = (frames.toLong() * (1000000 / DEFAULT_SAMPLE_RATE.toDouble())).toLong()
+    return us
 }
