@@ -39,6 +39,7 @@ import org.wycliffeassociates.otter.jvm.controls.bar.searchBar
 import org.wycliffeassociates.otter.jvm.controls.card.translationTypeCard
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.model.StepDirection
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.languageTableView
 import tornadofx.*
 import tornadofx.FX.Companion.messages
@@ -126,6 +127,18 @@ class ProjectWizardSection(
         }
 
         languageTableView(sourceLanguages) {
+            selectedModeProperty.onChange {
+                if (it == ProjectMode.NARRATION) {
+                    val duplicated = existingLanguagePairs
+                        .filter { it.first == it.second }
+                        .map { it.first }
+
+                    disabledLanguages.setAll(duplicated)
+                } else {
+                    disabledLanguages.clear()
+                }
+            }
+
             this@apply.visibleProperty().onChange {
                 if (it) customizeScrollbarSkin()
             }
