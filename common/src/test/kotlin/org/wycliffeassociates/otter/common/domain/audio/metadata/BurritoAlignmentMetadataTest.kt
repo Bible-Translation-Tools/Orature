@@ -11,7 +11,7 @@ import java.io.File
 
 class BurritoAlignmentMetadataTest {
 
-    private val testFilePath = "test_burrito_timing.json"
+    private val testTimingFile= File("test_burrito_timing.json")
     private val testBookSlug = "gen"
     private val testChapterNumber = 1
     private val testAudioLength = 100000
@@ -26,22 +26,23 @@ class BurritoAlignmentMetadataTest {
 
     @Before
     fun setUp() {
-        File(testFilePath).delete()
-        val testFile = File(testFilePath)
+        testTimingFile.delete()
+        val testFile = testTimingFile
         testFile.createNewFile()
     }
 
     @After
     fun tearDown() {
-        File(testFilePath).delete()
+        testTimingFile.delete()
     }
 
     @Test
     fun testWriteValidMarkers() {
-        val metadata = BurritoAlignmentMetadata(File(testFilePath))
+        val audioFileName = File("test_audio_file.mp3")
+        val metadata = BurritoAlignmentMetadata(testTimingFile, audioFileName)
         metadata.write(markers, testBookSlug, testChapterNumber, testAudioLength)
 
-        val testMetadata = BurritoAlignmentMetadata(File(testFilePath))
+        val testMetadata = BurritoAlignmentMetadata(testTimingFile, audioFileName)
         val outputMarkers = testMetadata.parseTimings().getMarkers().sortedBy { it.location }
         assertEquals(outputMarkers.size, markers.size)
         markers.forEachIndexed { index, audioMarker ->

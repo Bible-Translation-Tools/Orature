@@ -235,7 +235,7 @@ class ScriptureBurritoUtils @Inject constructor(
         val oratureAudio = OratureAudioFile(audioFile)
 
         BurritoAudioAlignment.create(audioFile, timingFile)
-        BurritoAlignmentMetadata(timingFile)
+        BurritoAlignmentMetadata(timingFile, audioFile)
             .write(oratureAudio.getMarkers(), book, chapterNumber, oratureAudio.totalFrames)
 
         val ingredient = IngredientSchema().apply {

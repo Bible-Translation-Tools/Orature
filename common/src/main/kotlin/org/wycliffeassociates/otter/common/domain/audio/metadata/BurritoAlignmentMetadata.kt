@@ -20,6 +20,7 @@ import java.io.File
 
 class BurritoAlignmentMetadata(
     private val burritoTimingFile: File,
+    private val audioFile: File
 ) : CueMetadata {
 
     private val _cues = mutableListOf<AudioMarker>()
@@ -80,7 +81,9 @@ class BurritoAlignmentMetadata(
             return
         }
 
-        val alignment = BurritoAudioAlignment.load(burritoTimingFile)
+        val alignment = if (burritoTimingFile.length() > 0) {
+            BurritoAudioAlignment.load(burritoTimingFile)
+        } else BurritoAudioAlignment.create(audioFile, burritoTimingFile)
 
         val vttCues = markers
             .sortedBy { it.location }

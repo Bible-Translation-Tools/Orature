@@ -256,7 +256,7 @@ class BurritoToResourceContainerConverter @Inject constructor(
         val audio = OratureAudioFile(audioFile)
         audio.clearMarkers()
 
-        val markers = getMarkersFromBurritoTimining(timingFile)
+        val markers = getMarkersFromBurritoTimining(timingFile, audioFile)
 
         for (marker in markers) {
             audio.addMarker(marker)
@@ -282,8 +282,11 @@ class BurritoToResourceContainerConverter @Inject constructor(
         }
     }
 
-    private fun getMarkersFromBurritoTimining(timingFile: File): List<AudioMarker> {
-        return BurritoAlignmentMetadata(timingFile)
+    private fun getMarkersFromBurritoTimining(
+        timingFile: File,
+        audioFile: File
+    ): List<AudioMarker> {
+        return BurritoAlignmentMetadata(timingFile, audioFile)
             .parseTimings()
             .getMarkers()
     }
