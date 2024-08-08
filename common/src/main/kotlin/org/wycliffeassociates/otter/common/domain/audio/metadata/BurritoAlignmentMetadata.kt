@@ -25,9 +25,13 @@ class BurritoAlignmentMetadata(
 
     private val _cues = mutableListOf<AudioMarker>()
     private val markers = OratureMarkers()
+
     fun parseTimings(): OratureMarkers {
         val timings = BurritoAudioAlignment.load(burritoTimingFile)
+        return parseTimings(timings)
+    }
 
+    internal fun parseTimings(timings: BurritoAudioAlignment): OratureMarkers {
         val references = timings.getVttCues()
         val cues = mutableListOf<AudioCue>()
         for (marker in references) {

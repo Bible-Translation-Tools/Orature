@@ -17,7 +17,6 @@ object BiblicalReferencesParser {
     val VERSE_TITLE_PATTERN = Pattern.compile("^(?:.*[.|:])?\\w{2,3} \\d{1,3}:\\d{1,3}:0$")
     val VERSE_PATTERN = Pattern.compile("^(?:.*[.|:])?\\w{2,3} \\d{1,3}:(\\d{1,3})(?:-(\\d{1,3}))?$")
 
-
     fun parseBiblicalReference(reference: String): String {
         val bookTitle = BOOK_TITLE_PATTERN.matcher(reference)
         val chapterTitle = CHAPTER_TITLE_PATTERN.matcher(reference)
