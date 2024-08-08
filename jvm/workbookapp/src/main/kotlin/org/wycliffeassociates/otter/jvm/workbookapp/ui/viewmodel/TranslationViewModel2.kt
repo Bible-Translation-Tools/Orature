@@ -21,7 +21,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
 import io.reactivex.Maybe
-import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
@@ -35,7 +34,9 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
@@ -43,13 +44,15 @@ import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import tornadofx.*
-import java.util.concurrent.TimeUnit
+import java.io.File
 import javax.inject.Inject
 
 class TranslationViewModel2 : ViewModel() {
 
     @Inject
     lateinit var creationUseCase: CreateProject
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
@@ -158,6 +161,14 @@ class TranslationViewModel2 : ViewModel() {
             .subscribe()
     }
 
+    fun exportChunk(take: Take, outputFile: File): Completable {
+        return Completable
+            .fromAction {
+                take.file.copyTo(outputFile, overwrite = true)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
     fun loadChunks(chunks: List<Chunk>) {
         val chunkViewData = chunks.map { chunk ->
             val completed = when(selectedStepProperty.value) {
@@ -235,6 +246,8 @@ class TranslationViewModel2 : ViewModel() {
                 }
             }
     }
+
+    fun openInFilesManager(path: String) = directoryProvider.openInFileManager(path)
 
     private fun loadChapter(chapter: Chapter) {
         workbookDataStore.activeChapterProperty.set(chapter)

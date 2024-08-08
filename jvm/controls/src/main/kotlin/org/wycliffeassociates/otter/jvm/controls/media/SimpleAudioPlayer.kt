@@ -95,7 +95,7 @@ class SimpleAudioPlayer(
         nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
 
         button {
-            addClass("btn", "btn--secondary")
+            addClass("btn", "btn--tertiary")
             textProperty().bind(playPauseTextBinding())
             tooltip {
                 textProperty().bind(playPauseTextBinding(true))
