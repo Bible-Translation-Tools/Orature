@@ -35,7 +35,7 @@ object SnackbarHandler {
         snackbar.enqueue(
             JFXSnackbar.SnackbarEvent(
                 JFXSnackbarLayout(message),
-                Duration.seconds(60.0)
+                Duration.seconds(NOTIFICATION_DURATION_SEC)
             )
         )
     }
