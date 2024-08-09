@@ -28,8 +28,10 @@ import org.wycliffeassociates.resourcecontainer.entity.MediaManifest
 import org.wycliffeassociates.resourcecontainer.entity.MediaProject
 import org.wycliffeassociates.resourcecontainer.entity.Project
 import java.io.File
+import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
@@ -61,14 +63,13 @@ internal fun getTestament(bookSlug: String): String {
     }
 }
 
+private val usfmFilenamePattern = "./{booknum}-{book}.usfm"
+private val filenamePattern = "{language}_{title}_{book}_c{chapter}.{extension}"
+private val DEFAULT_TITLE_CODE = "reg"
+
 class BurritoToResourceContainerConverter @Inject constructor(
     val directoryProvider: IDirectoryProvider
 ) {
-
-    private val usfmFilenamePattern = "./{booknum}-{book}.usfm"
-    private val filenamePattern = "{language}_{title}_{book}_c{chapter}.{extension}"
-    private val DEFAULT_TITLE_CODE = "reg"
-
     fun convert(
         burrito: File,
         outputFile: File
@@ -96,72 +97,7 @@ class BurritoToResourceContainerConverter @Inject constructor(
         return true
     }
 
-    private fun dublinCoreFromBurrito(burrito: MetadataSchema): DublinCore {
-        val (identifier, title) = getTitleFromBurrito(burrito)
-        return DublinCore(
-            type = "bundle",
-            conformsTo = "0.2",
-            format = "text/usfm",
-            identifier = identifier,
-            title = title,
-            description = getDescriptionFromBurrito(burrito),
-            language = getLanguageFromBurrito(burrito),
-            rights = getCopyrightFromBurrito(burrito),
-            issued = getCreationDateFromBurrito(burrito),
-            modified = LocalDateTime.now().toString()
-        )
-    }
-
-    private fun getCreationDateFromBurrito(burrito: MetadataSchema): String {
-        return burrito
-            .meta
-            .dateCreated
-            .toInstant()
-            .atZone(ZoneId.systemDefault())
-            .toLocalDateTime()
-            .toString()
-    }
-
-    private fun getDescriptionFromBurrito(burrito: MetadataSchema): String {
-        val langSlug = burrito.meta.defaultLocale
-        var desc = ""
-        burrito.identification?.let {
-            desc = it.description["en"] ?: it.description[langSlug] ?: ""
-        }
-        return desc
-    }
-
-    private fun getTitleFromBurrito(burrito: MetadataSchema): Pair<String, String> {
-        val langSlug = burrito.meta.defaultLocale
-        var slug = DEFAULT_TITLE_CODE
-        var title = ""
-        burrito.identification?.let {
-            slug = it.abbreviation["en"] ?: it.abbreviation[langSlug] ?: ""
-            title = it.name["en"] ?: it.name[langSlug] ?: ""
-        }
-        return Pair(slug, title)
-    }
-
-    private fun getLanguageFromBurrito(burrito: MetadataSchema): Language {
-        val slug = burrito.meta.defaultLocale
-        val lang = burrito.languages.first { it.tag == slug }
-        val direction = lang.scriptDirection?.value() ?: ""
-        return Language(
-            direction,
-            slug,
-            lang.name[slug] ?: lang.name["en"] ?: ""
-        )
-    }
-
-    private fun getCopyrightFromBurrito(burrito: MetadataSchema): String {
-        return burrito
-            .copyright
-            .shortStatements
-            .map { it.statement }
-            .reduce { acc, shortStatement -> "$acc\n$shortStatement" }
-    }
-
-    private fun processContentInBurrito(
+    internal fun processContentInBurrito(
         burrito: MetadataSchema,
         inputAccessor: IContainerAccessor,
         outputAccessor: IResourceContainerAccessor
@@ -188,7 +124,7 @@ class BurritoToResourceContainerConverter @Inject constructor(
         return Pair(projects, mediaManifest)
     }
 
-    private fun createChapterAudioIngredients(
+    internal fun createChapterAudioIngredients(
         burrito: MetadataSchema,
         ingredientsByBook: IngredientsByBook,
         inputAccessor: IContainerAccessor,
@@ -236,7 +172,7 @@ class BurritoToResourceContainerConverter @Inject constructor(
         return reconstructed
     }
 
-    private fun convertBurritoTimingToOratureTiming(
+    internal fun convertBurritoTimingToOratureTiming(
         file: String,
         timing: String,
         inputAccessor: IContainerAccessor,
@@ -282,112 +218,7 @@ class BurritoToResourceContainerConverter @Inject constructor(
         }
     }
 
-    private fun getMarkersFromBurritoTimining(
-        timingFile: File,
-        audioFile: File
-    ): List<AudioMarker> {
-        return BurritoAlignmentMetadata(timingFile, audioFile)
-            .parseTimings()
-            .getMarkers()
-    }
-
-    fun findMatchingTimingFile(
-        audioFile: String,
-        ingredients: List<Pair<String, IngredientSchema>>
-    ): Pair<String, IngredientSchema>? {
-        return ingredients.find { (name, ingredient) ->
-            val audioName = File(audioFile).nameWithoutExtension
-            val timingName = File(name).nameWithoutExtension
-
-            File(name).extension == "json" && audioName == timingName
-        }
-    }
-
-    private fun filterAcceptedAudioFormats(
-        burrito: MetadataSchema, ingedientsByBook: IngredientsByBook
-    ): IngredientsByBook {
-        val audioFlavor = (burrito.type!!.flavorType.flavor as AudioFlavorSchema)
-        val approved = audioFlavor
-            .getFormats()
-            .filter { (formatName, format) ->
-                val supported = format.compression in arrayOf(Compression.WAV, Compression.MP3)
-                val validMp3 = validateMp3Format(format)
-                val validWav = validateWavFormat(format)
-                (supported && (validMp3 || validWav))
-            }
-        val approvedMimeType = approved.map { (name, format) ->
-            when (format.compression) {
-                Compression.MP3 -> "audio/mpeg"
-                Compression.WAV -> "audio/wav"
-                else -> throw Exception("Audio format ${format} not filtered out.")
-            }
-        }
-
-        val accepted = HashMap<String, List<Pair<String, IngredientSchema>>>()
-        ingedientsByBook.forEach { (book, ingredients) ->
-            accepted[book] = ingredients.filter { (filename, ingredient) ->
-                ingredient.mimeType in listOf(
-                    *approvedMimeType.toTypedArray(),
-                    "application/x-cue"
-                ) ||
-                        ingredient.role == "timing"
-            }
-        }
-        return accepted
-    }
-
-    private fun validateWavFormat(format: AudioFormat): Boolean {
-        return arrayOf(
-            format.compression == Compression.WAV,
-            // don't fail if sampling rate or configuration are not provided
-            format.samplingRate?.equals(DEFAULT_SAMPLE_RATE) ?: true,
-            format.trackConfiguration?.equals(TrackConfiguration.MONO) ?: true,
-            format.bitDepth?.equals(16) ?: true
-        ).all { it }
-    }
-
-    private fun validateMp3Format(format: AudioFormat): Boolean {
-        return arrayOf(
-            format.compression == Compression.MP3,
-            // don't fail if sampling rate or configuration are not provided
-            format.samplingRate?.equals(DEFAULT_SAMPLE_RATE) ?: true,
-            format.trackConfiguration?.equals(TrackConfiguration.MONO) ?: true,
-        ).all { it }
-    }
-
-    private fun createMediaManifest(
-        burrito: MetadataSchema,
-        chapterAudioByBook: IngredientsByBook
-    ): MediaManifest {
-        val (titleCode, _) = getTitleFromBurrito(burrito)
-        val languageCode = getLanguageFromBurrito(burrito).identifier
-        val mediaProjects = chapterAudioByBook.map { (book, chapterIngredients) ->
-            val audioEntries = setOf(
-                *AudioFileFormat.extensions.toTypedArray(),
-                *AudioMetadataFileFormat.extensions.toTypedArray()
-            )
-                .map { extension ->
-                    Media(
-                        identifier = extension,
-                        chapterUrl = "media/${
-                            getFilename(
-                                languageCode,
-                                titleCode,
-                                book,
-                                extension
-                            )
-                        }"
-                    )
-                }
-            MediaProject(
-                identifier = book,
-                media = audioEntries
-            )
-        }
-        return MediaManifest(projects = mediaProjects)
-    }
-
-    private fun moveUSFMFiles(
+    internal fun moveUSFMFiles(
         burrito: MetadataSchema,
         usfmFilesByBook: IngredientsByBook,
         inputAccessor: IContainerAccessor,
@@ -410,7 +241,7 @@ class BurritoToResourceContainerConverter @Inject constructor(
         }
     }
 
-    private fun moveAudioFiles(
+    internal fun moveAudioFiles(
         burrito: MetadataSchema,
         chapterAudioByBook: IngredientsByBook,
         inputAccessor: IContainerAccessor,
@@ -441,83 +272,254 @@ class BurritoToResourceContainerConverter @Inject constructor(
             }
         }
     }
+}
 
-    private fun getVersification(
-        burrito: MetadataSchema,
-        usfmFilesByBook: Any,
-        chapterAudioByBook: Any
-    ): String {
-        return "ufw"
+internal fun dublinCoreFromBurrito(burrito: MetadataSchema): DublinCore {
+    val (identifier, title) = getTitleFromBurrito(burrito)
+    return DublinCore(
+        type = "bundle",
+        conformsTo = "0.2",
+        format = "text/usfm",
+        identifier = identifier,
+        title = title,
+        description = getDescriptionFromBurrito(burrito),
+        language = getLanguageFromBurrito(burrito),
+        rights = getCopyrightFromBurrito(burrito),
+        issued = getCreationDateFromBurrito(burrito),
+        modified = LocalDateTime.now().toString()
+    )
+}
+
+internal fun getCreationDateFromBurrito(burrito: MetadataSchema): String {
+    return burrito
+        .meta
+        .dateCreated
+        .toInstant()
+        .atZone(ZoneId.systemDefault())
+        .toLocalDateTime()
+        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+        .toString()
+}
+
+internal fun getDescriptionFromBurrito(burrito: MetadataSchema): String {
+    val langSlug = burrito.meta.defaultLocale
+    var desc = ""
+    burrito.identification?.let {
+        desc = it.description["en"] ?: it.description[langSlug] ?: ""
+    }
+    return desc
+}
+
+internal fun getTitleFromBurrito(burrito: MetadataSchema): Pair<String, String> {
+    val langSlug = burrito.meta.defaultLocale
+    var slug = DEFAULT_TITLE_CODE
+    var title = ""
+    burrito.identification?.let {
+        slug = it.abbreviation["en"] ?: it.abbreviation[langSlug] ?: ""
+        title = it.name["en"] ?: it.name[langSlug] ?: ""
+    }
+    return Pair(slug, title)
+}
+
+internal fun getLanguageFromBurrito(burrito: MetadataSchema): Language {
+    val slug = burrito.meta.defaultLocale
+    val lang = burrito.languages.first { it.tag == slug }
+    val direction = lang.scriptDirection?.value() ?: ""
+    return Language(
+        direction,
+        slug,
+        lang.name[slug] ?: lang.name["en"] ?: ""
+    )
+}
+
+internal fun getCopyrightFromBurrito(burrito: MetadataSchema): String {
+    return burrito
+        .copyright
+        .shortStatements
+        .map { it.statement }
+        .reduce { acc, shortStatement -> "$acc\n$shortStatement" }
+}
+
+internal fun getMarkersFromBurritoTimining(
+    timingFile: File,
+    audioFile: File
+): List<AudioMarker> {
+    return BurritoAlignmentMetadata(timingFile, audioFile)
+        .parseTimings()
+        .getMarkers()
+}
+
+internal fun findMatchingTimingFile(
+    audioFile: String,
+    ingredients: List<Pair<String, IngredientSchema>>
+): Pair<String, IngredientSchema>? {
+    return ingredients.find { (name, ingredient) ->
+        val audioName = File(audioFile).nameWithoutExtension
+        val timingName = File(name).nameWithoutExtension
+
+        File(name).extension == "json" && audioName == timingName
+    }
+}
+
+internal fun filterAcceptedAudioFormats(
+    burrito: MetadataSchema, ingedientsByBook: IngredientsByBook
+): IngredientsByBook {
+    val audioFlavor = (burrito.type!!.flavorType.flavor as AudioFlavorSchema)
+    val approved = audioFlavor
+        .getFormats()
+        .filter { (formatName, format) ->
+            val supported = format.compression in arrayOf(Compression.WAV, Compression.MP3)
+            val validMp3 = validateMp3Format(format)
+            val validWav = validateWavFormat(format)
+            (supported && (validMp3 || validWav))
+        }
+    val approvedMimeType = approved.map { (name, format) ->
+        when (format.compression) {
+            Compression.MP3 -> "audio/mpeg"
+            Compression.WAV -> "audio/wav"
+            else -> throw Exception("Audio format ${format} not filtered out.")
+        }
     }
 
-    private fun getUSFMIngredients(ingedientsByBook: IngredientsByBook): IngredientsByBook {
-        val usfmMimetypes = listOf("text/usfm", "text/usfm3")
-        val filtered = HashMap<String, List<Pair<String, IngredientSchema>>>()
-        ingedientsByBook.forEach { book, ingredientList ->
-            val items = ingredientList.filter { (file, ingredient) ->
-                File(file).extension == "usfm" || ingredient.mimeType in usfmMimetypes
+    val accepted = HashMap<String, List<Pair<String, IngredientSchema>>>()
+    ingedientsByBook.forEach { (book, ingredients) ->
+        accepted[book] = ingredients.filter { (filename, ingredient) ->
+            ingredient.mimeType in listOf(
+                *approvedMimeType.toTypedArray(),
+                "application/x-cue"
+            ) ||
+                    ingredient.role == "timing"
+        }
+    }
+    return accepted
+}
+
+internal fun validateWavFormat(format: AudioFormat): Boolean {
+    return arrayOf(
+        format.compression == Compression.WAV,
+        // don't fail if sampling rate or configuration are not provided
+        format.samplingRate?.equals(DEFAULT_SAMPLE_RATE) ?: true,
+        format.trackConfiguration?.equals(TrackConfiguration.MONO) ?: true,
+        format.bitDepth?.equals(16) ?: true
+    ).all { it }
+}
+
+internal fun validateMp3Format(format: AudioFormat): Boolean {
+    return arrayOf(
+        format.compression == Compression.MP3,
+        // don't fail if sampling rate or configuration are not provided
+        format.samplingRate?.equals(DEFAULT_SAMPLE_RATE) ?: true,
+        format.trackConfiguration?.equals(TrackConfiguration.MONO) ?: true,
+    ).all { it }
+}
+
+internal fun createMediaManifest(
+    burrito: MetadataSchema,
+    chapterAudioByBook: IngredientsByBook
+): MediaManifest {
+    val (titleCode, _) = getTitleFromBurrito(burrito)
+    val languageCode = getLanguageFromBurrito(burrito).identifier
+    val mediaProjects = chapterAudioByBook.map { (book, chapterIngredients) ->
+        val audioEntries = setOf(
+            *AudioFileFormat.extensions.toTypedArray(),
+            *AudioMetadataFileFormat.extensions.toTypedArray()
+        )
+            .map { extension ->
+                Media(
+                    identifier = extension,
+                    chapterUrl = "media/${
+                        getFilename(
+                            languageCode,
+                            titleCode,
+                            book,
+                            extension
+                        )
+                    }"
+                )
             }
-            filtered[book] = items
+        MediaProject(
+            identifier = book,
+            media = audioEntries
+        )
+    }
+    return MediaManifest(projects = mediaProjects)
+}
+
+private fun getVersification(
+    burrito: MetadataSchema,
+    usfmFilesByBook: Any,
+    chapterAudioByBook: Any
+): String {
+    return "ufw"
+}
+
+internal fun getUSFMIngredients(ingedientsByBook: IngredientsByBook): IngredientsByBook {
+    val usfmMimetypes = listOf("text/usfm", "text/usfm3")
+    val filtered = HashMap<String, List<Pair<String, IngredientSchema>>>()
+    ingedientsByBook.forEach { book, ingredientList ->
+        val items = ingredientList.filter { (file, ingredient) ->
+            File(file).extension == "usfm" || ingredient.mimeType in usfmMimetypes
         }
-        return filtered
+        filtered[book] = items
     }
+    return filtered
+}
 
-    private fun createProjects(
-        burrito: MetadataSchema,
-        versification: String,
-        bookSlugs: Iterable<String>,
-        filenamePattern: String
-    ): List<Project> {
-        return bookSlugs.map { slug ->
-            val usfmFile = filenamePattern
-                .replace("{booknum}", "${getBookSort(slug)}")
-                .replace("{book}", slug.uppercase(Locale.US))
-            Project(
-                title = getBookTitle(burrito, slug),
-                versification = versification,
-                identifier = slug,
-                sort = getBookSort(slug),
-                path = usfmFile,
-                categories = listOf(getTestament(slug))
-            )
-        }
+internal fun createProjects(
+    burrito: MetadataSchema,
+    versification: String,
+    bookSlugs: Iterable<String>,
+    filenamePattern: String
+): List<Project> {
+    return bookSlugs.map { slug ->
+        val usfmFile = filenamePattern
+            .replace("{booknum}", "${getBookSort(slug)}")
+            .replace("{book}", slug.uppercase(Locale.US))
+        Project(
+            title = getBookTitle(burrito, slug),
+            versification = versification,
+            identifier = slug,
+            sort = getBookSort(slug),
+            path = usfmFile,
+            categories = listOf(getTestament(slug))
+        )
     }
+}
 
-    private fun getBookTitle(burrito: MetadataSchema, bookSlug: String): String {
-        val locale = burrito.meta.defaultLocale
-        val localizedTitle = burrito.localizedNames["book-${bookSlug.lowercase(Locale.US)}"]
-        localizedTitle?.let { localizedTitle ->
-            return localizedTitle.short[locale] ?: localizedTitle.short["en"] ?: ""
-        }
-        return ""
+internal fun getBookTitle(burrito: MetadataSchema, bookSlug: String): String {
+    val locale = burrito.meta.defaultLocale
+    val localizedTitle = burrito.localizedNames["book-${bookSlug.lowercase(Locale.US)}"]
+    localizedTitle?.let { localizedTitle ->
+        return localizedTitle.short[locale] ?: localizedTitle.short["en"] ?: ""
     }
+    return ""
+}
 
-    private fun getFilename(
-        languageCode: String,
-        titleCode: String,
-        bookSlug: String,
-        extension: String
-    ): String {
-        val titleCode = if (titleCode.isEmpty()) DEFAULT_TITLE_CODE else titleCode
-        return filenamePattern
-            .replace("{book}", bookSlug)
-            .replace("{title}", titleCode)
-            .replace("{language}", languageCode)
-            .replace("{extension}", extension)
-    }
+internal fun getFilename(
+    languageCode: String,
+    titleCode: String,
+    bookSlug: String,
+    extension: String
+): String {
+    val titleCode = if (titleCode.isEmpty()) DEFAULT_TITLE_CODE else titleCode
+    return filenamePattern
+        .replace("{book}", bookSlug)
+        .replace("{title}", titleCode)
+        .replace("{language}", languageCode)
+        .replace("{extension}", extension)
+}
 
-    private fun getIngredientsByBook(burrito: MetadataSchema): IngredientsByBook {
-        val slugs = burrito.type!!.flavorType.currentScope.keys.map { it.lowercase(Locale.US) }
-        val ingredientsByBook =
-            slugs.associateWith { mutableListOf<Pair<String, IngredientSchema>>() }
-        burrito.ingredients.forEach { filepath, item ->
-            item.scope?.let { scope ->
-                scope.keys.forEach {
-                    val slug = it.lowercase(Locale.US)
-                    ingredientsByBook[slug]?.add(Pair(filepath, item))
-                }
+internal fun getIngredientsByBook(burrito: MetadataSchema): IngredientsByBook {
+    val slugs = burrito.type!!.flavorType.currentScope.keys.map { it.lowercase(Locale.US) }
+    val ingredientsByBook =
+        slugs.associateWith { mutableListOf<Pair<String, IngredientSchema>>() }
+    burrito.ingredients.forEach { filepath, item ->
+        item.scope?.let { scope ->
+            scope.keys.forEach {
+                val slug = it.lowercase(Locale.US)
+                ingredientsByBook[slug]?.add(Pair(filepath, item))
             }
         }
-        return ingredientsByBook
     }
+    return ingredientsByBook
 }
