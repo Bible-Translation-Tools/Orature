@@ -56,6 +56,7 @@
 
 .translation-card__header .translation-card__header__text {
     -fx-text-fill: -wa-regular-text;
+    -fx-font-weight: bold;
 }
 
 .translation-card__header .ikonli-font-icon,
