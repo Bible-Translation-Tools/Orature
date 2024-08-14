@@ -27,9 +27,10 @@ class ProjectGroupCardModel(
     val sourceLanguage: Language,
     val targetLanguage: Language,
     val mode: ProjectMode,
+    val resourceSlug: String,
     val modifiedTs: LocalDateTime?,
     val books: ObservableList<WorkbookDescriptorWrapper>
 ) {
     val booksModel = books.map { it.workbookDescriptor }
-    fun getKey() = ProjectGroupKey(sourceLanguage.slug, targetLanguage.slug, mode)
+    fun getKey() = ProjectGroupKey(sourceLanguage.slug, targetLanguage.slug, resourceSlug, mode)
 }

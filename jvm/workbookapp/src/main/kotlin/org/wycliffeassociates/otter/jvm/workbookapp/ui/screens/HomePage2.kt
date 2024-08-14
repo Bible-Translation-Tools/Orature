@@ -183,6 +183,7 @@ class HomePage2 : View() {
                             cardModel.sourceLanguage,
                             cardModel.targetLanguage,
                             cardModel.mode,
+                            cardModel.resourceSlug,
                             viewModel.selectedProjectGroupProperty
                         ).apply {
 

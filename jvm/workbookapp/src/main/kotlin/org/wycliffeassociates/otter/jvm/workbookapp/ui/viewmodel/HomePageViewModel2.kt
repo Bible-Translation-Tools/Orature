@@ -346,7 +346,7 @@ class HomePageViewModel2 : ViewModel() {
         }
 
         val projectGroups = books.groupBy {
-            ProjectGroupKey(it.sourceLanguage.slug, it.targetLanguage.slug, it.mode)
+            ProjectGroupKey(it.sourceLanguage.slug, it.targetLanguage.slug, it.sourceMetadataSlug, it.mode)
         }
         projectGroups
             .map { entry ->
@@ -360,6 +360,7 @@ class HomePageViewModel2 : ViewModel() {
                     book.sourceLanguage,
                     book.targetLanguage,
                     book.mode,
+                    book.sourceMetadataSlug,
                     mostRecentBook?.lastModified,
                     bookList.toObservable()
                 )

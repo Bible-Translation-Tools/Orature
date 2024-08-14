@@ -46,11 +46,12 @@ class TranslationCard2(
     private val sourceLanguage: Language,
     private val targetLanguage: Language,
     private val mode: ProjectMode,
+    private val resourceSlug: String,
     selectedProjectGroupProperty: ObservableValue<ProjectGroupKey>
 ) : ButtonBase() {
 
     val cardTitleProperty = SimpleStringProperty(
-        MessageFormat.format(messages["translationMode"], messages[mode.titleKey])
+        MessageFormat.format(messages["projectModeTitle"], resourceSlug.uppercase(), messages[mode.titleKey])
     )
     val sourceLanguageProperty = SimpleObjectProperty(sourceLanguage)
     val targetLanguageProperty = SimpleObjectProperty(targetLanguage)
@@ -87,7 +88,7 @@ class TranslationCard2(
         }
     }
 
-    private fun getKey() = ProjectGroupKey(sourceLanguage.slug, targetLanguage.slug, mode)
+    private fun getKey() = ProjectGroupKey(sourceLanguage.slug, targetLanguage.slug, resourceSlug, mode)
 }
 
 class TranslationCardSkin2(card: TranslationCard2) : SkinBase<TranslationCard2>(card) {
@@ -163,10 +164,7 @@ class ActiveTranslationCardSkin(card: TranslationCard2) : SkinBase<TranslationCa
                 addClass("translation-card__language")
                 graphic = FontIcon(Material.HEARING)
             }
-            label {
-                addClass("translation-card__divider")
-                graphic = FontIcon(MaterialDesign.MDI_CHEVRON_DOUBLE_DOWN)
-            }
+            separator {  }
             label(targetLanguageProperty) {
                 addClass("translation-card__language")
                 graphic = FontIcon(MaterialDesign.MDI_VOICE)
@@ -186,6 +184,7 @@ fun EventTarget.translationCard(
     sourceLanguage: Language,
     targetLanguage: Language,
     mode: ProjectMode,
+    resourceSlug: String,
     selectedCardProperty: ObjectProperty<ProjectGroupKey> = SimpleObjectProperty(),
     op: TranslationCard2.() -> Unit = {}
-) = TranslationCard2(sourceLanguage, targetLanguage, mode, selectedCardProperty).attachTo(this, op)
+) = TranslationCard2(sourceLanguage, targetLanguage, mode, resourceSlug, selectedCardProperty).attachTo(this, op)
