@@ -64,32 +64,36 @@ class NewTranslationCard2(
         }
         vbox {
             addClass("translation-card__body")
-            label {
-                addClass("translation-card__language")
-                textProperty().bind(
-                    sourceLanguageProperty.stringBinding { source ->
-                        togglePseudoClass("unset", source == null)
-                        source?.name ?: "???"
-                    }
-                )
-                graphic = FontIcon(Material.HEARING)
-            }
-            label {
-                addClass("translation-card__divider")
-                sourceLanguageProperty.onChangeAndDoNow { source ->
-                    togglePseudoClass("unset", source == null)
+            vbox {
+                label(messages["sourceLanguage"]) {
+                    addClass("h5", "translation-card__subtitle")
                 }
-                graphic = FontIcon(MaterialDesign.MDI_CHEVRON_DOUBLE_DOWN)
+                label {
+                    addClass("translation-card__language")
+                    textProperty().bind(
+                        sourceLanguageProperty.stringBinding { source ->
+                            togglePseudoClass("unset", source == null)
+                            source?.name ?: "???"
+                        }
+                    )
+                    graphic = FontIcon(Material.HEARING)
+                }
             }
-            label {
-                addClass("translation-card__language")
-                textProperty().bind(
-                    targetLanguageProperty.stringBinding { target ->
-                        togglePseudoClass("unset", target == null)
-                        target?.name ?: "???"
-                    }
-                )
-                graphic = FontIcon(MaterialDesign.MDI_VOICE)
+            separator()
+            vbox {
+                label(messages["targetLanguage"]) {
+                    addClass("h5", "translation-card__subtitle")
+                }
+                label {
+                    addClass("translation-card__language")
+                    textProperty().bind(
+                        targetLanguageProperty.stringBinding { target ->
+                            togglePseudoClass("unset", target == null)
+                            target?.name ?: "???"
+                        }
+                    )
+                    graphic = FontIcon(MaterialDesign.MDI_VOICE)
+                }
             }
         }
         button(messages["cancel"]) {

@@ -70,6 +70,10 @@
     -fx-alignment: center-left;
 }
 
+.translation-card__subtitle {
+    -fx-font-size: 1em;
+}
+
 .translation-card__language {
     -fx-graphic-text-gap: 0.6em;
     -fx-text-fill: -wa-regular-text;

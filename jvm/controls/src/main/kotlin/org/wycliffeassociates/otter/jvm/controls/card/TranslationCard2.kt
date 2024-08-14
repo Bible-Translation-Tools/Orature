@@ -160,14 +160,24 @@ class ActiveTranslationCardSkin(card: TranslationCard2) : SkinBase<TranslationCa
         }
         vbox {
             addClass("translation-card__body")
-            label(sourceLanguageProperty) {
-                addClass("translation-card__language")
-                graphic = FontIcon(Material.HEARING)
+            vbox {
+                label(messages["sourceLanguage"]) {
+                    addClass("h5", "translation-card__subtitle")
+                }
+                label(sourceLanguageProperty) {
+                    addClass("translation-card__language")
+                    graphic = FontIcon(Material.HEARING)
+                }
             }
-            separator {  }
-            label(targetLanguageProperty) {
-                addClass("translation-card__language")
-                graphic = FontIcon(MaterialDesign.MDI_VOICE)
+            separator()
+            vbox {
+                label(messages["targetLanguage"]) {
+                    addClass("h5", "translation-card__subtitle")
+                }
+                label(targetLanguageProperty) {
+                    addClass("translation-card__language")
+                    graphic = FontIcon(MaterialDesign.MDI_VOICE)
+                }
             }
         }
     }
