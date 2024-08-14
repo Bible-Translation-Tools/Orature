@@ -35,6 +35,7 @@ import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
+import org.wycliffeassociates.otter.jvm.controls.model.ResourceVersion
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -65,10 +66,12 @@ class ProjectWizardViewModel : ViewModel() {
     val sortedSourceLanguages = SortedList(filteredSourceLanguages)
     val sortedTargetLanguages = SortedList(filteredTargetLanguage)
     val existingLanguagePairs = observableListOf<Pair<Language, Language>>()
+    val resourceVersions = observableListOf<ResourceVersion>()
 
     val selectedModeProperty = SimpleObjectProperty<ProjectMode>(null)
     val selectedSourceLanguageProperty = SimpleObjectProperty<Language>(null)
     val selectedTargetLanguageProperty = SimpleObjectProperty<Language>(null)
+    val selectedVersionProperty = SimpleObjectProperty<ResourceVersion>(null)
 
     val sourceLanguageSearchQueryProperty = SimpleStringProperty("")
     val targetLanguageSearchQueryProperty = SimpleStringProperty("")
@@ -144,20 +147,43 @@ class ProjectWizardViewModel : ViewModel() {
 
     fun onLanguageSelected(projectMode: ProjectMode, language: Language, onNavigateBack: () -> Unit) {
         val sourceLanguage = selectedSourceLanguageProperty.value
-
-        val createNarrationProject = projectMode == ProjectMode.NARRATION
-        val createOtherProject = projectMode != ProjectMode.NARRATION && sourceLanguage != null
-        
-        when {
-            createNarrationProject -> createProject(language, language, onNavigateBack)
-            createOtherProject -> createProject(sourceLanguage, language, onNavigateBack)
-            else -> selectedSourceLanguageProperty.set(language)
+        if (sourceLanguage == null) {
+            resourceVersions.setAll(getAvailableResources(language))
         }
+
+        val ignoreVersionSelect = resourceVersions.size == 1
+        val createNarrationProject = ignoreVersionSelect && projectMode == ProjectMode.NARRATION
+        val createOtherProject = ignoreVersionSelect && sourceLanguage != null
+
+        when {
+            //TODO: handle quick creation of projects that have only 1 version
+//            createNarrationProject -> createProject(language, language, onNavigateBack)
+//            createOtherProject -> createProject(sourceLanguage, language, onNavigateBack)
+            createNarrationProject -> println("Create narration")
+            createOtherProject -> println("Create translation/dialect")
+            sourceLanguage == null -> selectedSourceLanguageProperty.set(language)
+            else -> selectedTargetLanguageProperty.set(language)
+        }
+    }
+
+    fun onResourceVersionSelected(version: ResourceVersion, onNavigateBack: () -> Unit) {
+        createProject(
+            selectedSourceLanguageProperty.value,
+            selectedTargetLanguageProperty.value,
+            version,
+            onNavigateBack
+        )
+    }
+
+    private fun getAvailableResources(language: Language): List<ResourceVersion> {
+        val rootSources = collectionRepo.getRootSources().blockingGet().filter { it.resourceContainer!!.language == language }
+        return rootSources.map { ResourceVersion(it.slug, it.resourceContainer!!.title) }
     }
 
     private fun createProject(
         sourceLanguage: Language,
         targetLanguage: Language,
+        resourceVersion: ResourceVersion, // TODO: use source version when creating project
         onNavigateBack: () -> Unit
     ) {
         logger.info("Creating project group: ${sourceLanguage.name} - ${targetLanguage.name}")

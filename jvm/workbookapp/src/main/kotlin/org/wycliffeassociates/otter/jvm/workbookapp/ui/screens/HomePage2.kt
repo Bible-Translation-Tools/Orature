@@ -58,6 +58,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.ProjectImportEvent
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectContributorsEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ResourceVersionSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupCardModel
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
@@ -106,8 +107,10 @@ class HomePage2 : View() {
         ProjectWizardSection(
             projectWizardViewModel.sortedSourceLanguages,
             projectWizardViewModel.sortedTargetLanguages,
+            projectWizardViewModel.resourceVersions,
             projectWizardViewModel.selectedModeProperty,
             projectWizardViewModel.selectedSourceLanguageProperty,
+            projectWizardViewModel.selectedTargetLanguageProperty,
             projectWizardViewModel.existingLanguagePairs
         ).apply {
 
@@ -239,15 +242,22 @@ class HomePage2 : View() {
             val projectMode = projectWizardViewModel.selectedModeProperty.value
 
             if (selectedSource == null && projectMode != ProjectMode.NARRATION) {
-                wizardFragment.nextStep()
             }
+            wizardFragment.nextStep()
 
             if (selectedSource != null || projectMode == ProjectMode.NARRATION) {
                 // open loading dialog when creating project
-                viewModel.isLoadingProperty.set(true)
+//                viewModel.isLoadingProperty.set(true)
             }
 
             projectWizardViewModel.onLanguageSelected(projectMode, it.item) {
+                viewModel.loadProjects()
+                mainSectionProperty.set(bookFragment)
+            }
+        }
+
+        subscribe<ResourceVersionSelectedEvent> {
+            projectWizardViewModel.onResourceVersionSelected(it.resourceVersion) {
                 viewModel.loadProjects()
                 mainSectionProperty.set(bookFragment)
             }
