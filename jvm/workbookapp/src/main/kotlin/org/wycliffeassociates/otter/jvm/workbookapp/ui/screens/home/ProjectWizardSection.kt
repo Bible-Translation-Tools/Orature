@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home
 
 import javafx.animation.TranslateTransition
-import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -40,7 +39,6 @@ import org.wycliffeassociates.otter.jvm.controls.card.translationTypeCard
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.model.ResourceVersion
 import org.wycliffeassociates.otter.jvm.controls.model.StepDirection
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.languageTableView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.resourceVersionTableView
 import tornadofx.*
@@ -55,7 +53,6 @@ class ProjectWizardSection(
     selectedModeProperty: SimpleObjectProperty<ProjectMode>,
     selectedSourceLanguageProperty: SimpleObjectProperty<Language>,
     selectedTargetLanguageProperty: SimpleObjectProperty<Language>,
-    existingLanguagePairs: ObservableList<Pair<Language, Language>>
 ) : StackPane() {
     val sourceLanguageSearchQueryProperty =  SimpleStringProperty()
     val targetLanguageSearchQueryProperty = SimpleStringProperty()
@@ -131,18 +128,6 @@ class ProjectWizardSection(
         }
 
         languageTableView(sourceLanguages) {
-            selectedModeProperty.onChange {
-                if (it == ProjectMode.NARRATION) {
-                    val duplicated = existingLanguagePairs
-                        .filter { it.first == it.second }
-                        .map { it.first }
-
-                    disabledLanguages.setAll(duplicated)
-                } else {
-                    disabledLanguages.clear()
-                }
-            }
-
             this@apply.visibleProperty().onChange {
                 if (it) customizeScrollbarSkin()
             }
@@ -175,18 +160,6 @@ class ProjectWizardSection(
         }
 
         languageTableView(targetLanguages) {
-            selectedSourceLanguageProperty.onChange {
-                it?.let { src ->
-                    val duplicated = existingLanguagePairs
-                        .filter { it.first == src }
-                        .map { it.second }
-
-                    disabledLanguages.setAll(duplicated)
-                } ?: {
-                    disabledLanguages.clear()
-                }
-            }
-
             this@apply.visibleProperty().onChange {
                 if (it) customizeScrollbarSkin()
             }
@@ -212,6 +185,8 @@ class ProjectWizardSection(
             }
             label(messages["selectSourceVersionStep4"]) { addClass("h4") }
             region { hgrow = Priority.ALWAYS }
+
+            // TODO: add search bar
 //            searchBar {
 //                textProperty().bindBidirectional()
 //                promptText = messages["search"]

@@ -110,8 +110,7 @@ class HomePage2 : View() {
             projectWizardViewModel.resourceVersions,
             projectWizardViewModel.selectedModeProperty,
             projectWizardViewModel.selectedSourceLanguageProperty,
-            projectWizardViewModel.selectedTargetLanguageProperty,
-            projectWizardViewModel.existingLanguagePairs
+            projectWizardViewModel.selectedTargetLanguageProperty
         ).apply {
 
             sourceLanguageSearchQueryProperty.bindBidirectional(projectWizardViewModel.sourceLanguageSearchQueryProperty)
@@ -142,6 +141,7 @@ class HomePage2 : View() {
 
         subscribeActionEvents()
         projectWizardViewModel.isLoadingProperty.bindBidirectional(viewModel.isLoadingProperty)
+        projectWizardViewModel.bookMarkedProjectGroupProperty.bindBidirectional(viewModel.bookMarkedProjectGroupProperty)
     }
 
     override val root = borderpane {

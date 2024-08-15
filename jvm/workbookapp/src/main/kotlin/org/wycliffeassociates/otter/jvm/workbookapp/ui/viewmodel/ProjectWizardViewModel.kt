@@ -38,7 +38,10 @@ import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
+import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
 import org.wycliffeassociates.otter.jvm.controls.model.ResourceVersion
+import org.wycliffeassociates.otter.jvm.controls.model.WorkbookDescriptorWrapper
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -62,6 +65,8 @@ class ProjectWizardViewModel : ViewModel() {
     @Inject
     lateinit var resourceMetadataRepo: IResourceMetadataRepository
     @Inject
+    lateinit var workbookDescriptorRepo: IWorkbookDescriptorRepository
+    @Inject
     lateinit var importer: ImportProjectUseCase
 
     private val sourceLanguages = observableListOf<Language>()
@@ -70,10 +75,10 @@ class ProjectWizardViewModel : ViewModel() {
     private val filteredTargetLanguage = FilteredList(targetLanguages)
     val sortedSourceLanguages = SortedList(filteredSourceLanguages)
     val sortedTargetLanguages = SortedList(filteredTargetLanguage)
-    val existingLanguagePairs = observableListOf<Pair<Language, Language>>()
     val resourceVersions = observableListOf<ResourceVersion>()
 
     val selectedModeProperty = SimpleObjectProperty<ProjectMode>(null)
+    val selectedMode by selectedModeProperty
     val selectedSourceLanguageProperty = SimpleObjectProperty<Language>(null)
     val selectedTargetLanguageProperty = SimpleObjectProperty<Language>(null)
     val selectedVersionProperty = SimpleObjectProperty<ResourceVersion>(null)
@@ -81,6 +86,7 @@ class ProjectWizardViewModel : ViewModel() {
     val sourceLanguageSearchQueryProperty = SimpleStringProperty("")
     val targetLanguageSearchQueryProperty = SimpleStringProperty("")
     val isLoadingProperty = SimpleBooleanProperty(false)
+    val bookMarkedProjectGroupProperty = SimpleObjectProperty<ProjectGroupKey>()
 
     private val projectDeleteCounter = AtomicInteger(0)
     private val disposableListeners = mutableListOf<ListenerDisposer>()
@@ -135,7 +141,6 @@ class ProjectWizardViewModel : ViewModel() {
             }
             .subscribe { languages ->
                 sourceLanguages.setAll(languages)
-                updateExistingLanguagePairs()
             }
     }
 
@@ -157,7 +162,7 @@ class ProjectWizardViewModel : ViewModel() {
         val sourceLanguage = selectedSourceLanguageProperty.value
         val availableVersions = if (sourceLanguage == null) {
             resourceVersions.clear()
-            getAvailableResources(language)
+            getResourceVersions(language)
         } else {
             Single.just(resourceVersions)
         }
@@ -208,7 +213,7 @@ class ProjectWizardViewModel : ViewModel() {
                 (ignoreVersion && selectedSource != null)
     }
 
-    private fun getAvailableResources(language: Language): Single<List<ResourceVersion>> {
+    private fun getResourceVersions(language: Language): Single<List<ResourceVersion>> {
         return resourceMetadataRepo
             .exists { it.language == language }
             .flatMapCompletable { exists ->
@@ -240,6 +245,21 @@ class ProjectWizardViewModel : ViewModel() {
         logger.info("Creating project group: ${sourceLanguage.name} - ${targetLanguage.name}")
         isLoadingProperty.set(true)
 
+        val existingBook = fetchExistingWorkBook(resourceVersion, sourceLanguage, targetLanguage)
+        // if the project is already created, bookmark it to open after home page finishes loading
+        if (existingBook != null) {
+            bookMarkedProjectGroupProperty.set(
+                ProjectGroupKey(
+                    existingBook.sourceLanguage.slug,
+                    existingBook.targetLanguage.slug,
+                    existingBook.sourceMetadataSlug, selectedMode
+                )
+            )
+            isLoadingProperty.set(false)
+            onNavigateBack()
+            return
+        }
+
         // check if source metadata exists for the requested language
         val sourceExists = collectionRepo.getRootSources().blockingGet()
             .any { it.resourceContainer!!.language == sourceLanguage }
@@ -255,7 +275,7 @@ class ProjectWizardViewModel : ViewModel() {
             .createAllBooks(
                 sourceLanguage,
                 targetLanguage,
-                selectedModeProperty.value,
+                selectedMode,
                 resourceVersion?.slug
             )
             .startWith(prepareSource) // must run after deletion and before creation
@@ -264,19 +284,17 @@ class ProjectWizardViewModel : ViewModel() {
             .subscribe(
                 {
                     logger.info("Project group created: ${sourceLanguage.name} - ${targetLanguage.name}")
-                    existingLanguagePairs.add(Pair(sourceLanguage, targetLanguage))
                     reset()
                     onNavigateBack()
                 },
                 {
                     logger.error("Could not create project for ${sourceLanguage.name} - ${targetLanguage.slug} ${selectedModeProperty.value}")
-                    find<HomePageViewModel2>().isLoadingProperty.set(false)
+                    isLoadingProperty.set(false)
                 }
             )
     }
 
     fun dock() {
-        updateExistingLanguagePairs()
         reset()
 
         selectedModeProperty.onChangeWithDisposer {
@@ -305,6 +323,25 @@ class ProjectWizardViewModel : ViewModel() {
     fun increaseProjectDeleteCounter() { projectDeleteCounter.incrementAndGet() }
     fun decreaseProjectDeleteCounter() { projectDeleteCounter.decrementAndGet() }
 
+    private fun fetchExistingWorkBook(
+        resourceVersion: ResourceVersion?,
+        sourceLanguage: Language,
+        targetLanguage: Language
+    ): WorkbookDescriptorWrapper? {
+        return workbookDescriptorRepo.getAll().blockingGet()
+            .firstOrNull { wb ->
+                val sourceVersionMatches = resourceVersion?.slug?.let {
+                    wb.sourceCollection.resourceContainer!!.identifier == it
+                } != false
+
+                wb.sourceLanguage == sourceLanguage &&
+                        wb.targetLanguage == targetLanguage &&
+                        sourceVersionMatches
+            }?.let {
+                WorkbookDescriptorWrapper(it)
+            }
+    }
+
     /**
      * Blocks the execution of project creation until projects delete queue completes.
      */
@@ -325,13 +362,5 @@ class ProjectWizardViewModel : ViewModel() {
         sourceLanguages.clear()
         targetLanguages.clear()
         resourceVersions.clear()
-    }
-
-    private fun updateExistingLanguagePairs() {
-        val homePageViewModel = find<HomePageViewModel2>()
-        val languagePairs = homePageViewModel.projectGroups.map {
-            Pair(it.sourceLanguage, it.targetLanguage)
-        }
-        existingLanguagePairs.setAll(languagePairs)
     }
 }
