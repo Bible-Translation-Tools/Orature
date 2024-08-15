@@ -22,6 +22,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
@@ -75,8 +76,9 @@ class ProjectWizardViewModel : ViewModel() {
 
     val sourceLanguageSearchQueryProperty = SimpleStringProperty("")
     val targetLanguageSearchQueryProperty = SimpleStringProperty("")
-    private val projectDeleteCounter = AtomicInteger(0)
+    val isLoadingProperty = SimpleBooleanProperty(false)
 
+    private val projectDeleteCounter = AtomicInteger(0)
     private val disposableListeners = mutableListOf<ListenerDisposer>()
 
     init {
@@ -156,13 +158,21 @@ class ProjectWizardViewModel : ViewModel() {
         val createOtherProject = ignoreVersionSelect && sourceLanguage != null
 
         when {
-            //TODO: handle quick creation of projects that have only 1 version
-//            createNarrationProject -> createProject(language, language, onNavigateBack)
-//            createOtherProject -> createProject(sourceLanguage, language, onNavigateBack)
-            createNarrationProject -> println("Create narration")
-            createOtherProject -> println("Create translation/dialect")
-            sourceLanguage == null -> selectedSourceLanguageProperty.set(language)
-            else -> selectedTargetLanguageProperty.set(language)
+            createNarrationProject -> {
+                createProject(language, language, resourceVersion = null, onNavigateBack)
+            }
+
+            createOtherProject -> {
+                createProject(sourceLanguage, language, resourceVersion = null, onNavigateBack)
+            }
+
+            sourceLanguage == null -> {
+                selectedSourceLanguageProperty.set(language)
+            }
+
+            else -> {
+                selectedTargetLanguageProperty.set(language)
+            }
         }
     }
 
@@ -175,18 +185,32 @@ class ProjectWizardViewModel : ViewModel() {
         )
     }
 
+    fun shouldBypassNextSteps(): Boolean {
+        val selectedMode = selectedModeProperty.value
+        val selectedSource = selectedSourceLanguageProperty.value
+        val ignoreVersion = resourceVersions.size == 1
+
+        return (selectedMode == ProjectMode.NARRATION && selectedSource == null && ignoreVersion) ||
+                (ignoreVersion && selectedSource != null)
+    }
+
     private fun getAvailableResources(language: Language): List<ResourceVersion> {
-        val rootSources = collectionRepo.getRootSources().blockingGet().filter { it.resourceContainer!!.language == language }
+        var rootSources = collectionRepo.getRootSources().blockingGet().filter { it.resourceContainer!!.language == language }
+        if (rootSources.isEmpty()) {
+            importer.sideloadSource(language).blockingAwait()
+            rootSources = collectionRepo.getRootSources().blockingGet().filter { it.resourceContainer!!.language == language }
+        }
         return rootSources.map { ResourceVersion(it.slug, it.resourceContainer!!.title) }
     }
 
     private fun createProject(
         sourceLanguage: Language,
         targetLanguage: Language,
-        resourceVersion: ResourceVersion, // TODO: use source version when creating project
+        resourceVersion: ResourceVersion?,
         onNavigateBack: () -> Unit
     ) {
         logger.info("Creating project group: ${sourceLanguage.name} - ${targetLanguage.name}")
+        isLoadingProperty.set(true)
 
         // check if source metadata exists for the requested language
         val sourceExists = collectionRepo.getRootSources().blockingGet()
@@ -203,7 +227,8 @@ class ProjectWizardViewModel : ViewModel() {
             .createAllBooks(
                 sourceLanguage,
                 targetLanguage,
-                selectedModeProperty.value
+                selectedModeProperty.value,
+                resourceVersion?.slug
             )
             .startWith(prepareSource) // must run after deletion and before creation
             .startWith(waitForProjectDeletionFinishes()) // this must run first

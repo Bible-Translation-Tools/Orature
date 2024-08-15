@@ -88,15 +88,17 @@ class CreateProject @Inject constructor(
     fun createAllBooks(
         sourceLanguage: Language,
         targetLanguage: Language,
-        projectMode: ProjectMode
+        projectMode: ProjectMode,
+        resourceId: String? = null
     ): Completable {
         val isVerseByVerse = projectMode != ProjectMode.TRANSLATION
         return collectionRepo.getRootSources()
             .flattenAsObservable {
                 it
             }
-            .filter {
-                it.resourceContainer?.language == sourceLanguage
+            .filter { collection ->
+                collection.resourceContainer?.language == sourceLanguage &&
+                        (resourceId?.let  { collection.resourceContainer?.identifier == resourceId } ?: true)
             }
             .firstOrError()
             .flatMap { rootCollection ->

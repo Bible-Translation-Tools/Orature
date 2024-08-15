@@ -141,6 +141,7 @@ class HomePage2 : View() {
         tryImportStylesheet("/css/snack-bar-notification.css")
 
         subscribeActionEvents()
+        projectWizardViewModel.isLoadingProperty.bindBidirectional(viewModel.isLoadingProperty)
     }
 
     override val root = borderpane {
@@ -241,13 +242,8 @@ class HomePage2 : View() {
             val selectedSource = projectWizardViewModel.selectedSourceLanguageProperty.value
             val projectMode = projectWizardViewModel.selectedModeProperty.value
 
-            if (selectedSource == null && projectMode != ProjectMode.NARRATION) {
-            }
-            wizardFragment.nextStep()
-
-            if (selectedSource != null || projectMode == ProjectMode.NARRATION) {
-                // open loading dialog when creating project
-//                viewModel.isLoadingProperty.set(true)
+            if (!projectWizardViewModel.shouldBypassNextSteps()) {
+                wizardFragment.nextStep()
             }
 
             projectWizardViewModel.onLanguageSelected(projectMode, it.item) {
