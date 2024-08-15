@@ -245,7 +245,7 @@ class ProjectWizardViewModel : ViewModel() {
         logger.info("Creating project group: ${sourceLanguage.name} - ${targetLanguage.name}")
         isLoadingProperty.set(true)
 
-        val existingBook = fetchExistingWorkBook(resourceVersion, sourceLanguage, targetLanguage)
+        val existingBook = findExistingWorkBook(resourceVersion, sourceLanguage, targetLanguage)
         // if the project is already created, bookmark it to open after home page finishes loading
         if (existingBook != null) {
             bookMarkedProjectGroupProperty.set(
@@ -323,7 +323,7 @@ class ProjectWizardViewModel : ViewModel() {
     fun increaseProjectDeleteCounter() { projectDeleteCounter.incrementAndGet() }
     fun decreaseProjectDeleteCounter() { projectDeleteCounter.decrementAndGet() }
 
-    private fun fetchExistingWorkBook(
+    private fun findExistingWorkBook(
         resourceVersion: ResourceVersion?,
         sourceLanguage: Language,
         targetLanguage: Language
