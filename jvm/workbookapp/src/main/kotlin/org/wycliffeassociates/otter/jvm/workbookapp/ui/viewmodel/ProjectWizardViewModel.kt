@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -36,6 +37,7 @@ import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.otter.jvm.controls.model.ResourceVersion
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
@@ -57,6 +59,8 @@ class ProjectWizardViewModel : ViewModel() {
     lateinit var languageRepo: ILanguageRepository
     @Inject
     lateinit var collectionRepo: ICollectionRepository
+    @Inject
+    lateinit var resourceMetadataRepo: IResourceMetadataRepository
     @Inject
     lateinit var importer: ImportProjectUseCase
 
@@ -148,32 +152,42 @@ class ProjectWizardViewModel : ViewModel() {
     }
 
     fun onLanguageSelected(projectMode: ProjectMode, language: Language, onNavigateBack: () -> Unit) {
+        isLoadingProperty.set(true)
+
         val sourceLanguage = selectedSourceLanguageProperty.value
-        if (sourceLanguage == null) {
-            resourceVersions.setAll(getAvailableResources(language))
+        val availableVersions = if (sourceLanguage == null) {
+            resourceVersions.clear()
+            getAvailableResources(language)
+        } else {
+            Single.just(resourceVersions)
         }
 
-        val ignoreVersionSelect = resourceVersions.size == 1
-        val createNarrationProject = ignoreVersionSelect && projectMode == ProjectMode.NARRATION
-        val createOtherProject = ignoreVersionSelect && sourceLanguage != null
+        availableVersions
+            .subscribe { versions ->
+                val ignoreVersionSelect = versions.size == 1
+                val createNarrationProject = ignoreVersionSelect && projectMode == ProjectMode.NARRATION
+                val createOtherProject = ignoreVersionSelect && sourceLanguage != null
 
-        when {
-            createNarrationProject -> {
-                createProject(language, language, resourceVersion = null, onNavigateBack)
-            }
+                when {
+                    createNarrationProject -> {
+                        createProject(language, language, resourceVersion = null, onNavigateBack)
+                    }
 
-            createOtherProject -> {
-                createProject(sourceLanguage, language, resourceVersion = null, onNavigateBack)
-            }
+                    createOtherProject -> {
+                        createProject(sourceLanguage, language, resourceVersion = null, onNavigateBack)
+                    }
 
-            sourceLanguage == null -> {
-                selectedSourceLanguageProperty.set(language)
-            }
+                    sourceLanguage == null -> {
+                        isLoadingProperty.set(false)
+                        selectedSourceLanguageProperty.set(language)
+                    }
 
-            else -> {
-                selectedTargetLanguageProperty.set(language)
+                    else -> {
+                        isLoadingProperty.set(false)
+                        selectedTargetLanguageProperty.set(language)
+                    }
+                }
             }
-        }
     }
 
     fun onResourceVersionSelected(version: ResourceVersion, onNavigateBack: () -> Unit) {
@@ -194,13 +208,27 @@ class ProjectWizardViewModel : ViewModel() {
                 (ignoreVersion && selectedSource != null)
     }
 
-    private fun getAvailableResources(language: Language): List<ResourceVersion> {
-        var rootSources = collectionRepo.getRootSources().blockingGet().filter { it.resourceContainer!!.language == language }
-        if (rootSources.isEmpty()) {
-            importer.sideloadSource(language).blockingAwait()
-            rootSources = collectionRepo.getRootSources().blockingGet().filter { it.resourceContainer!!.language == language }
-        }
-        return rootSources.map { ResourceVersion(it.slug, it.resourceContainer!!.title) }
+    private fun getAvailableResources(language: Language): Single<List<ResourceVersion>> {
+        return resourceMetadataRepo
+            .exists { it.language == language }
+            .flatMapCompletable { exists ->
+                if (!exists) {
+                    importer.sideloadSource(language)
+                } else {
+                    Completable.complete()
+                }
+            }
+            .andThen(
+                resourceMetadataRepo.getAllSources()
+            )
+            .map { resources ->
+                resources
+                    .filter { it.language == language }
+                    .map { ResourceVersion(it.identifier, it.title)}
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
+            .doOnSuccess { resourceVersions.setAll(it) }
     }
 
     private fun createProject(
@@ -249,6 +277,7 @@ class ProjectWizardViewModel : ViewModel() {
 
     fun dock() {
         updateExistingLanguagePairs()
+        reset()
 
         selectedModeProperty.onChangeWithDisposer {
             loadSourceLanguages()
@@ -293,6 +322,9 @@ class ProjectWizardViewModel : ViewModel() {
         selectedTargetLanguageProperty.set(null)
         sourceLanguageSearchQueryProperty.set("")
         targetLanguageSearchQueryProperty.set("")
+        sourceLanguages.clear()
+        targetLanguages.clear()
+        resourceVersions.clear()
     }
 
     private fun updateExistingLanguagePairs() {
