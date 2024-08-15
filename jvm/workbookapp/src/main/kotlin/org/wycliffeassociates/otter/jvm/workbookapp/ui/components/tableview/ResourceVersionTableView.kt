@@ -21,8 +21,11 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 import javafx.collections.ObservableList
 import javafx.event.EventTarget
 import javafx.scene.control.TableView
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
+import org.wycliffeassociates.otter.jvm.controls.event.ResourceVersionSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ResourceVersion
 import tornadofx.*
 import tornadofx.FX.Companion.messages
@@ -56,7 +59,20 @@ class ResourceVersionTableView(
 
         setRowFactory { ResourceVersionTableRow() }
 
-        //TODO: accessibility support
+        /* accessibility */
+        focusedProperty().onChange {
+            if (it && selectionModel.selectedIndex < 0) {
+                selectionModel.select(0)
+                focusModel.focus(0)
+            }
+        }
+        addEventFilter(KeyEvent.KEY_PRESSED) { keyEvent ->
+            if (keyEvent.code == KeyCode.SPACE || keyEvent.code == KeyCode.ENTER) {
+                selectedItem?.let {
+                    FX.eventbus.fire(ResourceVersionSelectedEvent(it))
+                }
+            }
+        }
     }
 }
 
