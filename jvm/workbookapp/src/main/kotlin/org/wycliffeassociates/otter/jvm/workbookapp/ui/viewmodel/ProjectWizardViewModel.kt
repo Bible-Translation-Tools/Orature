@@ -170,15 +170,15 @@ class ProjectWizardViewModel : ViewModel() {
         availableVersions
             .subscribe { versions ->
                 val ignoreVersionSelect = versions.size == 1
-                val createNarrationProject = ignoreVersionSelect && projectMode == ProjectMode.NARRATION
-                val createOtherProject = ignoreVersionSelect && sourceLanguage != null
+                val quickCreateNarration = ignoreVersionSelect && projectMode == ProjectMode.NARRATION
+                val quickCreateProject = ignoreVersionSelect && sourceLanguage != null
 
                 when {
-                    createNarrationProject -> {
+                    quickCreateNarration -> {
                         createProject(language, language, resourceVersion = null, onNavigateBack)
                     }
 
-                    createOtherProject -> {
+                    quickCreateProject -> {
                         createProject(sourceLanguage, language, resourceVersion = null, onNavigateBack)
                     }
 
