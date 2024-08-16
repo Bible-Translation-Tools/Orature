@@ -5,6 +5,7 @@ import org.bibletranslationtools.vtt.Cue
 import org.bibletranslationtools.vtt.WebVttCue
 import org.bibletranslationtools.vtt.WebVttDocument
 import org.bibletranslationtools.vtt.WebvttCueInfo
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.CueMetadata
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
@@ -24,6 +25,8 @@ class BurritoAlignmentMetadata(
     private val burritoTimingFile: File,
     private val audioFile: File
 ) : CueMetadata {
+
+    private val logger = LoggerFactory.getLogger(BurritoAlignmentMetadata::class.java)
 
     private val _cues = mutableListOf<AudioMarker>()
     private val markers = OratureMarkers()
@@ -62,19 +65,31 @@ class BurritoAlignmentMetadata(
 
     fun write(audioLengthInFrames: Int) {
         val markers = markers.getMarkers()
-        val bookSlug: String = markers.find { it is BookMarker }
+        val bookSlug: String? = markers
+            .find { it is BookMarker }
             ?.let {
                 it as BookMarker
                 it.bookSlug
-            }!!
+            }
 
-        val chapterNumber: Int = markers.find { it is ChapterMarker }
+        val chapterNumber: Int? = markers
+            .find { it is ChapterMarker }
             ?.let {
                 it as ChapterMarker
                 it.chapterNumber
-            }!!
+            }
 
-        write(markers, bookSlug, chapterNumber, audioLengthInFrames)
+        if (bookSlug != null && chapterNumber != null) {
+            write(markers, bookSlug, chapterNumber, audioLengthInFrames)
+        } else {
+            if (bookSlug == null && chapterNumber == null) {
+                logger.warn("Attempted to write timing but ${audioFile.name} is missing book and chapter marker")
+            } else if (bookSlug == null) {
+                logger.warn("Attempted to write timing but ${audioFile.name} is missing a book marker")
+            } else {
+                logger.warn("Attempted to write timing but ${audioFile.name} is missing a chapter marker")
+            }
+        }
     }
 
     fun write(
@@ -118,7 +133,10 @@ class BurritoAlignmentMetadata(
         alignment.update()
     }
 
-    private fun assignEndTimes(cues: List<WebVttDocument.WebVttCueContent>, audioLengthInFrames: Int) {
+    private fun assignEndTimes(
+        cues: List<WebVttDocument.WebVttCueContent>,
+        audioLengthInFrames: Int
+    ) {
         cues.forEachIndexed { i, content ->
             val cue = content.cue
             if (i == cues.lastIndex) {
