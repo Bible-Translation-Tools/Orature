@@ -18,6 +18,8 @@ import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.audio.OratureCueParser
 import java.io.File
 
+private const val BIBLICAL_REFERENCE_VTT_CLASSNAME = "c.u23003"
+
 class BurritoAlignmentMetadata(
     private val burritoTimingFile: File,
     private val audioFile: File
@@ -101,7 +103,7 @@ class BurritoAlignmentMetadata(
                     WebVttCue(
                         WebvttCueInfo(
                             Cue.Builder()
-                                .addMarkup("<c.u23003>$tag</c.u23003>")
+                                .addMarkup("<$BIBLICAL_REFERENCE_VTT_CLASSNAME>$tag</$BIBLICAL_REFERENCE_VTT_CLASSNAME")
                                 .build(),
                             framesToUs(it.location),
                             framesToUs(it.location)
