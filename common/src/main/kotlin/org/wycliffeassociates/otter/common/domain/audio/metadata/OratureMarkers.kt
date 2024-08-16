@@ -28,30 +28,22 @@ class OratureMarkers {
 
     @Synchronized
     fun addMarkers(type: OratureCueType, markers: List<AudioMarker>) {
-        if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
-        cueMap[type]!!.addAll(markers)
+        cueMap.getOrPut(type) { mutableListOf() }.addAll(markers)
     }
 
     @Synchronized
     fun addMarker(type: OratureCueType, marker: AudioMarker) {
-        if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
-        cueMap[type]!!.add(marker)
+        cueMap.getOrPut(type) { mutableListOf() }.add(marker)
     }
 
     @Synchronized
     fun clearMarkersOfType(type: OratureCueType) {
-        if (!cueMap.containsKey(type)) {
-            cueMap[type] = mutableListOf()
-            return
-        } else {
-            cueMap[type]!!.clear()
-        }
+        cueMap[type] = mutableListOf()
     }
 
     @Synchronized
     private fun addEntry(entry: Map.Entry<OratureCueType, MutableList<AudioMarker>>) {
-        if (!cueMap.containsKey(entry.key)) cueMap[entry.key] = mutableListOf()
-        cueMap[entry.key]!!.addAll(entry.value)
+        cueMap.getOrPut(entry.key) { mutableListOf() }.addAll(entry.value)
     }
 
     /**
