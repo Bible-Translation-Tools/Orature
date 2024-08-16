@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home
 
 import javafx.animation.TranslateTransition
-import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -38,9 +37,10 @@ import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.jvm.controls.bar.searchBar
 import org.wycliffeassociates.otter.jvm.controls.card.translationTypeCard
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
+import org.wycliffeassociates.otter.jvm.controls.model.ResourceVersion
 import org.wycliffeassociates.otter.jvm.controls.model.StepDirection
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.languageTableView
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.resourceVersionTableView
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -49,9 +49,10 @@ private const val TRANSITION_DURATION_SEC = 0.3
 class ProjectWizardSection(
     sourceLanguages: ObservableList<Language>,
     targetLanguages: ObservableList<Language>,
+    resourceVersions: ObservableList<ResourceVersion>,
     selectedModeProperty: SimpleObjectProperty<ProjectMode>,
     selectedSourceLanguageProperty: SimpleObjectProperty<Language>,
-    existingLanguagePairs: ObservableList<Pair<Language, Language>>
+    selectedTargetLanguageProperty: SimpleObjectProperty<Language>,
 ) : StackPane() {
     val sourceLanguageSearchQueryProperty =  SimpleStringProperty()
     val targetLanguageSearchQueryProperty = SimpleStringProperty()
@@ -127,18 +128,6 @@ class ProjectWizardSection(
         }
 
         languageTableView(sourceLanguages) {
-            selectedModeProperty.onChange {
-                if (it == ProjectMode.NARRATION) {
-                    val duplicated = existingLanguagePairs
-                        .filter { it.first == it.second }
-                        .map { it.first }
-
-                    disabledLanguages.setAll(duplicated)
-                } else {
-                    disabledLanguages.clear()
-                }
-            }
-
             this@apply.visibleProperty().onChange {
                 if (it) customizeScrollbarSkin()
             }
@@ -171,18 +160,39 @@ class ProjectWizardSection(
         }
 
         languageTableView(targetLanguages) {
-            selectedSourceLanguageProperty.onChange {
-                it?.let { src ->
-                    val duplicated = existingLanguagePairs
-                        .filter { it.first == src }
-                        .map { it.second }
+            this@apply.visibleProperty().onChange {
+                if (it) customizeScrollbarSkin()
+            }
+        }
+        managedWhen(visibleProperty())
+    }
 
-                    disabledLanguages.setAll(duplicated)
-                } ?: {
-                    disabledLanguages.clear()
+    private val step4 = VBox().apply {
+        addClass("homepage__main-region")
+
+        hbox {
+            addClass("homepage__main-region__header-section")
+
+            button {
+                addClass("btn", "btn--icon")
+                tooltip(messages["goBack"])
+                graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT)
+
+                setOnAction {
+                    selectedTargetLanguageProperty.set(null)
+                    previousStep()
                 }
             }
+            label(messages["selectSourceVersionStep4"]) { addClass("h4") }
+            region { hgrow = Priority.ALWAYS }
 
+            // TODO: add search bar
+//            searchBar {
+//                textProperty().bindBidirectional()
+//                promptText = messages["search"]
+//            }
+        }
+        resourceVersionTableView(resourceVersions) {
             this@apply.visibleProperty().onChange {
                 if (it) customizeScrollbarSkin()
             }
@@ -197,8 +207,9 @@ class ProjectWizardSection(
         add(step1)
         add(step2)
         add(step3)
+        add(step4)
 
-        steps = listOf(step1, step2, step3)
+        steps = listOf(step1, step2, step3, step4)
     }
 
     fun setOnCancelAction(op: () -> Unit) {
@@ -213,6 +224,7 @@ class ProjectWizardSection(
         runLater {
             step2.translateX = scene.width
             step3.translateX = scene.width
+            step4.translateX = scene.width
         }
     }
 

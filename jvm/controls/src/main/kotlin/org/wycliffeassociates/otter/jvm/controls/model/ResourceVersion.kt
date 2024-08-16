@@ -18,6 +18,4 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.model
 
-import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
-
-data class ProjectGroupKey(val sourceLanguage: String, val targetLanguage: String, val resourceSlug: String, val mode: ProjectMode)
+data class ResourceVersion(val slug: String, val name: String)

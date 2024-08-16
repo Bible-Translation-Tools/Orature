@@ -16,26 +16,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.controls.event
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 
-import org.wycliffeassociates.otter.common.data.primitives.Language
-import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
+import javafx.scene.control.TableRow
+import org.wycliffeassociates.otter.jvm.controls.event.ResourceVersionSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ResourceVersion
-import tornadofx.FXEvent
-import java.io.File
+import tornadofx.*
 
-class LanguageSelectedEvent(val item: Language) : FXEvent()
-class ResourceVersionSelectedEvent(val resourceVersion: ResourceVersion): FXEvent()
+class ResourceVersionTableRow : TableRow<ResourceVersion>() {
+    override fun updateItem(item: ResourceVersion?, empty: Boolean) {
+        super.updateItem(item, empty)
 
-class ProjectImportFinishEvent(
-    val result: ImportResult,
-    val project: String? = null,
-    val language: String? = null,
-    val filePath: String? = null,
-    val workbookDescriptor: WorkbookDescriptor? = null
-): FXEvent()
+        if (item == null || empty) {
+            isMouseTransparent = true
+            return
+        }
 
-class ProjectImportEvent(
-    val file: File
-) : FXEvent()
+        isMouseTransparent = isDisable
+        isFocusTraversable = false
+
+        setOnMouseClicked {
+            if (it.clickCount == 1) { // avoid double fire()
+                FX.eventbus.fire(ResourceVersionSelectedEvent(item))
+            }
+        }
+    }
+}
