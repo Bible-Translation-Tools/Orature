@@ -210,9 +210,6 @@ class HomePageViewModel2 : ViewModel() {
                 .observeOnFx()
                 .doOnComplete {
                     logger.info("Deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
-//                    projectWizardViewModel.existingLanguagePairs.remove(
-//                        Pair(cardModel.sourceLanguage, cardModel.targetLanguage)
-//                    )
                 }
                 .doOnDispose {
                     logger.info("Cancelled deleting project group ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
