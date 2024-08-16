@@ -144,6 +144,7 @@ class BurritoToResourceContainerConverter @Inject constructor(
                 when {
                     scope.isEmpty() -> {
                         assert(false)
+                        // TODO: Need to add this for potential apps which store book audio files
                         // breakBookAudioIntoChapters()
                     }
 
@@ -162,6 +163,7 @@ class BurritoToResourceContainerConverter @Inject constructor(
                             groupedByChapter[chapterNumber]!!.add(item)
 
                             assert(false)
+                            // TODO: Need to add this for potential apps which store audio files as verses/chunks
                             // combineSubchapterIntoChapter()
                         }
                     }

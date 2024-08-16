@@ -47,7 +47,11 @@ object BiblicalReferencesParser {
             verse.matches() -> {
                 val verseStart = verse.group(1)!!
                 val verseEnd = if (verse.groupCount() == 2) verse.group(2) else null
-                if (verseEnd != null) "orature-vm-${verseStart}-${verseEnd}" else "orature-vm-$verseStart"
+                if (verseEnd != null) {
+                    "orature-vm-${verseStart}-${verseEnd}"
+                } else {
+                    "orature-vm-$verseStart"
+                }
             }
 
             else -> {
@@ -78,7 +82,11 @@ object OratureMarkerConverter {
                 }
 
                 is VerseMarker -> {
-                    val label = if (marker.end != marker.start) "${marker.start}-${marker.end}" else "${marker.start}"
+                    val label = if (marker.end != marker.start) {
+                        "${marker.start}-${marker.end}"
+                    } else {
+                        "${marker.start}"
+                    }
                     "${bookSlug!!.allCaps()} ${chapterNumber!!}:${marker.label}"
                 }
 

@@ -87,7 +87,9 @@ class BurritoAlignmentMetadata(
 
         val alignment = if (burritoTimingFile.length() > 0) {
             BurritoAudioAlignment.load(burritoTimingFile)
-        } else BurritoAudioAlignment.create(audioFile, burritoTimingFile)
+        } else {
+            BurritoAudioAlignment.create(audioFile, burritoTimingFile)
+        }
 
         val vttCues = markers
             .sortedBy { it.location }
@@ -135,6 +137,6 @@ class BurritoAlignmentMetadata(
 }
 
 internal fun framesToUs(frames: Int): Long {
-    val us = (frames.toLong() * (1000000 / DEFAULT_SAMPLE_RATE.toDouble())).toLong()
+    val us = (frames * (1_000_000.0 / DEFAULT_SAMPLE_RATE.toDouble())).toLong()
     return us
 }

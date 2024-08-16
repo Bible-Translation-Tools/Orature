@@ -28,6 +28,8 @@ import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.AudioFo
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Compression
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Formats
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Performance
+import org.wycliffeassociates.otter.common.audio.AudioFileFormat
+import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
 import org.wycliffeassociates.otter.common.data.IAppInfo
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
@@ -191,9 +193,9 @@ class ScriptureBurritoUtils @Inject constructor(
                 files[path] = outFile
                 val ingredient = IngredientSchema().apply {
                     this.mimeType = when (outFile.extension) {
-                        "wav" -> "audio/wav"
-                        "mp3" -> "audio/mpeg"
-                        "cue" -> "application/x-cue"
+                        AudioFileFormat.WAV.extension -> "audio/wav"
+                        AudioFileFormat.MP3.extension -> "audio/mpeg"
+                        AudioMetadataFileFormat.CUE.extension -> "application/x-cue"
                         else -> "application/octet-stream"
                     }
                     this.size = take.length().toInt()
@@ -207,7 +209,7 @@ class ScriptureBurritoUtils @Inject constructor(
                         )
                     }
                 }
-                if (outFile.extension in listOf("wav", "mp3")) {
+                if (outFile.extension in listOf(AudioFileFormat.WAV.extension, AudioFileFormat.MP3.extension)) {
                     val (timingIngredient, timingPath) = buildTimingFile(
                         rc,
                         outTempDir,

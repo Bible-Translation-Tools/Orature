@@ -13,29 +13,32 @@ class OratureMarkers {
         OratureCueType.LICENSE to mutableListOf(),
     )
 
+    @Synchronized
     fun getCues(): List<AudioCue> {
         return cueMap.values.flatMap { it.map { it.toCue() } }
     }
 
     @Synchronized
     fun getMarkers(type: OratureCueType): List<AudioMarker> {
-        if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
-        return cueMap[type]!!
+        return cueMap.getOrPut(type) { mutableListOf() }
     }
 
     @Synchronized
     fun getMarkers(): List<AudioMarker> = cueMap.values.flatten()
 
+    @Synchronized
     fun addMarkers(type: OratureCueType, markers: List<AudioMarker>) {
         if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
         cueMap[type]!!.addAll(markers)
     }
 
+    @Synchronized
     fun addMarker(type: OratureCueType, marker: AudioMarker) {
         if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
         cueMap[type]!!.add(marker)
     }
 
+    @Synchronized
     fun clearMarkersOfType(type: OratureCueType) {
         if (!cueMap.containsKey(type)) {
             cueMap[type] = mutableListOf()
@@ -45,6 +48,7 @@ class OratureMarkers {
         }
     }
 
+    @Synchronized
     private fun addEntry(entry: Map.Entry<OratureCueType, MutableList<AudioMarker>>) {
         if (!cueMap.containsKey(entry.key)) cueMap[entry.key] = mutableListOf()
         cueMap[entry.key]!!.addAll(entry.value)
@@ -53,6 +57,7 @@ class OratureMarkers {
     /**
      * Deep copies markers into a new instance of OratureMarkers
      */
+    @Synchronized
     fun copy(): OratureMarkers {
         val newCopy = OratureMarkers()
         cueMap.forEach { newCopy.addEntry(it) }
