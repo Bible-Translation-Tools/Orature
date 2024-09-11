@@ -148,10 +148,12 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     private fun initializeSourceAudio(chapter: Int): Maybe<SourceAudio> {
         return Maybe.fromCallable {
             val workbook = workbookDataStore.workbook
-            ChunkAudioUseCase(directoryProvider, workbook.projectFilesAccessor)
-                .copySourceAudioToProject(sourceAudio.file)
-
             workbook.sourceAudioAccessor.getUserMarkedChapter(chapter, workbook.target)
+                ?: let {
+                    ChunkAudioUseCase(directoryProvider, workbook.projectFilesAccessor)
+                        .copySourceAudioToProject(sourceAudio.file)
+                    workbook.sourceAudioAccessor.getUserMarkedChapter(chapter, workbook.target)
+                }
         }
     }
 

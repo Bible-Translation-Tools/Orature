@@ -267,6 +267,7 @@ class TranslationViewModel2 : ViewModel() {
         Maybe
             .fromCallable {
                 wb.sourceAudioAccessor.getChapter(chapter.sort, wb.target)
+                    ?: wb.sourceAudioAccessor.getUserMarkedChapter(chapter.sort, wb.target)
             }
             .subscribeOn(Schedulers.io())
             .observeOnFx()
