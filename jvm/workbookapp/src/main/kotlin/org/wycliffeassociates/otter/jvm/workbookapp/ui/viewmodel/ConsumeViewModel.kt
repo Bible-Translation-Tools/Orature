@@ -99,6 +99,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
         Maybe
             .fromCallable<SourceAudio> {
                 wb.sourceAudioAccessor.getChapter(chapter.sort, wb.target)
+                    ?: wb.sourceAudioAccessor.getUserMarkedChapter(chapter.sort, wb.target)
             }
             .subscribeOn(Schedulers.io())
             .observeOnFx()
