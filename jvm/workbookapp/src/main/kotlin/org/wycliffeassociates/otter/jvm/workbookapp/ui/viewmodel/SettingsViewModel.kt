@@ -44,6 +44,7 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.ThemeColorEvent
 import tornadofx.*
+import java.io.File
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -51,12 +52,18 @@ class SettingsViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(SettingsViewModel::class.java)
 
-    @Inject lateinit var audioDeviceProvider: AudioDeviceProvider
-    @Inject lateinit var appPrefRepository: IAppPreferencesRepository
-    @Inject lateinit var pluginRepository: IAudioPluginRepository
-    @Inject lateinit var localeLanguage: LocaleLanguage
-    @Inject lateinit var theme: AppTheme
-    @Inject lateinit var importLanguages: ImportLanguages
+    @Inject
+    lateinit var audioDeviceProvider: AudioDeviceProvider
+    @Inject
+    lateinit var appPrefRepository: IAppPreferencesRepository
+    @Inject
+    lateinit var pluginRepository: IAudioPluginRepository
+    @Inject
+    lateinit var localeLanguage: LocaleLanguage
+    @Inject
+    lateinit var theme: AppTheme
+    @Inject
+    lateinit var importLanguages: ImportLanguages
 
     private val audioPluginViewModel: AudioPluginViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
@@ -314,13 +321,23 @@ class SettingsViewModel : ViewModel() {
     fun updateLanguageNamesUrl() {
         val matchRegex = "^https?://.*".toRegex()
         val replaceRegex = "^h?t?t?p?s?:?/+(.*)".toRegex()
-        if (!matchRegex.matches(languageNamesUrlProperty.value)) {
-            val cleaned = languageNamesUrlProperty.value.replace(replaceRegex, "$1")
-            languageNamesUrlProperty.set("https://$cleaned")
+        val url = languageNamesUrlProperty.value
+
+        val formattedUrl = when {
+            File(url).exists() -> {
+                File(url).invariantSeparatorsPath
+            }
+            !matchRegex.matches(url) -> {
+                val cleaned = url.replace(replaceRegex, "$1")
+                "https://$cleaned"
+            }
+            else -> url
         }
 
+        languageNamesUrlProperty.set(formattedUrl)
+
         appPrefRepository
-            .setLanguageNamesUrl(languageNamesUrlProperty.value)
+            .setLanguageNamesUrl(formattedUrl)
             .subscribe()
     }
 
