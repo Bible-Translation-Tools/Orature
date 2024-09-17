@@ -137,7 +137,6 @@ class SettingsViewModel : ViewModel() {
         loadCurrentInputDevice()
         loadLanguageNamesUrl()
         loadDefaultLanguageNamesUrl()
-        watchForNewDevices()
 
         supportedThemes.setAll(ColorTheme.values().asList())
         theme.preferredTheme
@@ -275,7 +274,7 @@ class SettingsViewModel : ViewModel() {
     fun watchForNewDevices() {
         disposableDeviceWatcher.clear()
         Observable
-            .interval(2, 2, TimeUnit.SECONDS)
+            .interval(2, TimeUnit.SECONDS)
             .subscribeOn(Schedulers.io())
             .observeOnFx()
             .subscribe {
@@ -283,8 +282,12 @@ class SettingsViewModel : ViewModel() {
             }.addTo(disposableDeviceWatcher)
     }
 
-    fun onDrawerCollapsed() {
+    fun cancelDeviceWatcher() {
         disposableDeviceWatcher.clear()
+    }
+
+    fun onDrawerCollapsed() {
+        cancelDeviceWatcher()
     }
 
     fun updateLanguage(language: Language) {

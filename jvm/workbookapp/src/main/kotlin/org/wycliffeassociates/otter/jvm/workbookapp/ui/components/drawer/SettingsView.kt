@@ -20,8 +20,10 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
 import io.github.palexdev.materialfx.controls.MFXProgressBar
 import javafx.application.Platform
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.ObservableList
 import javafx.scene.control.Button
+import javafx.scene.control.ComboBox
 import javafx.scene.control.ProgressBar
 import javafx.scene.control.ToggleGroup
 import javafx.scene.input.KeyCode
@@ -47,6 +49,8 @@ class SettingsView : View() {
         orientationProperty.set(viewModel.orientationProperty.value)
     }
 
+    private val outputDeviceLoadingProperty = SimpleBooleanProperty()
+    private val inputDeviceLoadingProperty = SimpleBooleanProperty()
     private lateinit var closeButton: Button
 
     lateinit var progressBar: ProgressBar
@@ -157,6 +161,8 @@ class SettingsView : View() {
                         progressindicator {
                             prefWidth = 25.0
                             prefHeight = 25.0
+
+                            visibleWhen { outputDeviceLoadingProperty }
                         }
                     }
 
@@ -179,6 +185,7 @@ class SettingsView : View() {
                         overrideDefaultKeyEventHandler {
                             viewModel.updateOutputDevice(it)
                         }
+                        outputDeviceLoadingProperty.bind(showingProperty())
                     }
 
                     hbox {
@@ -189,6 +196,8 @@ class SettingsView : View() {
                         progressindicator {
                             prefWidth = 25.0
                             prefHeight = 25.0
+
+                            visibleWhen { inputDeviceLoadingProperty }
                         }
                     }
                     combobox(viewModel.selectedInputDeviceProperty, viewModel.inputDevices) {
@@ -210,6 +219,7 @@ class SettingsView : View() {
                         overrideDefaultKeyEventHandler {
                             viewModel.updateInputDevice(it)
                         }
+                        inputDeviceLoadingProperty.bind(showingProperty())
                     }
                 }
 
@@ -432,6 +442,13 @@ class SettingsView : View() {
                 openDrawer()
             }
         }
+
+        outputDeviceLoadingProperty.onChangeAndDoNow {
+            if (it == true) viewModel.watchForNewDevices() else viewModel.cancelDeviceWatcher()
+        }
+        inputDeviceLoadingProperty.onChangeAndDoNow {
+            if (it == true) viewModel.watchForNewDevices() else viewModel.cancelDeviceWatcher()
+        }
     }
 
     override fun onDock() {
@@ -482,7 +499,6 @@ class SettingsView : View() {
         viewModel.refreshDevices()
         focusCloseButton()
         resetUpdateLanguagesStatus()
-        viewModel.watchForNewDevices()
     }
 
     private fun collapse() {
