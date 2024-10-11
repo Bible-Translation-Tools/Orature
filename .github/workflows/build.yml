@@ -73,6 +73,7 @@ jobs:
           -e ORG_GRADLE_PROJECT_gradlewCommandVersionProp \
           -e ORG_GRADLE_PROJECT_gradlewCommandLicenseProp \
           -e ORG_GRADLE_PROJECT_githubRepoUrl \
+          -e ORG_GRADLE_PROJECT_gradlewwinKeystorePassword \
           -e ORG_GRADLE_PROJECT_gradlewmacKeystorePassword \
           -e ORG_GRADLE_PROJECT_ \
           -e ORG_GRADLE_PROJECT_githubOauthToken \
