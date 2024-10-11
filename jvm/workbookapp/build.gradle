@@ -112,6 +112,10 @@ install4j {
     if (project.hasProperty('gradlewwinKeystorePassword')) {
         winKeystorePassword = gradlewwinKeystorePassword
     }
+    //gradle command Property for the maac code signing cert password
+    if (project.hasProperty('gradlewmacKeystorePassword')) {
+        macKeystorePassword = gradlewmacKeystorePassword
+    }
 }
 
 task install4jdeploy(type: com.install4j.gradle.Install4jTask) {

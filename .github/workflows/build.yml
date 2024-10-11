@@ -1,7 +1,6 @@
 name: Java CI with Gradle
-on: [ push, pull_request ]
+on: [push, pull_request]
 jobs:
-
   set-env-vars:
     runs-on: ubuntu-20.04
     steps:
@@ -12,7 +11,7 @@ jobs:
         uses: booxmedialtd/ws-action-parse-semver@v1.4.2
         with:
           input_string: ${{ env.CI_REF_NAME }}
-          version_extractor_regex: 'v(.*)$'
+          version_extractor_regex: "v(.*)$"
         if: contains( github.ref, 'refs/tags/v' )
       - name: set version var for tags and update path for releases
         id: tagged
@@ -57,11 +56,19 @@ jobs:
         run: ./.github/scripts/decrypt_secret.sh
         env:
           LARGE_SECRET_PASSPHRASE: ${{ secrets.LARGE_SECRET_PASSPHRASE }}
+      - name: set mac signin secrets
+        shell: bash
+        run: |
+          echo -n $MAC_SIGNING_KEY_BASE64 | base64 -d -o $HOME/signing_macos.p12 && echo -n $MAC_APP_STORE_NOTARY_API_KEY > $HOME/mac_app_notary_key.p8
+        env:
+          MAC_SIGNING_KEY_BASE64: ${{ secrets.MAC_SIGNING_KEY_BASE64 }}
+          MAC_APP_STORE_NOTARY_API_KEY: ${{ secrets.MAC_APP_STORE_NOTARY_API_KEY }}
       - name: install4j build
         shell: bash
         run: |
           docker run -v $(pwd):/repo \
           -v $HOME/signing.p12:/root/signing.p12 \
+          -v $HOME/signing_macos.p12:/root/signing_macos.p12 \
           -e UPDATE_PATH \
           -e ORG_GRADLE_PROJECT_gradlewCommandVersionProp \
           -e ORG_GRADLE_PROJECT_gradlewCommandLicenseProp \
@@ -71,6 +78,8 @@ jobs:
           -e ORG_GRADLE_PROJECT_sentryDsn \
           -e GITHUB_TOKEN \
           -e SONAR_TOKEN \
+          -e MAC_NOTARY_ISSUER \
+          -e MAC_NOTARY_KEY_ID \
           wycliffeassociates/install4j-docker:10.0.9 \
           ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx2048m -Dnet.bytebuddy.experimental=true -XX:MaxMetaspaceSize=512m"
         env:
@@ -79,10 +88,13 @@ jobs:
           ORG_GRADLE_PROJECT_gradlewCommandLicenseProp: ${{ secrets.INSTALL4J_LICENSE_10 }}
           ORG_GRADLE_PROJECT_githubRepoUrl: https://api.github.com/repos/OratureCrashReports/orature-crash-reports/issues
           ORG_GRADLE_PROJECT_gradlewwinKeystorePassword: ${{ secrets.WIN_KEYSTORE_PW }}
+          ORG_GRADLE_PROJECT_gradlewmacKeystorePassword: ${{ secrets.MAC_KEYSTORE_PW }}
           ORG_GRADLE_PROJECT_githubOauthToken: ${{ secrets.GH_API_OAUTH_TOKEN }}
           ORG_GRADLE_PROJECT_sentryDsn: ${{ secrets.SENTRY_OTTER_DSN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          MAC_NOTARY_ISSUER: ${{ secrets.MAC_NOTARY_ISSUER }}
+          MAC_NOTARY_KEY_ID: ${{ secrets.MAC_NOTARY_KEY_ID }}
       - name: cache binaries
         uses: actions/upload-artifact@v4
         with:
@@ -101,7 +113,7 @@ jobs:
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 6.0.x
-      
+
       - name: download artifacts from previous job
         uses: actions/download-artifact@v4
         with:
