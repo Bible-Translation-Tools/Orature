@@ -59,7 +59,7 @@ jobs:
       - name: set mac signin secrets
         shell: bash
         run: |
-          echo -n $MAC_SIGNING_KEY_BASE64 | base64 -d -o $HOME/signing_macos.p12 && echo -n $MAC_APP_STORE_NOTARY_API_KEY > $HOME/mac_app_notary_key.p8
+          echo -n $MAC_SIGNING_KEY_BASE64 | base64 -d > $HOME/signing_macos.p12 && echo -n $MAC_APP_STORE_NOTARY_API_KEY > $HOME/mac_app_notary_key.p8
         env:
           MAC_SIGNING_KEY_BASE64: ${{ secrets.MAC_SIGNING_KEY_BASE64 }}
           MAC_APP_STORE_NOTARY_API_KEY: ${{ secrets.MAC_APP_STORE_NOTARY_API_KEY }}
