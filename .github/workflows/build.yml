@@ -82,7 +82,7 @@ jobs:
           -e SONAR_TOKEN \
           -e MAC_NOTARY_ISSUER \
           -e MAC_NOTARY_KEY_ID \
-          wycliffeassociates/install4j-docker:10.0.9 \
+          wycliffeassociates/install4j-docker:11_0 \
           ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx2048m -Dnet.bytebuddy.experimental=true -XX:MaxMetaspaceSize=512m"
         env:
           UPDATE_PATH: ${{ needs.set-env-vars.outputs.UPDATE_PATH }}
