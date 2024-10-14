@@ -83,6 +83,7 @@ jobs:
           -e SONAR_TOKEN \
           -e MAC_NOTARY_ISSUER \
           -e MAC_NOTARY_KEY_ID \
+          --name orature-${GITHUB_SHA} \
           wycliffeassociates/install4j-docker:11.0 \
           ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx2048m -Dnet.bytebuddy.experimental=true -XX:MaxMetaspaceSize=512m"
         env:
@@ -98,10 +99,14 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           MAC_NOTARY_ISSUER: ${{ secrets.MAC_NOTARY_ISSUER }}
           MAC_NOTARY_KEY_ID: ${{ secrets.MAC_NOTARY_KEY_ID }}
+      - name: Docker cp build output to runner
+        if: ${{ failure() }}
+        run: |
+          docker cp orature-${GITHUB_SHA}:/repo/jvm/workbookapp/.exec ./debug
       - name: Get notarization log
         if: ${{ failure() }}
         run: |
-          NOTARIZATION_LOG=$(find /repo/jvm/workbookapp/.exec/ -name "*.notarization.log")
+          NOTARIZATION_LOG=$(find ./debug -name "*.notarization.log")
           echo "NOTARIZATION_LOG=$NOTARIZATION_LOG" >> $GITHUB_ENV
       - name: Write notarization log to artifact
         if: ${{ failure() }}
