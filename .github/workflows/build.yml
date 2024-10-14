@@ -98,6 +98,19 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           MAC_NOTARY_ISSUER: ${{ secrets.MAC_NOTARY_ISSUER }}
           MAC_NOTARY_KEY_ID: ${{ secrets.MAC_NOTARY_KEY_ID }}
+      - name: Get notarization log
+        if: ${{ failure() }}
+        run: |
+          NOTARIZATION_LOG=$(find /repo/jvm/workbookapp/.exec/ -name "*.notarization.log")
+          echo "NOTARIZATION_LOG=$NOTARIZATION_LOG" >> $GITHUB_ENV
+      - name: Write notarization log to artifact
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: notarization-log
+          path: ${{ env.NOTARIZATION_LOG }}
+          retention-days: 7
+
       - name: cache binaries
         uses: actions/upload-artifact@v4
         with:
