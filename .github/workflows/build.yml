@@ -67,14 +67,12 @@ jobs:
         shell: bash
         run: |
           docker run -v $(pwd):/repo \
-          -v $HOME/signing.p12:/root/signing.p12 \
           -v $HOME/signing_macos.p12:/root/signing_macos.p12 \
           -v $HOME/mac_app_notary_key.p8:/root/mac_app_notary_key.p8 \
           -e UPDATE_PATH \
           -e ORG_GRADLE_PROJECT_gradlewCommandVersionProp \
           -e ORG_GRADLE_PROJECT_gradlewCommandLicenseProp \
           -e ORG_GRADLE_PROJECT_githubRepoUrl \
-          -e ORG_GRADLE_PROJECT_gradlewwinKeystorePassword \
           -e ORG_GRADLE_PROJECT_gradlewmacKeystorePassword \
           -e ORG_GRADLE_PROJECT_ \
           -e ORG_GRADLE_PROJECT_githubOauthToken \
