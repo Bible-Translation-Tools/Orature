@@ -95,9 +95,9 @@ apply from: './jooq.gradle'
 
 boolean devbuild = hasProperty("devbuild")
 
-//install4j tasks for building win/nix/mac installers. Executable jar can be built without it
+//install4j tasks for building win/nix/mac installers. Executable jar can be built without itv
 install4j {
-    vmParameters = ["-Dinstall4j.timestampUrl=http://timestamp.sectigo.com/"]
+    vmParameters = ["-Dinstall4j.timestampUrl=http://timestamp.sectigo.com/", "-Xmx4096m"]
     faster = devbuild
     disableSigning = devbuild
     //pass in the install4j directory via -P if it's not in the default install location, e.q. for use with travis or arbitrary paths
