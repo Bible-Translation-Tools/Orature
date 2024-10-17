@@ -40,18 +40,7 @@ jobs:
           echo "UPDATE_PATH=$UPDATE_PATH" >> $GITHUB_OUTPUT
           echo "PRERELEASE_BOOL=$PRERELEASE_BOOL" >> $GITHUB_OUTPUT
           echo "S3_DESTINATION=$S3_DESTINATION" >> $GITHUB_OUTPUT
-    outputs:
-      GHA_VERSION: ${{ steps.output_env_vars_step.outputs.GHA_VERSION }}
-      UPDATE_PATH: ${{ steps.output_env_vars_step.outputs.UPDATE_PATH }}
-      PRERELEASE_BOOL: ${{ steps.output_env_vars_step.outputs.PRERELEASE_BOOL }}
-      S3_DESTINATION: ${{ steps.output_env_vars_step.outputs.S3_DESTINATION }}
-
-  build:
-    runs-on: ubuntu-20.04
-    needs: set-env-vars
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set Build Secrets
+      - name: Source secrets
         uses: 1password/load-secrets-action@v2
         with:
           export-env: true
@@ -66,6 +55,25 @@ jobs:
           SONAR_TOKEN: "op://DevOps/Orature CI_CD/SONAR_TOKEN"
           MAC_NOTARY_ISSUER: "op://DevOps/Orature CI_CD/MAC_NOTARY_ISSUER"
           MAC_NOTARY_KEY_ID: "op://DevOps/Orature CI_CD/MAC_NOTARY_KEY_ID"
+          AZURE_TENANT_ID: "op://AppDev Scripture Accessibility/azure-codesign-secrets/tenant-id"
+          AZURE_CLIENT_ID: "op://AppDev Scripture Accessibility/azure-codesign-secrets/client-id"
+          AZURE_CLIENT_SECRET: "op://AppDev Scripture Accessibility/azure-codesign-secrets/client-secret"
+          AZURE_CODE_SIGNING_ACCOUNT_NAME: "op://AppDev Scripture Accessibility/azure-codesign-secrets/code-signing-account-name"
+          AZURE_CERTIFICATE_PROFILE_NAME: "op://AppDev Scripture Accessibility/azure-codesign-secrets/certificate-profile-name"
+          AWS_KEY_ID: "op://DevOps/travis-nightlybuilds aws s3 api access for travis uploads/S3_ACCESS_KEY_ID"
+          AWS_SECRET_ACCESS_KEY: "op://DevOps/travis-nightlybuilds aws s3 api access for travis uploads/S3_SECRET_ACCESS_KEY"
+          AWS_BUCKET: "op://DevOps/travis-nightlybuilds aws s3 api access for travis uploads/S3_BUCKET"
+    outputs:
+      GHA_VERSION: ${{ steps.output_env_vars_step.outputs.GHA_VERSION }}
+      UPDATE_PATH: ${{ steps.output_env_vars_step.outputs.UPDATE_PATH }}
+      PRERELEASE_BOOL: ${{ steps.output_env_vars_step.outputs.PRERELEASE_BOOL }}
+      S3_DESTINATION: ${{ steps.output_env_vars_step.outputs.S3_DESTINATION }}
+
+  build:
+    runs-on: ubuntu-20.04
+    needs: set-env-vars
+    steps:
+      - uses: actions/checkout@v3
       - name: Write mac secrets for i4j
         shell: bash
         run: |
@@ -123,17 +131,6 @@ jobs:
     runs-on: windows-latest
     needs: build
     steps:
-      - name: Set windows signing secrets
-        uses: 1password/load-secrets-action@v2
-        with:
-          export-env: true
-          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          AZURE_TENANT_ID: "op://AppDev Scripture Accessibility/azure-codesign-secrets/tenant-id"
-          AZURE_CLIENT_ID: "op://AppDev Scripture Accessibility/azure-codesign-secrets/client-id"
-          AZURE_CLIENT_SECRET: "op://AppDev Scripture Accessibility/azure-codesign-secrets/client-secret"
-          AZURE_CODE_SIGNING_ACCOUNT_NAME: "op://AppDev Scripture Accessibility/azure-codesign-secrets/code-signing-account-name"
-          AZURE_CERTIFICATE_PROFILE_NAME: "op://AppDev Scripture Accessibility/azure-codesign-secrets/certificate-profile-name"
-
       - name: Checkout
         uses: actions/checkout@v3
       - uses: FranzDiebold/github-env-vars-action@v2.1.0
@@ -174,14 +171,6 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [sign-windows, set-env-vars]
     steps:
-      - name: Set upload secrets
-        uses: 1password/load-secrets-action@v2
-        with:
-          export-env: true
-        env:
-          AWS_KEY_ID: "op://DevOps/travis-nightlybuilds aws s3 api access for travis uploads/S3_ACCESS_KEY_ID"
-          AWS_SECRET_ACCESS_KEY: "op://DevOps/travis-nightlybuilds aws s3 api access for travis uploads/S3_SECRET_ACCESS_KEY"
-          AWS_BUCKET: "op://DevOps/travis-nightlybuilds aws s3 api access for travis uploads/S3_BUCKET"
       - name: download artifacts from previous job
         uses: actions/download-artifact@v4
         with:
