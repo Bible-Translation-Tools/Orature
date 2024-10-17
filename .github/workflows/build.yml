@@ -4,7 +4,7 @@ jobs:
   set-env-vars:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: FranzDiebold/github-env-vars-action@v2.1.0
       - name: Parse SemVer if tagged build
         id: semver_parser
@@ -50,6 +50,7 @@ jobs:
     runs-on: ubuntu-20.04
     needs: set-env-vars
     steps:
+      - uses: actions/checkout@v3
       - name: Set Build Secrets
         uses: 1password/load-secrets-action@v2
         with:
