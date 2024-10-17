@@ -1,8 +1,5 @@
 name: Check GH
-
-on:
-  workflow_dispatch:
-
+on: workflow_dispatch
 jobs:
   openssl:
     name: Recover With OpenSSL
