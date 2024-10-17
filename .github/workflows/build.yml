@@ -79,8 +79,8 @@ jobs:
         run: |
           echo -n $MAC_SIGNING_KEY_BASE64 | base64 -d > $HOME/signing_macos.p12 && echo -n $MAC_APP_STORE_NOTARY_API_KEY > $HOME/mac_app_notary_key.p8
         env:
-          MAC_SIGNING_KEY_BASE64: ${{ secrets.MAC_SIGNING_KEY_BASE64 }}
-          MAC_APP_STORE_NOTARY_API_KEY: ${{ secrets.MAC_APP_STORE_NOTARY_API_KEY }}
+          MAC_SIGNING_KEY_BASE64: ${{ env.MAC_SIGNING_KEY_BASE64 }}
+          MAC_APP_STORE_NOTARY_API_KEY: ${{ env.MAC_APP_STORE_NOTARY_API_KEY }}
       - name: install4j build
         shell: bash
         run: |
@@ -152,11 +152,11 @@ jobs:
         uses: azure/trusted-signing-action@v0.4.0
         with:
           azure-tenant-id: ${{ env.AZURE_TENANT_ID }}
-          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          azure-client-id: ${{ env.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ env.AZURE_CLIENT_SECRET }}
           endpoint: https://eus.codesigning.azure.net/
-          trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_ACCOUNT_NAME }}
-          certificate-profile-name: ${{ secrets.AZURE_CERTIFICATE_PROFILE_NAME }}
+          trusted-signing-account-name: ${{ env.AZURE_CODE_SIGNING_ACCOUNT_NAME }}
+          certificate-profile-name: ${{ env.AZURE_CERTIFICATE_PROFILE_NAME }}
           files-folder: ${{ github.workspace }}/binaries
           files-folder-filter: exe
           file-digest: SHA256
