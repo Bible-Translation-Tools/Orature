@@ -40,6 +40,30 @@ jobs:
           echo "UPDATE_PATH=$UPDATE_PATH" >> $GITHUB_OUTPUT
           echo "PRERELEASE_BOOL=$PRERELEASE_BOOL" >> $GITHUB_OUTPUT
           echo "S3_DESTINATION=$S3_DESTINATION" >> $GITHUB_OUTPUT
+      - name: Source secrets
+        uses: 1password/load-secrets-action@v2
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          MAC_SIGNING_KEY_BASE64: "op://DevOps/Orature Mac OS Keys/Mac-Cert-and-Signing-Key/B64_CERT_AND_SIGNING"
+          MAC_APP_STORE_NOTARY_API_KEY: "op://DevOps/Orature Mac OS Keys/App-Store-Connect-API-Key/app-store-connect-private-key.p8"
+          INSTALL4J_LICENSE_11: "op://Shared-IT-Development/install4j license keys and upgrade info/ORATURE-I4F-LICENSE"
+          MAC_KEYSTORE_PW: "op://DevOps/Orature Mac OS Keys/MAC-P12-SIGNING-PASSWORD"
+          ORG_GRADLE_PROJECT_githubOauthToken: "op://Shared-IT-Development/Orature Crash Reports oAuth Token/TOKEN"
+          ORG_GRADLE_PROJECT_sentryDsn: "op://Shared-IT-Development/Sentry Token - Otter - Orature/TOKEN"
+          SONAR_TOKEN: "op://Shared-IT-Development/SonarQube Admin Login/ORATURE-SONAR-TOKEN"
+          MAC_NOTARY_ISSUER: "op://DevOps/Orature Mac OS Keys/MAC_NOTARY_ISSUER"
+          MAC_NOTARY_KEY_ID: "op://DevOps/Orature Mac OS Keys/MAC_NOTARY_KEY_ID"
+          AZURE_TENANT_ID: "op://AppDev Scripture Accessibility/azure-codesign-secrets/tenant-id"
+          AZURE_CLIENT_ID: "op://AppDev Scripture Accessibility/azure-codesign-secrets/client-id"
+          AZURE_CLIENT_SECRET: "op://AppDev Scripture Accessibility/azure-codesign-secrets/client-secret"
+          AZURE_CODE_SIGNING_ACCOUNT_NAME: "op://AppDev Scripture Accessibility/azure-codesign-secrets/code-signing-account-name"
+          AZURE_CERTIFICATE_PROFILE_NAME: "op://AppDev Scripture Accessibility/azure-codesign-secrets/certificate-profile-name"
+          AWS_KEY_ID: "op://Shared-IT-Infrastructure/travis-nightlybuilds aws s3 api access for travis uploads/S3_ACCESS_KEY_ID"
+          AWS_SECRET_ACCESS_KEY: "op://Shared-IT-Infrastructure/travis-nightlybuilds aws s3 api access for travis uploads/S3_SECRET_ACCESS_KEY"
+          AWS_BUCKET: "op://Shared-IT-Infrastructure/travis-nightlybuilds aws s3 api access for travis uploads/S3_BUCKET"
+
     outputs:
       GHA_VERSION: ${{ steps.output_env_vars_step.outputs.GHA_VERSION }}
       UPDATE_PATH: ${{ steps.output_env_vars_step.outputs.UPDATE_PATH }}
@@ -50,13 +74,7 @@ jobs:
     runs-on: ubuntu-20.04
     needs: set-env-vars
     steps:
-      - uses: actions/checkout@v2
-      - name: Decrypt secret file
-        shell: bash
-        run: ./.github/scripts/decrypt_secret.sh
-        env:
-          LARGE_SECRET_PASSPHRASE: ${{ secrets.LARGE_SECRET_PASSPHRASE }}
-      - name: set mac signin secrets
+      - name: Write mac secrets for i4j
         shell: bash
         run: |
           echo -n $MAC_SIGNING_KEY_BASE64 | base64 -d > $HOME/signing_macos.p12 && echo -n $MAC_APP_STORE_NOTARY_API_KEY > $HOME/mac_app_notary_key.p8
@@ -81,22 +99,20 @@ jobs:
           -e SONAR_TOKEN \
           -e MAC_NOTARY_ISSUER \
           -e MAC_NOTARY_KEY_ID \
-          -e MAC_NOTARY_KEY_ID \
           wycliffeassociates/install4j-docker:11.0 \
-          ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx4096m -Dnet.bytebuddy.experimental=true -XX:MaxMetaspaceSize=1024m"
+          ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx2048m -Dnet.bytebuddy.experimental=true -XX:MaxMetaspaceSize=1024m"
         env:
           UPDATE_PATH: ${{ needs.set-env-vars.outputs.UPDATE_PATH }}
           ORG_GRADLE_PROJECT_gradlewCommandVersionProp: ${{ needs.set-env-vars.outputs.GHA_VERSION }}
-          ORG_GRADLE_PROJECT_gradlewCommandLicenseProp: ${{ secrets.INSTALL4J_LICENSE_11 }}
+          ORG_GRADLE_PROJECT_gradlewCommandLicenseProp: ${{ env.INSTALL4J_LICENSE_11 }}
           ORG_GRADLE_PROJECT_githubRepoUrl: https://api.github.com/repos/OratureCrashReports/orature-crash-reports/issues
-          ORG_GRADLE_PROJECT_gradlewwinKeystorePassword: ${{ secrets.WIN_KEYSTORE_PW }}
-          ORG_GRADLE_PROJECT_gradlewmacKeystorePassword: ${{ secrets.MAC_KEYSTORE_PW }}
-          ORG_GRADLE_PROJECT_githubOauthToken: ${{ secrets.GH_API_OAUTH_TOKEN }}
-          ORG_GRADLE_PROJECT_sentryDsn: ${{ secrets.SENTRY_OTTER_DSN }}
+          ORG_GRADLE_PROJECT_gradlewmacKeystorePassword: ${{ env.MAC_KEYSTORE_PW }}
+          ORG_GRADLE_PROJECT_githubOauthToken: ${{ env.ORG_GRADLE_PROJECT_githubOauthToken }}
+          ORG_GRADLE_PROJECT_sentryDsn: ${{ env.ORG_GRADLE_PROJECT_sentryDsn }}
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+          MAC_NOTARY_ISSUER: ${{ env.MAC_NOTARY_ISSUER }}
+          MAC_NOTARY_KEY_ID: ${{ env.MAC_NOTARY_KEY_ID }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          MAC_NOTARY_ISSUER: ${{ secrets.MAC_NOTARY_ISSUER }}
-          MAC_NOTARY_KEY_ID: ${{ secrets.MAC_NOTARY_KEY_ID }}
 
       - name: Dump container to artifact
         if: ${{ failure() }}
@@ -104,7 +120,7 @@ jobs:
         with:
           name: build-container
           path: $(pwd)
-          retention-days: 7
+          retention-days: 2
 
       - name: cache binaries
         uses: actions/upload-artifact@v4
@@ -135,7 +151,7 @@ jobs:
       - name: Sign files with Azure Code Signing
         uses: azure/trusted-signing-action@v0.4.0
         with:
-          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-tenant-id: ${{ env.AZURE_TENANT_ID }}
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
           azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
           endpoint: https://eus.codesigning.azure.net/
@@ -165,7 +181,7 @@ jobs:
       - name: upload
         if: github.event_name != 'pull_request'
         run: |
-          AWS_DEFAULT_REGION=us-east-1 AWS_ACCESS_KEY_ID=${{secrets.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 sync . s3://${{ secrets.AWS_BUCKET }}/${{ needs.set-env-vars.outputs.S3_DESTINATION }}
+          AWS_DEFAULT_REGION=us-east-1 AWS_ACCESS_KEY_ID=${{env.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{env.AWS_SECRET_ACCESS_KEY}} aws s3 sync . s3://${{ env.AWS_BUCKET }}/${{ needs.set-env-vars.outputs.S3_DESTINATION }}
         working-directory: ${{ github.workspace }}/binaries
       - name: upload artifacts to github releases on tags
         uses: "marvinpinto/action-automatic-releases@v1.2.1"

@@ -108,10 +108,6 @@ install4j {
     if (project.hasProperty('gradlewCommandLicenseProp')) {
         license = gradlewCommandLicenseProp
     }
-    //gradle command Property for the code signing cert password
-    if (project.hasProperty('gradlewwinKeystorePassword')) {
-        winKeystorePassword = gradlewwinKeystorePassword
-    }
     //gradle command Property for the maac code signing cert password
     if (project.hasProperty('gradlewmacKeystorePassword')) {
         macKeystorePassword = gradlewmacKeystorePassword
