@@ -43,7 +43,7 @@ jobs:
       - name: Source secrets
         uses: 1password/load-secrets-action@v2
         with:
-          export-env: true
+          export-env: false
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           MAC_SIGNING_KEY_BASE64: "op://DevOps/Orature CI_CD/Mac-Cert-and-Signing-Key/B64_CERT_AND_SIGNING"
@@ -79,8 +79,8 @@ jobs:
         run: |
           echo -n $MAC_SIGNING_KEY_BASE64 | base64 -d > $HOME/signing_macos.p12 && echo -n $MAC_APP_STORE_NOTARY_API_KEY > $HOME/mac_app_notary_key.p8
         env:
-          MAC_SIGNING_KEY_BASE64: ${{ env.MAC_SIGNING_KEY_BASE64 }}
-          MAC_APP_STORE_NOTARY_API_KEY: ${{ env.MAC_APP_STORE_NOTARY_API_KEY }}
+          MAC_SIGNING_KEY_BASE64: ${{ needs.set-env-vars.outputs.MAC_SIGNING_KEY_BASE64 }}
+          MAC_APP_STORE_NOTARY_API_KEY: ${{ needs.set-env-vars.outputs.MAC_APP_STORE_NOTARY_API_KEY }}
       - name: install4j build
         shell: bash
         run: |
@@ -103,14 +103,14 @@ jobs:
         env:
           UPDATE_PATH: ${{ needs.set-env-vars.outputs.UPDATE_PATH }}
           ORG_GRADLE_PROJECT_gradlewCommandVersionProp: ${{ needs.set-env-vars.outputs.GHA_VERSION }}
-          ORG_GRADLE_PROJECT_gradlewCommandLicenseProp: ${{ env.INSTALL4J_LICENSE_11 }}
+          ORG_GRADLE_PROJECT_gradlewCommandLicenseProp: ${{ needs.set-env-vars.outputs.INSTALL4J_LICENSE_11 }}
           ORG_GRADLE_PROJECT_githubRepoUrl: https://api.github.com/repos/OratureCrashReports/orature-crash-reports/issues
-          ORG_GRADLE_PROJECT_gradlewmacKeystorePassword: ${{ env.MAC_KEYSTORE_PW }}
-          ORG_GRADLE_PROJECT_githubOauthToken: ${{ env.ORG_GRADLE_PROJECT_githubOauthToken }}
-          ORG_GRADLE_PROJECT_sentryDsn: ${{ env.ORG_GRADLE_PROJECT_sentryDsn }}
-          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
-          MAC_NOTARY_ISSUER: ${{ env.MAC_NOTARY_ISSUER }}
-          MAC_NOTARY_KEY_ID: ${{ env.MAC_NOTARY_KEY_ID }}
+          ORG_GRADLE_PROJECT_gradlewmacKeystorePassword: ${{ needs.set-env-vars.outputs.MAC_KEYSTORE_PW }}
+          ORG_GRADLE_PROJECT_githubOauthToken: ${{ needs.set-env-vars.outputs.ORG_GRADLE_PROJECT_githubOauthToken }}
+          ORG_GRADLE_PROJECT_sentryDsn: ${{ needs.set-env-vars.outputs.ORG_GRADLE_PROJECT_sentryDsn }}
+          SONAR_TOKEN: ${{ needs.set-env-vars.outputs.SONAR_TOKEN }}
+          MAC_NOTARY_ISSUER: ${{ needs.set-env-vars.outputs.MAC_NOTARY_ISSUER }}
+          MAC_NOTARY_KEY_ID: ${{ needs.set-env-vars.outputs.MAC_NOTARY_KEY_ID }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Dump container to artifact
@@ -129,7 +129,7 @@ jobs:
           path: jvm/workbookapp/.exec/
   sign-windows:
     runs-on: windows-latest
-    needs: build
+    needs: [set-env-vars, build]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -150,12 +150,12 @@ jobs:
       - name: Sign files with Azure Code Signing
         uses: azure/trusted-signing-action@v0.4.0
         with:
-          azure-tenant-id: ${{ env.AZURE_TENANT_ID }}
-          azure-client-id: ${{ env.AZURE_CLIENT_ID }}
-          azure-client-secret: ${{ env.AZURE_CLIENT_SECRET }}
+          azure-tenant-id: ${{ needs.set-env-vars.outputs.AZURE_TENANT_ID }}
+          azure-client-id: ${{ needs.set-env-vars.outputs.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ needs.set-env-vars.outputs.AZURE_CLIENT_SECRET }}
           endpoint: https://eus.codesigning.azure.net/
-          trusted-signing-account-name: ${{ env.AZURE_CODE_SIGNING_ACCOUNT_NAME }}
-          certificate-profile-name: ${{ env.AZURE_CERTIFICATE_PROFILE_NAME }}
+          trusted-signing-account-name: ${{ needs.set-env-vars.outputs.AZURE_CODE_SIGNING_ACCOUNT_NAME }}
+          certificate-profile-name: ${{ needs.set-env-vars.outputs.AZURE_CERTIFICATE_PROFILE_NAME }}
           files-folder: ${{ github.workspace }}/binaries
           files-folder-filter: exe
           file-digest: SHA256
@@ -180,7 +180,7 @@ jobs:
       - name: upload
         if: github.event_name != 'pull_request'
         run: |
-          AWS_DEFAULT_REGION=us-east-1 AWS_ACCESS_KEY_ID=${{env.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{env.AWS_SECRET_ACCESS_KEY}} aws s3 sync . s3://${{ env.AWS_BUCKET }}/${{ needs.set-env-vars.outputs.S3_DESTINATION }}
+          AWS_DEFAULT_REGION=us-east-1 AWS_ACCESS_KEY_ID=${{needs.set-env-vars.outputs.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{needs.set-env-vars.outputs.AWS_SECRET_ACCESS_KEY}} aws s3 sync . s3://${{ needs.set-env-vars.outputs.AWS_BUCKET }}/${{ needs.set-env-vars.outputs.S3_DESTINATION }}
         working-directory: ${{ github.workspace }}/binaries
       - name: upload artifacts to github releases on tags
         uses: "marvinpinto/action-automatic-releases@v1.2.1"
