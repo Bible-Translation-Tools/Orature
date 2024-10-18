@@ -367,7 +367,7 @@ class NarrationPage : View() {
     }
 
     private fun addShortcut() {
-        workspace.shortcut(Shortcut.RECORD.value, viewModel::handleRecordShortcut)
+        workspace.shortcut(Shortcut.RECORD.value, viewModel::generateChapterAudio)
     }
 }
 

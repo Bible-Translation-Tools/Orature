@@ -888,6 +888,23 @@ class NarrationViewModel : ViewModel() {
             .subscribe()
     }
 
+    fun generateChapterAudio() {
+        println("GENERATING audio")
+        val workbook = workbookDataStore.workbook
+        val chapterText = workbook.source.chapters.blockingFirst().chunks.blockingGet()
+            .map { it.textItem.text }
+            .joinToString("\n")
+        val audio = audioGenerator.convertTextToAudio(chapterText)
+
+        narration.importChapterAudioFile(audio)
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
+            .subscribe {
+                recordedVerses.setAll(narration.activeVerses)
+                resetNarratableList()
+            }
+    }
+
     fun generateVerseAudio(verseIndex: Int, text: String) {
         showLoadingDialog("pleaseWait")
         Single

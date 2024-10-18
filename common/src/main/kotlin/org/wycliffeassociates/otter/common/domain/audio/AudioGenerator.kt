@@ -26,7 +26,7 @@ class AudioGenerator @Inject constructor(
 
     private fun request(content: String, outputFile: File) {
         val apiUrl = "https://api.openai.com/v1/audio/speech"
-        val apiKey = System.getenv("OPEN_AI_KEY")
+        val apiKey = System.getenv("OPENAI_KEY")
 
         // Create an HttpClient instance
         val client = HttpClient.newHttpClient()

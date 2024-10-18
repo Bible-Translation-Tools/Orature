@@ -176,6 +176,12 @@ class TeleprompterView : View() {
     }
 
     override val root = vbox {
+        button("GENERATE CHAPTER") {
+            action {
+                find<NarrationViewModel>().generateChapterAudio()
+            }
+        }
+
         addClass("narration__verses")
         vgrow = Priority.ALWAYS
 
