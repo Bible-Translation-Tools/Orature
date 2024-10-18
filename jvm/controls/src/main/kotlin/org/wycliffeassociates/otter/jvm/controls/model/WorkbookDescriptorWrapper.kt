@@ -23,6 +23,7 @@ data class WorkbookDescriptorWrapper(
     val lastModified = workbookDescriptor.targetCollection.modifiedTs
     val sourceLanguage = workbookDescriptor.sourceLanguage
     val targetLanguage = workbookDescriptor.targetLanguage
+    val sourceMetadataSlug = workbookDescriptor.sourceCollection.resourceContainer!!.identifier
     val anthology = workbookDescriptor.anthology
 
     val progressProperty = SimpleDoubleProperty(0.0)

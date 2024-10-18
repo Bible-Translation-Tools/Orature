@@ -23,18 +23,17 @@ import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
-import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.utils.computeFileChecksum
 import java.io.File
-import java.time.LocalDate
 import javax.inject.Inject
 
 class ChapterTranslationBuilder @Inject constructor(
-    private val concatenateAudio: ConcatenateAudio
+    private val concatenateAudio: ConcatenateAudio,
+    private val takeCreator: TakeCreator
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -104,29 +103,15 @@ class ChapterTranslationBuilder @Inject constructor(
 
         return chapter.audio.getNewTakeNumber()
             .map { takeNumber ->
-                createNewTake(
+                takeCreator.createNewTake(
                     takeNumber,
                     namer.generateName(takeNumber, AudioFileFormat.WAV),
-                    chapterAudioDir
+                    chapterAudioDir,
+                    createEmpty = false
                 ).also {
                     file.copyTo(it.file, overwrite = true)
                 }
             }
-    }
-
-    private fun createNewTake(
-        newTakeNumber: Int,
-        filename: String,
-        audioDir: File
-    ): Take {
-        val takeFile = audioDir.resolve(File(filename))
-        return Take(
-            name = takeFile.name,
-            file = takeFile,
-            number = newTakeNumber,
-            format = MimeType.WAV,
-            createdTimestamp = LocalDate.now()
-        )
     }
 
     private fun getFileNamer(

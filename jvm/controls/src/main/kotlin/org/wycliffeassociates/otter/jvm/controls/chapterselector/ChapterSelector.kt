@@ -24,12 +24,12 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.event.EventTarget
-import javafx.scene.control.Control
-import javafx.scene.control.Skin
-import org.wycliffeassociates.otter.jvm.controls.skins.chapterselector.ChapterSelectorSkin
+import javafx.scene.layout.StackPane
+import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import tornadofx.*
 
-class ChapterSelector : Control() {
+class ChapterSelector : StackPane() {
     val chapterTitleProperty = SimpleStringProperty()
     val onChapterSelectorOpenedProperty =
         SimpleObjectProperty<EventHandler<ActionEvent>>()
@@ -39,11 +39,29 @@ class ChapterSelector : Control() {
     val nextDisabledProperty = SimpleBooleanProperty()
 
     init {
-        styleClass.setAll("chapter-selector")
-    }
-
-    override fun createDefaultSkin(): Skin<*> {
-        return ChapterSelectorSkin(this)
+        addClass("chapter-selector")
+        hbox {
+            addClass("chapter-selector__controls")
+            button {
+                addClass("btn", "btn--tertiary", "chapter-selector__btn-prev")
+                graphic = FontIcon(MaterialDesign.MDI_CHEVRON_LEFT)
+                disableProperty().bind(prevDisabledProperty)
+                onActionProperty().bind(onPrevChapterActionProperty)
+            }
+            button(chapterTitleProperty) {
+                addClass("chapter-selector__title")
+                graphic = FontIcon(MaterialDesign.MDI_FILE)
+                fitToParentHeight()
+                disableProperty().bind(prevDisabledProperty.and(nextDisabledProperty))
+                onActionProperty().bind(onChapterSelectorOpenedProperty)
+            }
+            button {
+                addClass("btn", "btn--tertiary", "chapter-selector__btn-next")
+                graphic = FontIcon(MaterialDesign.MDI_CHEVRON_RIGHT)
+                disableProperty().bind(nextDisabledProperty)
+                onActionProperty().bind(onNextChapterActionProperty)
+            }
+        }
     }
 
     fun setOnPreviousChapter(op: () -> Unit) {

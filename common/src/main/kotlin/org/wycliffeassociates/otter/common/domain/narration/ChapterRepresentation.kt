@@ -155,11 +155,11 @@ internal class ChapterRepresentation(
     }
 
     fun finalizeVerse(verseIndex: Int, history: NarrationHistory? = null): Int {
-        val endIndex = frameToIndex(scratchAudio.totalFrames)
+        val endIndex = frameToIndex(scratchAudio.totalFrames) - 1
 
         history?.finalizeVerse(endIndex, totalVerses)
         onVersesUpdated()
-        return endIndex - 1 // subtract 1 due to the sector being finalized with `until`
+        return endIndex
     }
 
     fun onVersesUpdated() {
@@ -346,7 +346,7 @@ internal class ChapterRepresentation(
         verses
             .find { it.marker.label == verse.label }
             ?.let { _verse ->
-                return indexToFrame(_verse.firstIndex()) .. indexToFrame(_verse.lastIndex())
+                return indexToFrame(_verse.firstIndex())..indexToFrame(_verse.lastIndex())
             }
         return null
     }

@@ -21,9 +21,11 @@ package org.wycliffeassociates.otter.jvm.controls.event
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import tornadofx.FXEvent
+import java.io.File
 
 class ChunkingStepSelectedEvent(val step: ChunkingStep) : FXEvent()
 class ChunkSelectedEvent(val chunkNumber: Int): FXEvent()
+class ChunkExportedEvent(val chunkTake: Take, val outputFile: File): FXEvent()
 class ChunkTakeEvent(val take: Take, val action: TakeAction): FXEvent()
 enum class TakeAction {
     SELECT,
@@ -43,3 +45,10 @@ class RedoChunkingPageEvent: FXEvent()
 class GoToNextChapterEvent: FXEvent()
 class GoToPreviousChapterEvent: FXEvent()
 class OpenInPluginEvent: FXEvent()
+
+/**
+ * Use this event to avoid unwanted auto-navigation or state refresh
+ * when returning from an external plugin. Only fire this event inside
+ * onDock() of main view in Translation.
+ */
+class ReturnFromPluginEvent: FXEvent()

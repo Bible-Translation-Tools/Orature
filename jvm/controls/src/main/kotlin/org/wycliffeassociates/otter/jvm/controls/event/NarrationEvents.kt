@@ -18,17 +18,16 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.event
 
-import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import tornadofx.FXEvent
 import java.io.File
 
-class BeginRecordingEvent(val index: Int, val chunk: Chunk) : FXEvent()
+class BeginRecordingEvent(val index: Int) : FXEvent()
 class NextVerseEvent(val currentIndex: Int) : FXEvent()
-class PauseRecordingEvent(val index: Int, val chunk: Chunk) : FXEvent()
-class PauseRecordAgainEvent(val index: Int, val chunk: Chunk) : FXEvent()
-class ResumeRecordingEvent(val index: Int, val chunk: Chunk) : FXEvent()
-class ResumeRecordingAgainEvent(val index: Int, val chunk: Chunk) : FXEvent()
-class RecordVerseEvent(val index: Int, val chunk: Chunk) : FXEvent()
+class PauseRecordingEvent(val index: Int) : FXEvent()
+class PauseRecordAgainEvent(val index: Int) : FXEvent()
+class ResumeRecordingEvent(val index: Int) : FXEvent()
+class ResumeRecordingAgainEvent(val index: Int) : FXEvent()
+class RecordVerseEvent(val index: Int) : FXEvent()
 class RecordAgainEvent(val index: Int) : FXEvent()
 class GenerateVerseEvent(val index: Int, val text: String): FXEvent()
 class SaveRecordingEvent(val index: Int) : FXEvent()

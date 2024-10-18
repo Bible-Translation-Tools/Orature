@@ -24,6 +24,7 @@ import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
+import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.License
@@ -62,7 +63,10 @@ class SourceProjectExporter @Inject constructor(
     lateinit var audioExporter: AudioExporter
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
-    private val exportMediaTypes = listOf(AudioFileFormat.MP3.extension, "cue")
+    private val exportMediaTypes = listOf(
+        AudioFileFormat.MP3.extension,
+        AudioMetadataFileFormat.CUE.extension
+    )
 
     override fun export(
         outputDirectory: File,

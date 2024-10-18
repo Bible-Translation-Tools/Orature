@@ -22,10 +22,13 @@ import javafx.animation.FadeTransition
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
+import javafx.stage.FileChooser
 import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.jvm.controls.TakeSelectionAnimationMediator
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkExportedEvent
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.event.TakeAction
@@ -52,7 +55,28 @@ class ChunkTakeCard(take: TakeCardModel) : HBox() {
             sideTextProperty.bind(remainingTimeProperty)
         }
         button {
-            addClass("btn", "btn--secondary")
+            addClass("btn", "btn--tertiary")
+            tooltip(messages["export"])
+            graphic = FontIcon(MaterialDesign.MDI_EXPORT)
+
+            action {
+                chooseFile(
+                    FX.messages["export"],
+                    arrayOf(
+                        FileChooser.ExtensionFilter(
+                            messages["audioFileTypes"],
+                            "*.${AudioFileFormat.MP3.extension}"
+                        )
+                    ),
+                    mode = FileChooserMode.Save,
+                    initialFileName = take.take.name
+                ).firstOrNull()?.let {
+                    FX.eventbus.fire(ChunkExportedEvent(take.take, it))
+                }
+            }
+        }
+        button {
+            addClass("btn", "btn--tertiary")
             tooltip(messages["delete"])
             graphic = FontIcon(MaterialDesign.MDI_DELETE)
 
@@ -68,7 +92,7 @@ class ChunkTakeCard(take: TakeCardModel) : HBox() {
             }
         }
         button {
-            addClass("btn", "btn--secondary")
+            addClass("btn", "btn--tertiary")
             tooltip(messages["select"])
             togglePseudoClass("active", take.selected)
 

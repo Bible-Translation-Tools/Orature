@@ -23,6 +23,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.dialog.ImportAudioDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.LoadingModal
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
@@ -153,6 +154,8 @@ class NarrationPage : View() {
     }
 
     private fun subscribeToEvents() {
+        addShortcut()
+
         subscribe<PluginOpenedEvent> { pluginInfo ->
             if (!pluginInfo.isNative) {
                 workspace.dock(pluginOpenedPage)
@@ -361,6 +364,10 @@ class NarrationPage : View() {
 
             open()
         }
+    }
+
+    private fun addShortcut() {
+        workspace.shortcut(Shortcut.RECORD.value, viewModel::handleRecordShortcut)
     }
 }
 

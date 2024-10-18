@@ -71,7 +71,7 @@ jobs:
           -e ORG_GRADLE_PROJECT_sentryDsn \
           -e GITHUB_TOKEN \
           -e SONAR_TOKEN \
-          wycliffeassociates/install4j-docker:10.0.6 \
+          wycliffeassociates/install4j-docker:10.0.9 \
           ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx2048m -Dnet.bytebuddy.experimental=true -XX:MaxMetaspaceSize=512m"
         env:
           UPDATE_PATH: ${{ needs.set-env-vars.outputs.UPDATE_PATH }}
@@ -87,6 +87,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: unsigned-binaries
+          include-hidden-files: true
           path: jvm/workbookapp/.exec/
   sign-windows:
     runs-on: windows-latest
@@ -105,16 +106,17 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: unsigned-binaries
+          include-hidden-files: true
           path: ${{ github.workspace }}/binaries
 
       - name: Sign files with Azure Code Signing
-        uses: azure/azure-code-signing-action@v0.3.0
+        uses: azure/trusted-signing-action@v0.4.0
         with:
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
           azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
           endpoint: https://eus.codesigning.azure.net/
-          code-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_ACCOUNT_NAME }}
+          trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_ACCOUNT_NAME }}
           certificate-profile-name: ${{ secrets.AZURE_CERTIFICATE_PROFILE_NAME }}
           files-folder: ${{ github.workspace }}/binaries
           files-folder-filter: exe
@@ -125,6 +127,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: upload-binaries
+          include-hidden-files: true
           path: ${{ github.workspace }}/binaries
   upload:
     runs-on: ubuntu-20.04
@@ -134,6 +137,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: upload-binaries
+          include-hidden-files: true
           path: ${{ github.workspace }}/binaries
       - name: upload
         if: github.event_name != 'pull_request'

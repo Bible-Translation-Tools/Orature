@@ -37,7 +37,7 @@ class LanguageTableRow(
 
         isDisable = item in unavailableLanguages
         isMouseTransparent = isDisable
-        isFocusTraversable = !isDisable
+        isFocusTraversable = false
 
         setOnMouseClicked {
             if (it.clickCount == 1) { // avoid double fire()

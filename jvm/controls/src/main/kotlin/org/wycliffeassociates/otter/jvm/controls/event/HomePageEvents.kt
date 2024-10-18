@@ -21,10 +21,12 @@ package org.wycliffeassociates.otter.jvm.controls.event
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
+import org.wycliffeassociates.otter.jvm.controls.model.ResourceVersion
 import tornadofx.FXEvent
 import java.io.File
 
 class LanguageSelectedEvent(val item: Language) : FXEvent()
+class ResourceVersionSelectedEvent(val resourceVersion: ResourceVersion): FXEvent()
 
 class ProjectImportFinishEvent(
     val result: ImportResult,

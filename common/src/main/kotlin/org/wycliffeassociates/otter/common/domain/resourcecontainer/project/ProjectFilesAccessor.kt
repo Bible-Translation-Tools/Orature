@@ -677,8 +677,10 @@ class ProjectFilesAccessor(
         ResourceContainer.load(source).use {
             val inMap = it.accessor.getInputStreams(".", listOf())
                 .filterKeys { path ->
-                    if (path.contains("${RcConstants.SOURCE_MEDIA_DIR}/")) {
-                        path.contains("${RcConstants.SOURCE_MEDIA_DIR}/${project.slug}")
+                    val sourceAudioDir = "${RcConstants.SOURCE_MEDIA_DIR}/"
+                    if (path.contains(sourceAudioDir)) {
+                        path.substringAfter(sourceAudioDir)
+                            .contains("${sourceMetadata.identifier}_${project.slug}")
                     } else {
                         true
                     }

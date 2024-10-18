@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="10.0.5" transformSequenceNumber="10">
+<install4j version="10.0.9" transformSequenceNumber="10">
   <directoryPresets config="." />
   <application name="Orature" applicationId="8057-9807-3529-9982" mediaDir=".exec" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-${compiler:sys.version}" shortName="orature" version="0.1" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="82fd10b9f6e2b1b5" javaMinVersion="21" javaMaxVersion="21">
     <codeSigning windowsEnabled="true" windowsPkcs12File="~/signing.p12" />
@@ -25,6 +25,8 @@
           <archive location="workbookapp.jar" />
         </classPath>
       </java>
+      <infoPlist>&lt;key&gt;NSMicrophoneUsageDescription&lt;/key&gt;
+&lt;string&gt;Enable Microphone for recording&lt;/string&gt;</infoPlist>
       <iconImageFiles>
         <file path="./orature_icon_48x48.png" />
         <file path="./orature_icon_128x128.png" />

@@ -37,4 +37,6 @@ dependencies {
 
     implementation "org.bibletranslationtools:kotlin-scripture-burrito:$kotlinscriptureburritoVer"
     implementation 'ws.schild:jave-all-deps:3.5.0'
+    implementation "org.bibletranslationtools:kotlin-vtt:$kotlinVttVer"
+    implementation "org.bibletranslationtools:kotlin-scripture-alignment:$kotlinScriptureAlignmentVer"
 }

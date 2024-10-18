@@ -148,10 +148,13 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     private fun initializeSourceAudio(chapter: Int): Maybe<SourceAudio> {
         return Maybe.fromCallable {
             val workbook = workbookDataStore.workbook
-            ChunkAudioUseCase(directoryProvider, workbook.projectFilesAccessor)
-                .copySourceAudioToProject(sourceAudio.file)
+            workbook.sourceAudioAccessor.getUserMarkedChapter(chapter, workbook.target)  // this first call is intentional. See https://github.com/Bible-Translation-Tools/Orature/pull/1186
+                ?: let {
+                    ChunkAudioUseCase(directoryProvider, workbook.projectFilesAccessor)
+                        .copySourceAudioToProject(sourceAudio.file)
 
-            workbook.sourceAudioAccessor.getUserMarkedChapter(chapter, workbook.target)
+                    workbook.sourceAudioAccessor.getUserMarkedChapter(chapter, workbook.target)
+                }
         }
     }
 

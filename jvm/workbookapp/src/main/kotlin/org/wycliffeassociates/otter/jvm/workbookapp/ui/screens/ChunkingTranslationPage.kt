@@ -18,8 +18,11 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.beans.binding.Bindings
 import javafx.scene.layout.Priority
+import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkExportedEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SourceTextDrawer
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkSelectedEvent
@@ -27,7 +30,11 @@ import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToPreviousChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ReturnFromPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
+import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
+import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
+import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.BlindDraft
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.Chunking
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.ChunkingStepsDrawer
@@ -40,6 +47,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.trans
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
+import java.lang.Exception
+import java.text.MessageFormat
 
 class ChunkingTranslationPage : View() {
 
@@ -136,6 +145,9 @@ class ChunkingTranslationPage : View() {
         subscribe<ChunkSelectedEvent> {
             viewModel.selectChunk(it.chunkNumber)
         }
+        subscribe<ChunkExportedEvent> {
+            handleExportChunk(it)
+        }
         subscribe<GoToNextChapterEvent> {
             viewModel.nextChapter()
         }
@@ -150,11 +162,51 @@ class ChunkingTranslationPage : View() {
 
     override fun onDock() {
         super.onDock()
-        viewModel.dockPage()
+        when (viewModel.pluginOpenedProperty.value) {
+            true -> {
+                // returning from plugin, notify child view without triggering onDock()
+                FX.eventbus.fire(ReturnFromPluginEvent())
+            }
+            false -> {
+                viewModel.dockPage()
+            }
+        }
     }
 
     override fun onUndock() {
         super.onUndock()
-        viewModel.undockPage()
+        when (viewModel.pluginOpenedProperty.value) {
+            true -> {
+                // no-op, opening plugin
+            }
+            false -> {
+                viewModel.undockPage()
+            }
+        }
+    }
+
+    private fun handleExportChunk(event: ChunkExportedEvent) {
+        viewModel.exportChunk(event.chunkTake, event.outputFile)
+            .observeOnFx()
+            .doOnComplete {
+                val notification = NotificationViewData(
+                    title = messages["exportSuccessful"],
+                    message = MessageFormat.format(messages["export_take_successful"], event.chunkTake.number),
+                    statusType = NotificationStatusType.SUCCESSFUL,
+                    actionText = messages["showLocation"],
+                    actionIcon = MaterialDesign.MDI_OPEN_IN_NEW
+                ) {
+                    val f = event.outputFile
+                    if (f.exists()) {
+                        try {
+                            viewModel.openInFilesManager(f.path)
+                        } catch (_: Exception) {
+                            // no-op
+                        }
+                    }
+                }
+                SnackbarHandler.showNotification(notification, root)
+            }
+            .subscribe()
     }
 }

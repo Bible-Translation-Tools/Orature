@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.subscribeOnFx
-import com.jakewharton.rxrelay2.BehaviorRelay
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -44,7 +43,6 @@ import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.getWaveformColors
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
-import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
@@ -54,6 +52,7 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.ChapterTranslationBuilder
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
+import org.wycliffeassociates.otter.common.domain.content.TakeCreator
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
@@ -76,9 +75,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.SnackBarEvent
 import tornadofx.*
-import java.io.File
 import java.text.MessageFormat
-import java.time.LocalDate
 import javax.inject.Inject
 import kotlin.collections.sortBy
 
@@ -96,6 +93,9 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
     @Inject
     lateinit var chapterTranslationBuilder: ChapterTranslationBuilder
+
+    @Inject
+    lateinit var takeCreator: TakeCreator
 
     val settingsViewModel: SettingsViewModel by inject()
     val workbookDataStore: WorkbookDataStore by inject()
@@ -147,14 +147,13 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-
-        translationViewModel.pluginOpenedProperty.bind(pluginOpenedProperty)
     }
 
     fun dock() {
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
         workbookDataStore.activeChunkProperty.set(null)
         translationViewModel.currentMarkerProperty.bind(highlightedMarkerIndexProperty)
+        translationViewModel.pluginOpenedProperty.bind(pluginOpenedProperty)
 
         Completable
             .fromAction {
@@ -191,6 +190,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             ?.writeMarkers()
             ?.blockingAwait()
 
+        translationViewModel.pluginOpenedProperty.unbind()
         translationViewModel.currentMarkerProperty.unbind()
         translationViewModel.currentMarkerProperty.set(-1)
         cleanup()
@@ -325,6 +325,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                                 // no-op
                             }
                         }
+
                         FX.eventbus.fire(PluginClosedEvent(pluginType))
                     }
             }
@@ -472,37 +473,23 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                 .resolve(namer.formatChapterNumber())
                 .apply { mkdirs() }
 
+            val chapterTake = workbookDataStore.chapter.getSelectedTake()!!
+
             chapter.audio.getNewTakeNumber()
                 .map { takeNumber ->
-                    createNewTake(
+                    val newTake = takeCreator.createNewTake(
                         takeNumber,
                         namer.generateName(takeNumber, AudioFileFormat.WAV),
-                        chapterAudioDir
+                        chapterAudioDir,
+                        createEmpty = false
                     )
+                    chapterTake.file.copyTo(newTake.file, overwrite = true)
+                    newTake.checkingState.accept(
+                        TakeCheckingState(CheckingStatus.VERSE, chapterTake.getSavedChecksum())
+                    )
+                    newTake
                 }
         }
-    }
-
-    private fun createNewTake(
-        newTakeNumber: Int,
-        filename: String,
-        audioDir: File
-    ): Take {
-        val newTakeFile = audioDir.resolve(File(filename))
-        val chapterTake = workbookDataStore.chapter.getSelectedTake()!!
-        chapterTake.file.copyTo(newTakeFile, true)
-
-        val newTake = Take(
-            name = newTakeFile.name,
-            file = newTakeFile,
-            number = newTakeNumber,
-            format = MimeType.WAV,
-            createdTimestamp = LocalDate.now(),
-            checkingState = BehaviorRelay.createDefault(
-                TakeCheckingState(CheckingStatus.VERSE, chapterTake.getSavedChecksum())
-            )
-        )
-        return newTake
     }
 
     private fun setupUndoRedo(action: TakeEditAction, oldMarkerModel: MarkerPlacementModel?) {

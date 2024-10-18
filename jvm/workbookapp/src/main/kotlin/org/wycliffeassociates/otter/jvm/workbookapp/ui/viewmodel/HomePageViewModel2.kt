@@ -90,6 +90,7 @@ class HomePageViewModel2 : ViewModel() {
     val sortedBooks = SortedList<WorkbookDescriptorWrapper>(filteredBooks)
 
     val selectedProjectGroupProperty = SimpleObjectProperty<ProjectGroupKey>()
+    val bookMarkedProjectGroupProperty = SimpleObjectProperty<ProjectGroupKey>()
     val bookSearchQueryProperty = SimpleStringProperty("")
     val isLoadingProperty = SimpleBooleanProperty(false)
 
@@ -209,9 +210,6 @@ class HomePageViewModel2 : ViewModel() {
                 .observeOnFx()
                 .doOnComplete {
                     logger.info("Deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
-                    projectWizardViewModel.existingLanguagePairs.remove(
-                        Pair(cardModel.sourceLanguage, cardModel.targetLanguage)
-                    )
                 }
                 .doOnDispose {
                     logger.info("Cancelled deleting project group ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
@@ -346,7 +344,7 @@ class HomePageViewModel2 : ViewModel() {
         }
 
         val projectGroups = books.groupBy {
-            ProjectGroupKey(it.sourceLanguage.slug, it.targetLanguage.slug, it.mode)
+            ProjectGroupKey(it.sourceLanguage.slug, it.targetLanguage.slug, it.sourceMetadataSlug, it.mode)
         }
         projectGroups
             .map { entry ->
@@ -360,6 +358,7 @@ class HomePageViewModel2 : ViewModel() {
                     book.sourceLanguage,
                     book.targetLanguage,
                     book.mode,
+                    book.sourceMetadataSlug,
                     mostRecentBook?.lastModified,
                     bookList.toObservable()
                 )
@@ -368,7 +367,9 @@ class HomePageViewModel2 : ViewModel() {
             .let { modelList ->
                 this.projectGroups.setAll(modelList)
                 modelList.firstOrNull()?.let { cardModel ->
-                    selectedProjectGroupProperty.set(cardModel.getKey())
+                    val selectedProject = bookMarkedProjectGroupProperty.value ?: cardModel.getKey()
+                    selectedProjectGroupProperty.set(selectedProject)
+                    bookMarkedProjectGroupProperty.set(null)
                     bookList.setAll(cardModel.books)
                 }
             }
