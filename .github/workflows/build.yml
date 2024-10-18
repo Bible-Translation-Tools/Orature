@@ -33,20 +33,6 @@ jobs:
         if: ${{ steps.tagged.outcome == 'skipped' }}
       - name: set s3 destination_dir
         run: echo "S3_DESTINATION=$CI_REPOSITORY_OWNER/$CI_REPOSITORY_NAME/$UPDATE_PATH" >> $GITHUB_ENV
-        # op doesn't work windows
-      - name: Set windows signing secrets
-        uses: 1password/load-secrets-action@v2
-        id: set-windows-signing-secrets
-        with:
-          export-env: false
-        env:
-          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          AZURE_TENANT_ID: "op://AppDev Scripture Accessibility/azure-codesign-secrets/tenant-id"
-          AZURE_CLIENT_ID: "op://AppDev Scripture Accessibility/azure-codesign-secrets/client-id"
-          AZURE_CLIENT_SECRET: "op://AppDev Scripture Accessibility/azure-codesign-secrets/client-secret"
-          AZURE_CODE_SIGNING_ACCOUNT_NAME: "op://AppDev Scripture Accessibility/azure-codesign-secrets/code-signing-account-name"
-          AZURE_CERTIFICATE_PROFILE_NAME: "op://AppDev Scripture Accessibility/azure-codesign-secrets/certificate-profile-name"
-
       - name: output env vars
         id: output_env_vars_step
         run: |
@@ -59,11 +45,6 @@ jobs:
       UPDATE_PATH: ${{ steps.output_env_vars_step.outputs.UPDATE_PATH }}
       PRERELEASE_BOOL: ${{ steps.output_env_vars_step.outputs.PRERELEASE_BOOL }}
       S3_DESTINATION: ${{ steps.output_env_vars_step.outputs.S3_DESTINATION }}
-      AZURE_TENANT_ID: ${{ steps.set-windows-signing-secrets.outputs.AZURE_TENANT_ID }}
-      AZURE_CLIENT_ID: ${{ steps.set-windows-signing-secrets.outputs.AZURE_CLIENT_ID }}
-      AZURE_CLIENT_SECRET: ${{ steps.set-windows-signing-secrets.outputs.AZURE_CLIENT_SECRET }}
-      AZURE_CODE_SIGNING_ACCOUNT_NAME: ${{ steps.set-windows-signing-secrets.outputs.AZURE_CODE_SIGNING_ACCOUNT_NAME }}
-      AZURE_CERTIFICATE_PROFILE_NAME: ${{ steps.set-windows-signing-secrets.outputs.AZURE_CERTIFICATE_PROFILE_NAME }}
 
   build:
     runs-on: ubuntu-20.04
@@ -140,7 +121,7 @@ jobs:
           path: jvm/workbookapp/.exec/
   sign-windows:
     runs-on: windows-latest
-    needs: [set-env-vars, build]
+    needs: [build]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -160,13 +141,14 @@ jobs:
 
       - name: Sign files with Azure Code Signing
         uses: azure/trusted-signing-action@v0.4.0
+        # op doesn't work windows. Have to stick with secrets
         with:
-          azure-tenant-id: ${{ needs.set-env-vars.outputs.AZURE_TENANT_ID }}
-          azure-client-id: ${{ needs.set-env-vars.outputs.AZURE_CLIENT_ID }}
-          azure-client-secret: ${{ needs.set-env-vars.outputs.AZURE_CLIENT_SECRET }}
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
           endpoint: https://eus.codesigning.azure.net/
-          trusted-signing-account-name: ${{ needs.set-env-vars.outputs.AZURE_CODE_SIGNING_ACCOUNT_NAME }}
-          certificate-profile-name: ${{ needs.set-env-vars.outputs.AZURE_CERTIFICATE_PROFILE_NAME }}
+          trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_ACCOUNT_NAME }}
+          certificate-profile-name: ${{ secrets.AZURE_CERTIFICATE_PROFILE_NAME }}
           files-folder: ${{ github.workspace }}/binaries
           files-folder-filter: exe
           file-digest: SHA256
