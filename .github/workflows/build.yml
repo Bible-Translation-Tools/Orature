@@ -36,8 +36,9 @@ jobs:
         # op doesn't work windows
       - name: Set windows signing secrets
         uses: 1password/load-secrets-action@v2
+        id: set-windows-signing-secrets
         with:
-          export-env: true
+          export-env: false
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           AZURE_TENANT_ID: "op://AppDev Scripture Accessibility/azure-codesign-secrets/tenant-id"
@@ -53,21 +54,16 @@ jobs:
           echo "UPDATE_PATH=$UPDATE_PATH" >> $GITHUB_OUTPUT
           echo "PRERELEASE_BOOL=$PRERELEASE_BOOL" >> $GITHUB_OUTPUT
           echo "S3_DESTINATION=$S3_DESTINATION" >> $GITHUB_OUTPUT
-          echo "AZURE_TENANT_ID=$AZURE_TENANT_ID" >> $GITHUB_OUTPUT
-          echo "AZURE_CLIENT_ID=$AZURE_CLIENT_ID" >> $GITHUB_OUTPUT
-          echo "AZURE_CLIENT_SECRET=$AZURE_CLIENT_SECRET" >> $GITHUB_OUTPUT
-          echo "AZURE_CODE_SIGNING_ACCOUNT_NAME=$AZURE_CODE_SIGNING_ACCOUNT_NAME" >> $GITHUB_OUTPUT
-          echo "AZURE_CERTIFICATE_PROFILE_NAME=$AZURE_CERTIFICATE_PROFILE_NAME" >> $GITHUB_OUTPUT
     outputs:
       GHA_VERSION: ${{ steps.output_env_vars_step.outputs.GHA_VERSION }}
       UPDATE_PATH: ${{ steps.output_env_vars_step.outputs.UPDATE_PATH }}
       PRERELEASE_BOOL: ${{ steps.output_env_vars_step.outputs.PRERELEASE_BOOL }}
       S3_DESTINATION: ${{ steps.output_env_vars_step.outputs.S3_DESTINATION }}
-      AZURE_TENANT_ID: ${{ steps.output_env_vars_step.outputs.AZURE_TENANT_ID }}
-      AZURE_CLIENT_ID: ${{ steps.output_env_vars_step.outputs.AZURE_CLIENT_ID }}
-      AZURE_CLIENT_SECRET: ${{ steps.output_env_vars_step.outputs.AZURE_CLIENT_SECRET }}
-      AZURE_CODE_SIGNING_ACCOUNT_NAME: ${{ steps.output_env_vars_step.outputs.AZURE_CODE_SIGNING_ACCOUNT_NAME }}
-      AZURE_CERTIFICATE_PROFILE_NAME: ${{ steps.output_env_vars_step.outputs.AZURE_CERTIFICATE_PROFILE_NAME }}
+      AZURE_TENANT_ID: ${{ steps.set-windows-signing-secrets.outputs.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ steps.set-windows-signing-secrets.outputs.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ steps.set-windows-signing-secrets.outputs.AZURE_CLIENT_SECRET }}
+      AZURE_CODE_SIGNING_ACCOUNT_NAME: ${{ steps.set-windows-signing-secrets.outputs.AZURE_CODE_SIGNING_ACCOUNT_NAME }}
+      AZURE_CERTIFICATE_PROFILE_NAME: ${{ steps.set-windows-signing-secrets.outputs.AZURE_CERTIFICATE_PROFILE_NAME }}
 
   build:
     runs-on: ubuntu-20.04
