@@ -33,6 +33,19 @@ jobs:
         if: ${{ steps.tagged.outcome == 'skipped' }}
       - name: set s3 destination_dir
         run: echo "S3_DESTINATION=$CI_REPOSITORY_OWNER/$CI_REPOSITORY_NAME/$UPDATE_PATH" >> $GITHUB_ENV
+        # op doesn't work windows
+      - name: Set windows signing secrets
+        uses: 1password/load-secrets-action@v2
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          AZURE_TENANT_ID: "op://AppDev Scripture Accessibility/azure-codesign-secrets/tenant-id"
+          AZURE_CLIENT_ID: "op://AppDev Scripture Accessibility/azure-codesign-secrets/client-id"
+          AZURE_CLIENT_SECRET: "op://AppDev Scripture Accessibility/azure-codesign-secrets/client-secret"
+          AZURE_CODE_SIGNING_ACCOUNT_NAME: "op://AppDev Scripture Accessibility/azure-codesign-secrets/code-signing-account-name"
+          AZURE_CERTIFICATE_PROFILE_NAME: "op://AppDev Scripture Accessibility/azure-codesign-secrets/certificate-profile-name"
+
       - name: output env vars
         id: output_env_vars_step
         run: |
@@ -40,7 +53,28 @@ jobs:
           echo "UPDATE_PATH=$UPDATE_PATH" >> $GITHUB_OUTPUT
           echo "PRERELEASE_BOOL=$PRERELEASE_BOOL" >> $GITHUB_OUTPUT
           echo "S3_DESTINATION=$S3_DESTINATION" >> $GITHUB_OUTPUT
-      - name: Source Secrets
+          echo "AZURE_TENANT_ID=$AZURE_TENANT_ID" >> $GITHUB_OUTPUT
+          echo "AZURE_CLIENT_ID=$AZURE_CLIENT_ID" >> $GITHUB_OUTPUT
+          echo "AZURE_CLIENT_SECRET=$AZURE_CLIENT_SECRET" >> $GITHUB_OUTPUT
+          echo "AZURE_CODE_SIGNING_ACCOUNT_NAME=$AZURE_CODE_SIGNING_ACCOUNT_NAME" >> $GITHUB_OUTPUT
+          echo "AZURE_CERTIFICATE_PROFILE_NAME=$AZURE_CERTIFICATE_PROFILE_NAME" >> $GITHUB_OUTPUT
+    outputs:
+      GHA_VERSION: ${{ steps.output_env_vars_step.outputs.GHA_VERSION }}
+      UPDATE_PATH: ${{ steps.output_env_vars_step.outputs.UPDATE_PATH }}
+      PRERELEASE_BOOL: ${{ steps.output_env_vars_step.outputs.PRERELEASE_BOOL }}
+      S3_DESTINATION: ${{ steps.output_env_vars_step.outputs.S3_DESTINATION }}
+      AZURE_TENANT_ID: ${{ steps.output_env_vars_step.outputs.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ steps.output_env_vars_step.outputs.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ steps.output_env_vars_step.outputs.AZURE_CLIENT_SECRET }}
+      AZURE_CODE_SIGNING_ACCOUNT_NAME: ${{ steps.output_env_vars_step.outputs.AZURE_CODE_SIGNING_ACCOUNT_NAME }}
+      AZURE_CERTIFICATE_PROFILE_NAME: ${{ steps.output_env_vars_step.outputs.AZURE_CERTIFICATE_PROFILE_NAME }}
+
+  build:
+    runs-on: ubuntu-20.04
+    needs: set-env-vars
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set Build Secrets
         uses: 1password/load-secrets-action@v2
         with:
           export-env: true
@@ -55,51 +89,13 @@ jobs:
           SONAR_TOKEN: "op://DevOps/Orature CI_CD/SONAR_TOKEN"
           MAC_NOTARY_ISSUER: "op://DevOps/Orature CI_CD/MAC_NOTARY_ISSUER"
           MAC_NOTARY_KEY_ID: "op://DevOps/Orature CI_CD/MAC_NOTARY_KEY_ID"
-          AZURE_TENANT_ID: "op://AppDev Scripture Accessibility/azure-codesign-secrets/tenant-id"
-          AZURE_CLIENT_ID: "op://AppDev Scripture Accessibility/azure-codesign-secrets/client-id"
-          AZURE_CLIENT_SECRET: "op://AppDev Scripture Accessibility/azure-codesign-secrets/client-secret"
-          AZURE_CODE_SIGNING_ACCOUNT_NAME: "op://AppDev Scripture Accessibility/azure-codesign-secrets/code-signing-account-name"
-          AZURE_CERTIFICATE_PROFILE_NAME: "op://AppDev Scripture Accessibility/azure-codesign-secrets/certificate-profile-name"
-          AWS_KEY_ID: "op://DevOps/travis-nightlybuilds aws s3 api access for travis uploads/S3_ACCESS_KEY_ID"
-          AWS_SECRET_ACCESS_KEY: "op://DevOps/travis-nightlybuilds aws s3 api access for travis uploads/S3_SECRET_ACCESS_KEY"
-          AWS_BUCKET: "op://DevOps/travis-nightlybuilds aws s3 api access for travis uploads/S3_BUCKET"
-
-    outputs:
-      GHA_VERSION: ${{ steps.output_env_vars_step.outputs.GHA_VERSION }}
-      UPDATE_PATH: ${{ steps.output_env_vars_step.outputs.UPDATE_PATH }}
-      PRERELEASE_BOOL: ${{ steps.output_env_vars_step.outputs.PRERELEASE_BOOL }}
-      S3_DESTINATION: ${{ steps.output_env_vars_step.outputs.S3_DESTINATION }}
-      OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-      MAC_SIGNING_KEY_BASE64: ${{ env.MAC_SIGNING_KEY_BASE64 }}
-      MAC_APP_STORE_NOTARY_API_KEY: ${{ env.MAC_APP_STORE_NOTARY_API_KEY }}
-      INSTALL4J_LICENSE_11: ${{ env.INSTALL4J_LICENSE_11 }}
-      MAC_KEYSTORE_PW: ${{ env.MAC_KEYSTORE_PW }}
-      ORG_GRADLE_PROJECT_githubOauthToken: ${{ env.ORG_GRADLE_PROJECT_githubOauthToken }}
-      ORG_GRADLE_PROJECT_sentryDsn: ${{ env.ORG_GRADLE_PROJECT_sentryDsn }}
-      SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
-      MAC_NOTARY_ISSUER: ${{ env.MAC_NOTARY_ISSUER }}
-      MAC_NOTARY_KEY_ID: ${{ env.MAC_NOTARY_KEY_ID }}
-      AZURE_TENANT_ID: ${{ env.AZURE_TENANT_ID }}
-      AZURE_CLIENT_ID: ${{ env.AZURE_CLIENT_ID }}
-      AZURE_CLIENT_SECRET: ${{ env.AZURE_CLIENT_SECRET }}
-      AZURE_CODE_SIGNING_ACCOUNT_NAME: ${{ env.AZURE_CODE_SIGNING_ACCOUNT_NAME }}
-      AZURE_CERTIFICATE_PROFILE_NAME: ${{ env.AZURE_CERTIFICATE_PROFILE_NAME }}
-      AWS_KEY_ID: ${{ env.AWS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
-      AWS_BUCKET: ${{ env.AWS_BUCKET }}
-
-  build:
-    runs-on: ubuntu-20.04
-    needs: set-env-vars
-    steps:
-      - uses: actions/checkout@v3
       - name: Write mac secrets for i4j
         shell: bash
         run: |
           echo -n $MAC_SIGNING_KEY_BASE64 | base64 -d > $HOME/signing_macos.p12 && echo -n $MAC_APP_STORE_NOTARY_API_KEY > $HOME/mac_app_notary_key.p8
         env:
-          MAC_SIGNING_KEY_BASE64: ${{ needs.set-env-vars.outputs.MAC_SIGNING_KEY_BASE64 }}
-          MAC_APP_STORE_NOTARY_API_KEY: ${{ needs.set-env-vars.outputs.MAC_APP_STORE_NOTARY_API_KEY }}
+          MAC_SIGNING_KEY_BASE64: ${{ env.MAC_SIGNING_KEY_BASE64 }}
+          MAC_APP_STORE_NOTARY_API_KEY: ${{ env.MAC_APP_STORE_NOTARY_API_KEY }}
       - name: install4j build
         shell: bash
         run: |
@@ -122,14 +118,14 @@ jobs:
         env:
           UPDATE_PATH: ${{ needs.set-env-vars.outputs.UPDATE_PATH }}
           ORG_GRADLE_PROJECT_gradlewCommandVersionProp: ${{ needs.set-env-vars.outputs.GHA_VERSION }}
-          ORG_GRADLE_PROJECT_gradlewCommandLicenseProp: ${{ needs.set-env-vars.outputs.INSTALL4J_LICENSE_11 }}
+          ORG_GRADLE_PROJECT_gradlewCommandLicenseProp: ${{ env.INSTALL4J_LICENSE_11 }}
           ORG_GRADLE_PROJECT_githubRepoUrl: https://api.github.com/repos/OratureCrashReports/orature-crash-reports/issues
-          ORG_GRADLE_PROJECT_gradlewmacKeystorePassword: ${{ needs.set-env-vars.outputs.MAC_KEYSTORE_PW }}
-          ORG_GRADLE_PROJECT_githubOauthToken: ${{ needs.set-env-vars.outputs.ORG_GRADLE_PROJECT_githubOauthToken }}
-          ORG_GRADLE_PROJECT_sentryDsn: ${{ needs.set-env-vars.outputs.ORG_GRADLE_PROJECT_sentryDsn }}
-          SONAR_TOKEN: ${{ needs.set-env-vars.outputs.SONAR_TOKEN }}
-          MAC_NOTARY_ISSUER: ${{ needs.set-env-vars.outputs.MAC_NOTARY_ISSUER }}
-          MAC_NOTARY_KEY_ID: ${{ needs.set-env-vars.outputs.MAC_NOTARY_KEY_ID }}
+          ORG_GRADLE_PROJECT_gradlewmacKeystorePassword: ${{ env.MAC_KEYSTORE_PW }}
+          ORG_GRADLE_PROJECT_githubOauthToken: ${{ env.ORG_GRADLE_PROJECT_githubOauthToken }}
+          ORG_GRADLE_PROJECT_sentryDsn: ${{ env.ORG_GRADLE_PROJECT_sentryDsn }}
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+          MAC_NOTARY_ISSUER: ${{ env.MAC_NOTARY_ISSUER }}
+          MAC_NOTARY_KEY_ID: ${{ env.MAC_NOTARY_KEY_ID }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Dump container to artifact
@@ -190,6 +186,14 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [sign-windows, set-env-vars]
     steps:
+      - name: Set upload secrets
+        uses: 1password/load-secrets-action@v2
+        with:
+          export-env: true
+        env:
+          AWS_KEY_ID: "op://DevOps/travis-nightlybuilds aws s3 api access for travis uploads/S3_ACCESS_KEY_ID"
+          AWS_SECRET_ACCESS_KEY: "op://DevOps/travis-nightlybuilds aws s3 api access for travis uploads/S3_SECRET_ACCESS_KEY"
+          AWS_BUCKET: "op://DevOps/travis-nightlybuilds aws s3 api access for travis uploads/S3_BUCKET"
       - name: download artifacts from previous job
         uses: actions/download-artifact@v4
         with:
@@ -199,7 +203,7 @@ jobs:
       - name: upload
         if: github.event_name != 'pull_request'
         run: |
-          AWS_DEFAULT_REGION=us-east-1 AWS_ACCESS_KEY_ID=${{needs.set-env-vars.outputs.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{needs.set-env-vars.outputs.AWS_SECRET_ACCESS_KEY}} aws s3 sync . s3://${{ needs.set-env-vars.outputs.AWS_BUCKET }}/${{ needs.set-env-vars.outputs.S3_DESTINATION }}
+          AWS_DEFAULT_REGION=us-east-1 AWS_ACCESS_KEY_ID=${{env.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{env.AWS_SECRET_ACCESS_KEY}} aws s3 sync . s3://${{ env.AWS_BUCKET }}/${{ needs.set-env-vars.outputs.S3_DESTINATION }}
         working-directory: ${{ github.workspace }}/binaries
       - name: upload artifacts to github releases on tags
         uses: "marvinpinto/action-automatic-releases@v1.2.1"
