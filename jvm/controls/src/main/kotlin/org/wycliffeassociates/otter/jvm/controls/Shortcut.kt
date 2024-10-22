@@ -23,6 +23,7 @@ import javafx.scene.input.KeyCodeCombination
 
 enum class Shortcut(val value: KeyCodeCombination) {
     RECORD(KeyCodeCombination(KeyCode.R, KeyCodeCombination.SHORTCUT_DOWN)),
+    BOUNCE(KeyCodeCombination(KeyCode.B, KeyCodeCombination.SHORTCUT_DOWN)),
     ADD_MARKER(KeyCodeCombination(KeyCode.D, KeyCodeCombination.SHORTCUT_DOWN)),
     PLAY_SOURCE(KeyCodeCombination(KeyCode.SPACE, KeyCodeCombination.SHORTCUT_DOWN)),
     PLAY_TARGET(KeyCodeCombination(KeyCode.SPACE, KeyCodeCombination.SHORTCUT_DOWN, KeyCodeCombination.SHIFT_DOWN)),

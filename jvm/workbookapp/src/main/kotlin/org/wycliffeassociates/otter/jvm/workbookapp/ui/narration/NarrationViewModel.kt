@@ -410,6 +410,15 @@ class NarrationViewModel : ViewModel() {
         }
     }
 
+    fun bounceChapterAudio() {
+        showLoadingDialog()
+
+        narration.createChapterTakeWithAudio()
+            .doAfterSuccess {
+                openLoadingModalProperty.set(false)
+            }
+            .subscribe()
+    }
 
     fun processChapterWithPlugin(pluginType: PluginType) {
 
