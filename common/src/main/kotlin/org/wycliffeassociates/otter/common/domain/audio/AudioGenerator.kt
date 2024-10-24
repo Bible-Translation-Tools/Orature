@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.common.domain.audio
 
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.narration.AudioFileUtils
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
@@ -10,13 +11,48 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import javax.inject.Inject
+import kotlin.math.max
+import kotlin.math.min
 
 class AudioGenerator @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
+    private val concatAudio: ConcatenateAudio,
     private val audioUtils: AudioFileUtils
 ) {
 
     fun convertTextToAudio(text: String): File {
+        return generate(text)
+    }
+
+    fun convertTextToAudio(textItems: List<String>): File {
+        return buildAudio(textItems)
+    }
+
+    private fun buildAudio(chunksText: List<String>): File {
+        val maxToken = 4000
+        var counter = 0
+        val textItemsToConvert = mutableListOf<String>()
+        var tokenPayload = ""
+
+        chunksText.forEach {
+            val newLength = counter + it.length
+            if (newLength <= maxToken) {
+                tokenPayload += " $it"
+            } else {
+                textItemsToConvert.add(tokenPayload)
+                tokenPayload = it
+            }
+
+            counter = newLength
+        }
+        textItemsToConvert.add(tokenPayload)
+
+        val audioFiles = textItemsToConvert.map { generate(it) }
+
+        return concatAudio.execute(audioFiles, includeMarkers = false).blockingGet()
+    }
+
+    private fun generate(text: String): File {
         val generated = File.createTempFile("temp-tts", ".mp3", directoryProvider.tempDirectory)
         request(text, generated)
         val outputFile = File.createTempFile("tts", ".mp3", directoryProvider.tempDirectory)

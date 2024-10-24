@@ -900,10 +900,10 @@ class NarrationViewModel : ViewModel() {
     fun generateChapterAudio() {
         println("GENERATING audio")
         val workbook = workbookDataStore.workbook
-        val chapterText = workbook.source.chapters.blockingFirst().chunks.blockingGet()
+        val chunksText = workbook.source.chapters.filter { it.sort == workbookDataStore.chapter.sort }.blockingFirst()
+            .chunks.blockingGet()
             .map { it.textItem.text }
-            .joinToString("\n")
-        val audio = audioGenerator.convertTextToAudio(chapterText)
+        val audio = audioGenerator.convertTextToAudio(chunksText)
 
         narration.importChapterAudioFile(audio)
             .subscribeOn(Schedulers.io())
