@@ -35,15 +35,16 @@ class AudioGenerator @Inject constructor(
         var tokenPayload = ""
 
         chunksText.forEach {
-            val newLength = counter + it.length
+            val newLength = counter + it.length + 1 // new length includes space
             if (newLength <= maxToken) {
                 tokenPayload += " $it"
+                counter = newLength
             } else {
                 textItemsToConvert.add(tokenPayload)
+                // reset payload with new string
                 tokenPayload = it
+                counter = it.length
             }
-
-            counter = newLength
         }
         textItemsToConvert.add(tokenPayload)
 
