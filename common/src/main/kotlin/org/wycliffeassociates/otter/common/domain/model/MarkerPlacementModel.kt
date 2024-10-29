@@ -137,8 +137,8 @@ class MarkerPlacementModel(
             .map { marker -> MarkerItem(marker, false) }
 
         val missing = all
-            .filter { marker ->
-                placedMarkerItems.any { it.marker.label == marker.label }.not()
+            .filter { markerItem ->
+                placedMarkerItems.any { it.marker.formattedLabel == markerItem.marker.formattedLabel }.not()
             }
             .toTypedArray()
 
