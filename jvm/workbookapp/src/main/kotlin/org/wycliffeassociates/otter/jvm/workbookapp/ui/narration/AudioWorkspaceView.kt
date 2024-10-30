@@ -39,6 +39,8 @@ import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.NarratableItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.verse_markers_layer
@@ -164,7 +166,8 @@ class AudioWorkspaceView : View() {
 
                     setOnLayerScroll { delta ->
                         // Keep position inside audio bounds
-                        val seekTo = Utils.clamp(0, pos + delta, viewModel.totalAudioSizeProperty.value)
+                        val seekTo =
+                            Utils.clamp(0, pos + delta, viewModel.totalAudioSizeProperty.value)
                         viewModel.seekTo(seekTo)
                     }
                 }
@@ -221,7 +224,13 @@ class AudioWorkspaceViewModel : ViewModel() {
 
     val isScrollEnabledProperty = SimpleBooleanProperty()
 
-    fun drawWaveform(context: GraphicsContext, canvas: Canvas, markerNodes: ObservableList<VerseMarkerControl>) {
+    val disposables = mutableListOf<ListenerDisposer>()
+
+    fun drawWaveform(
+        context: GraphicsContext,
+        canvas: Canvas,
+        markerNodes: ObservableList<VerseMarkerControl>
+    ) {
         narrationViewModel.drawWaveform(context, canvas, markerNodes)
     }
 
@@ -256,15 +265,25 @@ class AudioWorkspaceViewModel : ViewModel() {
         audioPositionProperty.bind(narrationViewModel.audioFramePositionProperty)
 
         Bindings.bindContent(totalVerses, narrationViewModel.totalVerses)
-        narrationViewModel.narratableList.onChange {
+        val disposable = narrationViewModel.narratableList.onChangeWithDisposer {
             val verseMarkersList = narrationViewModel.narratableList.filter {
                 it.hasRecording && it.marker != null
             }
-            recordedVerses.setAll(verseMarkersList)
+            synchronized(recordedVerses) {
+                recordedVerses.setAll(verseMarkersList)
+            }
         }
+        disposables.add(disposable)
     }
 
     fun onUndock() {
+        narrationStateProperty.unbind()
+        totalAudioSizeProperty.unbind()
+        isScrollEnabledProperty.unbind()
+        audioPositionProperty.unbind()
+        Bindings.unbindContent(totalVerses, narrationViewModel.totalVerses)
+        disposables.forEach { it.dispose() }
+        disposables.clear()
     }
 
     fun seekPercent(percent: Double) {
