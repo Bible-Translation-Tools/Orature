@@ -265,15 +265,14 @@ class AudioWorkspaceViewModel : ViewModel() {
         audioPositionProperty.bind(narrationViewModel.audioFramePositionProperty)
 
         Bindings.bindContent(totalVerses, narrationViewModel.totalVerses)
-        val disposable = narrationViewModel.narratableList.onChangeWithDisposer {
+        narrationViewModel.narratableList.onChangeWithDisposer {
             val verseMarkersList = narrationViewModel.narratableList.filter {
                 it.hasRecording && it.marker != null
             }
             synchronized(recordedVerses) {
                 recordedVerses.setAll(verseMarkersList)
             }
-        }
-        disposables.add(disposable)
+        }.also { disposables.add(it) }
     }
 
     fun onUndock() {
