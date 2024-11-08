@@ -4,7 +4,7 @@ jobs:
   set-env-vars:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: FranzDiebold/github-env-vars-action@v2.1.0
       - name: Parse SemVer if tagged build
         id: semver_parser
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-20.04
     needs: set-env-vars
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set Build Secrets
         uses: 1password/load-secrets-action@v2
         with:
@@ -62,7 +62,7 @@ jobs:
           INSTALL4J_LICENSE_11: "op://DevOps/Orature_CI_CD/INSTALL4J_LICENSE"
           MAC_KEYSTORE_PW: "op://DevOps/Orature_CI_CD/MAC-P12-SIGNING-PASSWORD"
           ORG_GRADLE_PROJECT_githubOauthToken: "op://DevOps/Orature_CI_CD/CRASH_REPORTS_OAUTH_TOKEN"
-          ORG_GRADLE_PROJECT_sentryDsn: "op://DevOps/Orature_CI_CD/SENTRY_TOKEN"
+          ORG_GRADLE_PROJECT_sentryDsn: "op://DevOps/Orature_CI_CD/SENTRY_OTTER_DSN"
           SONAR_TOKEN: "op://DevOps/Orature_CI_CD/SONAR_TOKEN"
           MAC_NOTARY_ISSUER: "op://DevOps/Orature_CI_CD/MAC_NOTARY_ISSUER"
           MAC_NOTARY_KEY_ID: "op://DevOps/Orature_CI_CD/MAC_NOTARY_KEY_ID"
@@ -70,9 +70,6 @@ jobs:
         shell: bash
         run: |
           echo -n $MAC_SIGNING_KEY_BASE64 | base64 -d > $HOME/signing_macos.p12 && echo -n $MAC_APP_STORE_NOTARY_API_KEY > $HOME/mac_app_notary_key.p8
-        env:
-          MAC_SIGNING_KEY_BASE64: ${{ env.MAC_SIGNING_KEY_BASE64 }}
-          MAC_APP_STORE_NOTARY_API_KEY: ${{ env.MAC_APP_STORE_NOTARY_API_KEY }}
       - name: install4j build
         shell: bash
         run: |
@@ -91,7 +88,7 @@ jobs:
           -e MAC_NOTARY_ISSUER \
           -e MAC_NOTARY_KEY_ID \
           wycliffeassociates/install4j-docker:11.0 \
-          ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx2048m -Dnet.bytebuddy.experimental=true -XX:MaxMetaspaceSize=1024m"
+          ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx4096m -Dnet.bytebuddy.experimental=true -XX:MaxMetaspaceSize=1024m"
         env:
           UPDATE_PATH: ${{ needs.set-env-vars.outputs.UPDATE_PATH }}
           ORG_GRADLE_PROJECT_gradlewCommandVersionProp: ${{ needs.set-env-vars.outputs.GHA_VERSION }}
@@ -112,7 +109,7 @@ jobs:
           echo "NOTARIZATION_LOG=$NOTARIZATION_LOG" >> $GITHUB_ENV
       - name: Write notarization log to artifact
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: notarization-log
           path: ${{ env.NOTARIZATION_LOG }}
@@ -129,7 +126,7 @@ jobs:
     needs: [build]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - uses: FranzDiebold/github-env-vars-action@v2.1.0
 
       - name: Setup .NET Core SDK
