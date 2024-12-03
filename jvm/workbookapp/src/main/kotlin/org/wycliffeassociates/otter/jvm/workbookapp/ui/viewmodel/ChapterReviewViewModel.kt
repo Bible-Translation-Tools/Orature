@@ -403,7 +403,6 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                 waveformAudioPlayerProperty.set(audioPlayer)
                 OratureAudioFile(take.file)
             }
-            .subscribeOn(Schedulers.io())
     }
 
     private fun loadVerseMarkers(audio: OratureAudioFile, sourceAudio: OratureAudioFile?) {
