@@ -398,7 +398,9 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                 }
                 audioController = AudioPlayerController().also { controller ->
                     controller.load(audioPlayer)
-                    isPlayingProperty.bind(controller.isPlayingProperty)
+                    runLater {
+                        isPlayingProperty.bind(controller.isPlayingProperty)
+                    }
                 }
                 waveformAudioPlayerProperty.set(audioPlayer)
                 OratureAudioFile(take.file)
