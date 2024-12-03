@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.button.debouncedButton
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
+import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
@@ -231,6 +232,14 @@ class Chunking : View() {
             .addTo(viewModel.compositeDisposable)
     }
 
+    private val successDialog = confirmdialog {
+        titleTextProperty.set("Title")
+        messageTextProperty.set("Message")
+        orientationProperty.set(settingsViewModel.orientationProperty.value)
+        themeProperty.set(settingsViewModel.appColorMode.value)
+
+        cancelButtonTextProperty.set(messages["closeApp"])
+    }
 
     private fun setUpWaveformActionHandlers() {
         waveform.apply {

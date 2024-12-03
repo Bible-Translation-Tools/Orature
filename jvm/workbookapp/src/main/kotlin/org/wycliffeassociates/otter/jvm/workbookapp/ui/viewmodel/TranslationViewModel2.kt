@@ -132,6 +132,21 @@ class TranslationViewModel2 : ViewModel() {
     }
 
     fun navigateStep(target: ChunkingStep) {
+        val readyForTransition = when (selectedStepProperty.value) {
+            ChunkingStep.CHUNKING -> {
+                val chunkingVm = find<ChunkingViewModel>()
+                if (!chunkingVm.hasNewChanges()) {
+                    true
+                } else {
+                    chunkingVm.requestToNavigate(target)
+                    false
+                }
+            }
+
+            else -> true
+        }
+        if (!readyForTransition) return /** STOP NAVIGATION UPON CONDITION */
+
         FX.eventbus.fire(TranslationNavigationEvent())
 
         if (!loadingStepProperty.value) {

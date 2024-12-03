@@ -31,7 +31,6 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
-import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.getWaveformColors
 import javax.inject.Inject
@@ -48,6 +47,8 @@ import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
+import org.wycliffeassociates.otter.jvm.controls.dialog.ConfirmDialog
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
@@ -285,6 +286,30 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     fun subscribeOnWaveformImages() {
         subscribeOnWaveformImagesProperty.value.invoke()
+    }
+
+    fun hasNewChanges(): Boolean {
+        return markerCountProperty.value != 0 && markerModel?.canUndo() == true
+    }
+
+    fun requestToNavigate(targetStep: ChunkingStep) {
+        val dialog = find<ConfirmDialog>() {
+            titleTextProperty.set("Confirm")
+            messageTextProperty.set("message body")
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
+
+            onConfirmAction {
+                this.close()
+                saveChanges()
+                markerModel = null
+                FX.eventbus.fire(ChunkingStepSelectedEvent(targetStep))
+            }
+            onCancelAction {
+                this.close()
+            }
+        }
+        dialog.open()
     }
 
     private fun createWaveformImages(audio: OratureAudioFile) {
