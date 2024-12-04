@@ -220,7 +220,7 @@ class SettingsView : View() {
                         buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
                         overrideDefaultKeyEventHandler {
                             it?.let {
-                                viewModel.updateOutputDevice(it)
+                                viewModel.updateInputDevice(it)
                             }
                         }
                         inputDeviceLoadingProperty.bind(showingProperty())
