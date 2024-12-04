@@ -36,6 +36,8 @@ import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkTakeCard
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkTakeEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepTransitionEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ReturnFromPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.TakeAction
@@ -246,6 +248,10 @@ class BlindDraft : View() {
                 mainSectionProperty.set(takesView)
             }
         }.also { listenerDisposers.add(it) }
+
+        subscribe<ChunkingStepSelectedEvent> {
+            FX.eventbus.fire(ChunkingStepTransitionEvent(it.step))
+        }.also { eventSubscriptions.add(it) }
         
         subscribe<ChunkTakeEvent> {
             when (it.action) {

@@ -35,6 +35,7 @@ import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.button.debouncedButton
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
@@ -46,7 +47,6 @@ import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
-import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -196,6 +196,10 @@ class Chunking : View() {
     private fun subscribeEvents() {
         addShortcut()
 
+        subscribe<ChunkingStepSelectedEvent> {
+            viewModel.requestToNavigate(it.step)
+        }.also { eventSubscriptions.add(it) }
+
         subscribe<MarkerDeletedEvent> {
             viewModel.deleteMarker(it.markerId)
         }.also { eventSubscriptions.add(it) }
@@ -230,15 +234,6 @@ class Chunking : View() {
                 waveform.addWaveformImage(it)
             }
             .addTo(viewModel.compositeDisposable)
-    }
-
-    private val successDialog = confirmdialog {
-        titleTextProperty.set("Title")
-        messageTextProperty.set("Message")
-        orientationProperty.set(settingsViewModel.orientationProperty.value)
-        themeProperty.set(settingsViewModel.appColorMode.value)
-
-        cancelButtonTextProperty.set(messages["closeApp"])
     }
 
     private fun setUpWaveformActionHandlers() {

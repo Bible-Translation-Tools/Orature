@@ -23,6 +23,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import tornadofx.FXEvent
 import java.io.File
 
+class ChunkingStepTransitionEvent(val step: ChunkingStep): FXEvent()
 class ChunkingStepSelectedEvent(val step: ChunkingStep) : FXEvent()
 class ChunkSelectedEvent(val chunkNumber: Int): FXEvent()
 class ChunkExportedEvent(val chunkTake: Take, val outputFile: File): FXEvent()

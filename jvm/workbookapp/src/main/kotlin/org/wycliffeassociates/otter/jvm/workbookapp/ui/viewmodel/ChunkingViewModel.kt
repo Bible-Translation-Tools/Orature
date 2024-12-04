@@ -49,6 +49,7 @@ import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
 import org.wycliffeassociates.otter.jvm.controls.dialog.ConfirmDialog
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepTransitionEvent
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
@@ -293,23 +294,27 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     }
 
     fun requestToNavigate(targetStep: ChunkingStep) {
-        val dialog = find<ConfirmDialog>() {
-            titleTextProperty.set("Confirm")
-            messageTextProperty.set("message body")
-            orientationProperty.set(settingsViewModel.orientationProperty.value)
-            themeProperty.set(settingsViewModel.appColorMode.value)
+        if ((hasNewChanges() && targetStep.ordinal > ChunkingStep.CHUNKING.ordinal)) {
+            val dialog = find<ConfirmDialog> {
+                titleTextProperty.set("Confirm")
+                messageTextProperty.set("Possible data loss")
+                confirmButtonTextProperty.set("Proceed")
+                cancelButtonTextProperty.set("Cancel")
+                orientationProperty.set(settingsViewModel.orientationProperty.value)
+                themeProperty.set(settingsViewModel.appColorMode.value)
 
-            onConfirmAction {
-                this.close()
-                saveChanges()
-                markerModel = null
-                FX.eventbus.fire(ChunkingStepSelectedEvent(targetStep))
+                onConfirmAction {
+                    this.close()
+                    FX.eventbus.fire(ChunkingStepTransitionEvent(targetStep))
+                }
+                onCancelAction {
+                    this.close()
+                }
             }
-            onCancelAction {
-                this.close()
-            }
+            dialog.open()
+        } else {
+            FX.eventbus.fire(ChunkingStepTransitionEvent(targetStep))
         }
-        dialog.open()
     }
 
     private fun createWaveformImages(audio: OratureAudioFile) {
