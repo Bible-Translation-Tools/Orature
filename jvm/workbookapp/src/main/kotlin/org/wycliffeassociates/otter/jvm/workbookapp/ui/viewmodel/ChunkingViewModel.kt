@@ -338,7 +338,11 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     private fun onUndoableAction() {
         translationViewModel.canUndoProperty.set(true)
         translationViewModel.canRedoProperty.set(false)
-        // any changes in chunking will affect the subsequent steps
-        translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
+        if (markers.size > 0) {
+            // enable next step when chunks are placed
+            translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
+        } else {
+            translationViewModel.reachableStepProperty.set(ChunkingStep.CHUNKING)
+        }
     }
 }
