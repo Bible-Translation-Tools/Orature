@@ -183,7 +183,9 @@ class SettingsView : View() {
 
                         buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_VOLUME_HIGH))
                         overrideDefaultKeyEventHandler {
-                            viewModel.updateOutputDevice(it)
+                            it?.let {
+                                viewModel.updateOutputDevice(it)
+                            }
                         }
                         outputDeviceLoadingProperty.bind(showingProperty())
                     }
@@ -217,7 +219,9 @@ class SettingsView : View() {
 
                         buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
                         overrideDefaultKeyEventHandler {
-                            viewModel.updateInputDevice(it)
+                            it?.let {
+                                viewModel.updateOutputDevice(it)
+                            }
                         }
                         inputDeviceLoadingProperty.bind(showingProperty())
                     }
