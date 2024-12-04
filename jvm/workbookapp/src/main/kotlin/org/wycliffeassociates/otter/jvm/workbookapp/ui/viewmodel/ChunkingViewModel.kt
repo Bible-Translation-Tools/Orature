@@ -296,10 +296,10 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     fun requestToNavigate(targetStep: ChunkingStep) {
         if ((hasNewChanges() && targetStep.ordinal > ChunkingStep.CHUNKING.ordinal)) {
             val dialog = find<ConfirmDialog> {
-                titleTextProperty.set("Confirm")
-                messageTextProperty.set("Possible data loss")
-                confirmButtonTextProperty.set("Proceed")
-                cancelButtonTextProperty.set("Cancel")
+                titleTextProperty.set(messages["warning"])
+                messageTextProperty.set(messages["rechunk_data_loss_warning"])
+                confirmButtonTextProperty.set(messages["continue"])
+                cancelButtonTextProperty.set(messages["cancel"])
                 orientationProperty.set(settingsViewModel.orientationProperty.value)
                 themeProperty.set(settingsViewModel.appColorMode.value)
 
