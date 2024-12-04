@@ -294,7 +294,8 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     }
 
     fun requestToNavigate(targetStep: ChunkingStep) {
-        if ((hasNewChanges() && targetStep.ordinal > ChunkingStep.CHUNKING.ordinal)) {
+        val chunkCount = workbookDataStore.chapter.chunkCount.blockingGet()
+        if (hasNewChanges() && chunkCount > 0 && targetStep.ordinal > ChunkingStep.CHUNKING.ordinal) {
             val dialog = find<ConfirmDialog> {
                 titleTextProperty.set(messages["warning"])
                 messageTextProperty.set(messages["rechunk_data_loss_warning"])
