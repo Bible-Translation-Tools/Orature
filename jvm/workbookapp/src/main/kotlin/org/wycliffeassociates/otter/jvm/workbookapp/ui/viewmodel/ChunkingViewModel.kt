@@ -48,7 +48,6 @@ import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
 import org.wycliffeassociates.otter.jvm.controls.dialog.ConfirmDialog
-import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepTransitionEvent
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
@@ -134,8 +133,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         pause()
         translationViewModel.selectedStepProperty.value?.let {
             // handle when navigating to the next step
-            val hasUnsavedChanges = markerCountProperty.value != 0 && markerModel?.canUndo() == true
-            if ((hasUnsavedChanges && it.ordinal > ChunkingStep.CHUNKING.ordinal)) {
+            if (hasUnsavedChanges() && it.ordinal > ChunkingStep.CHUNKING.ordinal) {
                 saveChanges()
             }
             translationViewModel.updateStep()
@@ -253,7 +251,44 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         cleanupWaveform()
     }
 
-    fun saveChanges() {
+    fun pause() {
+        audioController?.pause()
+    }
+
+    fun cleanupWaveform() {
+        cleanupWaveformProperty.value.invoke()
+    }
+
+    fun subscribeOnWaveformImages() {
+        subscribeOnWaveformImagesProperty.value.invoke()
+    }
+
+    fun requestToNavigate(targetStep: ChunkingStep) {
+        val chunkCount = workbookDataStore.chapter.chunkCount.blockingGet()
+        if (hasUnsavedChanges() && chunkCount > 0 && targetStep.ordinal > ChunkingStep.CHUNKING.ordinal) {
+            val dialog = find<ConfirmDialog> {
+                titleTextProperty.set(messages["warning"])
+                messageTextProperty.set(messages["rechunk_data_loss_warning"])
+                confirmButtonTextProperty.set(messages["continue"])
+                cancelButtonTextProperty.set(messages["cancel"])
+                orientationProperty.set(settingsViewModel.orientationProperty.value)
+                themeProperty.set(settingsViewModel.appColorMode.value)
+
+                onConfirmAction {
+                    this.close()
+                    FX.eventbus.fire(ChunkingStepTransitionEvent(targetStep))
+                }
+                onCancelAction {
+                    this.close()
+                }
+            }
+            dialog.open()
+        } else {
+            FX.eventbus.fire(ChunkingStepTransitionEvent(targetStep))
+        }
+    }
+    
+    private fun saveChanges() {
         compositeDisposable.clear()
         audioConnectionFactory.clearPlayerConnections()
         waveformAudioPlayerProperty.value.close()
@@ -275,47 +310,6 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
                 completable.onComplete()
             }
             .blockingAwait() // ensures chunks are written before going to next step
-    }
-
-    fun pause() {
-        audioController?.pause()
-    }
-
-    fun cleanupWaveform() {
-        cleanupWaveformProperty.value.invoke()
-    }
-
-    fun subscribeOnWaveformImages() {
-        subscribeOnWaveformImagesProperty.value.invoke()
-    }
-
-    fun hasNewChanges(): Boolean {
-        return markerCountProperty.value != 0 && markerModel?.canUndo() == true
-    }
-
-    fun requestToNavigate(targetStep: ChunkingStep) {
-        val chunkCount = workbookDataStore.chapter.chunkCount.blockingGet()
-        if (hasNewChanges() && chunkCount > 0 && targetStep.ordinal > ChunkingStep.CHUNKING.ordinal) {
-            val dialog = find<ConfirmDialog> {
-                titleTextProperty.set(messages["warning"])
-                messageTextProperty.set(messages["rechunk_data_loss_warning"])
-                confirmButtonTextProperty.set(messages["continue"])
-                cancelButtonTextProperty.set(messages["cancel"])
-                orientationProperty.set(settingsViewModel.orientationProperty.value)
-                themeProperty.set(settingsViewModel.appColorMode.value)
-
-                onConfirmAction {
-                    this.close()
-                    FX.eventbus.fire(ChunkingStepTransitionEvent(targetStep))
-                }
-                onCancelAction {
-                    this.close()
-                }
-            }
-            dialog.open()
-        } else {
-            FX.eventbus.fire(ChunkingStepTransitionEvent(targetStep))
-        }
     }
 
     private fun createWaveformImages(audio: OratureAudioFile) {
@@ -344,5 +338,9 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         } else {
             translationViewModel.reachableStepProperty.set(ChunkingStep.CHUNKING)
         }
+    }
+
+    private fun hasUnsavedChanges(): Boolean {
+        return markerCountProperty.value != 0 && markerModel?.canUndo() == true
     }
 }
