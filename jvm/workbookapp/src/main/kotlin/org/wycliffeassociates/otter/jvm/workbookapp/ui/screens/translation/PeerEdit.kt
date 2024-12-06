@@ -36,6 +36,8 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepTransitionEvent
 import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ReturnFromPluginEvent
@@ -264,6 +266,10 @@ open class PeerEdit : View() {
                 mainSectionProperty.set(playbackView)
             }
         }.also { listenerDisposers.add(it) }
+
+        subscribe<ChunkingStepSelectedEvent> {
+            FX.eventbus.fire(ChunkingStepTransitionEvent(it.step))
+        }.also { eventSubscriptions.add(it) }
 
         subscribe<UndoChunkingPageEvent> {
             viewModel.undo()

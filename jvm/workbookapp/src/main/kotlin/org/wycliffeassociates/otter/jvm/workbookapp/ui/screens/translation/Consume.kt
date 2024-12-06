@@ -31,6 +31,8 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepTransitionEvent
 import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ConsumeViewModel
@@ -174,6 +176,10 @@ class Consume : View() {
 
     private fun subscribeEvents() {
         addShortcut()
+
+        subscribe<ChunkingStepSelectedEvent> {
+            FX.eventbus.fire(ChunkingStepTransitionEvent(it.step))
+        }.also { eventSubscriptions.add(it) }
 
         subscribe<TranslationNavigationEvent> {
             viewModel.cleanupWaveform()

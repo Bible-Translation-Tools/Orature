@@ -34,6 +34,8 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.button.debouncedButton
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
+import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
@@ -45,7 +47,6 @@ import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
-import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -195,6 +196,10 @@ class Chunking : View() {
     private fun subscribeEvents() {
         addShortcut()
 
+        subscribe<ChunkingStepSelectedEvent> {
+            viewModel.requestToNavigate(it.step)
+        }.also { eventSubscriptions.add(it) }
+
         subscribe<MarkerDeletedEvent> {
             viewModel.deleteMarker(it.markerId)
         }.also { eventSubscriptions.add(it) }
@@ -230,7 +235,6 @@ class Chunking : View() {
             }
             .addTo(viewModel.compositeDisposable)
     }
-
 
     private fun setUpWaveformActionHandlers() {
         waveform.apply {

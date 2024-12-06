@@ -129,7 +129,6 @@ class ConfirmDialog : OtterDialog() {
             }
 
             region {
-                addClass("confirm-dialog__footer-spacer")
                 hgrow = Priority.ALWAYS
                 managedProperty().bind(onCancelActionProperty.isNotNull)
             }

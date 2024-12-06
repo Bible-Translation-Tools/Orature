@@ -26,7 +26,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.ChunkExportedEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SourceTextDrawer
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkSelectedEvent
-import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepTransitionEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToPreviousChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
@@ -139,7 +139,7 @@ class ChunkingTranslationPage : View() {
         tryImportStylesheet("/css/source-audio-missing.css")
         tryImportStylesheet("/css/add-plugin-dialog.css")
 
-        subscribe<ChunkingStepSelectedEvent> {
+        subscribe<ChunkingStepTransitionEvent> {
             viewModel.navigateStep(it.step)
         }
         subscribe<ChunkSelectedEvent> {

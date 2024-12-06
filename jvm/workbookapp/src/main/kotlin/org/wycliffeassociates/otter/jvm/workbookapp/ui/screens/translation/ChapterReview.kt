@@ -36,6 +36,8 @@ import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.button.debouncedButton
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepTransitionEvent
 import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
@@ -250,6 +252,10 @@ class ChapterReview : View() {
 
     private fun subscribeEvents() {
         addShortcut()
+
+        subscribe<ChunkingStepSelectedEvent> {
+            FX.eventbus.fire(ChunkingStepTransitionEvent(it.step))
+        }.also { eventSubscriptions.add(it) }
 
         subscribe<MarkerDeletedEvent> {
             viewModel.deleteMarker(it.markerId)

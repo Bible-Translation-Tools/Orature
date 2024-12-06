@@ -31,7 +31,6 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
-import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.getWaveformColors
 import javax.inject.Inject
@@ -48,6 +47,8 @@ import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
+import org.wycliffeassociates.otter.jvm.controls.dialog.ConfirmDialog
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepTransitionEvent
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
@@ -132,8 +133,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         pause()
         translationViewModel.selectedStepProperty.value?.let {
             // handle when navigating to the next step
-            val hasUnsavedChanges = markerCountProperty.value != 0 && markerModel?.canUndo() == true
-            if ((hasUnsavedChanges && it.ordinal > ChunkingStep.CHUNKING.ordinal)) {
+            if (hasUnsavedChanges() && it.ordinal > ChunkingStep.CHUNKING.ordinal) {
                 saveChanges()
             }
             translationViewModel.updateStep()
@@ -251,7 +251,44 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         cleanupWaveform()
     }
 
-    fun saveChanges() {
+    fun pause() {
+        audioController?.pause()
+    }
+
+    fun cleanupWaveform() {
+        cleanupWaveformProperty.value.invoke()
+    }
+
+    fun subscribeOnWaveformImages() {
+        subscribeOnWaveformImagesProperty.value.invoke()
+    }
+
+    fun requestToNavigate(targetStep: ChunkingStep) {
+        val chunkCount = workbookDataStore.chapter.chunkCount.blockingGet()
+        if (hasUnsavedChanges() && chunkCount > 0 && targetStep.ordinal > ChunkingStep.CHUNKING.ordinal) {
+            val dialog = find<ConfirmDialog> {
+                titleTextProperty.set(messages["warning"])
+                messageTextProperty.set(messages["rechunk_data_loss_warning"])
+                confirmButtonTextProperty.set(messages["continue"])
+                cancelButtonTextProperty.set(messages["cancel"])
+                orientationProperty.set(settingsViewModel.orientationProperty.value)
+                themeProperty.set(settingsViewModel.appColorMode.value)
+
+                onConfirmAction {
+                    this.close()
+                    FX.eventbus.fire(ChunkingStepTransitionEvent(targetStep))
+                }
+                onCancelAction {
+                    this.close()
+                }
+            }
+            dialog.open()
+        } else {
+            FX.eventbus.fire(ChunkingStepTransitionEvent(targetStep))
+        }
+    }
+    
+    private fun saveChanges() {
         compositeDisposable.clear()
         audioConnectionFactory.clearPlayerConnections()
         waveformAudioPlayerProperty.value.close()
@@ -275,18 +312,6 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             .blockingAwait() // ensures chunks are written before going to next step
     }
 
-    fun pause() {
-        audioController?.pause()
-    }
-
-    fun cleanupWaveform() {
-        cleanupWaveformProperty.value.invoke()
-    }
-
-    fun subscribeOnWaveformImages() {
-        subscribeOnWaveformImagesProperty.value.invoke()
-    }
-
     private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
 
@@ -307,7 +332,15 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     private fun onUndoableAction() {
         translationViewModel.canUndoProperty.set(true)
         translationViewModel.canRedoProperty.set(false)
-        // any changes in chunking will affect the subsequent steps
-        translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
+        if (markers.size > 0) {
+            // enable next step when chunks are placed
+            translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
+        } else {
+            translationViewModel.reachableStepProperty.set(ChunkingStep.CHUNKING)
+        }
+    }
+
+    private fun hasUnsavedChanges(): Boolean {
+        return markerCountProperty.value != 0 && markerModel?.canUndo() == true
     }
 }
