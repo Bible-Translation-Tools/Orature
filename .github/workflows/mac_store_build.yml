@@ -1,0 +1,150 @@
+name: Mac pkg Java CI with Gradle
+on: [push, pull_request]
+jobs:
+  set-env-vars:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: FranzDiebold/github-env-vars-action@v2.1.0
+      - name: Parse SemVer if tagged build
+        id: semver_parser
+        uses: booxmedialtd/ws-action-parse-semver@v1.4.2
+        with:
+          input_string: ${{ env.CI_REF_NAME }}
+          version_extractor_regex: "v(.*)$"
+        if: contains( github.ref, 'refs/tags/v' )
+      - name: set version var for tags and update path for releases
+        id: tagged
+        run: |
+          echo "GHA_VERSION=${{ steps.semver_parser.outputs.fullversion }}" >> $GITHUB_ENV && \
+          echo "UPDATE_PATH=release" >> $GITHUB_ENV && \
+          echo "PRERELEASE_BOOL=false" >> $GITHUB_ENV
+        if: contains( github.ref, 'refs/tags/v')
+      - name: set s3 destination_dir
+        run: echo "S3_DESTINATION=$CI_REPOSITORY_OWNER/$CI_REPOSITORY_NAME/$UPDATE_PATH" >> $GITHUB_ENV
+      - name: output env vars
+        id: output_env_vars_step
+        run: |
+          echo "GHA_VERSION=$GHA_VERSION" >> $GITHUB_OUTPUT
+          echo "UPDATE_PATH=$UPDATE_PATH" >> $GITHUB_OUTPUT
+          echo "PRERELEASE_BOOL=$PRERELEASE_BOOL" >> $GITHUB_OUTPUT
+          echo "S3_DESTINATION=$S3_DESTINATION" >> $GITHUB_OUTPUT
+    outputs:
+      GHA_VERSION: ${{ steps.output_env_vars_step.outputs.GHA_VERSION }}
+      UPDATE_PATH: ${{ steps.output_env_vars_step.outputs.UPDATE_PATH }}
+      PRERELEASE_BOOL: ${{ steps.output_env_vars_step.outputs.PRERELEASE_BOOL }}
+      S3_DESTINATION: ${{ steps.output_env_vars_step.outputs.S3_DESTINATION }}
+      IS_RELEASE: ${{ steps.tagged.outcome }}
+
+  build:
+    runs-on: ubuntu-20.04
+    needs: set-env-vars
+    if: ${{ needs.set-env-vars.outputs.IS_RELEASE != 'skipped' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set Build Secrets
+        uses: 1password/load-secrets-action@v2
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          MAC_SIGNING_KEY_BASE64: "op://DevOps/Orature_CI_CD/Cert-Signing-Key_V2/B64_P12"
+          MAC_APP_STORE_NOTARY_API_KEY: "op://DevOps/Orature_CI_CD/App-Store-Connect-API-Key/app-store-connect-private-key.p8"
+          INSTALL4J_LICENSE_11: "op://DevOps/Orature_CI_CD/INSTALL4J_LICENSE"
+          MAC_KEYSTORE_PW: "op://DevOps/Orature_CI_CD/MAC-P12-SIGNING-PASSWORD"
+          MAC_APP_PROVISION_PROFILE: "op://DevOps/Orature_CI_CD/Apple-Store-Provision-Profile/B64_PROFILE"
+          ORG_GRADLE_PROJECT_githubOauthToken: "op://DevOps/Orature_CI_CD/CRASH_REPORTS_OAUTH_TOKEN"
+          ORG_GRADLE_PROJECT_sentryDsn: "op://DevOps/Orature_CI_CD/SENTRY_OTTER_DSN"
+          SONAR_TOKEN: "op://DevOps/Orature_CI_CD/SONAR_TOKEN"
+          MAC_NOTARY_ISSUER: "op://DevOps/Orature_CI_CD/MAC_NOTARY_ISSUER"
+          MAC_NOTARY_KEY_ID: "op://DevOps/Orature_CI_CD/MAC_NOTARY_KEY_ID"
+      - name: Write mac secrets for i4j
+        shell: bash
+        run: |
+          echo -n $MAC_SIGNING_KEY_BASE64 | base64 -d > $HOME/signing_macos.p12 && echo -n $MAC_APP_STORE_NOTARY_API_KEY > $HOME/mac_app_notary_key.p8 && echo -n $MAC_APP_PROVISION_PROFILE | base64 -d > $HOME/orature.provisionprofile
+      - name: install4j build
+        shell: bash
+        run: |
+          docker run -v $(pwd):/repo \
+          -v $HOME/signing_macos.p12:/root/signing_macos.p12 \
+          -v $HOME/mac_app_notary_key.p8:/root/mac_app_notary_key.p8 \
+          -v $HOME/orature.provisionprofile:/root/orature.provisionprofile \
+          -e UPDATE_PATH \
+          -e ORG_GRADLE_PROJECT_gradlewCommandVersionProp \
+          -e ORG_GRADLE_PROJECT_gradlewForMacAppStore \
+          -e ORG_GRADLE_PROJECT_gradlewCommandLicenseProp \
+          -e ORG_GRADLE_PROJECT_githubRepoUrl \
+          -e ORG_GRADLE_PROJECT_gradlewmacKeystorePassword \
+          -e ORG_GRADLE_PROJECT_githubOauthToken \
+          -e ORG_GRADLE_PROJECT_sentryDsn \
+          -e GITHUB_TOKEN \
+          -e SONAR_TOKEN \
+          -e MAC_NOTARY_ISSUER \
+          -e MAC_NOTARY_KEY_ID \
+          wycliffeassociates/install4j-docker:11.0 \
+          ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx4096m -Dnet.bytebuddy.experimental=true -XX:MaxMetaspaceSize=1024m"
+        env:
+          UPDATE_PATH: ${{ needs.set-env-vars.outputs.UPDATE_PATH }}
+          ORG_GRADLE_PROJECT_gradlewCommandVersionProp: ${{ needs.set-env-vars.outputs.GHA_VERSION }}
+          ORG_GRADLE_PROJECT_gradlewCommandLicenseProp: ${{ env.INSTALL4J_LICENSE_11 }}
+          ORG_GRADLE_PROJECT_gradlewForMacAppStore: true
+          ORG_GRADLE_PROJECT_githubRepoUrl: https://api.github.com/repos/OratureCrashReports/orature-crash-reports/issues
+          ORG_GRADLE_PROJECT_gradlewmacKeystorePassword: ${{ env.MAC_KEYSTORE_PW }}
+          ORG_GRADLE_PROJECT_githubOauthToken: ${{ env.ORG_GRADLE_PROJECT_githubOauthToken }}
+          ORG_GRADLE_PROJECT_sentryDsn: ${{ env.ORG_GRADLE_PROJECT_sentryDsn }}
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+          MAC_NOTARY_ISSUER: ${{ env.MAC_NOTARY_ISSUER }}
+          MAC_NOTARY_KEY_ID: ${{ env.MAC_NOTARY_KEY_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get notarization log
+        if: ${{ failure() }}
+        run: |
+          NOTARIZATION_LOG=$(find /repo/jvm/workbookapp/.exec/ -name "*.notarization.log")
+          echo "NOTARIZATION_LOG=$NOTARIZATION_LOG" >> $GITHUB_ENV
+      - name: Write notarization log to artifact
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: notarization-log
+          path: ${{ env.NOTARIZATION_LOG }}
+          retention-days: 7
+
+      - name: cache binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: upload-binaries
+          include-hidden-files: true
+          path: jvm/workbookapp/.exec/
+  upload:
+    runs-on: ubuntu-20.04
+    needs: [set-env-vars, build]
+    steps:
+      - name: Set upload secrets
+        uses: 1password/load-secrets-action@v2
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          AWS_KEY_ID: "op://DevOps/travis-nightlybuilds aws s3 api access for travis uploads/S3_ACCESS_KEY_ID"
+          AWS_SECRET_ACCESS_KEY: "op://DevOps/travis-nightlybuilds aws s3 api access for travis uploads/S3_SECRET_ACCESS_KEY"
+          AWS_BUCKET: "op://DevOps/travis-nightlybuilds aws s3 api access for travis uploads/S3_BUCKET"
+      - name: download artifacts from previous job
+        uses: actions/download-artifact@v4
+        with:
+          name: upload-binaries
+          include-hidden-files: true
+          path: ${{ github.workspace }}/binaries
+      - name: upload
+        if: github.event_name != 'pull_request'
+        run: |
+          AWS_DEFAULT_REGION=us-east-1 AWS_ACCESS_KEY_ID=${{env.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{env.AWS_SECRET_ACCESS_KEY}} aws s3 sync . s3://${{ env.AWS_BUCKET }}/${{ needs.set-env-vars.outputs.S3_DESTINATION }}
+        working-directory: ${{ github.workspace }}/binaries
+      - name: upload artifacts to github releases on tags
+        uses: "marvinpinto/action-automatic-releases@v1.2.1"
+        if: contains( github.ref, 'refs/tags/v' )
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: ${{ needs.set-env-vars.outputs.PRERELEASE_BOOL }}
+          files: |
+            ${{ github.workspace }}/binaries/*.pkg
