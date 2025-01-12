@@ -18,6 +18,8 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
+import io.reactivex.Scheduler
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
@@ -101,22 +103,31 @@ class ImportAudioViewModel : ViewModel() {
         val chapters = collectionRepository.getChildren(workbookDescriptor.sourceCollection)
             .blockingGet()
 
-        val chapter = chapters.first()
-        val chapterVerseContents = contentRepository.getByCollection(chapter).blockingGet()
-        val verseText = chapterVerseContents.filter { it.labelKey == "verse" }.map{ it.text }
-        println(verseText.size)
+
+        workbook.target.chapters
+            .subscribeOn(Schedulers.io())
+            .map { ch ->
+                val chapter = chapters.first {it.sort == ch.sort}
+                val chapterVerseContents = contentRepository.getByCollection(chapter).blockingGet()
+                val verseText = chapterVerseContents.filter { it.labelKey == "verse" }.map{ it.text!! }
+                generateForChapter(workbook, ch, verseText)
+            }
+            .subscribe()
+
     }
 
-    fun generateForChapter(chapter: Chapter) {
-        val chunksText = chapter.chunks.blockingGet()
-            .map { it.textItem.text }
-
-        val audio = audioGenerator.convertTextToAudio(chunksText)
+    fun generateForChapter(workbook: Workbook, chapter: Chapter, chunkTextList: List<String>) {
+//        val audio = audioGenerator.convertTextToAudio(chunkTextList)
 
         // delete/restart chapter
-
+    //        workbook.projectFilesAccessor.getChapterAudioDir(
+    //            workbook,
+    //            chapter
+    //        )
+    //            .listFiles()
+    //            ?.forEach { it.delete() }
 
         // import to chapter content
-
+        println(chunkTextList.size)
     }
 }
