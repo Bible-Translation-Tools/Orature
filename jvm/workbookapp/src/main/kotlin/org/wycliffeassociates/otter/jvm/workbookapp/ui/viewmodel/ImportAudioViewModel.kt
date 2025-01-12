@@ -21,15 +21,41 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
+import org.wycliffeassociates.otter.common.domain.audio.AudioGenerator
+import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 import java.io.File
+import javax.inject.Inject
 
 class ImportAudioViewModel : ViewModel() {
 
+    @Inject
+    lateinit var audioGenerator: AudioGenerator
+
+    @Inject
+    lateinit var workbookRepository: IWorkbookRepository
+
+    @Inject
+    lateinit var workbookDescriptorRepository: IWorkbookDescriptorRepository
+
+    @Inject
+    lateinit var collectionRepository: ICollectionRepository
+
+    @Inject
+    lateinit var contentRepository: IContentRepository
+
     private val logger = LoggerFactory.getLogger(ImportAudioViewModel::class.java)
-    
+
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
+
+    val workbookDS: WorkbookDataStore by inject()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -64,5 +90,33 @@ class ImportAudioViewModel : ViewModel() {
 
             else -> true
         }
+    }
+
+    fun generateBook(workbookDescriptor: WorkbookDescriptor) {
+
+        val workbook = workbookRepository.get(
+            workbookDescriptor.sourceCollection,
+            workbookDescriptor.targetCollection
+        )
+        val chapters = collectionRepository.getChildren(workbookDescriptor.sourceCollection)
+            .blockingGet()
+
+        val chapter = chapters.first()
+        val chapterVerseContents = contentRepository.getByCollection(chapter).blockingGet()
+        val verseText = chapterVerseContents.filter { it.labelKey == "verse" }.map{ it.text }
+        println(verseText.size)
+    }
+
+    fun generateForChapter(chapter: Chapter) {
+        val chunksText = chapter.chunks.blockingGet()
+            .map { it.textItem.text }
+
+        val audio = audioGenerator.convertTextToAudio(chunksText)
+
+        // delete/restart chapter
+
+
+        // import to chapter content
+
     }
 }

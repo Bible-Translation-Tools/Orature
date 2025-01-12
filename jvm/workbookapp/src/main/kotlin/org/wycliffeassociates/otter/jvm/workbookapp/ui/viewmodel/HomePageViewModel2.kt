@@ -169,14 +169,16 @@ class HomePageViewModel2 : ViewModel() {
     }
 
     fun selectBook(workbookDescriptor: WorkbookDescriptor) {
-        val projectGroup = selectedProjectGroupProperty.value
-        workbookDS.currentModeProperty.set(projectGroup.mode)
+//        val projectGroup = selectedProjectGroupProperty.value
+//        workbookDS.currentModeProperty.set(projectGroup.mode)
+//
+//        val workbook = workbookRepo.get(
+//            workbookDescriptor.sourceCollection,
+//            workbookDescriptor.targetCollection
+//        )
+//        openWorkbook(workbook, projectGroup.mode)
 
-        val workbook = workbookRepo.get(
-            workbookDescriptor.sourceCollection,
-            workbookDescriptor.targetCollection
-        )
-        openWorkbook(workbook, projectGroup.mode)
+        find<ImportAudioViewModel>().generateBook(workbookDescriptor)
     }
 
     /**
