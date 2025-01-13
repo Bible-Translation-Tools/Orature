@@ -188,6 +188,7 @@ class HomePageViewModel2 : ViewModel() {
         find<ImportAudioViewModel>()
             .generateBook(workbookDescriptor)
             .doOnComplete {
+                println("Finished generating for ${workbookDescriptor.slug}")
                 workbook.projectFilesAccessor.writeSelectedTakesFile(workbook, true)
                 workbookRepo.closeWorkbook(workbook)
             }

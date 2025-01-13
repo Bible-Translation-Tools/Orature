@@ -119,31 +119,38 @@ class ImportAudioViewModel : ViewModel() {
         val targetChapters = collectionRepository.getChildren(workbookDescriptor.targetCollection)
             .blockingGet()
 
-
         return workbook.target.chapters
-//            .firstOrError() // DEBUG first chapter
-            .subscribeOn(Schedulers.io())
+            .toList() // force emit from deferred observable
+            .flattenAsObservable { it }
             .map { ch ->
-                val srcChapter = sourceChapters.first { it.sort == ch.sort}
+                val srcChapter = sourceChapters.first { it.sort == ch.sort }
                 val targetChapter = targetChapters.first { it.sort == ch.sort }
                 val chapterVerseContents = contentRepository.getByCollection(srcChapter).blockingGet()
-                val verseText = chapterVerseContents.filter { it.labelKey == "verse" }.map{ it.text!! }
+                val verseText = chapterVerseContents.filter { it.labelKey == "verse" }.map { it.text!! }
 
                 val chapterMetaContent = contentRepository.getCollectionMetaContent(targetChapter).blockingGet()
                 generateForChapter(workbook, ch, chapterMetaContent, verseText)
             }
+            .subscribeOn(Schedulers.io())
             .ignoreElements()
     }
 
-    private fun generateForChapter(workbook: Workbook, chapter: Chapter, chapterContent: Content, chunkTextList: List<String>) {
+    private fun generateForChapter(
+        workbook: Workbook,
+        chapter: Chapter,
+        chapterContent: Content,
+        chunkTextList: List<String>
+    ) {
         println("Generate chapter ${chapter.sort}")
         val generatedAudio = audioGenerator.convertTextToAudio(chunkTextList)
 
         // delete/restart chapter
-        workbook.projectFilesAccessor.getChapterAudioDir(
-            workbook,
-            chapter
-        ).deleteRecursively()
+//        workbook.projectFilesAccessor.getChapterAudioDir(
+//            workbook,
+//            chapter
+//        )
+//            ?.listFiles()
+//            ?.forEach { it.deleteRecursively() }
 
         // import to chapter content
         val namer = getFileNamer(workbook, chapter)
