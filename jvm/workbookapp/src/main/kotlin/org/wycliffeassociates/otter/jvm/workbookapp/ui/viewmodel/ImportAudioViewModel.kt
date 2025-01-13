@@ -121,30 +121,29 @@ class ImportAudioViewModel : ViewModel() {
 
 
         return workbook.target.chapters
-            .firstOrError() // DEBUG first chapter
+//            .firstOrError() // DEBUG first chapter
             .subscribeOn(Schedulers.io())
-            .doOnSuccess { ch ->
-                val srcChapter = sourceChapters.first {it.sort == ch.sort}
-                val targetChapter = targetChapters.first()
+            .map { ch ->
+                val srcChapter = sourceChapters.first { it.sort == ch.sort}
+                val targetChapter = targetChapters.first { it.sort == ch.sort }
                 val chapterVerseContents = contentRepository.getByCollection(srcChapter).blockingGet()
                 val verseText = chapterVerseContents.filter { it.labelKey == "verse" }.map{ it.text!! }
 
                 val chapterMetaContent = contentRepository.getCollectionMetaContent(targetChapter).blockingGet()
                 generateForChapter(workbook, ch, chapterMetaContent, verseText)
             }
-            .ignoreElement()
+            .ignoreElements()
     }
 
     private fun generateForChapter(workbook: Workbook, chapter: Chapter, chapterContent: Content, chunkTextList: List<String>) {
+        println("Generate chapter ${chapter.sort}")
         val generatedAudio = audioGenerator.convertTextToAudio(chunkTextList)
 
         // delete/restart chapter
-    //        workbook.projectFilesAccessor.getChapterAudioDir(
-    //            workbook,
-    //            chapter
-    //        )
-    //            .listFiles()
-    //            ?.forEach { it.delete() }
+        workbook.projectFilesAccessor.getChapterAudioDir(
+            workbook,
+            chapter
+        ).deleteRecursively()
 
         // import to chapter content
         val namer = getFileNamer(workbook, chapter)
@@ -172,8 +171,6 @@ class ImportAudioViewModel : ViewModel() {
         take.id = insertedId
         chapterContent.selectedTake = take
         contentRepository.update(chapterContent).blockingAwait()
-
-//        println(chunkTextList.size)
     }
 
     private fun getFileNamer(

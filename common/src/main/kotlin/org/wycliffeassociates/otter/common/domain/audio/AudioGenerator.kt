@@ -76,7 +76,7 @@ class AudioGenerator @Inject constructor(
         {
             "model": "tts-1",
             "input": $serializedContent,
-            "voice": "echo"
+            "voice": "shimmer"
         }
         """.trimIndent()
 //        "response_format": "wav"

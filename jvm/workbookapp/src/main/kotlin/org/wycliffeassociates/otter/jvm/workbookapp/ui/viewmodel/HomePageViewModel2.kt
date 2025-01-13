@@ -185,7 +185,6 @@ class HomePageViewModel2 : ViewModel() {
             workbookDescriptor.targetCollection
         )
 
-//        initializeProjectFiles(workbook)
         find<ImportAudioViewModel>()
             .generateBook(workbookDescriptor)
             .doOnComplete {
