@@ -180,10 +180,23 @@ class HomePageViewModel2 : ViewModel() {
     }
 
     fun generateBook(workbookDescriptor: WorkbookDescriptor) {
+        val loadingDialog = find<LoadingModal>().apply {
+            // show loading modal while flushing the delete queue to prevent navigating home
+            messageProperty.set("Generating")
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
+        }
+        loadingDialog.open()
+
         val workbook = workbookRepo.get(
             workbookDescriptor.sourceCollection,
             workbookDescriptor.targetCollection
         )
+        val projectGroup = selectedProjectGroupProperty.value
+        workbookDS.currentModeProperty.set(projectGroup.mode)
+        workbookDS.activeWorkbookProperty.set(workbook)
+        initializeProjectFiles(workbook)
+        updateWorkbookModifiedDate(workbook)
 
         find<ImportAudioViewModel>()
             .generateBook(workbookDescriptor)
@@ -191,6 +204,9 @@ class HomePageViewModel2 : ViewModel() {
                 println("Finished generating for ${workbookDescriptor.slug}")
                 workbook.projectFilesAccessor.writeSelectedTakesFile(workbook, true)
                 workbookRepo.closeWorkbook(workbook)
+                runLater {
+                    loadingDialog.close()
+                }
             }
             .subscribe()
     }
