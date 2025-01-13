@@ -54,16 +54,18 @@ class AudioGenerator @Inject constructor(
     }
 
     private fun generate(text: String): File {
+        println("GENERATING...")
         val generated = File.createTempFile("temp-tts", ".mp3", directoryProvider.tempDirectory)
         request(text, generated)
         val outputFile = File.createTempFile("tts", ".mp3", directoryProvider.tempDirectory)
         audioUtils.resampleAudio(generated, outputFile)
+        println("DONE!")
         return outputFile
     }
 
     private fun request(content: String, outputFile: File) {
         val apiUrl = "https://api.openai.com/v1/audio/speech"
-        val apiKey = System.getenv("OPENAI_KEY")
+        val apiKey = System.getenv("OPENAI_TTS_KEY")
 
         // Create an HttpClient instance
         val client = HttpClient.newHttpClient()

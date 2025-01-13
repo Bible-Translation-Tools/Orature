@@ -169,16 +169,30 @@ class HomePageViewModel2 : ViewModel() {
     }
 
     fun selectBook(workbookDescriptor: WorkbookDescriptor) {
-//        val projectGroup = selectedProjectGroupProperty.value
-//        workbookDS.currentModeProperty.set(projectGroup.mode)
-//
-//        val workbook = workbookRepo.get(
-//            workbookDescriptor.sourceCollection,
-//            workbookDescriptor.targetCollection
-//        )
-//        openWorkbook(workbook, projectGroup.mode)
+        val projectGroup = selectedProjectGroupProperty.value
+        workbookDS.currentModeProperty.set(projectGroup.mode)
 
-        find<ImportAudioViewModel>().generateBook(workbookDescriptor)
+        val workbook = workbookRepo.get(
+            workbookDescriptor.sourceCollection,
+            workbookDescriptor.targetCollection
+        )
+        openWorkbook(workbook, projectGroup.mode)
+    }
+
+    fun generateBook(workbookDescriptor: WorkbookDescriptor) {
+        val workbook = workbookRepo.get(
+            workbookDescriptor.sourceCollection,
+            workbookDescriptor.targetCollection
+        )
+
+//        initializeProjectFiles(workbook)
+        find<ImportAudioViewModel>()
+            .generateBook(workbookDescriptor)
+            .doOnComplete {
+                workbook.projectFilesAccessor.writeSelectedTakesFile(workbook, true)
+                workbookRepo.closeWorkbook(workbook)
+            }
+            .subscribe()
     }
 
     /**

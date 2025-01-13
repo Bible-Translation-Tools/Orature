@@ -27,6 +27,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportDialogOpenEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookGenerateEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookOpenEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookQuickBackupEvent
 import tornadofx.FX
@@ -85,8 +86,19 @@ class WorkbookOptionMenu : ContextMenu() {
                 }
             }
         }
+        val generateOption = MenuItem().apply {
+            graphic = Label("GENERATE").apply {
+                this.graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
+                tooltip(text)
+            }
+            action {
+                workbookInfoProperty.value?.let {
+                    FX.eventbus.fire(WorkbookGenerateEvent(it))
+                }
+            }
+        }
         addClass("wa-context-menu")
         isAutoHide = true
-        items.setAll(openOption, backupOption, exportOption, deleteOption)
+        items.setAll(openOption, generateOption, backupOption, exportOption, deleteOption)
     }
 }

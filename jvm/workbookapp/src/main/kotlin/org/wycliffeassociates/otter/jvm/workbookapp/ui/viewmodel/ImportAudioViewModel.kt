@@ -18,22 +18,30 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
-import io.reactivex.Scheduler
+import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
+import org.wycliffeassociates.otter.common.data.primitives.Content
+import org.wycliffeassociates.otter.common.data.primitives.Take
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.audio.AudioGenerator
+import org.wycliffeassociates.otter.common.domain.content.FileNamer
+import org.wycliffeassociates.otter.common.domain.content.TakeCreator
+import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 import java.io.File
+import java.time.LocalDate
 import javax.inject.Inject
 
 class ImportAudioViewModel : ViewModel() {
@@ -52,6 +60,12 @@ class ImportAudioViewModel : ViewModel() {
 
     @Inject
     lateinit var contentRepository: IContentRepository
+
+    @Inject
+    lateinit var takeCreator: TakeCreator
+
+    @Inject
+    lateinit var takeRepository: ITakeRepository
 
     private val logger = LoggerFactory.getLogger(ImportAudioViewModel::class.java)
 
@@ -94,30 +108,35 @@ class ImportAudioViewModel : ViewModel() {
         }
     }
 
-    fun generateBook(workbookDescriptor: WorkbookDescriptor) {
+    fun generateBook(workbookDescriptor: WorkbookDescriptor): Completable {
 
         val workbook = workbookRepository.get(
             workbookDescriptor.sourceCollection,
             workbookDescriptor.targetCollection
         )
-        val chapters = collectionRepository.getChildren(workbookDescriptor.sourceCollection)
+        val sourceChapters = collectionRepository.getChildren(workbookDescriptor.sourceCollection)
+            .blockingGet()
+        val targetChapters = collectionRepository.getChildren(workbookDescriptor.targetCollection)
             .blockingGet()
 
 
-        workbook.target.chapters
+        return workbook.target.chapters
+            .firstOrError() // DEBUG first chapter
             .subscribeOn(Schedulers.io())
-            .map { ch ->
-                val chapter = chapters.first {it.sort == ch.sort}
-                val chapterVerseContents = contentRepository.getByCollection(chapter).blockingGet()
+            .doOnSuccess { ch ->
+                val srcChapter = sourceChapters.first {it.sort == ch.sort}
+                val targetChapter = targetChapters.first()
+                val chapterVerseContents = contentRepository.getByCollection(srcChapter).blockingGet()
                 val verseText = chapterVerseContents.filter { it.labelKey == "verse" }.map{ it.text!! }
-                generateForChapter(workbook, ch, verseText)
-            }
-            .subscribe()
 
+                val chapterMetaContent = contentRepository.getCollectionMetaContent(targetChapter).blockingGet()
+                generateForChapter(workbook, ch, chapterMetaContent, verseText)
+            }
+            .ignoreElement()
     }
 
-    fun generateForChapter(workbook: Workbook, chapter: Chapter, chunkTextList: List<String>) {
-//        val audio = audioGenerator.convertTextToAudio(chunkTextList)
+    private fun generateForChapter(workbook: Workbook, chapter: Chapter, chapterContent: Content, chunkTextList: List<String>) {
+        val generatedAudio = audioGenerator.convertTextToAudio(chunkTextList)
 
         // delete/restart chapter
     //        workbook.projectFilesAccessor.getChapterAudioDir(
@@ -128,6 +147,45 @@ class ImportAudioViewModel : ViewModel() {
     //            ?.forEach { it.delete() }
 
         // import to chapter content
-        println(chunkTextList.size)
+        val namer = getFileNamer(workbook, chapter)
+        val takeNumber = 1
+        val chapterNumber = namer.formatChapterNumber()
+        val chapterAudioDir = workbook.projectFilesAccessor.audioDir
+            .resolve(chapterNumber)
+            .apply { mkdirs() }
+
+        val chapterFile = chapterAudioDir.resolve(namer.generateName(takeNumber, AudioFileFormat.WAV))
+            .also { generatedAudio.copyTo(it, overwrite = true) }
+
+        val take = Take(
+            chapterFile.name,
+            chapterFile,
+            takeNumber,
+            LocalDate.now(),
+            null,
+            false,
+            CheckingStatus.UNCHECKED,
+            null,
+            listOf()
+        )
+        val insertedId = takeRepository.insertForContent(take, chapterContent).blockingGet()
+        take.id = insertedId
+        chapterContent.selectedTake = take
+        contentRepository.update(chapterContent).blockingAwait()
+
+//        println(chunkTextList.size)
+    }
+
+    private fun getFileNamer(
+        workbook: Workbook,
+        chapter: Chapter,
+    ): FileNamer {
+        return WorkbookFileNamerBuilder.createFileNamer(
+            workbook = workbook,
+            chapter = chapter,
+            chunk = null,
+            recordable = chapter,
+            rcSlug = workbook.sourceMetadataSlug
+        )
     }
 }

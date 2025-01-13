@@ -71,6 +71,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ImportProjectVi
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookGenerateEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -291,6 +292,10 @@ class HomePage2 : View() {
 
         subscribe<WorkbookOpenEvent> {
             viewModel.selectBook(it.data)
+        }
+
+        subscribe<WorkbookGenerateEvent> {
+            viewModel.generateBook(it.data)
         }
 
         subscribe<WorkbookDeleteEvent> {

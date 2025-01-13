@@ -29,6 +29,8 @@ class WorkbookOpenEvent(val data: WorkbookDescriptor) : FXEvent()
 class WorkbookExportDialogOpenEvent(val data: WorkbookDescriptor) : FXEvent()
 class WorkbookQuickBackupEvent(val data: WorkbookDescriptor) : FXEvent()
 class WorkbookDeleteEvent(val data: WorkbookDescriptor) : FXEvent()
+class WorkbookGenerateEvent(val data: WorkbookDescriptor): FXEvent()
+
 class WorkbookExportEvent(
     val workbook: WorkbookDescriptor,
     val exportType: ExportType,
