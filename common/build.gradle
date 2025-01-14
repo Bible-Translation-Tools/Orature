@@ -4,6 +4,8 @@ dependencies {
     implementation "org.slf4j:slf4j-api:$slf4jApiVer"
     implementation "de.sciss:jump3r:$jump3rVer"
     implementation "org.wycliffeassociates:kotlin-tstudio2rc:$tstudio2rcVer"
+    implementation "com.squareup.okhttp3:okhttp:4.12.0"
+
     // Testing
     testImplementation "junit:junit:$junitVer"
     testImplementation "io.mockk:mockk:$mockkVer"
