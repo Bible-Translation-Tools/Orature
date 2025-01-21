@@ -30,6 +30,7 @@ class MarkerGenerator @Inject constructor() {
                 val location = pos * DEFAULT_SAMPLE_RATE
                 audio.addMarker(VerseMarker(index + 1, index + 1, location.toInt()))
             }
+            audio.update()
         } else {
             println("---> this chapter has error!")
         }
@@ -38,38 +39,8 @@ class MarkerGenerator @Inject constructor() {
     private fun parseMarker(audioFile: File, verseList: List<String>): List<Double> {
         val transcription = request(audioFile) ?: return listOf()
         println(transcription.words)
-        val markersToAdd = mutableListOf<Double>()
-        val wordArray = selfCorrect(transcription.words, verseList)
-
-        var wordPosition = 0
-
-        markersToAdd.add(0.0) // first marker
-//        for (verse in verseList) {
-//            while(verse.contains(wordArray[wordPosition].word)) {
-//                wordPosition++
-//            }
-//            // position at the beginning of next verse
-//            markerPositions.add(wordArray[wordPosition].start)
-//        }
-        for (verse in verseList) {
-            var textOfVerse = verse
-
-            while (wordPosition < wordArray.size) {
-                val wordText = wordArray[wordPosition].word
-                if (textOfVerse.contains(wordText)) {
-                    textOfVerse = textOfVerse.substringAfter(wordText)
-                    wordPosition++
-                } else {
-                    break
-                }
-            }
-            // position at the beginning of next verse
-            if (wordPosition < wordArray.size) {
-                markersToAdd.add(wordArray[wordPosition].start)
-            }
-        }
-
-        return markersToAdd
+        val wordsWithMarker = findMarkerPositions(transcription.words, verseList)
+        return wordsWithMarker.map { it.start }
     }
 
     private fun request(inputFile: File): OpenAITranscription? {
@@ -112,30 +83,35 @@ class MarkerGenerator @Inject constructor() {
         }
     }
 
-    private fun selfCorrect(words: List<Word>, verses: List<String>): List<Word> {
-        val chapterText = verses.joinToString("\n")
-        val correctedWords: Map<Int, String> = chatGPT(chapterText, words.map { it.word })
-        val newWordList = words.toMutableList()
+    private fun findMarkerPositions(words: List<Word>, verses: List<String>): List<Word> {
+        var markerCount = 0
+        val chapterText = verses.map {
+            "<${++markerCount}>$it"
+        }.joinToString("\n")
 
-        correctedWords.keys.forEach { index ->
-            val newText = correctedWords[index]!!
-            val currentWord = newWordList[index]
-            newWordList[index] = currentWord.copy(word = newText)
+        val wordListWithMarkers: List<String> = chatGPT(chapterText, words.map { it.word })
+        val markerPositions = mutableListOf<Int>()
+
+        markerCount = 0
+        wordListWithMarkers.forEachIndexed { index, w ->
+           if (w.matches(Regex("<\\d>"))) {
+               markerCount++
+               markerPositions.add(index + 1 - markerCount)
+           }
         }
 
-        return newWordList
+        return words.filterIndexed { index, _ ->
+            index in markerPositions
+        }
     }
 
-    fun chatGPT(originalText: String, words: List<String>): Map<Int, String> {
+    fun chatGPT(originalText: String, words: List<String>): List<String> {
         val apiUrl = "https://api.openai.com/v1/chat/completions"
-        val apiKey = System.getenv("OPENAI_KEY")
+        val apiKey = System.getenv("OPEN_AI_KEY")
 
-        val message = "I have a string and a list of words parsed from that string.\\n" +
-                "However, some words in the list may contain spelling errors.\\n" +
-                "Generate a json object where the keys are the index of the incorrect word\\n" +
-                "and the values are the corrected word that match the word from the original string. Example output: { \"1\":\"replacement\" }\\n" +
-                "String: \\\"$originalText\\\"\\n" +
-                "Words: $words"
+        val message = "I have a string containing <number> tags and a list of words in that string without punctuations. Your job is to create a new list of words including the tags that match the positions in the original string. The output must be a json array." +
+                "Original string: \\\"$originalText\\\".\\n" +
+                "Word list: $words"
 
         val objectMapper: ObjectMapper = ObjectMapper(JsonFactory()).registerKotlinModule()
 
@@ -146,6 +122,7 @@ class MarkerGenerator @Inject constructor() {
                     mapOf("role" to "system", "content" to "You are a helpful assistant and you will generate responses in json format."),
                     mapOf("role" to "user", "content" to message)
                 ),
+                "temperature" to 0.1,
                 "response_format" to mapOf("type" to "json_object")
             )
         )
@@ -165,8 +142,8 @@ class MarkerGenerator @Inject constructor() {
             val data = response.body()
             val chatResponse = objectMapper.readValue<ChatResponse>(data)
             val answer = chatResponse.choices.first().message.content
-            val correctionMap: Map<String, String> = objectMapper.readValue(answer)
-            return correctionMap.mapKeys { it.key.toInt() }
+            val correctionMap: Map<String, List<String>> = objectMapper.readValue(answer)
+            return correctionMap["result"]!!
         } else {
             println("Request failed with status code: ${response.statusCode()}")
             println("Error response: ${response.body()}")

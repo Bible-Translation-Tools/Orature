@@ -57,7 +57,7 @@ class DeleteMe {
     )
     @Test
     fun validateGenerator() {
-        val file = File("""D:\misc\temp\generatemarkers\testdata-vi_ulb_psa_c001_meta_t1.wav""")
+        val file = File("""D:\misc\temp\vi_ulb_psa_c001_meta_t2.wav""")
         MarkerGenerator().generate(file, verses)
     }
     @Test
