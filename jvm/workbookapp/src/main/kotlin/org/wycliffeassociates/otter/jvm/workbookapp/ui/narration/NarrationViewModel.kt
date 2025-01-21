@@ -902,6 +902,7 @@ class NarrationViewModel : ViewModel() {
         val workbook = workbookDataStore.workbook
         val chunksText = workbook.source.chapters.filter { it.sort == workbookDataStore.chapter.sort }.blockingFirst()
             .chunks.blockingGet()
+            .filter { it.label == "verse" }
             .map { it.textItem.text }
         val audio = audioGenerator.convertTextToAudio(chunksText)
 
