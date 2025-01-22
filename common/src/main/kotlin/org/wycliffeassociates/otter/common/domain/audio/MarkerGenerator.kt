@@ -18,6 +18,7 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class MarkerGenerator @Inject constructor() {
@@ -37,15 +38,16 @@ class MarkerGenerator @Inject constructor() {
     }
 
     private fun parseMarker(audioFile: File, verseList: List<String>): List<Double> {
-        val transcription = request(audioFile) ?: return listOf()
-        println(transcription.words)
+        val transcription = transcribe(audioFile) ?: return listOf()
         val wordsWithMarker = findMarkerPositions(transcription.words, verseList)
         return wordsWithMarker.map { it.start }
     }
 
-    private fun request(inputFile: File): OpenAITranscription? {
+    private fun transcribe(inputFile: File): OpenAITranscription? {
         val apiKey = System.getenv("OPENAI_TTS_KEY")
         val client = OkHttpClient().newBuilder()
+            .connectTimeout(10_000, TimeUnit.SECONDS)
+            .readTimeout(10_000, TimeUnit.SECONDS)
             .build()
 
         val body: RequestBody = MultipartBody.Builder().setType(MultipartBody.FORM)
@@ -89,12 +91,12 @@ class MarkerGenerator @Inject constructor() {
             "<${++markerCount}>$it"
         }.joinToString("\n")
 
-        val wordListWithMarkers: List<String> = chatGPT(chapterText, words.map { it.word })
+        val wordListWithMarkers: List<String> = fillMarkers(chapterText, words.map { it.word })
         val markerPositions = mutableListOf<Int>()
 
         markerCount = 0
         wordListWithMarkers.forEachIndexed { index, w ->
-           if (w.matches(Regex("<\\d>"))) {
+           if (w.matches(Regex("<\\d{1,3}>"))) {
                markerCount++
                markerPositions.add(index + 1 - markerCount)
            }
@@ -105,9 +107,9 @@ class MarkerGenerator @Inject constructor() {
         }
     }
 
-    fun chatGPT(originalText: String, words: List<String>): List<String> {
+    fun fillMarkers(originalText: String, words: List<String>): List<String> {
         val apiUrl = "https://api.openai.com/v1/chat/completions"
-        val apiKey = System.getenv("OPEN_AI_KEY")
+        val apiKey = System.getenv("OPENAI_KEY")
 
         val message = "I have a string containing <number> tags and a list of words in that string without punctuations. Your job is to create a new list of words including the tags that match the positions in the original string. The output must be a json array." +
                 "Original string: \\\"$originalText\\\".\\n" +
@@ -142,8 +144,55 @@ class MarkerGenerator @Inject constructor() {
             val data = response.body()
             val chatResponse = objectMapper.readValue<ChatResponse>(data)
             val answer = chatResponse.choices.first().message.content
-            val correctionMap: Map<String, List<String>> = objectMapper.readValue(answer)
-            return correctionMap["result"]!!
+            val responseObject: Map<String, List<String>> = objectMapper.readValue(answer)
+            val results = responseObject["result"]!!
+            return cleanUpPunctuations(results)
+        } else {
+            println("Request failed with status code: ${response.statusCode()}")
+            println("Error response: ${response.body()}")
+            throw Exception("ERROR while asking chatGPT!")
+        }
+    }
+
+    private fun cleanUpPunctuations(words: List<String>): List<String> {
+        val apiUrl = "https://api.openai.com/v1/chat/completions"
+        val apiKey = System.getenv("OPENAI_KEY")
+
+        val message = "Given a list of strings that contains words, some tags <number> and punctuations. " +
+                "Please remove the punctuations from the list. The output must be a json array. The field in the output can be named \"results\". " +
+                "List: $words"
+
+        val objectMapper: ObjectMapper = ObjectMapper(JsonFactory()).registerKotlinModule()
+
+        val jsonPayload = objectMapper.writeValueAsString(
+            mapOf(
+                "model" to "gpt-4o",
+                "messages" to listOf(
+                    mapOf("role" to "system", "content" to "You are a helpful assistant and you will generate responses in json format."),
+                    mapOf("role" to "user", "content" to message)
+                ),
+                "temperature" to 0.1,
+                "response_format" to mapOf("type" to "json_object")
+            )
+        )
+
+        val client = HttpClient.newHttpClient()
+
+        val request = HttpRequest.newBuilder()
+            .uri(URI.create(apiUrl))
+            .header("Content-Type", "application/json")
+            .header("Authorization", "Bearer $apiKey")
+            .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+            .build()
+
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+
+        if (response.statusCode() == 200) {
+            val data = response.body()
+            val chatResponse = objectMapper.readValue<ChatResponse>(data)
+            val answer = chatResponse.choices.first().message.content
+            val responseObject: Map<String, List<String>> = objectMapper.readValue(answer)
+            return responseObject["results"]!!
         } else {
             println("Request failed with status code: ${response.statusCode()}")
             println("Error response: ${response.body()}")

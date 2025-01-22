@@ -62,7 +62,7 @@ class DeleteMe {
     }
     @Test
     fun tryIt() {
-        MarkerGenerator().chatGPT(
+        MarkerGenerator().fillMarkers(
             verseList.joinToString("\n"),
             badTranscription.map {it.first}
         )

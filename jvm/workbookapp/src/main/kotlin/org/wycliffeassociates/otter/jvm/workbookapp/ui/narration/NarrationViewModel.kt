@@ -22,7 +22,6 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
 import com.jakewharton.rxrelay2.ReplayRelay
 import com.sun.glass.ui.Screen
-import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -53,6 +52,7 @@ import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.AudioGenerator
+import org.wycliffeassociates.otter.common.domain.audio.MarkerGenerator
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.*
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.*
@@ -99,6 +99,9 @@ class NarrationViewModel : ViewModel() {
 
     @Inject
     lateinit var audioGenerator: AudioGenerator
+
+    @Inject
+    lateinit var markerGenerator: MarkerGenerator
 
     private lateinit var narration: Narration
     private lateinit var renderer: NarrationWaveformRenderer
@@ -900,11 +903,13 @@ class NarrationViewModel : ViewModel() {
     fun generateChapterAudio() {
         println("GENERATING audio")
         val workbook = workbookDataStore.workbook
-        val chunksText = workbook.source.chapters.filter { it.sort == workbookDataStore.chapter.sort }.blockingFirst()
+        val verseList = workbook.source.chapters.filter { it.sort == workbookDataStore.chapter.sort }.blockingFirst()
             .chunks.blockingGet()
             .filter { it.label == "verse" }
             .map { it.textItem.text }
-        val audio = audioGenerator.convertTextToAudio(chunksText)
+
+        val audio = audioGenerator.convertTextToAudio(verseList)
+        markerGenerator.generate(audio,verseList)
 
         narration.importChapterAudioFile(audio)
             .subscribeOn(Schedulers.io())
