@@ -117,11 +117,12 @@ internal class ChapterRepresentation(
             .filter { it.isNotEmpty() }
             .blockingFirst()
             .map { chunk ->
-                val marker = when (chunk.sort) {
-                    BOOK_TITLE_SORT -> BookMarker(workbook.source.slug, 0)
-                    CHAPTER_TITLE_SORT -> ChapterMarker(chapter.sort, 0)
-                    else -> VerseMarker(chunk.start, chunk.end, 0)
-                }
+//                val marker = when (chunk.sort) {
+//                    BOOK_TITLE_SORT -> BookMarker(workbook.source.slug, 0)
+//                    CHAPTER_TITLE_SORT -> ChapterMarker(chapter.sort, 0)
+//                    else -> VerseMarker(chunk.start, chunk.end, 0)
+//                }
+                val marker = VerseMarker(chunk.start, chunk.end, 0)
                 VerseNode(false, marker)
             }
             .toMutableList()

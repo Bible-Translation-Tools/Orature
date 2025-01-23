@@ -571,29 +571,30 @@ class NarrationViewModel : ViewModel() {
      * Injects chapter title text since the source may not have it.
      */
     private fun injectChapterTitleText(chapter: Chapter, chunks: List<Chunk>): List<Chunk> {
-        val indexOfChapterTitle = chunks.indexOfFirst {
-            it.sort == -1 && it.contentType == ContentType.TITLE && it.textItem.text == ""
-        }
-        if (indexOfChapterTitle >= 0) {
-            val updatedChunks = chunks.toMutableList()
-            val chapterTitle = chapterTitleProperty.value
-            val updatedChapterTitle = Chunk(
-                CHAPTER_TITLE_SORT,
-                chapter.label,
-                AssociatedAudio(ReplayRelay.create()),
-                listOf(),
-                TextItem(chapterTitle, MimeType.USFM),
-                1,
-                chunks.size,
-                false,
-                1,
-                ContentType.TITLE
-            )
-            updatedChunks[indexOfChapterTitle] = updatedChapterTitle
-            return updatedChunks
-        } else {
-            return chunks
-        }
+//        val indexOfChapterTitle = chunks.indexOfFirst {
+//            it.sort == -1 && it.contentType == ContentType.TITLE && it.textItem.text == ""
+//        }
+//        if (indexOfChapterTitle >= 0) {
+//            val updatedChunks = chunks.toMutableList()
+//            val chapterTitle = chapterTitleProperty.value
+//            val updatedChapterTitle = Chunk(
+//                CHAPTER_TITLE_SORT,
+//                chapter.label,
+//                AssociatedAudio(ReplayRelay.create()),
+//                listOf(),
+//                TextItem(chapterTitle, MimeType.USFM),
+//                1,
+//                chunks.size,
+//                false,
+//                1,
+//                ContentType.TITLE
+//            )
+//            updatedChunks[indexOfChapterTitle] = updatedChapterTitle
+//            return updatedChunks
+//        } else {
+//            return chunks
+//        }
+        return chunks.filter { it.sort > 0 }
     }
 
     private fun resetNarratableList() {

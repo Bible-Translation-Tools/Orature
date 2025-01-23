@@ -114,10 +114,10 @@ class VersificationTreeBuilder @Inject constructor(
                         type = ContentType.TITLE,
                         draftNumber = 1
                     )
-                    chapterTree.addChild(OtterTreeNode(bookContent))
+//                    chapterTree.addChild(OtterTreeNode(bookContent))
                 }
 
-                chapterTree.addChild(OtterTreeNode(chapTitle))
+//                chapterTree.addChild(OtterTreeNode(chapTitle))
                 chapterTree.addChild(OtterTreeNode(chapChunk))
 
                 for (j in 1..verses) {

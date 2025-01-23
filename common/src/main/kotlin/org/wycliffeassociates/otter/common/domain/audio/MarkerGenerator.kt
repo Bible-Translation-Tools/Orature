@@ -28,7 +28,7 @@ class MarkerGenerator @Inject constructor() {
         if (markerPositions.size == verses.size) {
             val audio = OratureAudioFile(audioFile)
             markerPositions.forEachIndexed { index, pos ->
-                val location = pos * DEFAULT_SAMPLE_RATE
+                val location = pos * DEFAULT_SAMPLE_RATE // convert secs to frames
                 audio.addMarker(VerseMarker(index + 1, index + 1, location.toInt()))
             }
             audio.update()

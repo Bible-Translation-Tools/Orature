@@ -234,7 +234,7 @@ class WorkbookRepository(
         db.getContentByCollectionActiveConnection(chapterCollection)
             .subscribe { contents ->
                 val chunks = contents
-                    .filter { it.type == ContentType.TEXT || it.type == ContentType.TITLE }
+                    .filter { it.type == ContentType.TEXT }
                     .map { chunk(it, disposables) }
 
                 relay.accept(chunks)
