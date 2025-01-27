@@ -13,6 +13,7 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import java.io.File
 import java.net.URI
 import java.net.http.HttpClient
@@ -21,6 +22,31 @@ import java.net.http.HttpResponse
 import javax.inject.Inject
 
 class MarkerGenerator @Inject constructor() {
+
+
+    fun generateFromFragments(audioFiles: List<File>, verses: Map<Int, String>, groupSize: Int = 2) {
+        var verseCount = 1
+
+        audioFiles.forEachIndexed { index, audioFile ->
+            val matchingVerseIndex = index * groupSize
+            val verseTextInAudio = listOfNotNull(verses[matchingVerseIndex], verses[matchingVerseIndex + 1])
+
+            val markerPositions = parseMarker(audioFile, verseTextInAudio)
+            if (markerPositions.size == groupSize) {
+                val audio = OratureAudioFile(audioFile)
+                markerPositions.forEach { pos ->
+                    val location = pos * DEFAULT_SAMPLE_RATE
+                    audio.addMarker(
+                        VerseMarker(verseCount,  verseCount, location.toInt())
+                    )
+                    verseCount++
+                }
+                audio.update()
+            } else {
+                println("Error parsing marker for audio group $index")
+            }
+        }
+    }
 
     fun generate(audioFile: File, verses: List<String>) {
         val markerPositions = parseMarker(audioFile, verses)

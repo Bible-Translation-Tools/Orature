@@ -22,7 +22,6 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
 import com.jakewharton.rxrelay2.ReplayRelay
 import com.sun.glass.ui.Screen
-import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -53,6 +52,8 @@ import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.AudioGenerator
+import org.wycliffeassociates.otter.common.domain.audio.MarkerGenerator
+import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.*
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.*
@@ -99,6 +100,12 @@ class NarrationViewModel : ViewModel() {
 
     @Inject
     lateinit var audioGenerator: AudioGenerator
+
+    @Inject
+    lateinit var markerGenerator: MarkerGenerator
+
+    @Inject
+    lateinit var concatenateAudio: ConcatenateAudio
 
     private lateinit var narration: Narration
     private lateinit var renderer: NarrationWaveformRenderer
@@ -904,9 +911,14 @@ class NarrationViewModel : ViewModel() {
             .chunks.blockingGet()
             .filter { it.label == "verse" }
             .map { it.textItem.text }
-        val audio = audioGenerator.convertTextToAudio(chunksText)
+        val chapterAudio = audioGenerator.convertTextToAudio(chunksText)
+        markerGenerator.generate(chapterAudio, chunksText)
+//        val audioFragments = audioGenerator.convertChapterToAudioFragments(chunksText)
+//        val verseMap = chunksText.associateBy { chunksText.indexOf(it) }
+//        markerGenerator.generateFromFragments(audioFragments, verseMap)
+//        val chapterAudio = concatenateAudio.execute(audioFragments, includeMarkers = true).blockingGet()
 
-        narration.importChapterAudioFile(audio)
+        narration.importChapterAudioFile(chapterAudio)
             .subscribeOn(Schedulers.io())
             .observeOnFx()
             .subscribe {

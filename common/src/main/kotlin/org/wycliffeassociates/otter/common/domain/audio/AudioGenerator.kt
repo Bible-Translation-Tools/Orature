@@ -28,6 +28,16 @@ class AudioGenerator @Inject constructor(
         return buildAudio(textItems)
     }
 
+    fun convertChapterToAudioFragments(textItems: List<String>): List<File> {
+        val chunkedList = textItems.chunked(2)
+        val generated = chunkedList.map { chunk ->
+            val text = chunk.joinToString(" ")
+            val audio = generate(text)
+            audio
+        }
+        return generated
+    }
+
     private fun buildAudio(chunksText: List<String>): File {
         val maxToken = 4000
         var counter = 0
