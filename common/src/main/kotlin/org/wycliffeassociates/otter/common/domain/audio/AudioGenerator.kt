@@ -25,7 +25,8 @@ class AudioGenerator @Inject constructor(
     }
 
     fun convertTextToAudio(textItems: List<String>): File {
-        return buildAudio(textItems)
+//        return buildAudio(textItems)
+        return buildAudioSeparately(textItems)
     }
 
     private fun buildAudio(chunksText: List<String>): File {
@@ -51,6 +52,13 @@ class AudioGenerator @Inject constructor(
         val audioFiles = textItemsToConvert.map { generate(it) }
 
         return concatAudio.execute(audioFiles, includeMarkers = false).blockingGet()
+    }
+
+    private fun buildAudioSeparately(chunksText: List<String>): File {
+
+        val chunksAudio = chunksText.map { generate(it) }
+
+        return concatAudio.execute(chunksAudio, includeMarkers = true).blockingGet()
     }
 
     private fun generate(text: String): File {

@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.common.domain.content
 
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
-import org.wycliffeassociates.otter.common.data.audio.OratureCueType
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
@@ -62,11 +61,21 @@ class ConcatenateAudio @Inject constructor(private val directoryProvider: IDirec
 
     private fun generateMarkers(inputFiles: List<File>, outputAudio: OratureAudioFile) {
         var markerLocation = 0
+        var markerCount: Int = -1
 
         inputFiles.forEach { file ->
             val oratureAudioFile = OratureAudioFile(file)
-            val oldMarker = oratureAudioFile.getMarker<VerseMarker>().first()
-            outputAudio.addMarker(VerseMarker(oldMarker.start, oldMarker.end, markerLocation))
+            val oldMarker = oratureAudioFile.getMarker<VerseMarker>().firstOrNull()
+            val markerToAdd = if (oldMarker != null) {
+                oldMarker
+            } else if (markerCount > 0) {
+                markerCount++
+                VerseMarker(start= markerCount, end = markerCount, markerLocation)
+            } else {
+                markerCount = 1
+                VerseMarker(start = 1,  end = 1, markerLocation)
+            }
+            outputAudio.addMarker(markerToAdd)
             markerLocation += oratureAudioFile.totalFrames
         }
         outputAudio.update()

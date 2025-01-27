@@ -147,7 +147,7 @@ class ImportAudioViewModel : ViewModel() {
     ) {
         println("Generate chapter ${chapter.sort}")
         val generatedAudio = audioGenerator.convertTextToAudio(chunkTextList)
-        markerGenerator.generate(generatedAudio, chunkTextList)
+//        markerGenerator.generate(generatedAudio, chunkTextList)
 
         // delete/restart chapter
 //        workbook.projectFilesAccessor.getChapterAudioDir(
