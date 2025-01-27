@@ -121,9 +121,9 @@ task install4jdeploy(type: com.install4j.gradle.Install4jTask) {
         release = gradlewCommandVersionProp
     }
     if (project.hasProperty('gradlewForMacAppStore')) {
-        buildIds = [546, 519]
+        buildIds = [519]
     } else {
-        buildIds = [60, 158, 415, 59]
+        buildIds = [60, 158, 415]
     }
 }
 

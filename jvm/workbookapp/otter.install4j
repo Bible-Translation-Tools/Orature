@@ -25,15 +25,14 @@
     </entries>
   </files>
   <launchers>
-    <launcher name="orature" id="59" macBundleIdentifier="org.wycliffeassociates.otter" macEntitlementsFile="/repo/entitlements.xml" macApplicationCategory="public.app-category.utilities">
+    <launcher name="orature" id="59" macBundleIdentifier="org.wycliffeassociates.otter" macEntitlementsFile="/repo/entitlements.plist" macApplicationCategory="public.app-category.utilities">
       <executable name="orature" iconSet="true" iconFile="./orature_icon.ico" executableDir="." executableMode="gui" singleInstance="true" />
       <java mainClass="org.wycliffeassociates.otter.jvm.workbookapp.MainKt" vmParameters="--add-exports=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED, --add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED, --add-exports=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED, --add-opens=javafx.controls/javafx.scene.control.skin=ALL-UNNAMED, --add-exports=javafx.base/com.sun.javafx.binding=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.css=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED, --add-opens=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED, --add-opens=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED, --add-opens=javafx.controls/javafx.scene.control.skin=ALL-UNNAMED, --add-opens=javafx.base/com.sun.javafx.binding=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.css=ALL-UNNAMED">
         <classPath>
           <archive location="workbookapp.jar" />
         </classPath>
       </java>
-      <infoPlist>&lt;key&gt;NSMicrophoneUsageDescription&lt;/key&gt;
-&lt;string&gt;Enable Microphone for recording&lt;/string&gt;</infoPlist>
+      <infoPlist>&lt;key&gt;NSMicrophoneUsageDescription&lt;/key&gt;&lt;string&gt;Enable Microphone for recording&lt;/string&gt;</infoPlist>
       <iconImageFiles>
         <file path="./orature_icon_16x16.png" />
         <file path="./orature_icon_32x32.png" />
