@@ -7,6 +7,8 @@
     <string>WNR2N2D4UW.org.wycliffeassociates.otter</string>
     <key>com.apple.developer.team-identifier</key>
     <string>WNR2N2D4UW</string>
+    <key>com.apple.security.app-sandbox<key/>
+    <true/>
     <key>com.apple.security.device.microphone</key>
     <true/>
     <key>com.apple.security.device.audio-input</key>
