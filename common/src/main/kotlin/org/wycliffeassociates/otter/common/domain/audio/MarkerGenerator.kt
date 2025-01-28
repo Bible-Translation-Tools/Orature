@@ -68,6 +68,7 @@ class MarkerGenerator @Inject constructor() {
 //        println(transcription.words)
         val transcription = requestWhisperTranscription(audioFile) ?: return listOf()
         val wordsWithMarker = findMarkerPositions(transcription, verseList)
+        println(wordsWithMarker)
         return wordsWithMarker.map { it.start }
     }
 
@@ -161,7 +162,16 @@ class MarkerGenerator @Inject constructor() {
            }
         }
 
-        return words.filterIndexed { index, _ ->
+        val wordsWithEasedTimestamp = words.mapIndexed { index, word ->
+            if (index > 0) {
+                val midPoint = (words[index - 1].end + word.start) / 2
+                word.copy(start = midPoint) // offset to avoid cutting off the beginning of a word
+            } else {
+                word
+            }
+        }
+
+        return wordsWithEasedTimestamp.filterIndexed { index, _ ->
             index in markerPositions
         }
     }
