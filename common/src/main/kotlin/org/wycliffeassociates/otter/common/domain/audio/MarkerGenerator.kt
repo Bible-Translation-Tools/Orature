@@ -155,7 +155,7 @@ class MarkerGenerator @Inject constructor() {
 
         markerCount = 0
         wordListWithMarkers.forEachIndexed { index, w ->
-           if (w.matches(Regex("<\\d>"))) {
+           if (w.matches(Regex("<\\d{1,3}>"))) {
                markerCount++
                markerPositions.add(index + 1 - markerCount)
            }
