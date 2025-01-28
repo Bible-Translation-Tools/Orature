@@ -11,14 +11,15 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
-import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import java.io.File
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class MarkerGenerator @Inject constructor() {
@@ -63,13 +64,14 @@ class MarkerGenerator @Inject constructor() {
     }
 
     private fun parseMarker(audioFile: File, verseList: List<String>): List<Double> {
-        val transcription = request(audioFile) ?: return listOf()
-        println(transcription.words)
-        val wordsWithMarker = findMarkerPositions(transcription.words, verseList)
+//        val transcription = requestTranscription(audioFile) ?: return listOf()
+//        println(transcription.words)
+        val transcription = requestWhisperTranscription(audioFile) ?: return listOf()
+        val wordsWithMarker = findMarkerPositions(transcription, verseList)
         return wordsWithMarker.map { it.start }
     }
 
-    private fun request(inputFile: File): OpenAITranscription? {
+    private fun requestTranscription(inputFile: File): OpenAITranscription? {
         val apiKey = System.getenv("OPENAI_TTS_KEY")
         val client = OkHttpClient().newBuilder()
             .build()
@@ -103,6 +105,39 @@ class MarkerGenerator @Inject constructor() {
                 response.body?.string()?.let { data ->
                     val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
                     val transcription: OpenAITranscription = mapper.readValue(data)
+                    transcription
+                }
+            }
+        }
+    }
+
+    private fun requestWhisperTranscription(inputFile: File): List<Word>? {
+        val apiKey = System.getenv("OPENAI_TTS_KEY")
+        val client = OkHttpClient().newBuilder()
+            .readTimeout(10_000, TimeUnit.SECONDS).build()
+
+        val jsonPayload = ObjectMapper().writeValueAsString(
+            mapOf("audio-file" to inputFile.path)
+        )
+        val mediaType = "application/json".toMediaType()
+        val body = jsonPayload.toRequestBody(mediaType)
+
+        val request = Request.Builder()
+            .url("http://127.0.0.1:8000/transcribe")
+            .post(body)
+            .addHeader("Content-Type", "application/json")
+            .addHeader("Authorization", "Bearer $apiKey") // Optional auth header
+            .build()
+
+        return client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                println("Unexpected code $response")
+                null
+            }
+            else {
+                response.body?.string()?.let { data ->
+                    val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
+                    val transcription: List<Word> = mapper.readValue(data)
                     transcription
                 }
             }
