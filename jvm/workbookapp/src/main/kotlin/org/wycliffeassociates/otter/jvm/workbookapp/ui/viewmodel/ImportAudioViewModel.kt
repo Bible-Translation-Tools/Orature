@@ -30,6 +30,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.audio.AudioGenerator
+import org.wycliffeassociates.otter.common.domain.audio.MarkerGenerator
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.TakeCreator
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
@@ -63,6 +64,10 @@ class ImportAudioViewModel : ViewModel() {
 
     @Inject
     lateinit var takeCreator: TakeCreator
+
+    @Inject
+
+    lateinit var markerGenerator: MarkerGenerator
 
     @Inject
     lateinit var takeRepository: ITakeRepository
@@ -142,7 +147,8 @@ class ImportAudioViewModel : ViewModel() {
         chunkTextList: List<String>
     ) {
         println("Generate chapter ${chapter.sort}")
-        val generatedAudio = audioGenerator.convertTextToAudio(chunkTextList)
+        val chapterAudio = audioGenerator.convertTextToAudio(chunkTextList)
+        markerGenerator.generate(chapterAudio, chunkTextList)
 
         // delete/restart chapter
 //        workbook.projectFilesAccessor.getChapterAudioDir(
@@ -161,7 +167,7 @@ class ImportAudioViewModel : ViewModel() {
             .apply { mkdirs() }
 
         val chapterFile = chapterAudioDir.resolve(namer.generateName(takeNumber, AudioFileFormat.WAV))
-            .also { generatedAudio.copyTo(it, overwrite = true) }
+            .also { chapterAudio.copyTo(it, overwrite = true) }
 
         val take = Take(
             chapterFile.name,
