@@ -42,6 +42,11 @@ jobs:
           echo "UPDATE_PATH=release" >> $GITHUB_ENV && \
           echo "PRERELEASE_BOOL=false" >> $GITHUB_ENV
         if: contains( github.ref, 'refs/tags/v')
+      - name: set version var for not-tags and upload dir for branches
+        if: ${{ steps.tagged.outcome == 'skipped' }}
+        run: |
+          echo "GHA_VERSION=$(cat VERSION)" >> $GITHUB_ENV && \
+          echo "UPDATE_PATH=$CI_REF_NAME_SLUG" >> $GITHUB_ENV
       - name: set s3 destination_dir
         run: echo "S3_DESTINATION=$CI_REPOSITORY_OWNER/$CI_REPOSITORY_NAME/$UPDATE_PATH" >> $GITHUB_ENV
       - name: output env vars
