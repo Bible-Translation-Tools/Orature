@@ -70,16 +70,27 @@ jobs:
           export-env: true
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          MAC_SIGNING_KEY_BASE64: ${{inputs.buildTarget == 'dev' && 'op://DevOps/Orature_CI_CD/Apple-Dev-Cert-And-Profile/B64_P12' || 'op://DevOps/Orature_CI_CD/Cert-Signing-Key_V2/B64_P12'}}
+          MAC_SIGNING_KEY_BASE64: "op://DevOps/Orature_CI_CD/Cert-Signing-Key_V2/B64_P12"
           MAC_APP_STORE_NOTARY_API_KEY: "op://DevOps/Orature_CI_CD/App-Store-Connect-API-Key/app-store-connect-private-key.p8"
           INSTALL4J_LICENSE_11: "op://DevOps/Orature_CI_CD/INSTALL4J_LICENSE"
           MAC_KEYSTORE_PW: "op://DevOps/Orature_CI_CD/MAC-P12-SIGNING-PASSWORD"
-          MAC_APP_PROVISION_PROFILE: ${{inputs.buildTarget == 'dev' && 'op://DevOps/Orature_CI_CD/Apple-Dev-Cert-And-Profile/B64_PROFILE' || 'op://DevOps/Orature_CI_CD/Apple-Store-Provision-Profile/B64_PROFILE'}}
+          MAC_APP_PROVISION_PROFILE: "op://DevOps/Orature_CI_CD/Apple-Store-Provision-Profile/B64_PROFILE"
           ORG_GRADLE_PROJECT_githubOauthToken: "op://DevOps/Orature_CI_CD/CRASH_REPORTS_OAUTH_TOKEN"
           ORG_GRADLE_PROJECT_sentryDsn: "op://DevOps/Orature_CI_CD/SENTRY_OTTER_DSN"
           SONAR_TOKEN: "op://DevOps/Orature_CI_CD/SONAR_TOKEN"
           MAC_NOTARY_ISSUER: "op://DevOps/Orature_CI_CD/MAC_NOTARY_ISSUER"
           MAC_NOTARY_KEY_ID: "op://DevOps/Orature_CI_CD/MAC_NOTARY_KEY_ID"
+
+      - name: Override build secrets if dev
+        uses: 1password/load-secrets-action@v2
+        if: ${{ inputs.buildTarget == 'dev' }}
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          MAC_SIGNING_KEY_BASE64: "op://DevOps/Orature_CI_CD/Apple-Dev-Cert-And-Profile/B64_P12"
+          MAC_APP_PROVISION_PROFILE: "op://DevOps/Orature_CI_CD/Apple-Dev-Cert-And-Profile/B64_PROFILE"
+
       - name: Write mac secrets for i4j
         shell: bash
         run: |
