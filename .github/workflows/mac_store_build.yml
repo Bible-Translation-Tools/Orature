@@ -61,7 +61,7 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     needs: set-env-vars
-    if: ${{ needs.set-env-vars.outputs.IS_RELEASE != 'skipped' }}
+    if: ${{ needs.set-env-vars.outputs.IS_RELEASE != 'skipped' || inputs.buildTarget == 'dev' }}
     steps:
       - uses: actions/checkout@v4
       - name: Set Build Secrets
@@ -141,6 +141,7 @@ jobs:
   upload:
     runs-on: ubuntu-20.04
     needs: [set-env-vars, build]
+    if: ${{ inputs.buildTarget != 'dev' }}
     steps:
       - name: Set upload secrets
         uses: 1password/load-secrets-action@v2
