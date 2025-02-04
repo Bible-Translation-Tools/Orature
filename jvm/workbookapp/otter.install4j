@@ -11,6 +11,8 @@
         <entry>*.so</entry>
         <entry>*.jnilib</entry>
         <entry>workbookapp.jar</entry>
+        <entry>markerapp.jar</entry>
+        <entry>recorderapp.jar</entry>
         <entry>sqlite-*</entry>
       </macSearchedJars>
     </codeSigning>
