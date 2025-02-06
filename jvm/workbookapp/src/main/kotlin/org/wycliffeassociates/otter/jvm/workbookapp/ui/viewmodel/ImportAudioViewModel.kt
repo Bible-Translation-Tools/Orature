@@ -41,6 +41,8 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepo
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import org.wycliffeassociates.otter.jvm.controls.dialog.ConfirmDialog
+import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 import java.io.File
@@ -82,6 +84,8 @@ class ImportAudioViewModel : ViewModel() {
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
     val workbookDS: WorkbookDataStore by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
+
 
     private val errorChapters = CopyOnWriteArrayList<Int>()
 
@@ -148,7 +152,11 @@ class ImportAudioViewModel : ViewModel() {
             .ignoreElements()
             .doOnComplete {
                 if (errorChapters.any()) {
-                    logger.error("===============> Chapters: ${errorChapters} has error!")
+                    val chaptersWithError = errorChapters.toList()
+                    logger.error("===============> Chapters: ${chaptersWithError} has error!")
+                    runLater {
+                        showErrorDialog("Chapters with error: $chaptersWithError")
+                    }
                     errorChapters.clear()
                 }
             }
@@ -230,5 +238,18 @@ class ImportAudioViewModel : ViewModel() {
             recordable = chapter,
             rcSlug = workbook.sourceMetadataSlug
         )
+    }
+
+    private fun showErrorDialog(message: String) {
+        val successDialog = find<ConfirmDialog> {
+            titleTextProperty.set("Chapters have error")
+            messageTextProperty.set(message)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
+
+            cancelButtonTextProperty.set("Close")
+            onCloseAction { this.close() }
+        }
+        successDialog.open()
     }
 }
