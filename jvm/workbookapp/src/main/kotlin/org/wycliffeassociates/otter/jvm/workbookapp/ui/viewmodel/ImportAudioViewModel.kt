@@ -152,8 +152,8 @@ class ImportAudioViewModel : ViewModel() {
             .ignoreElements()
             .doOnComplete {
                 if (errorChapters.any()) {
-                    val chaptersWithError = errorChapters.toList()
-                    logger.error("===============> Chapters: ${chaptersWithError} has error!")
+                    val chaptersWithError = errorChapters.toString()
+                    logger.error("===============> Chapters: $chaptersWithError has error!")
                     runLater {
                         showErrorDialog("Chapters with error: $chaptersWithError")
                     }
