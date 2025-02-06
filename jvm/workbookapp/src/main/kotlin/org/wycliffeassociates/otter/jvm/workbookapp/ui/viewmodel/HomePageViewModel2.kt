@@ -206,6 +206,7 @@ class HomePageViewModel2 : ViewModel() {
                 workbookRepo.closeWorkbook(workbook)
                 runLater {
                     loadingDialog.close()
+                    loadProjects()
                 }
             }
             .subscribe()

@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
@@ -34,6 +35,7 @@ import org.wycliffeassociates.otter.common.domain.audio.MarkerGenerator
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.TakeCreator
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
+import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
@@ -70,6 +72,9 @@ class ImportAudioViewModel : ViewModel() {
 
     @Inject
     lateinit var takeRepository: ITakeRepository
+
+    @Inject
+    lateinit var narrationFactory: NarrationFactory
 
     private val logger = LoggerFactory.getLogger(ImportAudioViewModel::class.java)
 
@@ -133,7 +138,8 @@ class ImportAudioViewModel : ViewModel() {
                 val verseText = chapterVerseContents.filter { it.labelKey == "verse" }.map { it.text!! }
 
                 val chapterMetaContent = contentRepository.getCollectionMetaContent(targetChapter).blockingGet()
-                generateForChapter(workbook, ch, chapterMetaContent, verseText)
+//                generateForChapter(workbook, ch, chapterMetaContent, verseText)
+                generateForChapterNarration(workbook, ch, chapterMetaContent, verseText)
             }
             .subscribeOn(Schedulers.io())
             .ignoreElements()
@@ -183,6 +189,19 @@ class ImportAudioViewModel : ViewModel() {
         take.id = insertedId
         chapterContent.selectedTake = take
         contentRepository.update(chapterContent).blockingAwait()
+    }
+
+    private fun generateForChapterNarration(
+        workbook: Workbook,
+        chapter: Chapter,
+        chapterContent: Content,
+        verseList: List<String>
+    ) {
+        val narration = narrationFactory.create(workbook,chapter)
+        narration.initialize().blockingAwait()
+        val audio = audioGenerator.convertTextToAudio(verseList)
+        narration.importChapterAudioFile(audio).blockingAwait()
+        narration.close()
     }
 
     private fun getFileNamer(
