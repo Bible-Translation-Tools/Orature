@@ -137,7 +137,6 @@ internal class ChapterRepresentation(
 
         try {
             val activeNodes = activeVersesMapper.readValue(json, reference)
-            logger.info("Loading ${activeNodes.size} audio markers from serialized data")
             totalVerses.forEach {
                 it.clear() // reset the node's sectors
             }

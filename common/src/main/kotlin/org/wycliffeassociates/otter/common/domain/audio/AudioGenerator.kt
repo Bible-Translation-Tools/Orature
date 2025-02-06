@@ -61,14 +61,15 @@ class AudioGenerator @Inject constructor(
         return concatAudio.execute(chunksAudio, includeMarkers = true).blockingGet()
     }
 
+    @Synchronized
     private fun generate(text: String): File {
-        println("GENERATING...")
+//        println("GENERATING...")
         val generated = File.createTempFile("temp-tts", ".mp3", directoryProvider.tempDirectory)
 //        request(text, generated)
         requestLocalTTS(text, generated)
         val outputFile = File.createTempFile("tts", ".mp3", directoryProvider.tempDirectory)
         audioUtils.resampleAudio(generated, outputFile)
-        println("DONE!")
+//        println("DONE!")
         return outputFile
     }
 
@@ -102,9 +103,7 @@ class AudioGenerator @Inject constructor(
         val response = client.send(request, HttpResponse.BodyHandlers.ofFile(outputFile.toPath()))
 
         // Check if the response is successful
-        if (response.statusCode() == 200) {
-            println("Audio file saved as $outputFile")
-        } else {
+        if (response.statusCode() != 200) {
             println("Request failed with status code: ${response.statusCode()}")
         }
     }
@@ -137,7 +136,6 @@ class AudioGenerator @Inject constructor(
         if (response.statusCode() == 200) {
             val filePath = ObjectMapper().readTree(response.body()).get("file-path").asText()
             File(filePath).copyTo(outputFile, overwrite = true)
-            println("Audio file saved as $outputFile")
         } else {
             println("Request failed with status code: ${response.statusCode()}")
         }

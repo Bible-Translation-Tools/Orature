@@ -45,6 +45,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 import java.io.File
 import java.time.LocalDate
+import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
 
 class ImportAudioViewModel : ViewModel() {
@@ -81,6 +82,8 @@ class ImportAudioViewModel : ViewModel() {
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
     val workbookDS: WorkbookDataStore by inject()
+
+    private val errorChapters = CopyOnWriteArrayList<Int>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -143,6 +146,12 @@ class ImportAudioViewModel : ViewModel() {
             }
             .subscribeOn(Schedulers.io())
             .ignoreElements()
+            .doOnComplete {
+                if (errorChapters.any()) {
+                    logger.error("===============> Chapters: ${errorChapters} has error!")
+                    errorChapters.clear()
+                }
+            }
     }
 
     private fun generateForChapter(
@@ -197,9 +206,15 @@ class ImportAudioViewModel : ViewModel() {
         chapterContent: Content,
         verseList: List<String>
     ) {
+        println("Generating for chapter ${chapter.sort} of ${workbook.target.slug}")
         val narration = narrationFactory.create(workbook,chapter)
         narration.initialize().blockingAwait()
-        val audio = audioGenerator.convertTextToAudio(verseList)
+        val audio = try {
+            audioGenerator.convertTextToAudio(verseList)
+        } catch(e: NoSuchFileException) {
+            errorChapters.add(chapter.sort)
+            return
+        }
         narration.importChapterAudioFile(audio).blockingAwait()
         narration.close()
     }
