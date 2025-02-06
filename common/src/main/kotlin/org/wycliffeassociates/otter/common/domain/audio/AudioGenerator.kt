@@ -64,7 +64,8 @@ class AudioGenerator @Inject constructor(
     private fun generate(text: String): File {
         println("GENERATING...")
         val generated = File.createTempFile("temp-tts", ".mp3", directoryProvider.tempDirectory)
-        request(text, generated)
+//        request(text, generated)
+        requestLocalTTS(text, generated)
         val outputFile = File.createTempFile("tts", ".mp3", directoryProvider.tempDirectory)
         audioUtils.resampleAudio(generated, outputFile)
         println("DONE!")
@@ -84,7 +85,7 @@ class AudioGenerator @Inject constructor(
         {
             "model": "tts-1",
             "input": $serializedContent,
-            "voice": "shimmer"
+            "voice": "echo"
         }
         """.trimIndent()
 //        "response_format": "wav"
@@ -102,6 +103,40 @@ class AudioGenerator @Inject constructor(
 
         // Check if the response is successful
         if (response.statusCode() == 200) {
+            println("Audio file saved as $outputFile")
+        } else {
+            println("Request failed with status code: ${response.statusCode()}")
+        }
+    }
+
+    private fun requestLocalTTS(content: String, outputFile: File) {
+        val apiUrl = "http://0.0.0.0:8888/speech"
+        // Create an HttpClient instance
+        val client = HttpClient.newHttpClient()
+
+        val serializedContent = ObjectMapper(JsonFactory()).writeValueAsString(content)
+        // Create the JSON payload
+        val jsonPayload = """
+        {
+            "text" : $serializedContent
+        }
+        """.trimIndent()
+//        "response_format": "wav"
+
+        // Create an HttpRequest instance
+        val request = HttpRequest.newBuilder()
+            .uri(URI.create(apiUrl))
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+            .build()
+
+        // Send the request and get the response
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+
+        // Check if the response is successful
+        if (response.statusCode() == 200) {
+            val filePath = ObjectMapper().readTree(response.body()).get("file-path").asText()
+            File(filePath).copyTo(outputFile, overwrite = true)
             println("Audio file saved as $outputFile")
         } else {
             println("Request failed with status code: ${response.statusCode()}")
