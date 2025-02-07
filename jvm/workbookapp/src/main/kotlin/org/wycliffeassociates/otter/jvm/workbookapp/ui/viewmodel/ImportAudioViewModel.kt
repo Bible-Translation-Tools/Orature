@@ -214,6 +214,9 @@ class ImportAudioViewModel : ViewModel() {
         chapterContent: Content,
         verseList: List<String>
     ) {
+        if (chapter.hasSelectedAudio()) {
+            return
+        }
         println("Generating for chapter ${chapter.sort} of ${workbook.target.slug}")
         val narration = narrationFactory.create(workbook,chapter)
         narration.initialize().blockingAwait()
