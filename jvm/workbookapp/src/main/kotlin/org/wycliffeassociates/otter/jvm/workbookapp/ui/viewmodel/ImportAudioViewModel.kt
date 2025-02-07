@@ -224,6 +224,7 @@ class ImportAudioViewModel : ViewModel() {
             return
         }
         narration.importChapterAudioFile(audio).blockingAwait()
+        narration.createChapterTakeWithAudio().blockingGet() // bounce audio
         narration.close()
     }
 
