@@ -120,7 +120,7 @@ jobs:
           -e MAC_NOTARY_ISSUER \
           -e MAC_NOTARY_KEY_ID \
           wycliffeassociates/install4j-docker:11.0.2 \
-          ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx4096m -Dnet.bytebuddy.experimental=true -Dorg.sqlite.lib.path=src/resources/nativelibs/mac -XX:MaxMetaspaceSize=1024m"
+          ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx4096m -Dnet.bytebuddy.experimental=true -XX:MaxMetaspaceSize=1024m"
         env:
           UPDATE_PATH: ${{ needs.set-env-vars.outputs.UPDATE_PATH }}
           ORG_GRADLE_PROJECT_gradlewCommandVersionProp: ${{ needs.set-env-vars.outputs.GHA_VERSION }}

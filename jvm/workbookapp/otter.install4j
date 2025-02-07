@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="11.0" transformSequenceNumber="11">
-  <directoryPresets config="." />
+  <directoryPresets config="./src/main/resources/nativelibs/mac/x86_64/libsqlitejdbc.dylib" />
   <application name="Orature" applicationId="8057-9807-3529-9982" mediaDir=".exec" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-${compiler:sys.version}" shortName="orature" version="0.1" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="82fd10b9f6e2b1b5" javaMinVersion="21" javaMaxVersion="21">
     <codeSigning macEnabled="true" macPkcs12File="~/signing_macos.p12" macNotarize="true" macApiIssuer="${compiler:env.MAC_NOTARY_ISSUER}" macApiKey="${compiler:env.MAC_NOTARY_KEY_ID}" macApiPrivateKey="/root/mac_app_notary_key.p8">
       <macSearchedJars>
@@ -11,10 +11,7 @@
         <entry>*.so</entry>
         <entry>*.jnilib</entry>
         <entry>workbookapp.jar</entry>
-        <entry>markerapp.jar</entry>
-        <entry>recorderapp.jar</entry>
         <entry>sqlite-*</entry>
-        <entry>*sqlite*</entry>
       </macSearchedJars>
     </codeSigning>
     <jreBundles jdkProviderId="Liberica" release="21/latest">
@@ -29,6 +26,12 @@
     </mountPoints>
     <entries>
       <dirEntry mountPoint="58" file="./build/libs" subDirectory="libs" />
+      <dirEntry mountPoint="58" file="./src/main/resources/nativelibs">
+        <exclude>
+          <entry location=".DS_Store" />
+          <entry location="mac/.DS_Store" />
+        </exclude>
+      </dirEntry>
     </entries>
   </files>
   <launchers>
@@ -918,9 +921,15 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
       <excludedBeans>
         <bean refId="414" />
       </excludedBeans>
+      <exclude>
+        <entry location="mac" />
+      </exclude>
       <jreBundle jdkProviderId="Liberica" release="21/latest" />
     </windows>
     <linuxDeb name="Linux Deb Archive" id="158" description="Orature is a modular suite of Oral Translation libraries and distributable software." maintainerEmail="wycliffeassociates.org">
+      <exclude>
+        <entry location="mac" />
+      </exclude>
       <jreBundle jdkProviderId="Liberica" release="21/latest" />
       <postInstallScript>for desktop in /home/*/Desktop; do
     USER=$(stat -c "%U" "$desktop")
