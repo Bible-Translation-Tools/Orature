@@ -215,20 +215,22 @@ class ImportAudioViewModel : ViewModel() {
         verseList: List<String>
     ) {
         if (chapter.hasSelectedAudio()) {
+            println("Chapter ${chapter.sort} skipped - already has audio")
             return
         }
         println("Generating for chapter ${chapter.sort} of ${workbook.target.slug}")
         val narration = narrationFactory.create(workbook,chapter)
-        narration.initialize().blockingAwait()
-        val audio = try {
-            audioGenerator.convertTextToAudio(verseList)
+        try {
+            narration.initialize().blockingAwait()
+            val audio = audioGenerator.convertTextToAudio(verseList)
+            narration.importChapterAudioFile(audio).blockingAwait()
+            narration.createChapterTakeWithAudio().blockingGet() // bounce audio
         } catch(e: NoSuchFileException) {
             errorChapters.add(chapter.sort)
             return
+        } finally {
+            narration.close()
         }
-        narration.importChapterAudioFile(audio).blockingAwait()
-        narration.createChapterTakeWithAudio().blockingGet() // bounce audio
-        narration.close()
     }
 
     private fun getFileNamer(
