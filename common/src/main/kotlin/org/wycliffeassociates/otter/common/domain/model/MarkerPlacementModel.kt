@@ -263,10 +263,13 @@ class MarkerPlacementModel(
             it.marker.clone(location = -1) in optionalMarkers
         }.size
         val unplacedOptionalMarkers = optionalMarkers.size - placedOptionalMarkers
+        val optionalMarkerLabels = optionalMarkers.map {it.formattedLabel}
 
         markerItems.sortBy { it.frame }
         markerItems.forEachIndexed { index, chunkMarker ->
-            if (index < markers.size) {
+            if (chunkMarker.marker.formattedLabel in optionalMarkerLabels) {
+                // no-op
+            } else if (index < markers.size) {
                 // We want the marker from the index, but the position of chunkMarker
                 // This keeps the markers in verse/chunk order and may "swap" markers around
                 chunkMarker.marker = markers[index + unplacedOptionalMarkers].clone(chunkMarker.frame)
