@@ -145,6 +145,18 @@ class ChapterReview : View() {
                         viewModel.placeMarker()
                     }
                 }
+                button("add chapter marker") {
+                    addClass("btn", "btn--secondary", "consume__btn")
+                    action {
+                        viewModel.addChapterMarker()
+                    }
+                }
+                button("add book marker") {
+                    addClass("btn", "btn--secondary", "consume__btn")
+                    action {
+                        viewModel.addBookMarker()
+                    }
+                }
                 label(viewModel.markerProgressCounterProperty) {
                     addClass("normal-text")
                 }

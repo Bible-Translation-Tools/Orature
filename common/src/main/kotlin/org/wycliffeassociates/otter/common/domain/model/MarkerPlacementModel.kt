@@ -40,6 +40,11 @@ enum class MarkerPlacementType {
     VERSE
 }
 
+enum class OptionalMarkerType {
+    BOOK,
+    CHAPTER
+}
+
 /**
  * A model consisting of the state of placeable markers and their operations
  *
@@ -168,6 +173,23 @@ class MarkerPlacementModel(
         return markerModel.id
     }
 
+    fun addOptionalMarker(location: Int, type: OptionalMarkerType): Int {
+        val markerToAdd = when (type) {
+                OptionalMarkerType.BOOK -> optionalMarkers.find { it is BookMarker }
+                OptionalMarkerType.CHAPTER -> optionalMarkers.find { it is ChapterMarker }
+                else -> null
+            }?.clone(location) ?: return -1
+
+        val markerItem = MarkerItem(markerToAdd, true)
+        val op = Add(markerItem)
+        undoStack.push(op)
+        op.execute()
+        redoStack.clear()
+        refreshMarkers()
+
+        return markerItem.id
+    }
+
     fun deleteMarker(id: Int) {
         if (placedMarkersCount > 0) {
             val op = Delete(id)
@@ -237,12 +259,17 @@ class MarkerPlacementModel(
     fun canRedo() = redoStack.isNotEmpty()
 
     private fun refreshMarkers() {
+        val placedOptionalMarkers = markerItems.filter {
+            it.marker.clone(location = -1) in optionalMarkers
+        }.size
+        val unplacedOptionalMarkers = optionalMarkers.size - placedOptionalMarkers
+
         markerItems.sortBy { it.frame }
         markerItems.forEachIndexed { index, chunkMarker ->
             if (index < markers.size) {
                 // We want the marker from the index, but the position of chunkMarker
                 // This keeps the markers in verse/chunk order and may "swap" markers around
-                chunkMarker.marker = markers[index + optionalMarkers.size].clone(chunkMarker.frame)
+                chunkMarker.marker = markers[index + unplacedOptionalMarkers].clone(chunkMarker.frame)
             }
         }
     }

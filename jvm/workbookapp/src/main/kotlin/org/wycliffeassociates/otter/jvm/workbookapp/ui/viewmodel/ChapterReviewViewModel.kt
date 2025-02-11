@@ -59,8 +59,10 @@ import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuild
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
+import org.wycliffeassociates.otter.common.domain.model.OptionalMarkerType
 import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
 import org.wycliffeassociates.otter.common.domain.translation.AddMarkerAction
+import org.wycliffeassociates.otter.common.domain.translation.AddOptionalMarkerAction
 import org.wycliffeassociates.otter.common.domain.translation.DeleteMarkerAction
 import org.wycliffeassociates.otter.common.domain.translation.MoveMarkerAction
 import org.wycliffeassociates.otter.common.domain.translation.TakeEditAction
@@ -217,6 +219,22 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     override fun placeMarker() {
         val location = waveformAudioPlayerProperty.get().getLocationInFrames()
         val action = AddMarkerAction(markerModel!!, location)
+        actionHistory.execute(action)
+        onUndoableAction()
+    }
+
+    fun addBookMarker() {
+        val location = waveformAudioPlayerProperty.get().getLocationInFrames()
+        val type = OptionalMarkerType.BOOK
+        val action = AddOptionalMarkerAction(markerModel!!, type, location)
+        actionHistory.execute(action)
+        onUndoableAction()
+    }
+
+    fun addChapterMarker() {
+        val location = waveformAudioPlayerProperty.get().getLocationInFrames()
+        val type = OptionalMarkerType.CHAPTER
+        val action = AddOptionalMarkerAction(markerModel!!, type, location)
         actionHistory.execute(action)
         onUndoableAction()
     }

@@ -7,6 +7,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.domain.IUndoable
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
+import org.wycliffeassociates.otter.common.domain.model.OptionalMarkerType
 
 class AddMarkerAction(
     private val markerModel: MarkerPlacementModel,
@@ -16,6 +17,26 @@ class AddMarkerAction(
 
     override fun execute() {
         markerId = markerModel.addMarker(location)
+    }
+
+    override fun undo() {
+        markerId?.let {
+            markerModel.deleteMarker(it)
+        }
+    }
+
+    override fun redo() = execute()
+}
+
+class AddOptionalMarkerAction(
+    private val markerModel: MarkerPlacementModel,
+    private val type: OptionalMarkerType,
+    private val location: Int
+) : IUndoable {
+    private var markerId: Int? = null
+
+    override fun execute() {
+        markerId = markerModel.addOptionalMarker(location, type)
     }
 
     override fun undo() {
