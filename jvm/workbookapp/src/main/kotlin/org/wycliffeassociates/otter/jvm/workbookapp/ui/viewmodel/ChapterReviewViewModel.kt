@@ -39,6 +39,8 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
+import org.wycliffeassociates.otter.common.data.audio.BookMarker
+import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.getWaveformColors
@@ -410,6 +412,17 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     private fun loadVerseMarkers(audio: OratureAudioFile, sourceAudio: OratureAudioFile?) {
         markers.clear()
         val sourceMarkers = getSourceMarkers(sourceAudio)
+
+        val optionalMarkers = mutableListOf<AudioMarker>().also { list ->
+            val chapterNumber = workbookDataStore.chapter.sort
+            if (sourceMarkers.none { it is BookMarker} && chapterNumber == 1) {
+                list.add(BookMarker(workbookDataStore.workbook.target.slug, -1))
+            }
+            if (sourceMarkers.none { it is ChapterMarker}) {
+                list.add(ChapterMarker(chapterNumber, -1))
+            }
+        }
+
         val placedMarkers = audio.getVerseAndTitleMarkers()
             .map { MarkerItem(it, true) }
 
@@ -417,7 +430,8 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         markerModel = MarkerPlacementModel(
             MarkerPlacementType.VERSE,
             audio,
-            sourceMarkers.map { it.clone(0) }
+            sourceMarkers.map { it.clone(0) } + optionalMarkers,
+            optionalMarkers
         ).also {
             it.loadMarkers(placedMarkers)
         }

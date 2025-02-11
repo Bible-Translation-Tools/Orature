@@ -53,7 +53,8 @@ enum class MarkerPlacementType {
 class MarkerPlacementModel(
     primaryPlacementType: MarkerPlacementType,
     private val audio: OratureAudioFile,
-    reservedMarkers: List<AudioMarker>
+    reservedMarkers: List<AudioMarker>,
+    private val optionalMarkers: List<AudioMarker> = listOf()
 ) {
     private val logger = LoggerFactory.getLogger(MarkerPlacementModel::class.java)
 
@@ -241,7 +242,7 @@ class MarkerPlacementModel(
             if (index < markers.size) {
                 // We want the marker from the index, but the position of chunkMarker
                 // This keeps the markers in verse/chunk order and may "swap" markers around
-                chunkMarker.marker = markers[index].clone(chunkMarker.frame)
+                chunkMarker.marker = markers[index + optionalMarkers.size].clone(chunkMarker.frame)
             }
         }
     }
