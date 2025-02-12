@@ -230,6 +230,7 @@ By using this software, you agree to the Oracle Binary Code License Agreement fo
               </action>
               <action id="549" beanClass="com.install4j.runtime.beans.actions.control.SetVariableAction" rollbackBarrierExitCode="0">
                 <serializedBean>
+                  <property name="failIfNull" type="boolean" value="true" />
                   <property name="onlyIfUndefined" type="boolean" value="true" />
                   <property name="script">
                     <object class="com.install4j.api.beans.ScriptProperty">
@@ -243,21 +244,22 @@ By using this software, you agree to the Oracle Binary Code License Agreement fo
                 <serializedBean>
                   <property name="destinationFile">
                     <object class="java.io.File">
-                      <string>.</string>
+                      <string>${installer:sys.contentDir}</string>
                     </object>
                   </property>
                   <property name="files" type="array" class="java.io.File" length="2">
                     <element index="0">
                       <object class="java.io.File">
-                        <string>./mac/${installer:macArchType}/libjnidispatch.jnilib</string>
+                        <string>${installer:sys.contentDir}/mac/${installer:macArchType}/libjnidispatch.jnilib</string>
                       </object>
                     </element>
                     <element index="1">
                       <object class="java.io.File">
-                        <string>./mac/${installer:macArchType}/libsqlitejdbc.dylib</string>
+                        <string>${installer:sys.contentDir}/mac/${installer:macArchType}/libsqlitejdbc.dylib</string>
                       </object>
                     </element>
                   </property>
+                  <property name="showProgress" type="boolean" value="true" />
                 </serializedBean>
               </action>
             </actions>
