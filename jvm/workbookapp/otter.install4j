@@ -55,7 +55,7 @@
     </launcher>
     <launcher name="Orature-pkg" id="546" customMacBundleIdentifier="true" macBundleIdentifier="org.wycliffeassociates.otter" addMacEntitlements="true" macEntitlementsFile="/repo/entitlements.plist" addMacApplicationCategory="true" macApplicationCategory="public.app-category.utilities">
       <executable name="orature" iconSet="true" iconFile="./orature_icon.ico" executableDir="." executableMode="gui" singleInstance="true" />
-      <java mainClass="org.wycliffeassociates.otter.jvm.workbookapp.MainKt" vmParameters="--add-exports=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED, --add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED, --add-exports=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED, --add-opens=javafx.controls/javafx.scene.control.skin=ALL-UNNAMED, --add-exports=javafx.base/com.sun.javafx.binding=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.css=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED, --add-opens=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED, --add-opens=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED, --add-opens=javafx.controls/javafx.scene.control.skin=ALL-UNNAMED, --add-opens=javafx.base/com.sun.javafx.binding=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.css=ALL-UNNAMED,-J-Dorg.sqlite.lib.name=libsqlitejdbc.dylib, -J-Dorg.sqlite.lib.path=${installer:sys.contentDir}/mac/${compiler:sys.jreBundleArch}, -J-Djna.nounpack=true, -J-Djna.boot.library.path=${installer:sys.contentDir}/mac/${compiler:sys.jreBundleArch}">
+      <java mainClass="org.wycliffeassociates.otter.jvm.workbookapp.MainKt" vmParameters="--add-exports=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED, --add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED, --add-exports=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED, --add-opens=javafx.controls/javafx.scene.control.skin=ALL-UNNAMED, --add-exports=javafx.base/com.sun.javafx.binding=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.css=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED, --add-opens=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED, --add-opens=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED, --add-opens=javafx.controls/javafx.scene.control.skin=ALL-UNNAMED, --add-opens=javafx.base/com.sun.javafx.binding=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.css=ALL-UNNAMED, -Dorg.sqlite.lib.name=libsqlitejdbc.dylib, -Dorg.sqlite.lib.path=${installer:sys.contentDir}, -Djna.nounpack=true, -Djna.boot.library.path=${installer:sys.contentDir}">
         <classPath>
           <archive location="workbookapp.jar" />
         </classPath>
@@ -237,6 +237,27 @@ By using this software, you agree to the Oracle Binary Code License Agreement fo
                     </object>
                   </property>
                   <property name="variableName" type="string">macArchType</property>
+                </serializedBean>
+              </action>
+              <action id="563" beanClass="com.install4j.runtime.beans.actions.files.MoveFileAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="destinationFile">
+                    <object class="java.io.File">
+                      <string>.</string>
+                    </object>
+                  </property>
+                  <property name="files" type="array" class="java.io.File" length="2">
+                    <element index="0">
+                      <object class="java.io.File">
+                        <string>./mac/${installer:macArchType}/libjnidispatch.jnilib</string>
+                      </object>
+                    </element>
+                    <element index="1">
+                      <object class="java.io.File">
+                        <string>./mac/${installer:macArchType}/libsqlitejdbc.dylib</string>
+                      </object>
+                    </element>
+                  </property>
                 </serializedBean>
               </action>
             </actions>
