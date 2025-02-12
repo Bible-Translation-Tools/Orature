@@ -228,40 +228,6 @@ By using this software, you agree to the Oracle Binary Code License Agreement fo
                   <property name="itemName" type="string">${compiler:sys.fullName} ${compiler:sys.version}</property>
                 </serializedBean>
               </action>
-              <action id="549" beanClass="com.install4j.runtime.beans.actions.control.SetVariableAction" rollbackBarrierExitCode="0">
-                <serializedBean>
-                  <property name="failIfNull" type="boolean" value="true" />
-                  <property name="onlyIfUndefined" type="boolean" value="true" />
-                  <property name="script">
-                    <object class="com.install4j.api.beans.ScriptProperty">
-                      <property name="value" type="string">return System.getProperty("os.arch").equals("aarch64") ? "aarch64" : "x86_64";</property>
-                    </object>
-                  </property>
-                  <property name="variableName" type="string">macArchType</property>
-                </serializedBean>
-              </action>
-              <action id="563" beanClass="com.install4j.runtime.beans.actions.files.MoveFileAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
-                <serializedBean>
-                  <property name="destinationFile">
-                    <object class="java.io.File">
-                      <string>${installer:sys.contentDir}</string>
-                    </object>
-                  </property>
-                  <property name="files" type="array" class="java.io.File" length="2">
-                    <element index="0">
-                      <object class="java.io.File">
-                        <string>${installer:sys.contentDir}/mac/${installer:macArchType}/libjnidispatch.jnilib</string>
-                      </object>
-                    </element>
-                    <element index="1">
-                      <object class="java.io.File">
-                        <string>${installer:sys.contentDir}/mac/${installer:macArchType}/libsqlitejdbc.dylib</string>
-                      </object>
-                    </element>
-                  </property>
-                  <property name="showProgress" type="boolean" value="true" />
-                </serializedBean>
-              </action>
             </actions>
             <formComponents>
               <formComponent id="16" beanClass="com.install4j.runtime.beans.formcomponents.ProgressComponent">
@@ -332,6 +298,40 @@ By using this software, you agree to the Oracle Binary Code License Agreement fo
                   </property>
                   <property name="mode" type="string">755</property>
                   <property name="triggerReboot" type="boolean" value="false" />
+                </serializedBean>
+              </action>
+              <action id="549" beanClass="com.install4j.runtime.beans.actions.control.SetVariableAction" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="failIfNull" type="boolean" value="true" />
+                  <property name="onlyIfUndefined" type="boolean" value="true" />
+                  <property name="script">
+                    <object class="com.install4j.api.beans.ScriptProperty">
+                      <property name="value" type="string">return System.getProperty("os.arch").equals("aarch64") ? "aarch64" : "x86_64";</property>
+                    </object>
+                  </property>
+                  <property name="variableName" type="string">macArchType</property>
+                </serializedBean>
+              </action>
+              <action id="563" beanClass="com.install4j.runtime.beans.actions.files.MoveFileAction" actionElevationType="elevated" rollbackBarrierExitCode="0" failureStrategy="ask" errorMessage="Couldn't find the vendored binaries">
+                <serializedBean>
+                  <property name="destinationFile">
+                    <object class="java.io.File">
+                      <string>${installer:sys.contentDir}</string>
+                    </object>
+                  </property>
+                  <property name="files" type="array" class="java.io.File" length="2">
+                    <element index="0">
+                      <object class="java.io.File">
+                        <string>${installer:sys.contentDir}/mac/${installer:macArchType}/libjnidispatch.jnilib</string>
+                      </object>
+                    </element>
+                    <element index="1">
+                      <object class="java.io.File">
+                        <string>${installer:sys.contentDir}/mac/${installer:macArchType}/libsqlitejdbc.dylib</string>
+                      </object>
+                    </element>
+                  </property>
+                  <property name="showProgress" type="boolean" value="true" />
                 </serializedBean>
               </action>
             </actions>
@@ -985,7 +985,5 @@ done</postUninstallScript>
     </macosArchive>
     <macosArchive name="macOS Single Bundle Archive Pkg" id="519" archiveType="appstore" provisioningProfile="/root/orature.provisionprofile" architecture="universal" launcherId="546" />
   </mediaSets>
-  <buildIds buildAll="false">
-    <mediaSet refId="415" />
-  </buildIds>
+  <buildIds buildAll="false" />
 </install4j>
