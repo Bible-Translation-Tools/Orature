@@ -41,6 +41,13 @@ class MarkerDeletedEvent(val markerId: Int): FXEvent()
  * @param end ending frame position of the movement
  */
 class MarkerMovedEvent(val markerId: Int, val start: Int, val end: Int): FXEvent()
+
+enum class MarkerType {
+    BOOK,
+    CHAPTER,
+    VERSE
+}
+class AddMarkerEvent(val markerType: MarkerType): FXEvent()
 class UndoChunkingPageEvent: FXEvent()
 class RedoChunkingPageEvent: FXEvent()
 class GoToNextChapterEvent: FXEvent()

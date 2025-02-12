@@ -33,15 +33,16 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
-import org.wycliffeassociates.otter.jvm.controls.button.debouncedButton
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
+import org.wycliffeassociates.otter.jvm.controls.event.AddMarkerEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepTransitionEvent
 import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.MarkerType
 import org.wycliffeassociates.otter.jvm.controls.event.OpenInPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ReturnFromPluginEvent
@@ -57,6 +58,7 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.addMarkerSplitButton
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.SnackBarEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterReviewViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -132,31 +134,20 @@ class ChapterReview : View() {
 
             hbox {
                 addClass("consume__bottom", "chunking-bottom__media-btn-group")
-                debouncedButton(messages["addVerse"], 700.0) {
-                    addClass("btn", "btn--primary", "consume__btn")
-                    tooltip(text)
-                    graphic = FontIcon(MaterialDesign.MDI_PLUS)
-                    disableWhen {
-                        viewModel.markersPlacedCountProperty.isEqualTo(viewModel.totalMarkersProperty)
-                            .or(isOverlappingNearbyMarker())
-                    }
-
-                    action {
-                        viewModel.placeMarker()
-                    }
-                }
-                button("add chapter marker") {
-                    addClass("btn", "btn--secondary", "consume__btn")
-                    action {
-                        viewModel.addChapterMarker()
-                    }
-                }
-                button("add book marker") {
-                    addClass("btn", "btn--secondary", "consume__btn")
-                    action {
-                        viewModel.addBookMarker()
-                    }
-                }
+//                debouncedButton(messages["addVerse"], 700.0) {
+//                    addClass("btn", "btn--primary", "consume__btn")
+//                    tooltip(text)
+//                    graphic = FontIcon(MaterialDesign.MDI_PLUS)
+//                    disableWhen {
+//                        viewModel.markersPlacedCountProperty.isEqualTo(viewModel.totalMarkersProperty)
+//                            .or(isOverlappingNearbyMarker())
+//                    }
+//
+//                    action {
+//                        viewModel.placeMarker()
+//                    }
+//                }
+                addMarkerSplitButton()
                 label(viewModel.markerProgressCounterProperty) {
                     addClass("normal-text")
                 }
@@ -275,6 +266,14 @@ class ChapterReview : View() {
 
         subscribe<MarkerMovedEvent> {
             viewModel.moveMarker(it.markerId, it.start, it.end)
+        }.also { eventSubscriptions.add(it) }
+
+        subscribe<AddMarkerEvent> {
+            when (it.markerType) {
+                MarkerType.BOOK -> viewModel.addBookMarker()
+                MarkerType.CHAPTER -> viewModel.addChapterMarker()
+                MarkerType.VERSE -> viewModel.placeMarker()
+            }
         }.also { eventSubscriptions.add(it) }
 
         subscribe<UndoChunkingPageEvent> {
