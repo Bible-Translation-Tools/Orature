@@ -67,6 +67,7 @@ class MarkerPlacementModel(
         MarkerPlacementType.CHUNK -> ChunkMarker::class.java
         MarkerPlacementType.VERSE -> VerseMarker::class.java
     }
+    private val optionalMarkerLabels = optionalMarkers.map {it.formattedLabel}
 
     private val undoStack: Deque<IUndoable> = ArrayDeque()
     private val redoStack: Deque<IUndoable> = ArrayDeque()
@@ -160,17 +161,18 @@ class MarkerPlacementModel(
     }
 
     fun addMarker(location: Int): Int {
-        val marker = markers.getOrNull(labelIndex) ?: return - 1
-        val markerModel = MarkerItem(marker.clone(location), true)
+        val marker = markers.find { it.formattedLabel !in optionalMarkerLabels && it.location <= 0 }
+            ?: return - 1
 
-        val op = Add(markerModel)
+        val markerItem = MarkerItem(marker.clone(location), true)
+        val op = Add(markerItem)
         undoStack.push(op)
         op.execute()
         redoStack.clear()
 
         refreshMarkers()
 
-        return markerModel.id
+        return markerItem.id
     }
 
     fun addOptionalMarker(location: Int, type: OptionalMarkerType): Int {
@@ -263,7 +265,6 @@ class MarkerPlacementModel(
             it.marker.clone(location = -1) in optionalMarkers
         }.size
         val unplacedOptionalMarkers = optionalMarkers.size - placedOptionalMarkers
-        val optionalMarkerLabels = optionalMarkers.map {it.formattedLabel}
 
         markerItems.sortBy { it.frame }
         markerItems.forEachIndexed { index, chunkMarker ->
