@@ -54,6 +54,8 @@ enum class OptionalMarkerType {
  *
  * @param reservedMarkers the exhaustive list of all AudioMarkers that need to be placed and accounted for, which
  * can include markers that are not of the primaryPlacementType, such as BookMarker and ChapterMarker
+ *
+ * @param optionalMarkers a list of non-mandatory markers that can be placed out of order.
  */
 class MarkerPlacementModel(
     primaryPlacementType: MarkerPlacementType,
@@ -271,8 +273,10 @@ class MarkerPlacementModel(
             if (chunkMarker.marker.formattedLabel in optionalMarkerLabels) {
                 // no-op
             } else if (index < markers.size) {
-                // We want the marker from the index, but the position of chunkMarker
-                // This keeps the markers in verse/chunk order and may "swap" markers around
+                /* We want the marker from the index, but the position of chunkMarker
+                 This keeps the markers in verse/chunk order and may "swap" markers around.
+                 We offset the unplaced optional markers because these need to be placed out of order
+                */
                 chunkMarker.marker = markers[index + unplacedOptionalMarkers].clone(chunkMarker.frame)
             }
         }
