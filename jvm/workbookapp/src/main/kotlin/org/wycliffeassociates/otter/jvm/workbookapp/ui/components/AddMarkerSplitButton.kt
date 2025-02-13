@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.event.EventTarget
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
@@ -14,9 +15,16 @@ import tornadofx.FX.Companion.messages
 
 class AddMarkerSplitButton : HBox() {
 
+    val disableAddingVerseMarkerProperty = SimpleBooleanProperty()
+    val canAddBookMarkerProperty = SimpleBooleanProperty()
+    val canAddChapterMarkerProperty = SimpleBooleanProperty()
+
     private val menu = AddMarkerMenu().also { menu ->
         menu.setOnShowing { addPseudoClass("active") }
         menu.setOnHidden { removePseudoClass("active") }
+
+        menu.canAddBookMarkerProperty.bind(canAddBookMarkerProperty)
+        menu.canAddChapterMarkerProperty.bind(canAddChapterMarkerProperty)
     }
 
     init {
@@ -26,6 +34,7 @@ class AddMarkerSplitButton : HBox() {
             graphic = FontIcon(MaterialDesign.MDI_BOOKMARK_PLUS)
             fitToParentHeight()
 
+            disableWhen(disableAddingVerseMarkerProperty)
             action {
                 FX.eventbus.fire(AddMarkerEvent(MarkerType.VERSE))
             }
@@ -33,6 +42,10 @@ class AddMarkerSplitButton : HBox() {
         button {
             addClass("btn", "btn--primary", "chapter-selector__btn-next")
             graphic = FontIcon(MaterialDesign.MDI_CHEVRON_DOWN)
+
+            disableWhen {
+                canAddBookMarkerProperty.not().and(canAddChapterMarkerProperty.not())
+            }
 
             action {
                 val screenBound = localToScreen(boundsInLocal)
@@ -45,16 +58,22 @@ class AddMarkerSplitButton : HBox() {
 }
 
 class AddMarkerMenu : ContextMenu() {
+
+    val canAddBookMarkerProperty = SimpleBooleanProperty()
+    val canAddChapterMarkerProperty = SimpleBooleanProperty()
+
     init {
         addClass("wa-context-menu")
 
         val addBookOption = MenuItem().apply {
             addClass("btn", "btn--tertiary", "btn--borderless")
-
             graphic = label(messages["addBookMarker"]) {
                 graphic = FontIcon(MaterialDesign.MDI_BOOK)
                 tooltip(text)
             }
+
+            enableWhen(canAddBookMarkerProperty)
+
             action {
                 FX.eventbus.fire(AddMarkerEvent(MarkerType.BOOK))
             }
@@ -62,11 +81,13 @@ class AddMarkerMenu : ContextMenu() {
 
         val addChapterOption = MenuItem().apply {
             addClass("btn", "btn--tertiary", "btn--borderless")
-
             graphic = label(messages["addChapterMarker"]) {
                 graphic = FontIcon(MaterialDesign.MDI_FILE_DOCUMENT)
                 tooltip(text)
             }
+
+            enableWhen(canAddChapterMarkerProperty)
+
             action {
                 FX.eventbus.fire(AddMarkerEvent(MarkerType.CHAPTER))
             }

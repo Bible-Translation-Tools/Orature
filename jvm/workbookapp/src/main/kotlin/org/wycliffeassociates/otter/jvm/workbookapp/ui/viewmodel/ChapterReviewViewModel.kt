@@ -142,6 +142,12 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     val canGoNextChapterProperty: BooleanBinding = translationViewModel.isLastChapterProperty.not().and(
         markersPlacedCountProperty.isEqualTo(totalMarkersProperty)
     )
+    val isBookMarkerPlacedProperty = markers.booleanBinding { list ->
+        list.any { m -> m.marker is BookMarker && m.placed }
+    }
+    val isChapterMarkerPlacedProperty = markers.booleanBinding { list ->
+        list.any { m -> m.marker is ChapterMarker && m.placed }
+    }
     val isPlayingProperty = SimpleBooleanProperty(false)
     val compositeDisposable = CompositeDisposable()
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()

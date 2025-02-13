@@ -134,20 +134,14 @@ class ChapterReview : View() {
 
             hbox {
                 addClass("consume__bottom", "chunking-bottom__media-btn-group")
-//                debouncedButton(messages["addVerse"], 700.0) {
-//                    addClass("btn", "btn--primary", "consume__btn")
-//                    tooltip(text)
-//                    graphic = FontIcon(MaterialDesign.MDI_PLUS)
-//                    disableWhen {
-//                        viewModel.markersPlacedCountProperty.isEqualTo(viewModel.totalMarkersProperty)
-//                            .or(isOverlappingNearbyMarker())
-//                    }
-//
-//                    action {
-//                        viewModel.placeMarker()
-//                    }
-//                }
-                addMarkerSplitButton()
+                addMarkerSplitButton {
+                    disableAddingVerseMarkerProperty.bind(
+                        viewModel.markersPlacedCountProperty.isEqualTo(viewModel.totalMarkersProperty)
+                            .or(isOverlappingNearbyMarker())
+                    )
+                    canAddBookMarkerProperty.bind(viewModel.isBookMarkerPlacedProperty.not())
+                    canAddChapterMarkerProperty.bind(viewModel.isChapterMarkerPlacedProperty.not())
+                }
                 label(viewModel.markerProgressCounterProperty) {
                     addClass("normal-text")
                 }
