@@ -24,7 +24,6 @@ task createDb {
     boolean isMac = (System.getProperty("os.name")).toUpperCase().contains("MAC");
 
     if (sandboxed && isMac) {
-            String arch = System.getProperty("os.arch");
             // Determine the current architecture
             String arch = System.getProperty("os.arch");
             String archDir;
