@@ -20,6 +20,44 @@ dependencies {
 }
 
 task createDb {
+    boolean sandboxed = System.getenv("APP_SANDBOX_CONTAINER_ID") != null;
+    boolean isMac = (System.getProperty("os.name")).toUpperCase().contains("MAC");
+
+    if (sandboxed && isMac) {
+            String arch = System.getProperty("os.arch");
+            // Determine the current architecture
+            String arch = System.getProperty("os.arch");
+            String archDir;
+
+            // Normalize architecture names
+            if (arch.equals("aarch64")) {
+                archDir = "mac/aarch64";
+            } else if (arch.equals("x86_64") || arch.equals("amd64")) {
+                archDir = "mac/x86_64";
+            } else {
+                throw new RuntimeException("Unsupported macOS architecture: " + arch);
+            }
+
+            // Locate the JAR file
+            File jarFile = new File(NativeLibPathResolver.class
+                .getProtectionDomain()
+                .getCodeSource()
+                .getLocation()
+                .toURI());
+
+        // Navigate to the appropriate native lib directory
+        File nativeLibDir = new File(jarFile.getParentFile(), archDir);
+        String absolutePath = nativeLibDir.getAbsolutePath();
+        
+        System.setProperty("jna.nosys", "true");
+         // Don't unpack the libraries
+        System.setProperty("jna.nounpack", "true");
+        // Tell JNA where the native libraries are
+        System.setProperty("jna.boot.library.path", absolutePath);
+        // same path for sqlite
+        // org.sqlite.lib.name=libsqlitejdbc.dylib passed a vm parameter. Path here in gradle due to needing arch
+        System.setProperty("org.sqlite.lib.path", absolutePath);
+    }
     //Add the full path to the sqlite-jdbc jar to the list of URLs
     //that Gradle will search for classes and resources
     //The code block below allows Gradle to find and use the executable jar for sqlite-jdbc
