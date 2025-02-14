@@ -20,56 +20,6 @@ dependencies {
 }
 
 task createDb {
-    boolean sandboxed = System.getenv("APP_SANDBOX_CONTAINER_ID") != null;
-    boolean isMac = System.getProperty("os.name").toUpperCase().contains("MAC");
-
-    System.out.println("[DEBUG] Sandbox detected: " + sandboxed);
-    System.out.println("[DEBUG] Running on macOS: " + isMac);
-
-    if (sandboxed && isMac) {
-        try {
-            // Determine the current architecture
-            String arch = System.getProperty("os.arch");
-            System.out.println("[DEBUG] Detected architecture: " + arch);
-
-            String archDir;
-            if (arch.equals("aarch64")) {
-                archDir = "mac/aarch64";
-            } else if (arch.equals("x86_64") || arch.equals("amd64")) {
-                archDir = "mac/x86_64";
-            } else {
-                throw new RuntimeException("Unsupported macOS architecture: " + arch);
-            }
-
-            System.out.println("[DEBUG] Using native library directory: " + archDir);
-
-            // Locate the JAR file
-            File jarFile = new File(NativeLibPathResolver.class
-                .getProtectionDomain()
-                .getCodeSource()
-                .getLocation()
-                .toURI());
-
-            System.out.println("[DEBUG] JAR file location: " + jarFile.getAbsolutePath());
-
-            // Navigate to the appropriate native lib directory
-            File nativeLibDir = new File(jarFile.getParentFile(), archDir);
-            String absolutePath = nativeLibDir.getAbsolutePath();
-
-            System.out.println("[DEBUG] Resolved native library path: " + absolutePath);
-
-            // Set system properties for JNA and SQLite
-            System.setProperty("jna.nosys", "true");
-            System.setProperty("jna.nounpack", "true");
-            System.setProperty("jna.boot.library.path", absolutePath);
-            System.setProperty("org.sqlite.lib.path", absolutePath);
-
-            System.out.println("[INFO] Successfully configured native libraries.");
-        } catch (URISyntaxException e) {
-            System.err.println("[ERROR] Failed to determine native library path: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
     //Add the full path to the sqlite-jdbc jar to the list of URLs
     //that Gradle will search for classes and resources
     //The code block below allows Gradle to find and use the executable jar for sqlite-jdbc
