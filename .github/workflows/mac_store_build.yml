@@ -14,7 +14,7 @@ on:
 
 jobs:
   set-env-vars:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: FranzDiebold/github-env-vars-action@v2.1.0
@@ -49,7 +49,7 @@ jobs:
       IS_RELEASE: ${{ steps.tagged.outcome }}
 
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     needs: set-env-vars
     if: ${{ needs.set-env-vars.outputs.IS_RELEASE != 'skipped' }}
     steps:
@@ -129,7 +129,7 @@ jobs:
           include-hidden-files: true
           path: jvm/workbookapp/.exec/
   upload:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     needs: [set-env-vars, build]
     steps:
       - name: Set upload secrets
