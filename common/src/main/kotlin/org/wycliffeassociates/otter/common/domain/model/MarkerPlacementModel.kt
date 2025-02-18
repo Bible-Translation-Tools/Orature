@@ -162,6 +162,11 @@ class MarkerPlacementModel(
         refreshMarkers()
     }
 
+    /**
+     * Adds a marker item to the list of placed markers and returns the id
+     * of the newly added.
+     * Returns -1 if there is no appropriate marker available to add.
+     */
     fun addMarker(location: Int): Int {
         val marker = markers.find { it.formattedLabel !in optionalMarkerLabels && it.location <= 0 }
             ?: return - 1
@@ -177,6 +182,13 @@ class MarkerPlacementModel(
         return markerItem.id
     }
 
+    /**
+     * Adds an optional marker item to the list of placed markers and returns the id
+     * of the newly added or -1 if there is no marker available to add.
+     *
+     * These markers will not be subject to the automatic sorting mechanism when placed
+     * in front of verse markers.
+     */
     fun addOptionalMarker(location: Int, type: OptionalMarkerType): Int {
         val markerToAdd = when (type) {
                 OptionalMarkerType.BOOK -> optionalMarkers.find { it is BookMarker }
