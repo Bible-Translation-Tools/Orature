@@ -32,6 +32,9 @@ import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.audio.BookMarker
+import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
@@ -42,7 +45,6 @@ import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEven
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
-import org.wycliffeassociates.otter.jvm.controls.event.MarkerType
 import org.wycliffeassociates.otter.jvm.controls.event.OpenInPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ReturnFromPluginEvent
@@ -264,9 +266,9 @@ class ChapterReview : View() {
 
         subscribe<AddMarkerEvent> {
             when (it.markerType) {
-                MarkerType.BOOK -> viewModel.addBookMarker()
-                MarkerType.CHAPTER -> viewModel.addChapterMarker()
-                MarkerType.VERSE -> viewModel.placeMarker()
+                BookMarker::class -> viewModel.addBookMarker()
+                ChapterMarker::class -> viewModel.addChapterMarker()
+                VerseMarker::class -> viewModel.placeMarker()
             }
         }.also { eventSubscriptions.add(it) }
 

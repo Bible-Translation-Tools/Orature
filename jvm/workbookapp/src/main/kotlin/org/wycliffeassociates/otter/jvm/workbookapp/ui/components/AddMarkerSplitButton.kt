@@ -25,9 +25,11 @@ import javafx.scene.control.MenuItem
 import javafx.scene.layout.HBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.data.audio.BookMarker
+import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.button.debouncedButton
 import org.wycliffeassociates.otter.jvm.controls.event.AddMarkerEvent
-import org.wycliffeassociates.otter.jvm.controls.event.MarkerType
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -54,7 +56,7 @@ class AddMarkerSplitButton : HBox() {
 
             disableWhen(disableAddingVerseMarkerProperty)
             action {
-                FX.eventbus.fire(AddMarkerEvent(MarkerType.VERSE))
+                FX.eventbus.fire(AddMarkerEvent(VerseMarker::class))
             }
         }
         button {
@@ -93,7 +95,7 @@ class AddMarkerMenu : ContextMenu() {
             enableWhen(canAddBookMarkerProperty)
 
             action {
-                FX.eventbus.fire(AddMarkerEvent(MarkerType.BOOK))
+                FX.eventbus.fire(AddMarkerEvent(BookMarker::class))
             }
         }
 
@@ -107,7 +109,7 @@ class AddMarkerMenu : ContextMenu() {
             enableWhen(canAddChapterMarkerProperty)
 
             action {
-                FX.eventbus.fire(AddMarkerEvent(MarkerType.CHAPTER))
+                FX.eventbus.fire(AddMarkerEvent(ChapterMarker::class))
             }
 
         }
