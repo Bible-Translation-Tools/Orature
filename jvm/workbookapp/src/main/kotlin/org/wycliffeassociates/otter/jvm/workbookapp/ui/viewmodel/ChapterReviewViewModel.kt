@@ -39,6 +39,8 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
+import org.wycliffeassociates.otter.common.data.audio.BookMarker
+import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.getWaveformColors
@@ -57,8 +59,10 @@ import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuild
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
+import org.wycliffeassociates.otter.common.domain.model.OptionalMarkerType
 import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
 import org.wycliffeassociates.otter.common.domain.translation.AddMarkerAction
+import org.wycliffeassociates.otter.common.domain.translation.AddOptionalMarkerAction
 import org.wycliffeassociates.otter.common.domain.translation.DeleteMarkerAction
 import org.wycliffeassociates.otter.common.domain.translation.MoveMarkerAction
 import org.wycliffeassociates.otter.common.domain.translation.TakeEditAction
@@ -135,18 +139,31 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     val markerProgressCounterProperty = SimpleStringProperty()
     val totalMarkersProperty = SimpleIntegerProperty(0)
     val markersPlacedCountProperty = SimpleIntegerProperty(0)
-    val canGoNextChapterProperty: BooleanBinding = translationViewModel.isLastChapterProperty.not().and(
-        markersPlacedCountProperty.isEqualTo(totalMarkersProperty)
-    )
+    val canGoNextChapterProperty: BooleanBinding
+    val isBookMarkerPlacedProperty = markers.booleanBinding { list ->
+        list.any { m -> m.marker is BookMarker && m.placed }
+    }
+    val isChapterMarkerPlacedProperty = markers.booleanBinding { list ->
+        list.any { m -> m.marker is ChapterMarker && m.placed }
+    }
     val isPlayingProperty = SimpleBooleanProperty(false)
     val compositeDisposable = CompositeDisposable()
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
-
     val pluginOpenedProperty = SimpleBooleanProperty(false)
+
+    private val sourceMarkerLabels = observableListOf<String>()
     private val actionHistory = UndoableActionHistory<IUndoable>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+
+        val hasAllRequiredMarkers = markers.booleanBinding { list ->
+            val placedMarkerLabels = list.map { it.marker.formattedLabel }
+            sourceMarkerLabels.all { it in placedMarkerLabels }
+        }
+        canGoNextChapterProperty = translationViewModel.isLastChapterProperty.not().and(
+            hasAllRequiredMarkers
+        )
     }
 
     fun dock() {
@@ -215,6 +232,22 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     override fun placeMarker() {
         val location = waveformAudioPlayerProperty.get().getLocationInFrames()
         val action = AddMarkerAction(markerModel!!, location)
+        actionHistory.execute(action)
+        onUndoableAction()
+    }
+
+    fun addBookMarker() {
+        val location = waveformAudioPlayerProperty.get().getLocationInFrames()
+        val type = OptionalMarkerType.BOOK
+        val action = AddOptionalMarkerAction(markerModel!!, type, location)
+        actionHistory.execute(action)
+        onUndoableAction()
+    }
+
+    fun addChapterMarker() {
+        val location = waveformAudioPlayerProperty.get().getLocationInFrames()
+        val type = OptionalMarkerType.CHAPTER
+        val action = AddOptionalMarkerAction(markerModel!!, type, location)
         actionHistory.execute(action)
         onUndoableAction()
     }
@@ -410,6 +443,18 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     private fun loadVerseMarkers(audio: OratureAudioFile, sourceAudio: OratureAudioFile?) {
         markers.clear()
         val sourceMarkers = getSourceMarkers(sourceAudio)
+        sourceMarkerLabels.setAll(sourceMarkers.map { it.formattedLabel })
+
+        val optionalMarkers = mutableListOf<AudioMarker>().also { list ->
+            val chapterNumber = workbookDataStore.chapter.sort
+            if (sourceMarkers.none { it is BookMarker} && chapterNumber == 1) {
+                list.add(BookMarker(workbookDataStore.workbook.target.slug, -1))
+            }
+            if (sourceMarkers.none { it is ChapterMarker}) {
+                list.add(ChapterMarker(chapterNumber, -1))
+            }
+        }
+
         val placedMarkers = audio.getVerseAndTitleMarkers()
             .map { MarkerItem(it, true) }
 
@@ -417,7 +462,8 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         markerModel = MarkerPlacementModel(
             MarkerPlacementType.VERSE,
             audio,
-            sourceMarkers.map { it.clone(0) }
+            sourceMarkers.map { it.clone(0) } + optionalMarkers,
+            optionalMarkers
         ).also {
             it.loadMarkers(placedMarkers)
         }

@@ -18,10 +18,12 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.event
 
+import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import tornadofx.FXEvent
 import java.io.File
+import kotlin.reflect.KClass
 
 class ChunkingStepTransitionEvent(val step: ChunkingStep): FXEvent()
 class ChunkingStepSelectedEvent(val step: ChunkingStep) : FXEvent()
@@ -41,6 +43,8 @@ class MarkerDeletedEvent(val markerId: Int): FXEvent()
  * @param end ending frame position of the movement
  */
 class MarkerMovedEvent(val markerId: Int, val start: Int, val end: Int): FXEvent()
+
+class AddMarkerEvent(val markerType: KClass<out AudioMarker>): FXEvent()
 class UndoChunkingPageEvent: FXEvent()
 class RedoChunkingPageEvent: FXEvent()
 class GoToNextChapterEvent: FXEvent()
