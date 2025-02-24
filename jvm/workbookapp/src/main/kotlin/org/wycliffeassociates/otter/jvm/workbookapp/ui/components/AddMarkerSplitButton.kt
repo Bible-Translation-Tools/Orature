@@ -35,7 +35,7 @@ import tornadofx.FX.Companion.messages
 
 class AddMarkerSplitButton : HBox() {
 
-    val disableAddingVerseMarkerProperty = SimpleBooleanProperty()
+    val canAddVerseMarkerProperty = SimpleBooleanProperty()
     val canAddBookMarkerProperty = SimpleBooleanProperty()
     val canAddChapterMarkerProperty = SimpleBooleanProperty()
 
@@ -54,7 +54,7 @@ class AddMarkerSplitButton : HBox() {
             graphic = FontIcon(MaterialDesign.MDI_BOOKMARK_PLUS)
             fitToParentHeight()
 
-            disableWhen(disableAddingVerseMarkerProperty)
+            enableWhen(canAddVerseMarkerProperty)
             action {
                 FX.eventbus.fire(AddMarkerEvent(VerseMarker::class))
             }

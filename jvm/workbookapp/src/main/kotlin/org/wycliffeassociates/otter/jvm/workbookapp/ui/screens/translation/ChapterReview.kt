@@ -137,16 +137,18 @@ class ChapterReview : View() {
             hbox {
                 addClass("consume__bottom", "chunking-bottom__media-btn-group")
                 addMarkerSplitButton {
-                    disableAddingVerseMarkerProperty.bind(
-                        viewModel.markersPlacedCountProperty.isEqualTo(viewModel.totalMarkersProperty)
-                            .or(isOverlappingNearbyMarker())
+                    val disableAddingVerseMarker = viewModel.canGoNextChapterProperty.or(
+                        isOverlappingNearbyMarker()
                     )
+                    canAddVerseMarkerProperty.bind(disableAddingVerseMarker.not())
                     canAddBookMarkerProperty.bind(viewModel.isBookMarkerPlacedProperty.not())
                     canAddChapterMarkerProperty.bind(viewModel.isChapterMarkerPlacedProperty.not())
                 }
+                /*
                 label(viewModel.markerProgressCounterProperty) {
                     addClass("normal-text")
                 }
+                 */
                 region { hgrow = Priority.ALWAYS }
                 hbox {
                     addClass("chunking-bottom__media-btn-group")

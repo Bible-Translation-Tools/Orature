@@ -139,9 +139,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     val markerProgressCounterProperty = SimpleStringProperty()
     val totalMarkersProperty = SimpleIntegerProperty(0)
     val markersPlacedCountProperty = SimpleIntegerProperty(0)
-    val canGoNextChapterProperty: BooleanBinding = translationViewModel.isLastChapterProperty.not().and(
-        markersPlacedCountProperty.isEqualTo(totalMarkersProperty)
-    )
+    val canGoNextChapterProperty: BooleanBinding
     val isBookMarkerPlacedProperty = markers.booleanBinding { list ->
         list.any { m -> m.marker is BookMarker && m.placed }
     }
@@ -151,12 +149,21 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     val isPlayingProperty = SimpleBooleanProperty(false)
     val compositeDisposable = CompositeDisposable()
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
-
     val pluginOpenedProperty = SimpleBooleanProperty(false)
+
+    private val sourceMarkerLabels = observableListOf<String>()
     private val actionHistory = UndoableActionHistory<IUndoable>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+
+        val hasAllRequiredMarkers = markers.booleanBinding { list ->
+            val placedMarkerLabels = list.map { it.marker.formattedLabel }
+            sourceMarkerLabels.all { it in placedMarkerLabels }
+        }
+        canGoNextChapterProperty = translationViewModel.isLastChapterProperty.not().and(
+            hasAllRequiredMarkers
+        )
     }
 
     fun dock() {
@@ -436,6 +443,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     private fun loadVerseMarkers(audio: OratureAudioFile, sourceAudio: OratureAudioFile?) {
         markers.clear()
         val sourceMarkers = getSourceMarkers(sourceAudio)
+        sourceMarkerLabels.setAll(sourceMarkers.map { it.formattedLabel })
 
         val optionalMarkers = mutableListOf<AudioMarker>().also { list ->
             val chapterNumber = workbookDataStore.chapter.sort
