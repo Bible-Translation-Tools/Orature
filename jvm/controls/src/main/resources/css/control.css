@@ -131,7 +131,8 @@
     -fx-font-size: 24px;
 }
 
-.btn--primary:pressed {
+.btn--primary:pressed,
+.btn--primary:active {
     -fx-background-color: -wa-button-pressed-surface;
     -fx-underline: false;
 }

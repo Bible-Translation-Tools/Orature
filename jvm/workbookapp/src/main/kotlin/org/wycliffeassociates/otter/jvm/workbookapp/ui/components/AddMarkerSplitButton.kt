@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.event.EventTarget
+import javafx.scene.control.Button
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
 import javafx.scene.layout.HBox
@@ -39,9 +40,11 @@ class AddMarkerSplitButton : HBox() {
     val canAddBookMarkerProperty = SimpleBooleanProperty()
     val canAddChapterMarkerProperty = SimpleBooleanProperty()
 
+    private lateinit var dropDownButton: Button
+
     private val menu = AddMarkerMenu().also { menu ->
-        menu.setOnShowing { addPseudoClass("active") }
-        menu.setOnHidden { removePseudoClass("active") }
+        menu.setOnShowing { dropDownButton.addPseudoClass("active") }
+        menu.setOnHidden { dropDownButton.removePseudoClass("active") }
 
         menu.canAddBookMarkerProperty.bind(canAddBookMarkerProperty)
         menu.canAddChapterMarkerProperty.bind(canAddChapterMarkerProperty)
@@ -60,6 +63,7 @@ class AddMarkerSplitButton : HBox() {
             }
         }
         button {
+            dropDownButton = this
             addClass("btn", "btn--primary", "chapter-selector__btn-next")
             graphic = FontIcon(MaterialDesign.MDI_CHEVRON_DOWN)
 
