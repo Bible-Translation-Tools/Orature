@@ -34,7 +34,7 @@ jobs:
         uses: booxmedialtd/ws-action-parse-semver@v1.4.2
         with:
           input_string: ${{ env.CI_REF_NAME }}
-          version_extractor_regex: "v(.*)$"
+          version_extractor_regex: ${{inputs.buildTarget == 'storeForced' && '(\d+\.*\d*\.*\d*\.*)' || 'v(.*)$'}}
         if: contains( github.ref, 'refs/tags/v' ) || inputs.buildTarget == 'storeForced'
       - name: set version var for tags and update path for releases
         id: tagged
@@ -158,7 +158,7 @@ jobs:
   upload:
     runs-on: ubuntu-20.04
     needs: [set-env-vars, build]
-    if: ${{ inputs.buildTarget != 'dev' }}
+    if: ${{ inputs.buildTarget != 'dev' && inputs.buildTarget != 'storeForced' }}
     steps:
       - name: Set upload secrets
         uses: 1password/load-secrets-action@v2
