@@ -15,12 +15,13 @@ on:
     inputs:
       buildTarget:
         type: choice
-        description: Whether to build for dev testing of pkg or for production store build
+        description: Whether to build for dev testing of pkg or for production store build. Store Forced builds for store but bypasses the tag check (for if you want to distribute a testflight build)
         required: true
         default: store
         options:
           - dev
           - store
+          - storeForced
 
 jobs:
   set-env-vars:
@@ -34,14 +35,14 @@ jobs:
         with:
           input_string: ${{ env.CI_REF_NAME }}
           version_extractor_regex: "v(.*)$"
-        if: contains( github.ref, 'refs/tags/v' )
+        if: contains( github.ref, 'refs/tags/v' ) || inputs.buildTarget == 'storeForced'
       - name: set version var for tags and update path for releases
         id: tagged
         run: |
           echo "GHA_VERSION=${{ steps.semver_parser.outputs.fullversion }}" >> $GITHUB_ENV && \
           echo "UPDATE_PATH=release" >> $GITHUB_ENV && \
           echo "PRERELEASE_BOOL=false" >> $GITHUB_ENV
-        if: contains( github.ref, 'refs/tags/v')
+        if: contains( github.ref, 'refs/tags/v') || inputs.buildTarget == 'storeForced'
       - name: set version var for not-tags and upload dir for branches
         if: ${{ steps.tagged.outcome == 'skipped' }}
         run: |
