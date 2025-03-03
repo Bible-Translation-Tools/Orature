@@ -2,7 +2,7 @@ name: Java CI with Gradle
 on: [push, pull_request]
 jobs:
   set-env-vars:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: FranzDiebold/github-env-vars-action@v2.1.0
@@ -47,7 +47,7 @@ jobs:
       S3_DESTINATION: ${{ steps.output_env_vars_step.outputs.S3_DESTINATION }}
 
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     needs: set-env-vars
     steps:
       - uses: actions/checkout@v4
@@ -163,7 +163,7 @@ jobs:
           include-hidden-files: true
           path: ${{ github.workspace }}/binaries
   upload:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     needs: [sign-windows, set-env-vars]
     steps:
       - name: Set upload secrets
