@@ -11,6 +11,17 @@ on:
   pull_request:
     branches:
       - dev
+  workflow_dispatch:
+    inputs:
+      buildTarget:
+        type: choice
+        description: Whether to build for dev testing of pkg or for production store build. Store Forced builds for store but bypasses the tag check (for if you want to distribute a testflight build)
+        required: true
+        default: store
+        options:
+          - dev
+          - store
+          - storeForced
 
 jobs:
   set-env-vars:
@@ -23,15 +34,20 @@ jobs:
         uses: booxmedialtd/ws-action-parse-semver@v1.4.2
         with:
           input_string: ${{ env.CI_REF_NAME }}
-          version_extractor_regex: "v(.*)$"
-        if: contains( github.ref, 'refs/tags/v' )
+          version_extractor_regex: ${{inputs.buildTarget == 'storeForced' && '(\d+\.*\d*\.*\d*\.*)' || 'v(.*)$'}}
+        if: contains( github.ref, 'refs/tags/v' ) || inputs.buildTarget == 'storeForced'
       - name: set version var for tags and update path for releases
         id: tagged
         run: |
           echo "GHA_VERSION=${{ steps.semver_parser.outputs.fullversion }}" >> $GITHUB_ENV && \
           echo "UPDATE_PATH=release" >> $GITHUB_ENV && \
           echo "PRERELEASE_BOOL=false" >> $GITHUB_ENV
-        if: contains( github.ref, 'refs/tags/v')
+        if: contains( github.ref, 'refs/tags/v') || inputs.buildTarget == 'storeForced'
+      - name: set version var for not-tags and upload dir for branches
+        if: ${{ steps.tagged.outcome == 'skipped' }}
+        run: |
+          echo "GHA_VERSION=$(cat VERSION)" >> $GITHUB_ENV && \
+          echo "UPDATE_PATH=$CI_REF_NAME_SLUG" >> $GITHUB_ENV
       - name: set s3 destination_dir
         run: echo "S3_DESTINATION=$CI_REPOSITORY_OWNER/$CI_REPOSITORY_NAME/$UPDATE_PATH" >> $GITHUB_ENV
       - name: output env vars
@@ -51,7 +67,7 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     needs: set-env-vars
-    if: ${{ needs.set-env-vars.outputs.IS_RELEASE != 'skipped' }}
+    if: ${{ needs.set-env-vars.outputs.IS_RELEASE != 'skipped' || inputs.buildTarget == 'dev' }}
     steps:
       - uses: actions/checkout@v4
       - name: Set Build Secrets
@@ -70,6 +86,17 @@ jobs:
           SONAR_TOKEN: "op://DevOps/Orature_CI_CD/SONAR_TOKEN"
           MAC_NOTARY_ISSUER: "op://DevOps/Orature_CI_CD/MAC_NOTARY_ISSUER"
           MAC_NOTARY_KEY_ID: "op://DevOps/Orature_CI_CD/MAC_NOTARY_KEY_ID"
+
+      - name: Override build secrets if dev
+        uses: 1password/load-secrets-action@v2
+        if: ${{ inputs.buildTarget == 'dev' }}
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          MAC_SIGNING_KEY_BASE64: "op://DevOps/Orature_CI_CD/Apple-Dev-Cert-And-Profile/B64_P12"
+          MAC_APP_PROVISION_PROFILE: "op://DevOps/Orature_CI_CD/Apple-Dev-Cert-And-Profile/B64_PROFILE"
+
       - name: Write mac secrets for i4j
         shell: bash
         run: |
@@ -93,7 +120,7 @@ jobs:
           -e SONAR_TOKEN \
           -e MAC_NOTARY_ISSUER \
           -e MAC_NOTARY_KEY_ID \
-          wycliffeassociates/install4j-docker:11.0 \
+          wycliffeassociates/install4j-docker:11.0.2 \
           ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx4096m -Dnet.bytebuddy.experimental=true -XX:MaxMetaspaceSize=1024m"
         env:
           UPDATE_PATH: ${{ needs.set-env-vars.outputs.UPDATE_PATH }}
@@ -131,6 +158,7 @@ jobs:
   upload:
     runs-on: ubuntu-24.04
     needs: [set-env-vars, build]
+    if: ${{ inputs.buildTarget != 'dev' && inputs.buildTarget != 'storeForced' }}
     steps:
       - name: Set upload secrets
         uses: 1password/load-secrets-action@v2

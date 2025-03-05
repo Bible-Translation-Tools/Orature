@@ -98,6 +98,7 @@ boolean devbuild = hasProperty("devbuild")
 //install4j tasks for building win/nix/mac installers. Executable jar can be built without itv
 install4j {
     vmParameters = ["-Dinstall4j.timestampUrl=http://timestamp.sectigo.com/", "-Xmx4096m"]
+
     faster = devbuild
     disableSigning = devbuild
     //pass in the install4j directory via -P if it's not in the default install location, e.q. for use with travis or arbitrary paths
@@ -112,6 +113,10 @@ install4j {
     if (project.hasProperty('gradlewmacKeystorePassword')) {
         macKeystorePassword = gradlewmacKeystorePassword
     }
+    // try to point xerial sqlite to vendored sqlite-jdbc
+     if (project.hasProperty('gradlewForMacAppStore')) {
+        vmParameters += ["-Dorg.sqlite.lib.path=${projectDir}/src/resources/nativelibs/mac"]
+    }
 }
 
 task install4jdeploy(type: com.install4j.gradle.Install4jTask) {
@@ -121,9 +126,9 @@ task install4jdeploy(type: com.install4j.gradle.Install4jTask) {
         release = gradlewCommandVersionProp
     }
     if (project.hasProperty('gradlewForMacAppStore')) {
-        buildIds = [546, 519]
+        buildIds = [519]
     } else {
-        buildIds = [60, 158, 415, 59]
+        buildIds = [60, 158, 415]
     }
 }
 

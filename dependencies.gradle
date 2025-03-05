@@ -23,7 +23,7 @@ ext {
     rxrelayVer = '2.1.0'
     jfoenixVer = '17-hotfix'
     kfoenixVer = "0.2.0"
-    sqliteJdbcVer = '3.39.3.0'
+    sqliteJdbcVer = '3.48.0.0'
     jooqVer = '3.14.16'
     franzXaverVer = '0.1' // SVG Loader
     franzXaverSvgVer = 'unspecified'
