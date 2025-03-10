@@ -121,7 +121,7 @@ jobs:
           -e MAC_NOTARY_ISSUER \
           -e MAC_NOTARY_KEY_ID \
           wycliffeassociates/install4j-docker:11.0.2 \
-          ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx4096m -Dnet.bytebuddy.experimental=true -XX:MaxMetaspaceSize=1024m"
+          ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx4096m -Dnet.bytebuddy.experimental=true -XX:MaxMetaspaceSize=1024m" -x test
         env:
           UPDATE_PATH: ${{ needs.set-env-vars.outputs.UPDATE_PATH }}
           ORG_GRADLE_PROJECT_gradlewCommandVersionProp: ${{ needs.set-env-vars.outputs.GHA_VERSION }}
@@ -155,6 +155,7 @@ jobs:
           name: upload-binaries
           include-hidden-files: true
           path: jvm/workbookapp/.exec/
+
   upload:
     runs-on: ubuntu-24.04
     needs: [set-env-vars, build]
@@ -180,11 +181,3 @@ jobs:
         run: |
           AWS_DEFAULT_REGION=us-east-1 AWS_ACCESS_KEY_ID=${{env.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{env.AWS_SECRET_ACCESS_KEY}} aws s3 sync . s3://${{ env.AWS_BUCKET }}/${{ needs.set-env-vars.outputs.S3_DESTINATION }}
         working-directory: ${{ github.workspace }}/binaries
-      - name: upload artifacts to github releases on tags
-        uses: "marvinpinto/action-automatic-releases@v1.2.1"
-        if: contains( github.ref, 'refs/tags/v' )
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: ${{ needs.set-env-vars.outputs.PRERELEASE_BOOL }}
-          files: |
-            ${{ github.workspace }}/binaries/*.pkg
