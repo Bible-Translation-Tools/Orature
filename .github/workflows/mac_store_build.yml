@@ -34,17 +34,25 @@ jobs:
         uses: booxmedialtd/ws-action-parse-semver@v1.4.2
         with:
           input_string: ${{ env.CI_REF_NAME }}
-          version_extractor_regex: ${{inputs.buildTarget == 'storeForced' && '(\d+\.*\d*\.*\d*\.*)' || 'v(.*)$'}}
-        if: contains( github.ref, 'refs/tags/v' ) || inputs.buildTarget == 'storeForced'
+          version_extractor_regex: "v(.*)$"
+        if: contains( github.ref, 'refs/tags/v' )
       - name: set version var for tags and update path for releases
         id: tagged
         run: |
           echo "GHA_VERSION=${{ steps.semver_parser.outputs.fullversion }}" >> $GITHUB_ENV && \
           echo "UPDATE_PATH=release" >> $GITHUB_ENV && \
           echo "PRERELEASE_BOOL=false" >> $GITHUB_ENV
-        if: contains( github.ref, 'refs/tags/v') || inputs.buildTarget == 'storeForced'
+        if: contains( github.ref, 'refs/tags/v')
+        # use version file instaed of semver parser if this is a manual retrigger adn we're not trying to retag
+      - name: set version var forced store releases manually run
+        id: tagged
+        run: |
+          echo "GHA_VERSION=$(cat VERSION)" >> $GITHUB_ENV && \
+          echo "UPDATE_PATH=release" >> $GITHUB_ENV && \
+          echo "PRERELEASE_BOOL=false" >> $GITHUB_ENV
+        if: inputs.buildTarget == 'storeForced'
       - name: set version var for not-tags and upload dir for branches
-        if: ${{ steps.tagged.outcome == 'skipped' }}
+        if: ${{ steps.tagged.outcome == 'skipped' }} && inputs.buildTarget !== 'storeForced'
         run: |
           echo "GHA_VERSION=$(cat VERSION)" >> $GITHUB_ENV && \
           echo "UPDATE_PATH=$CI_REF_NAME_SLUG" >> $GITHUB_ENV
@@ -121,7 +129,7 @@ jobs:
           -e MAC_NOTARY_ISSUER \
           -e MAC_NOTARY_KEY_ID \
           wycliffeassociates/install4j-docker:11.0.2 \
-          ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx4096m -Dnet.bytebuddy.experimental=true -XX:MaxMetaspaceSize=1024m"
+          ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx4096m -Dnet.bytebuddy.experimental=true -XX:MaxMetaspaceSize=1024m" -x test
         env:
           UPDATE_PATH: ${{ needs.set-env-vars.outputs.UPDATE_PATH }}
           ORG_GRADLE_PROJECT_gradlewCommandVersionProp: ${{ needs.set-env-vars.outputs.GHA_VERSION }}
@@ -155,6 +163,7 @@ jobs:
           name: upload-binaries
           include-hidden-files: true
           path: jvm/workbookapp/.exec/
+
   upload:
     runs-on: ubuntu-24.04
     needs: [set-env-vars, build]
@@ -180,11 +189,3 @@ jobs:
         run: |
           AWS_DEFAULT_REGION=us-east-1 AWS_ACCESS_KEY_ID=${{env.AWS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{env.AWS_SECRET_ACCESS_KEY}} aws s3 sync . s3://${{ env.AWS_BUCKET }}/${{ needs.set-env-vars.outputs.S3_DESTINATION }}
         working-directory: ${{ github.workspace }}/binaries
-      - name: upload artifacts to github releases on tags
-        uses: "marvinpinto/action-automatic-releases@v1.2.1"
-        if: contains( github.ref, 'refs/tags/v' )
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: ${{ needs.set-env-vars.outputs.PRERELEASE_BOOL }}
-          files: |
-            ${{ github.workspace }}/binaries/*.pkg
