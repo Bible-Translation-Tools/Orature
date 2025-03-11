@@ -43,6 +43,7 @@ jobs:
           echo "UPDATE_PATH=release" >> $GITHUB_ENV && \
           echo "PRERELEASE_BOOL=false" >> $GITHUB_ENV
         if: contains( github.ref, 'refs/tags/v')
+
         # use version file instaed of semver parser if this is a manual retrigger adn we're not trying to retag
       - name: set version var forced store releases manually run
         id: store_tagged
@@ -75,7 +76,7 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     needs: set-env-vars
-    if: ${{ needs.set-env-vars.outputs.IS_RELEASE != 'skipped' || inputs.buildTarget == 'dev' }}
+    if: ${{ needs.set-env-vars.outputs.IS_RELEASE != 'skipped' || inputs.buildTarget == 'dev' || inputs.buildTarget == 'storeForced' }}
     steps:
       - uses: actions/checkout@v4
       - name: Set Build Secrets
