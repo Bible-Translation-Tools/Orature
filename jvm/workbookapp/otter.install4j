@@ -924,6 +924,9 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
   </installerGui>
   <mediaSets>
     <windows name="Windows" id="60" architecture="64">
+      <excludedLaunchers>
+        <launcher id="546" />
+      </excludedLaunchers>
       <excludedBeans>
         <bean refId="414" />
       </excludedBeans>
@@ -933,6 +936,9 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
       <jreBundle jdkProviderId="Liberica" release="21/latest" />
     </windows>
     <linuxDeb name="Linux Deb Archive" id="158" description="Orature is a modular suite of Oral Translation libraries and distributable software." maintainerEmail="wycliffeassociates.org">
+      <excludedLaunchers>
+        <launcher id="546" />
+      </excludedLaunchers>
       <exclude>
         <entry location="mac" />
       </exclude>
