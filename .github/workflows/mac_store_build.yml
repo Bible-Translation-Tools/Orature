@@ -45,14 +45,14 @@ jobs:
         if: contains( github.ref, 'refs/tags/v')
         # use version file instaed of semver parser if this is a manual retrigger adn we're not trying to retag
       - name: set version var forced store releases manually run
-        id: tagged
+        id: store_tagged
         run: |
           echo "GHA_VERSION=$(cat VERSION)" >> $GITHUB_ENV && \
           echo "UPDATE_PATH=release" >> $GITHUB_ENV && \
           echo "PRERELEASE_BOOL=false" >> $GITHUB_ENV
         if: inputs.buildTarget == 'storeForced'
       - name: set version var for not-tags and upload dir for branches
-        if: ${{ steps.tagged.outcome == 'skipped' }} && inputs.buildTarget !== 'storeForced'
+        if: ${{ steps.tagged.outcome == 'skipped' && inputs.buildTarget != 'storeForced' }}
         run: |
           echo "GHA_VERSION=$(cat VERSION)" >> $GITHUB_ENV && \
           echo "UPDATE_PATH=$CI_REF_NAME_SLUG" >> $GITHUB_ENV
