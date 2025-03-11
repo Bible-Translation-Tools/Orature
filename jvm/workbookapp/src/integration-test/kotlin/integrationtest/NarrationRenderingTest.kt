@@ -1,13 +1,10 @@
 package integrationtest
 
-import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.ReplayRelay
 import integrationtest.di.DaggerTestPersistenceComponent
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.Observable
-import io.reactivex.Single
-import javafx.embed.swing.SwingFXUtils
 import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
 import org.junit.Assert
@@ -29,14 +26,11 @@ import org.wycliffeassociates.otter.common.domain.narration.testDataRootFilePath
 import org.wycliffeassociates.otter.common.domain.narration.testDirWithAudio
 import org.wycliffeassociates.otter.common.domain.narration.testDirWithoutAudio
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.NarrationWaveformRenderer
-import java.awt.Color
-import java.awt.image.BufferedImage
 import java.io.File
 import java.io.Reader
 import java.nio.ByteBuffer
 import java.nio.file.Files
 import java.nio.file.Paths
-import javax.imageio.ImageIO
 import javax.inject.Inject
 
 
@@ -237,13 +231,6 @@ class NarrationRenderingTest {
                 "Not all values for drawable are the same at $i, should be ${data[0]}",
                 data.all { it == data[0] }
             )
-        }
-    }
-
-    private fun writeFramesToImages(frames: List<Image>) {
-        frames.forEachIndexed { index, image ->
-            val bImage: BufferedImage = SwingFXUtils.fromFXImage(image, null)
-            ImageIO.write(bImage, "png", File("${index}.png"))
         }
     }
 
