@@ -36,6 +36,8 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepTransitionEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectImportFinishEvent
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
@@ -60,6 +62,7 @@ class SourceAudioMissing : View() {
     private val settingsViewModel: SettingsViewModel by inject()
     private val importProjectViewModel: ImportProjectViewModel by inject()
 
+    private val eventSubscriptions = mutableListOf<EventRegistration>()
     private val disposable = CompositeDisposable()
 
     override val root = VBox().apply {
@@ -227,6 +230,7 @@ class SourceAudioMissing : View() {
 
     override fun onDock() {
         super.onDock()
+        logger.info("Consume (missing source audio) docked")
         viewModel.loadingStepProperty.set(false)
 
         importProjectViewModel.snackBarObservable
@@ -239,11 +243,26 @@ class SourceAudioMissing : View() {
                     )
                 )
             }.addTo(disposable)
+
+        subscribeEvents()
     }
 
     override fun onUndock() {
         super.onUndock()
         disposable.clear()
+        unsubscribeEvents()
+    }
+
+
+    private fun subscribeEvents() {
+        subscribe<ChunkingStepSelectedEvent> {
+            FX.eventbus.fire(ChunkingStepTransitionEvent(it.step))
+        }.also { eventSubscriptions.add(it) }
+    }
+
+    private fun unsubscribeEvents() {
+        eventSubscriptions.forEach { it.unsubscribe() }
+        eventSubscriptions.clear()
     }
 
     private fun onDragOverHandler(): EventHandler<DragEvent> {
