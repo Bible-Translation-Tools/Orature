@@ -51,9 +51,11 @@ class WavOutputStream @Throws(FileNotFoundException::class)
         // if appending, then truncate metadata following the audio length, otherwise truncate after the header
         val whereToTruncate = if (append) audioDataLength else 0
         try {
-            FileOutputStream(wav.file, true)
-                .channel
-                .truncate((whereToTruncate + wav.headerSize).toLong())
+            FileOutputStream(wav.file, true).use { stream ->
+                stream.channel.use { channel ->
+                    channel.truncate((whereToTruncate + wav.headerSize).toLong())
+                }
+            }
         } catch (e: IOException) {
             e.printStackTrace()
         }
