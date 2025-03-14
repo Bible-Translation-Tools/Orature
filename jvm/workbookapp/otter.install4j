@@ -17,10 +17,11 @@
     <jreBundles jdkProviderId="Liberica" release="21/latest">
       <modules>
         <defaultModules set="all" />
+        <module name="javafx.web" exclude="true" />
       </modules>
     </jreBundles>
   </application>
-  <files>
+  <files globalExcludeSuffixes="**/lib/libjfxwebkit.dylib">
     <mountPoints>
       <mountPoint id="58" />
     </mountPoints>
