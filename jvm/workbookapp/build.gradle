@@ -113,10 +113,6 @@ install4j {
     if (project.hasProperty('gradlewmacKeystorePassword')) {
         macKeystorePassword = gradlewmacKeystorePassword
     }
-    // try to point xerial sqlite to vendored sqlite-jdbc
-     if (project.hasProperty('gradlewForMacAppStore')) {
-        vmParameters += ["-Dorg.sqlite.lib.path=${projectDir}/src/resources/nativelibs/mac"]
-    }
 }
 
 task install4jdeploy(type: com.install4j.gradle.Install4jTask) {
