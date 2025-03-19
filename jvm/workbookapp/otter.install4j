@@ -688,8 +688,7 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
                   <property name="onlyIfUndefined" type="boolean" value="true" />
                   <property name="script">
                     <object class="com.install4j.api.beans.ScriptProperty">
-                      <property name="value" type="string">return System.getProperty("os.arch").equals("aarch64") ? "aarch64" : "x86_64"
-</property>
+                      <property name="value" type="string">return System.getProperty("os.arch").equals("aarch64") ? "aarch64" : "x86_64";</property>
                     </object>
                   </property>
                   <property name="variableName" type="string">macArch</property>
