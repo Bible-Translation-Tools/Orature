@@ -61,8 +61,8 @@
           <archive location="workbookapp.jar" />
         </classPath>
         <nativeLibraryDirectories>
-          <directory name="mac/aarch64" />
           <directory name="mac/x86_64" />
+          <directory name="mac/aarch64" />
         </nativeLibraryDirectories>
       </java>
       <vmOptionsFile mode="none" />
