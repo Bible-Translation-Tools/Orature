@@ -674,11 +674,14 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
           </screen>
         </startup>
       </application>
-      <application name="Determine Mac Arch" id="553" beanClass="com.install4j.runtime.beans.applications.CustomApplication">
+      <application name="Determine Mac Arch" id="553" beanClass="com.install4j.runtime.beans.applications.CustomApplication" automaticLauncherIntegration="true" launchMode="startupSync" launchSchedule="always" allLaunchers="false">
         <serializedBean>
           <property name="executableName" type="string">checkMacArch</property>
           <property name="windowTitle" type="string">${compiler:sys.fullName}</property>
         </serializedBean>
+        <launcherIds>
+          <launcher id="546" />
+        </launcherIds>
         <startup>
           <screen id="554" beanClass="com.install4j.runtime.beans.screens.StartupScreen" rollbackBarrierExitCode="0">
             <actions>
