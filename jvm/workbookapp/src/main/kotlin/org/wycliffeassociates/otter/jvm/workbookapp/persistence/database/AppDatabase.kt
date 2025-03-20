@@ -133,6 +133,8 @@ class AppDatabase(
     companion object {
         init {
             System.setProperty("org.jooq.no-logo", "true")
+            // passed as jvm arg through i4j launcher specifically for app store builds. DMG is fine to let jdbc
+            // sqlite load however it typically does.
             val isPkgMac = System.getProperty("orature.isPkgMac")
             if (isPkgMac != null) {
                 setSqlitePathsForMac()
@@ -143,6 +145,7 @@ class AppDatabase(
 
         private fun setSqlitePathsForMac() {
             val osName = System.getProperty("os.name").lowercase()
+            // This should only run on a mac regardless, but defensive programming here
             if (!osName.contains("mac")) return
             //from i4j. is .app/Contents/Resources/app for single bundle archives.  
             val contentDir = System.getProperty("mac.appDir")
@@ -152,10 +155,11 @@ class AppDatabase(
                 osArch.contains("aarch64") || osArch.contains("arm64") -> "aarch64"
                 else -> "x86_64"
             }
-            // Orature.app/Contents/Resources/app/mac/arch
+            // Orature.app/Contents/Resources/app/mac/$arch
             val sqliteLibPath = "$contentDir/mac/$archFolder"
             println("Setting SQLite library path to: $sqliteLibPath")
             System.setProperty("org.sqlite.lib.path", sqliteLibPath)
+            //should already be set in i4j for pkg files, but for extra redundancy
             System.setProperty("org.sqlite.lib.name", "libsqlitejdbc.dylib")
         }
 
