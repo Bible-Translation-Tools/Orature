@@ -45,26 +45,36 @@ class AppDatabase(
     init {
         System.setProperty("org.jooq.no-logo", "true")
 
-        // Only set SQLite library properties on macOS in sandboxed environment
+        // Only set SQLite library properties on macOS
         val osName = System.getProperty("os.name").lowercase()
         if (osName.contains("mac")) {
-            // Check if we're in a sandboxed environment
-            val isSandboxed = System.getProperty("apple.awt.application.appearance") != null || 
-                            System.getenv("APP_SANDBOX_CONTAINER_ID") != null
+            // Determine architecture
+            val osArch = System.getProperty("os.arch")
+            val archFolder = when {
+                osArch.contains("aarch64") || osArch.contains("arm64") -> "aarch64"
+                else -> "x86_64"
+            }
             
-            if (isSandboxed) {
-                // Determine architecture
-                val osArch = System.getProperty("os.arch")
-                val archFolder = when {
-                    osArch.contains("aarch64") || osArch.contains("arm64") -> "aarch64"
-                    else -> "x86_64"
-                }
-                
-                // Hardcoded path for sandboxed Mac environment
-                val appPath = "/Applications/Orature.app/Contents/Resources/app/mac/$archFolder"
-                System.setProperty("org.sqlite.lib.path", appPath)
-                // name already set as jvm arg
-                // System.setProperty("org.sqlite.lib.name", "libsqlitejdbc")
+            // Set library properties
+            val appPath = "/Applications/Orature.app/Contents/Resources/app/mac/$archFolder"
+            println("Setting SQLite library path to: $appPath")
+            System.setProperty("org.sqlite.lib.path", appPath)
+            
+            // For Mac, use the full library name with extension
+            val libName = "libsqlitejdbc.dylib"
+            println("Setting SQLite library name to: $libName")
+            System.setProperty("org.sqlite.lib.name", libName)
+            
+            // Verify the properties were set
+            println("Actual org.sqlite.lib.path: ${System.getProperty("org.sqlite.lib.path")}")
+            println("Actual org.sqlite.lib.name: ${System.getProperty("org.sqlite.lib.name")}")
+            
+            // Check if the file actually exists
+            val libFile = File("$appPath/$libName")
+            println("Library file exists: ${libFile.exists()}")
+            if (!libFile.exists()) {
+                println("Library file path: ${libFile.absolutePath}")
+                println("Directory contents: ${File(appPath).listFiles()?.joinToString { it.name } ?: "Cannot list directory"}")
             }
         }
 
