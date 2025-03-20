@@ -45,6 +45,30 @@ class AppDatabase(
     init {
         System.setProperty("org.jooq.no-logo", "true")
 
+        // Only set SQLite library properties on macOS in sandboxed environment
+        val osName = System.getProperty("os.name").lowercase()
+        if (osName.contains("mac")) {
+            // Check if we're in a sandboxed environment
+            val isSandboxed = System.getProperty("apple.awt.application.appearance") != null || 
+                            System.getenv("APP_SANDBOX_CONTAINER_ID") != null
+            
+            if (isSandboxed) {
+                // Determine architecture
+                val osArch = System.getProperty("os.arch")
+                val archFolder = when {
+                    osArch.contains("aarch64") || osArch.contains("arm64") -> "aarch64"
+                    else -> "x86_64"
+                }
+                
+                // Hardcoded path for sandboxed Mac environment
+                val appPath = "/Applications/Orature.app/Contents/Resources/app/mac/$archFolder"
+                System.setProperty("org.sqlite.lib.path", appPath)
+                // name already set as jvm arg
+                // System.setProperty("org.sqlite.lib.name", "libsqlitejdbc")
+            }
+        }
+
+
         // Load the SQLite JDBC drivers
         Class
             .forName("org.sqlite.JDBC")
