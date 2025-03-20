@@ -45,40 +45,6 @@ class AppDatabase(
     init {
         System.setProperty("org.jooq.no-logo", "true")
 
-        // Only set SQLite library properties on macOS
-        val osName = System.getProperty("os.name").lowercase()
-        if (osName.contains("mac")) {
-            // Determine architecture
-            val osArch = System.getProperty("os.arch")
-            val archFolder = when {
-                osArch.contains("aarch64") || osArch.contains("arm64") -> "aarch64"
-                else -> "x86_64"
-            }
-            
-            // Set library properties
-            val appPath = "/Applications/Orature.app/Contents/Resources/app/mac/$archFolder"
-            println("Setting SQLite library path to: $appPath")
-            System.setProperty("org.sqlite.lib.path", appPath)
-            
-            // For Mac, use the full library name with extension
-            val libName = "libsqlitejdbc.dylib"
-            println("Setting SQLite library name to: $libName")
-            System.setProperty("org.sqlite.lib.name", libName)
-            
-            // Verify the properties were set
-            println("Actual org.sqlite.lib.path: ${System.getProperty("org.sqlite.lib.path")}")
-            println("Actual org.sqlite.lib.name: ${System.getProperty("org.sqlite.lib.name")}")
-            
-            // Check if the file actually exists
-            val libFile = File("$appPath/$libName")
-            println("Library file exists: ${libFile.exists()}")
-            if (!libFile.exists()) {
-                println("Library file path: ${libFile.absolutePath}")
-                println("Directory contents: ${File(appPath).listFiles()?.joinToString { it.name } ?: "Cannot list directory"}")
-            }
-        }
-
-
         // Load the SQLite JDBC drivers
         Class
             .forName("org.sqlite.JDBC")
@@ -167,6 +133,30 @@ class AppDatabase(
     companion object {
         init {
             System.setProperty("org.jooq.no-logo", "true")
+            val isPkgMac = System.getProperty("orature.isPkgMac")
+            if (isPkgMac != null) {
+                setSqlitePathsForMac()
+            } else {
+              println("Skipping SQLite path configuration since not a PKG Mac app")
+             }
+        }
+
+        private fun setSqlitePathsForMac() {
+            val osName = System.getProperty("os.name").lowercase()
+            if (!osName.contains("mac")) return
+            //from i4j. is .app/Contents/Resources/app for single bundle archives.  
+            val contentDir = System.getProperty("mac.appDir")
+            if (contentDir == null) return
+            val osArch = System.getProperty("os.arch")
+            val archFolder = when {
+                osArch.contains("aarch64") || osArch.contains("arm64") -> "aarch64"
+                else -> "x86_64"
+            }
+            // Orature.app/Contents/Resources/app/mac/arch
+            val sqliteLibPath = "$contentDir/mac/$archFolder"
+            println("Setting SQLite library path to: $sqliteLibPath")
+            System.setProperty("org.sqlite.lib.path", sqliteLibPath)
+            System.setProperty("org.sqlite.lib.name", "libsqlitejdbc.dylib")
         }
 
         fun getDatabaseVersion(databaseFile: File): Int? {
