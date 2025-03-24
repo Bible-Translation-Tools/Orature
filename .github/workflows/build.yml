@@ -1,5 +1,14 @@
 name: Java CI with Gradle
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      skipTests:
+        description: "Option to skip tests for faster sanity check builds"
+        type: boolean
+        default: false
+
 jobs:
   set-env-vars:
     runs-on: ubuntu-24.04
@@ -70,6 +79,14 @@ jobs:
         shell: bash
         run: |
           echo -n $MAC_SIGNING_KEY_BASE64 | base64 -d > $HOME/signing_macos.p12 && echo -n $MAC_APP_STORE_NOTARY_API_KEY > $HOME/mac_app_notary_key.p8
+      - name: Set skip tests flag
+        id: set-skip-tests
+        run: |
+          if [ "${{ inputs.skipTests }}" == "true" ]; then
+            echo "SKIP_TESTS_FLAG=-x test -x integrationTest" >> $GITHUB_ENV
+          else
+            echo "SKIP_TESTS_FLAG=" >> $GITHUB_ENV
+          fi
       - name: install4j build
         shell: bash
         run: |
@@ -88,7 +105,7 @@ jobs:
           -e MAC_NOTARY_ISSUER \
           -e MAC_NOTARY_KEY_ID \
           wycliffeassociates/install4j-docker:11.0.2 \
-          ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx4096m -Dnet.bytebuddy.experimental=true -XX:MaxMetaspaceSize=1024m"
+          ./gradlew build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx4096m -Dnet.bytebuddy.experimental=true -XX:MaxMetaspaceSize=1024m" ${{ env.SKIP_TESTS_FLAG }}
         env:
           UPDATE_PATH: ${{ needs.set-env-vars.outputs.UPDATE_PATH }}
           ORG_GRADLE_PROJECT_gradlewCommandVersionProp: ${{ needs.set-env-vars.outputs.GHA_VERSION }}
@@ -130,7 +147,7 @@ jobs:
       - uses: FranzDiebold/github-env-vars-action@v2.1.0
 
       - name: Setup .NET Core SDK
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 6.0.x
 
