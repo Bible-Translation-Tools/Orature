@@ -266,7 +266,7 @@ class DirectoryProvider(
                 Runtime.getRuntime().exec(command)
             }
             osName.contains("MAC") -> {
-                val command = arrayOf("open", "-R", path)
+                val command = arrayOf("/usr/bin/open", "-R", path)
                 Runtime.getRuntime().exec(command)
             }
             osName.contains("LINUX") -> {
