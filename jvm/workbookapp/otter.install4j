@@ -37,7 +37,7 @@
           <entry location="mac/.DS_Store" />
         </exclude>
       </dirEntry>
-      <fileEntry mountPoint="570" file="../../container-migration.plist" />
+      <fileEntry mountPoint="570" file="/repo/container-migration.plist" />
     </entries>
   </files>
   <launchers>
