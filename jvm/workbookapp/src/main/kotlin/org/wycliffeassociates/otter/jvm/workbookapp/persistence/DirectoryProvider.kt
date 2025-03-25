@@ -270,9 +270,11 @@ class DirectoryProvider(
                 if (isPkgMac != null) {
                 val script = "tell application \"Finder\" to reveal POSIX file \"$path\"";
                 val command = arrayOf("osascript", "-e", script)
+                println("Running AppleScript: $script")
                 Runtime.getRuntime().exec(command)
                 } else {
-                val command = arrayOf("/usr/bin/open", "-R", path)
+                println("Running open command")
+                val command = arrayOf("open", "-R", path)
                 Runtime.getRuntime().exec(command)
                 }
             }

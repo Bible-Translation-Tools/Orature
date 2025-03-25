@@ -544,7 +544,7 @@ class HomePage2 : View() {
                     try {
                         viewModel.openInFilesManager(filePath.path)
                     } catch (e: Exception) {
-                        logger.error("Error while opening $filePath in file manager.")
+                        logger.error("Error while opening $filePath in file manager.", e)
                     }
                 }
             }
