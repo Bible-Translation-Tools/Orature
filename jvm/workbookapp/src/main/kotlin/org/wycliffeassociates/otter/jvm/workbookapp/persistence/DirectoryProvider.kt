@@ -266,8 +266,15 @@ class DirectoryProvider(
                 Runtime.getRuntime().exec(command)
             }
             osName.contains("MAC") -> {
+                val isPkgMac = System.getProperty("orature.isPkgMac")
+                if (isPkgMac != null) {
+                val script = "tell application \"Finder\" to reveal POSIX file \"$path\"";
+                val command = arrayOf("osascript", "-e", script)
+                Runtime.getRuntime().exec(command)
+                } else {
                 val command = arrayOf("/usr/bin/open", "-R", path)
                 Runtime.getRuntime().exec(command)
+                }
             }
             osName.contains("LINUX") -> {
                 val command = arrayOf("xdg-open", path)
