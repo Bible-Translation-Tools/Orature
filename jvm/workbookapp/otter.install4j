@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="11.0" transformSequenceNumber="11">
-  <directoryPresets config="../../container-migration.plist" />
+  <directoryPresets config="./container-migration.plist" />
   <application name="Orature" applicationId="8057-9807-3529-9982" mediaDir=".exec" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-${compiler:sys.version}" shortName="orature" version="0.1" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="82fd10b9f6e2b1b5" javaMinVersion="21" javaMaxVersion="21">
     <codeSigning macEnabled="true" macPkcs12File="~/signing_macos.p12" macNotarize="true" macApiIssuer="${compiler:env.MAC_NOTARY_ISSUER}" macApiKey="${compiler:env.MAC_NOTARY_KEY_ID}" macApiPrivateKey="/root/mac_app_notary_key.p8">
       <macSearchedJars>
@@ -37,7 +37,7 @@
           <entry location="mac/.DS_Store" />
         </exclude>
       </dirEntry>
-      <fileEntry mountPoint="570" file="/repo/container-migration.plist" />
+      <fileEntry mountPoint="570" file="../../container-migration.plist" />
     </entries>
   </files>
   <launchers>
