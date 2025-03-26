@@ -675,7 +675,7 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
           </screen>
         </startup>
       </application>
-      <application name="Container Migration File" id="584" beanClass="com.install4j.runtime.beans.applications.CustomApplication" automaticLauncherIntegration="true" launchMode="startupSync" launchInNewProcess="false" allLaunchers="false">
+      <application name="Container Migration File" id="584" beanClass="com.install4j.runtime.beans.applications.CustomApplication" automaticLauncherIntegration="true" launchMode="startupSync" launchInNewProcess="false" launchSchedule="firstRun" allLaunchers="false">
         <serializedBean>
           <property name="executableName" type="string">migrateDmg</property>
           <property name="windowTitle" type="string">${compiler:sys.fullName}</property>
