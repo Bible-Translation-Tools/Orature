@@ -696,7 +696,7 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
                   <property name="files" type="array" class="java.io.File" length="1">
                     <element index="0">
                       <object class="java.io.File">
-                        <string>container-migration.plist</string>
+                        <string>/Applications/Orature.app/Contents/Resources/app/container-migration.plist</string>
                       </object>
                     </element>
                   </property>
@@ -993,7 +993,7 @@ done</postUninstallScript>
         <file name=".DS_Store" file="./DS_Store" />
       </topLevelFiles>
     </macosArchive>
-    <macosArchive name="macOS Single Bundle Archive Pkg" id="519" archiveType="appstore" provisioningProfile="/root/orature.provisionprofile" architecture="universal" launcherId="546" executeSetupApp="true" setupAppId="584" />
+    <macosArchive name="macOS Single Bundle Archive Pkg" id="519" archiveType="appstore" provisioningProfile="/root/orature.provisionprofile" architecture="universal" launcherId="546" executeSetupApp="true" setupAppId="584" setupLaunchInNewProcess="true" />
   </mediaSets>
   <buildIds buildAll="false" />
 </install4j>
