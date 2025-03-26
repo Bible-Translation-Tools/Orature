@@ -675,7 +675,7 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
           </screen>
         </startup>
       </application>
-      <application name="Container Migration File" id="584" beanClass="com.install4j.runtime.beans.applications.CustomApplication" automaticLauncherIntegration="true" launchMode="startupSync" launchInNewProcess="false" launchSchedule="firstRun" allLaunchers="false">
+      <application name="Container Migration File" id="584" beanClass="com.install4j.runtime.beans.applications.CustomApplication" automaticLauncherIntegration="true" launchMode="startupSync" launchSchedule="always" allLaunchers="false">
         <serializedBean>
           <property name="executableName" type="string">migrateDmg</property>
           <property name="windowTitle" type="string">${compiler:sys.fullName}</property>
@@ -686,7 +686,7 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
         <startup>
           <screen id="585" beanClass="com.install4j.runtime.beans.screens.StartupScreen" rollbackBarrierExitCode="0">
             <actions>
-              <action id="586" beanClass="com.install4j.runtime.beans.actions.files.MoveFileAction" actionElevationType="elevated" rollbackBarrierExitCode="0" failureStrategy="ask">
+              <action id="589" beanClass="com.install4j.runtime.beans.actions.files.CopyFileAction" actionElevationType="elevated" rollbackBarrierExitCode="0" failureStrategy="ask">
                 <serializedBean>
                   <property name="destinationFile">
                     <object class="java.io.File">
@@ -700,6 +700,7 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
                       </object>
                     </element>
                   </property>
+                  <property name="showProgress" type="boolean" value="true" />
                 </serializedBean>
               </action>
             </actions>
