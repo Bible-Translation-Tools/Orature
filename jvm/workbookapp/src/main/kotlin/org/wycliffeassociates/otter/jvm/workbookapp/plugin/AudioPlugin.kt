@@ -29,16 +29,19 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPlugin
 import org.wycliffeassociates.otter.common.domain.plugins.PluginParameters
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
-import tornadofx.*
+import tornadofx.FX
+import tornadofx.Workspace
+import tornadofx.find
+import tornadofx.get
 import java.io.File
 import java.net.URL
 import java.net.URLClassLoader
 import java.text.MessageFormat
 import kotlin.jvm.internal.Reflection
 import kotlin.reflect.KClass
-import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 
 class AudioPlugin(
     private val connectionFactory: AudioConnectionFactory,
@@ -93,20 +96,22 @@ class AudioPlugin(
     }
 
     private fun launchBin(audioFile: File): Completable {
-        val args = buildBinArguments(pluginData.args, audioFile.absolutePath)
-        return Completable
-            .fromCallable {
-                runProcess(
-                    processArgs = listOf(
-                        pluginData.executable,
-                        *args
-                    )
-                )
-            }
-            .doOnError { e ->
-                logger.error("Error in launch bin for file: $audioFile", e)
-            }
-            .subscribeOn(Schedulers.io())
+        val pb = ProcessBuilder("/usr/bin/open", "/Applications/ocenaudio.app");
+        pb.start()
+//        val args = buildBinArguments(pluginData.args, audioFile.absolutePath)
+//        return Completable
+//            .fromCallable {
+//                runProcess(
+//                    processArgs = listOf(
+//                        pluginData.executable,
+//                        *args
+//                    )
+//                )
+//            }
+//            .doOnError { e ->
+//                logger.error("Error in launch bin for file: $audioFile", e)
+//            }
+//            .subscribeOn(Schedulers.io())
     }
 
     private fun buildJarArguments(

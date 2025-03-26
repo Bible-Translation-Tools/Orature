@@ -27,6 +27,7 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.io.file.NioDirectoryFileReader
 import org.wycliffeassociates.otter.jvm.workbookapp.io.zip.NioZipFileReader
 import org.wycliffeassociates.otter.jvm.workbookapp.io.zip.NioZipFileWriter
+import org.wycliffeassociates.otter.jvm.workbookapp.jna.mac.Foundation
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.io.FileNotFoundException
@@ -266,17 +267,19 @@ class DirectoryProvider(
                 Runtime.getRuntime().exec(command)
             }
             osName.contains("MAC") -> {
-                val isPkgMac = System.getProperty("orature.isPkgMac")
-                if (isPkgMac != null) {
-                val script = "tell application \"Finder\" to reveal POSIX file \"$path\"";
-                val command = arrayOf("osascript", "-e", script)
-                println("Running AppleScript: $script")
+//                val isPkgMac = System.getProperty("orature.isPkgMac")
+//                if (isPkgMac != null) {
+//                val script = "tell application \"Finder\" to reveal POSIX file \"$path\"";
+//                val command = arrayOf("osascript", "-e", script)
+//                println("Running AppleScript: $script")
+//                Runtime.getRuntime().exec(command)
+//                } else {
+//                println("Running open command")
+                val command = arrayOf("/usr/bin/open", "-R", path)
                 Runtime.getRuntime().exec(command)
-                } else {
-                println("Running open command")
-                val command = arrayOf("open", "-R", path)
-                Runtime.getRuntime().exec(command)
-                }
+////                }
+//                Foundation.revealInFinder(path)
+
             }
             osName.contains("LINUX") -> {
                 val command = arrayOf("xdg-open", path)
