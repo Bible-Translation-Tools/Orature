@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence
 
+
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
@@ -30,7 +31,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.io.zip.NioZipFileWriter
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.io.FileNotFoundException
-import java.io.IOError
 import java.io.IOException
 import java.nio.file.FileSystems
 
@@ -266,8 +266,12 @@ class DirectoryProvider(
                 Runtime.getRuntime().exec(command)
             }
             osName.contains("MAC") -> {
-                val command = arrayOf("open", "-R", path)
-                Runtime.getRuntime().exec(command)
+//                revealInFinder(path)
+//                val command = arrayOf("open", "-R", path)
+//                Runtime.getRuntime().exec(command)
+                println("Trying to invoke processBuilder")
+                val pb = ProcessBuilder("/usr/bin/open", "/Applications/ocenaudio.app")
+                pb.start()
             }
             osName.contains("LINUX") -> {
                 val command = arrayOf("xdg-open", path)

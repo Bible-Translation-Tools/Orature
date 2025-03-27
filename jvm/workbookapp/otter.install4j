@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="11.0" transformSequenceNumber="11">
-  <directoryPresets config="." />
+  <directoryPresets config="../../container-migration.plist" />
   <application name="Orature" applicationId="8057-9807-3529-9982" mediaDir=".exec" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-${compiler:sys.version}" shortName="orature" version="0.1" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="82fd10b9f6e2b1b5" javaMinVersion="21" javaMaxVersion="21">
     <codeSigning macEnabled="true" macPkcs12File="~/signing_macos.p12" macNotarize="true" macApiIssuer="${compiler:env.MAC_NOTARY_ISSUER}" macApiKey="${compiler:env.MAC_NOTARY_KEY_ID}" macApiPrivateKey="/root/mac_app_notary_key.p8">
       <macSearchedJars>
@@ -33,10 +33,11 @@
           <entry location="mac/.DS_Store" />
         </exclude>
       </dirEntry>
+      <fileEntry mountPoint="58" file="../../container-migration.plist" />
     </entries>
   </files>
   <launchers>
-    <launcher name="orature" id="59" macBundleIdentifier="org.wycliffeassociates.otter" addMacEntitlements="true" macEntitlementsFile="/repo/entitlements-dmg.plist" macApplicationCategory="public.app-category.utilities">
+    <launcher name="orature" id="59" customMacBundleIdentifier="true" macBundleIdentifier="org.wycliffeassociates.otter" addMacEntitlements="true" macEntitlementsFile="/repo/entitlements-dmg.plist" macApplicationCategory="public.app-category.utilities">
       <executable name="orature" iconSet="true" iconFile="./orature_icon.ico" executableDir="." executableMode="gui" singleInstance="true" />
       <java mainClass="org.wycliffeassociates.otter.jvm.workbookapp.MainKt" vmParameters="--add-exports=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED, --add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED, --add-exports=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED, --add-opens=javafx.controls/javafx.scene.control.skin=ALL-UNNAMED, --add-exports=javafx.base/com.sun.javafx.binding=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.css=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED, --add-opens=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED, --add-opens=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED, --add-opens=javafx.controls/javafx.scene.control.skin=ALL-UNNAMED, --add-opens=javafx.base/com.sun.javafx.binding=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.css=ALL-UNNAMED">
         <classPath>
@@ -674,6 +675,39 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
           </screen>
         </startup>
       </application>
+      <application name="Container Migration File" id="584" beanClass="com.install4j.runtime.beans.applications.CustomApplication" automaticLauncherIntegration="true" launchMode="startupSync" launchSchedule="always" allLaunchers="false">
+        <serializedBean>
+          <property name="executableName" type="string">migrateDmg</property>
+          <property name="windowTitle" type="string">${compiler:sys.fullName}</property>
+        </serializedBean>
+        <launcherIds>
+          <launcher id="546" />
+        </launcherIds>
+        <startup>
+          <screen id="585" beanClass="com.install4j.runtime.beans.screens.StartupScreen" rollbackBarrierExitCode="0">
+            <actions>
+              <action id="589" beanClass="com.install4j.runtime.beans.actions.files.CopyFileAction" actionElevationType="elevated" rollbackBarrierExitCode="0" failureStrategy="ask">
+                <serializedBean>
+                  <property name="destinationFile">
+                    <object class="java.io.File">
+                      <string>${installer:sys.userHome}/Downloads</string>
+                    </object>
+                  </property>
+                  <property name="files" type="array" class="java.io.File" length="1">
+                    <element index="0">
+                      <object class="java.io.File">
+                        <string>${installer:sys.userHome}/Orature</string>
+                      </object>
+                    </element>
+                  </property>
+                  <property name="overwriteMode" type="enum" class="com.install4j.api.context.OverwriteMode" value="IF_NEWER_OTHERWISE_ASK" />
+                  <property name="showProgress" type="boolean" value="true" />
+                </serializedBean>
+              </action>
+            </actions>
+          </screen>
+        </startup>
+      </application>
     </applications>
     <styles defaultStyleId="35">
       <style name="Standard" id="35" beanClass="com.install4j.runtime.beans.styles.FormStyle">
@@ -927,6 +961,7 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
       </excludedBeans>
       <exclude>
         <entry location="mac" />
+        <entry rootId="569" />
       </exclude>
       <jreBundle jdkProviderId="Liberica" release="21/latest" />
     </windows>
@@ -936,6 +971,7 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
       </excludedLaunchers>
       <exclude>
         <entry location="mac" />
+        <entry rootId="569" />
       </exclude>
       <jreBundle jdkProviderId="Liberica" release="21/latest" />
       <postInstallScript>for desktop in /home/*/Desktop; do
@@ -949,6 +985,9 @@ for desktop in /home/*/Desktop; do
 done</postUninstallScript>
     </linuxDeb>
     <macosArchive name="macOS Single Bundle Archive" id="415" architecture="universal" launcherId="59">
+      <exclude>
+        <entry rootId="569" location="container-migration.plist" />
+      </exclude>
       <jreBundle jdkProviderId="Liberica" release="21/latest" />
       <topLevelFiles>
         <symlink name="&quot; &quot;" target="/Applications" />
@@ -956,7 +995,7 @@ done</postUninstallScript>
         <file name=".DS_Store" file="./DS_Store" />
       </topLevelFiles>
     </macosArchive>
-    <macosArchive name="macOS Single Bundle Archive Pkg" id="519" archiveType="appstore" provisioningProfile="/root/orature.provisionprofile" architecture="universal" launcherId="546" />
+    <macosArchive name="macOS Single Bundle Archive Pkg" id="519" archiveType="appstore" provisioningProfile="/root/orature.provisionprofile" architecture="universal" launcherId="546" executeSetupApp="true" setupAppId="584" setupLaunchInNewProcess="true" />
   </mediaSets>
   <buildIds buildAll="false" />
 </install4j>
