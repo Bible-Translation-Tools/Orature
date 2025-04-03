@@ -53,10 +53,17 @@ dependencies {
 }
 
 tasks.register('downloadGLSources') {
-    doLast {
-        def jsonFilePath = "src/main/resources/gl_sources.json"
-        def jsonFile = file(jsonFilePath)
+    // Define properties in the configuration phase
+    def jsonFilePath = "src/main/resources/gl_sources.json"
+    def jsonFile = file(jsonFilePath)
 
+    // Define output paths
+    def outputPaths = []
+
+    // Specify inputs and outputs for task caching
+    inputs.files(jsonFile)  // Add json file as input
+    doLast {
+        // Parse the JSON file
         if (!jsonFile.exists()) {
             return
         }
@@ -69,17 +76,29 @@ tasks.register('downloadGLSources') {
             def artifactUrl = dependency["url"]
             def outputPath = "${layout.buildDirectory.dir("resources/content").get().asFile}/${artifactName}.zip"
 
-            try {
-                download.run {
-                    src artifactUrl
-                    dest outputPath
-                    overwrite false
+            // Add output path for caching
+            outputPaths.add(outputPath)
+
+            // Check if the file already exists (skip download if it does)
+            if (!file(outputPath).exists()) {
+                try {
+                    download.run {
+                        src artifactUrl
+                        dest outputPath
+                        overwrite false
+                    }
+                } catch (Exception _) {
+                    // Handle any errors if needed
                 }
-            } catch (Exception _) {
             }
         }
     }
+
+    // Add the collected output paths after `doLast` block
+    outputs.files(outputPaths)
 }
+
+
 
 tasks.register('copyToResources', Copy) {
     dependsOn configurations.content, 'downloadGLSources'

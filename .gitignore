@@ -99,3 +99,6 @@ hs_err_pid*
 # Ignore unencrypted signing file
 signing.p12
 Makefile
+
+# If you want a personalized i4j build file to test sandbox
+/jvm/workbookapp/i4jLocal.install4j
