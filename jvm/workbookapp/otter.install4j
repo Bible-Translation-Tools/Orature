@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="11.0" transformSequenceNumber="11">
+<install4j version="11.0.3" transformSequenceNumber="11">
   <directoryPresets config="." />
   <application name="Orature" applicationId="8057-9807-3529-9982" mediaDir=".exec" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-${compiler:sys.version}" shortName="orature" version="0.1" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="82fd10b9f6e2b1b5" javaMinVersion="21" javaMaxVersion="21">
+    <variables>
+      <variable name="sys.ext.addAdditionalFiles" value="true" />
+    </variables>
     <codeSigning macEnabled="true" macPkcs12File="~/signing_macos.p12" macNotarize="true" macApiIssuer="${compiler:env.MAC_NOTARY_ISSUER}" macApiKey="${compiler:env.MAC_NOTARY_KEY_ID}" macApiPrivateKey="/root/mac_app_notary_key.p8">
       <macSearchedJars>
         <entry>jna-*</entry>
@@ -36,7 +39,7 @@
     </entries>
   </files>
   <launchers>
-    <launcher name="orature" id="59" macBundleIdentifier="org.wycliffeassociates.otter" addMacEntitlements="true" macEntitlementsFile="/repo/entitlements-dmg.plist" macApplicationCategory="public.app-category.utilities">
+    <launcher name="orature" id="59" customMacBundleIdentifier="true" macBundleIdentifier="org.wycliffeassociates.otter" addMacEntitlements="true" macEntitlementsFile="/repo/entitlements-dmg.plist" macApplicationCategory="public.app-category.utilities">
       <executable name="orature" iconSet="true" iconFile="./orature_icon.ico" executableDir="." executableMode="gui" singleInstance="true" />
       <java mainClass="org.wycliffeassociates.otter.jvm.workbookapp.MainKt" vmParameters="--add-exports=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED, --add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED, --add-exports=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED, --add-opens=javafx.controls/javafx.scene.control.skin=ALL-UNNAMED, --add-exports=javafx.base/com.sun.javafx.binding=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.css=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED, --add-opens=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED, --add-opens=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED, --add-opens=javafx.controls/javafx.scene.control.skin=ALL-UNNAMED, --add-opens=javafx.base/com.sun.javafx.binding=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.css=ALL-UNNAMED">
         <classPath>
@@ -956,7 +959,11 @@ done</postUninstallScript>
         <file name=".DS_Store" file="./DS_Store" />
       </topLevelFiles>
     </macosArchive>
-    <macosArchive name="macOS Single Bundle Archive Pkg" id="519" archiveType="appstore" provisioningProfile="/root/orature.provisionprofile" architecture="universal" launcherId="546" />
+    <macosArchive name="macOS Single Bundle Archive Pkg" id="519" archiveType="appstore" provisioningProfile="/root/orature.provisionprofile" architecture="universal" launcherId="546">
+      <topLevelFiles>
+        <file name="${compiler:sys.fullName}.app/Contents/Resources/container-migration.plist" file="../../container-migration.plist" />
+      </topLevelFiles>
+    </macosArchive>
   </mediaSets>
   <buildIds buildAll="false" />
 </install4j>
