@@ -1,5 +1,5 @@
 name: Java CI with Gradle
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 jobs:
   set-env-vars:
     runs-on: ubuntu-24.04
@@ -87,7 +87,7 @@ jobs:
           -e SONAR_TOKEN \
           -e MAC_NOTARY_ISSUER \
           -e MAC_NOTARY_KEY_ID \
-          wycliffeassociates/install4j-docker:11.0.2 \
+          wycliffeassociates/install4j-docker:11.0.3 \
           ./gradlew clean build :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx4096m -Dnet.bytebuddy.experimental=true -XX:MaxMetaspaceSize=1024m"
         env:
           UPDATE_PATH: ${{ needs.set-env-vars.outputs.UPDATE_PATH }}
