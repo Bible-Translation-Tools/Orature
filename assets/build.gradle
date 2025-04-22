@@ -73,9 +73,14 @@ tasks.register('downloadGLSources') {
                 download.run {
                     src artifactUrl
                     dest outputPath
+                    headers = [
+                        "X-Requested-With": "WA-Tool-Orature"
+                    ]
                     overwrite false
                 }
-            } catch (Exception _) {
+            } catch (Exception e) {
+                println("Failed to download ${artifactName} from ${artifactUrl}")
+                println(e)
             }
         }
     }
