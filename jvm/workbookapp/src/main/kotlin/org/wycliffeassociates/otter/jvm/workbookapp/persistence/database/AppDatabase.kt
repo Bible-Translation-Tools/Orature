@@ -135,10 +135,40 @@ class AppDatabase(
         connection.close()
     }
 
+    /**
+     * Updates the absolute paths in the database tables to the sand-boxed paths (if needed).
+     * This fixes an error when installing the new version from the App Store
+     * over the existing dmg-installed build.
+     */
     private fun migratePathsForSandboxedMac() {
+        // dublin_core_entity
         dsl.execute(
             """
                 UPDATE dublin_core_entity 
+                SET path = REPLACE(path, 
+                   '/Library/Application Support/Orature/', 
+                   '/Library/Containers/org.wycliffeassociates.otter/Data/Library/Application Support/Orature/'
+                   )
+                WHERE path LIKE '%/Library/Application Support/Orature/%' 
+                AND path NOT LIKE '%/Library/Containers/%';
+            """.trimIndent()
+        )
+        // take_entity
+        dsl.execute(
+            """
+                UPDATE take_entity 
+                SET path = REPLACE(path, 
+                   '/Library/Application Support/Orature/', 
+                   '/Library/Containers/org.wycliffeassociates.otter/Data/Library/Application Support/Orature/'
+                   )
+                WHERE path LIKE '%/Library/Application Support/Orature/%' 
+                AND path NOT LIKE '%/Library/Containers/%';
+            """.trimIndent()
+        )
+        // versification_entity
+        dsl.execute(
+            """
+                UPDATE versification_entity 
                 SET path = REPLACE(path, 
                    '/Library/Application Support/Orature/', 
                    '/Library/Containers/org.wycliffeassociates.otter/Data/Library/Application Support/Orature/'
