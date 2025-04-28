@@ -62,6 +62,11 @@ class AppDatabase(
             setup()
         }
         DatabaseMigrator(directoryProvider).migrate(dsl)
+
+        val isMacOS = System.getProperty("orature.isPkgMac")
+        if (isMacOS != null) {
+            migratePathsForSandboxedMac()
+        }
     }
 
     private fun setup() {
@@ -128,6 +133,20 @@ class AppDatabase(
 
     fun close() {
         connection.close()
+    }
+
+    private fun migratePathsForSandboxedMac() {
+        dsl.execute(
+            """
+                UPDATE dublin_core_entity 
+                SET path = REPLACE(path, 
+                   '/Library/Application Support/Orature/', 
+                   '/Library/Containers/org.wycliffeassociates.otter/Data/Library/Application Support/Orature/'
+                   )
+                WHERE path LIKE '%/Library/Application Support/Orature/%' 
+                AND path NOT LIKE '%/Library/Containers/%';
+            """.trimIndent()
+        )
     }
 
     companion object {
