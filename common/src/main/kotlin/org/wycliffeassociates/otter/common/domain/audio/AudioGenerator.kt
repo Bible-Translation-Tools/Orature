@@ -25,8 +25,8 @@ class AudioGenerator @Inject constructor(
     }
 
     fun convertTextToAudio(textItems: List<String>): File {
-//        return buildAudio(textItems)
-        return buildAudioSeparately(textItems)
+        return buildAudio(textItems)
+//        return buildAudioSeparately(textItems)
     }
 
     private fun buildAudio(chunksText: List<String>): File {
@@ -65,8 +65,8 @@ class AudioGenerator @Inject constructor(
     private fun generate(text: String): File {
 //        println("GENERATING...")
         val generated = File.createTempFile("temp-tts", ".mp3", directoryProvider.tempDirectory)
-//        request(text, generated)
-        requestLocalTTS(text, generated)
+        request(text, generated)
+//        requestLocalTTS(text, generated)
         val outputFile = File.createTempFile("tts", ".mp3", directoryProvider.tempDirectory)
         audioUtils.resampleAudio(generated, outputFile)
 //        println("DONE!")
@@ -84,7 +84,7 @@ class AudioGenerator @Inject constructor(
         // Create the JSON payload
         val jsonPayload = """
         {
-            "model": "tts-1",
+            "model": "gpt-4o-mini-tts",
             "input": $serializedContent,
             "voice": "echo"
         }

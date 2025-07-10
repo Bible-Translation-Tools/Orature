@@ -25,8 +25,10 @@ class MarkerGenerator @Inject constructor() {
 
     fun generate(audioFile: File, verses: List<String>) {
         val markerPositions = parseMarker(audioFile, verses)
+        println(markerPositions.size)
         if (markerPositions.size == verses.size) {
             val audio = OratureAudioFile(audioFile)
+            audio.clearMarkers()
             markerPositions.forEachIndexed { index, pos ->
                 val location = pos * DEFAULT_SAMPLE_RATE // convert secs to frames
                 audio.addMarker(VerseMarker(index + 1, index + 1, location.toInt()))
@@ -133,7 +135,7 @@ class MarkerGenerator @Inject constructor() {
                     mapOf("role" to "system", "content" to "You are a helpful assistant and you will generate responses in json format."),
                     mapOf("role" to "user", "content" to message)
                 ),
-                "temperature" to 0.1,
+                "temperature" to 0.0,
                 "response_format" to mapOf("type" to "json_object")
             )
         )
@@ -180,7 +182,7 @@ class MarkerGenerator @Inject constructor() {
                     mapOf("role" to "system", "content" to "You are a helpful assistant and you will generate responses in json format."),
                     mapOf("role" to "user", "content" to message)
                 ),
-                "temperature" to 0.1,
+                "temperature" to 0.0,
                 "response_format" to mapOf("type" to "json_object")
             )
         )
@@ -241,6 +243,7 @@ data class Choice(
     val finish_reason: String
 )
 
+@JsonIgnoreProperties(ignoreUnknown=true)
 data class Message(
     val role: String,
     val content: String,

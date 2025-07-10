@@ -910,7 +910,7 @@ class NarrationViewModel : ViewModel() {
             .map { it.textItem.text }
 
         val audio = audioGenerator.convertTextToAudio(verseList)
-//        markerGenerator.generate(audio,verseList)
+        markerGenerator.generate(audio,verseList)
 
         narration.importChapterAudioFile(audio)
             .subscribeOn(Schedulers.io())
