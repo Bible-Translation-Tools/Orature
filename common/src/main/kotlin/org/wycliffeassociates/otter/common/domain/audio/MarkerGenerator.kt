@@ -26,23 +26,28 @@ class MarkerGenerator @Inject constructor() {
     fun generate(audioFile: File, verses: List<String>) {
         val markerPositions = parseMarker(audioFile, verses)
         println(markerPositions.size)
-        if (markerPositions.size == verses.size) {
-            val audio = OratureAudioFile(audioFile)
-            audio.clearMarkers()
-            markerPositions.forEachIndexed { index, pos ->
-                val location = pos * DEFAULT_SAMPLE_RATE // convert secs to frames
-                audio.addMarker(VerseMarker(index + 1, index + 1, location.toInt()))
-            }
-            audio.update()
-        } else {
+        if (markerPositions.size != verses.size) {
             println("---> this chapter has error!")
         }
+
+        val audio = OratureAudioFile(audioFile)
+        audio.clearMarkers()
+        markerPositions.forEachIndexed { index, pos ->
+            val location = pos * DEFAULT_SAMPLE_RATE // convert secs to frames
+            audio.addMarker(VerseMarker(index + 1, index + 1, location.toInt()))
+        }
+        audio.update()
     }
 
     private fun parseMarker(audioFile: File, verseList: List<String>): List<Double> {
         val transcription = transcribe(audioFile) ?: return listOf()
-        val wordsWithMarker = findMarkerPositions(transcription.words, verseList)
-        return wordsWithMarker.map { it.start }
+        val cleanVerseList = verseList.map {
+            it.replace(",", " ")
+                .replace(".", " ")
+                .replace("\n"," ")
+                .replace(Regex("  ")," ")
+        }
+        return findSubstringMatches(transcription.words, cleanVerseList)
     }
 
     private fun transcribe(inputFile: File): OpenAITranscription? {
@@ -208,6 +213,73 @@ class MarkerGenerator @Inject constructor() {
             println("Request failed with status code: ${response.statusCode()}")
             println("Error response: ${response.body()}")
             throw Exception("ERROR while asking chatGPT!")
+        }
+    }
+
+    fun findSubstringMatches(transcription: List<Word>, substrings: List<String>): List<Double> {
+        val apiUrl = "https://api.openai.com/v1/chat/completions"
+        val apiKey = System.getenv("OPENAI_KEY")
+
+        val transcriptionJson = transcription.map { 
+            mapOf("word" to it.word, "start" to it.start) 
+        }
+
+        val message = """
+            You are given a list of word-level transcription objects, each with a "word" and a "start" timestamp. 
+            Your task is to find an approximate match for each query substring within the transcription. 
+            Return the start timestamp of the first word in the matched sequence.
+            
+            Rules:
+            - Matching should be case-insensitive and punctuation-insensitive.
+            - Use fuzzy/soft matching: allow small variations like plural vs singular, minor rewordings, or slight differences in spelling.
+            - Return -1 if no approximate match is found.
+            
+            Transcription: $transcriptionJson
+            Substrings: $substrings
+            
+            Return a JSON object with a "matches" field containing an array of objects, each with "substring" and "start" fields.
+            Example format: {"matches": [{"substring": "going to show", "start": 2.8}, {"substring": "bake a chocolate cakes", "start": 4.1}]}
+        """.trimIndent()
+
+        val objectMapper: ObjectMapper = ObjectMapper(JsonFactory()).registerKotlinModule()
+
+        val jsonPayload = objectMapper.writeValueAsString(
+            mapOf(
+                "model" to "gpt-4o",
+                "messages" to listOf(
+                    mapOf("role" to "system", "content" to "You are a helpful assistant that analyzes transcriptions and finds approximate matches. Always return valid JSON with a 'matches' field containing an array of match objects with 'substring' and 'start' fields."),
+                    mapOf("role" to "user", "content" to message)
+                ),
+                "temperature" to 0.0,
+                "response_format" to mapOf("type" to "json_object")
+            )
+        )
+
+        val client = HttpClient.newHttpClient()
+
+        val request = HttpRequest.newBuilder()
+            .uri(URI.create(apiUrl))
+            .header("Content-Type", "application/json")
+            .header("Authorization", "Bearer $apiKey")
+            .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+            .build()
+
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+
+        if (response.statusCode() == 200) {
+            val data = response.body()
+            val chatResponse = objectMapper.readValue<ChatResponse>(data)
+            val answer = chatResponse.choices.first().message.content
+            val responseObject: Map<String, List<Map<String, Any>>> = objectMapper.readValue(answer)
+            val matches = responseObject["matches"] ?: throw Exception("No 'matches' field in API response")
+            
+            return matches.map { match ->
+                (match["start"] as Number).toDouble()
+            }
+        } else {
+            println("Request failed with status code: ${response.statusCode()}")
+            println("Error response: ${response.body()}")
+            throw Exception("ERROR while finding substring matches with OpenAI API!")
         }
     }
 
