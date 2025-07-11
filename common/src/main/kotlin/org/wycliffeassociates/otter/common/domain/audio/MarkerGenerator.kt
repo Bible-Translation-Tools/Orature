@@ -113,7 +113,7 @@ class MarkerGenerator @Inject constructor() {
             }
         }
 
-        return wordsWithEasedTimestamp.filterIndexed { index, _ ->
+        return words.filterIndexed { index, _ ->
             index in markerPositions
         }
     }
