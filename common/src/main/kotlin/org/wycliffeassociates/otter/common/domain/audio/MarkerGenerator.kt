@@ -235,7 +235,9 @@ class MarkerGenerator @Inject constructor() {
             - Return -1 if no approximate match is found.
             
             Transcription: $transcriptionJson
-            Substrings: $substrings
+            
+            Substrings:
+            ${substrings.mapIndexed { index, substring -> "${index + 1}. $substring" }.joinToString("\n")}
             
             Return a JSON object with a "matches" field containing an array of objects, each with "substring" and "start" fields.
             Example format: {"matches": [{"substring": "going to show", "start": 2.8}, {"substring": "bake a chocolate cakes", "start": 4.1}]}
