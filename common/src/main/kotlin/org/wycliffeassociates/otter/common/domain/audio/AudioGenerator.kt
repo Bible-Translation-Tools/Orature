@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.common.domain.audio
 
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.narration.AudioFileUtils
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -11,8 +12,6 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import javax.inject.Inject
-import kotlin.math.max
-import kotlin.math.min
 
 class AudioGenerator @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
@@ -27,6 +26,23 @@ class AudioGenerator @Inject constructor(
     fun convertTextToAudio(textItems: List<String>): File {
         return buildAudio(textItems)
 //        return buildAudioSeparately(textItems)
+    }
+
+    fun getExistingAudio(bookCode: String, chapterNumber: Int): File? {
+        val audioFolder = File("""D:\misc\generatemarkers\audio""")  // ← change this to your actual folder path
+
+        if (!audioFolder.exists() || !audioFolder.isDirectory) {
+            throw IllegalArgumentException("Audio folder does not exist or is not a directory")
+        }
+
+        // Normalize chapter number to match any leading-zero filenames (e.g., "001", "09", "6")
+        val pattern = Regex("^${bookCode}_${chapterNumber}\\d*.mp3$|^${bookCode}_0*${chapterNumber}\\.mp3$")
+
+        val existingFile = audioFolder.listFiles()
+            ?.firstOrNull { file -> pattern.matches(file.name) }
+
+
+        return existingFile
     }
 
     private fun buildAudio(chunksText: List<String>): File {

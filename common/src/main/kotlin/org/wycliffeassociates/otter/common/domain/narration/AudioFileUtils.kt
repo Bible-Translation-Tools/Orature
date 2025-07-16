@@ -20,6 +20,8 @@ package org.wycliffeassociates.otter.common.domain.narration
 
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import ws.schild.jave.Encoder
 import ws.schild.jave.MultimediaObject
@@ -75,5 +77,34 @@ class AudioFileUtils @Inject constructor(private val directoryProvider: IDirecto
 
         val encoder = Encoder()
         encoder.encode(MultimediaObject(source), target, attrs)
+    }
+
+    fun convertAudioToWav(inputFile: File): File {
+        val inputAudioFile = OratureAudioFile(inputFile)
+        val tempFile = directoryProvider.createTempFile("output", ".wav")
+        val outputAudioFile = OratureAudioFile(
+            tempFile,
+            inputAudioFile.channels,
+            inputAudioFile.sampleRate,
+            inputAudioFile.bitsPerSample
+        )
+        outputAudioFile.writer(append = true).use { outputStream ->
+            val buffer = ByteArray(10240)
+            inputAudioFile.reader().use { reader ->
+                reader.open()
+                while (reader.hasRemaining()) {
+                    val written = reader.getPcmBuffer(buffer)
+                    outputStream.write(buffer, 0, written)
+                }
+            }
+        }
+
+        // copy markers
+        inputAudioFile.getMarker<VerseMarker>().forEach { m ->
+            outputAudioFile.addMarker(m)
+        }
+        outputAudioFile.update()
+
+        return outputAudioFile.file
     }
 }

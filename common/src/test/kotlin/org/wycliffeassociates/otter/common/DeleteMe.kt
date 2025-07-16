@@ -92,7 +92,7 @@ class DeleteMe {
 
     @Test
     fun generateMarkerForChapterAudio() {
-        val audio = File("""D:\misc\temp\jude-id.mp3""")
+        val audio = File("""D:\misc\generatemarkers\26_yud01.mp3""")
         val input = """
         1:1 Dari Yudas, hamba Yesus Kristus dan saudara Yakobus, kepada mereka, yang terpanggil, yang dikasihi dalam Allah Bapa, dan yang dipelihara untuk Yesus Kristus. 1:2 Rahmat, damai sejahtera dan kasih kiranya melimpahi kamu.
         Hukuman atas guru-guru palsu

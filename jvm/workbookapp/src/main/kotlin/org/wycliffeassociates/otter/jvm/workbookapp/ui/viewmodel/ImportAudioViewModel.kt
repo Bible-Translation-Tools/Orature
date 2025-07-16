@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
-import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
@@ -35,6 +34,7 @@ import org.wycliffeassociates.otter.common.domain.audio.MarkerGenerator
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.TakeCreator
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
+import org.wycliffeassociates.otter.common.domain.narration.AudioFileUtils
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
@@ -42,7 +42,6 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ITakeReposit
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.controls.dialog.ConfirmDialog
-import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 import java.io.File
@@ -54,6 +53,9 @@ class ImportAudioViewModel : ViewModel() {
 
     @Inject
     lateinit var audioGenerator: AudioGenerator
+
+    @Inject
+    lateinit var audioFileUtils: AudioFileUtils
 
     @Inject
     lateinit var workbookRepository: IWorkbookRepository
@@ -142,7 +144,9 @@ class ImportAudioViewModel : ViewModel() {
                 val srcChapter = sourceChapters.first { it.sort == ch.sort }
                 val targetChapter = targetChapters.first { it.sort == ch.sort }
                 val chapterVerseContents = contentRepository.getByCollection(srcChapter).blockingGet()
-                val verseText = chapterVerseContents.filter { it.labelKey == "verse" }.map { it.text!! }
+                val verseText = chapterVerseContents.filter {
+                    it.labelKey == "verse"
+                }.mapNotNull { it.text }
 
                 val chapterMetaContent = contentRepository.getCollectionMetaContent(targetChapter).blockingGet()
 //                generateForChapter(workbook, ch, chapterMetaContent, verseText)
@@ -222,9 +226,16 @@ class ImportAudioViewModel : ViewModel() {
         val narration = narrationFactory.create(workbook,chapter)
         try {
             narration.initialize().blockingAwait()
-            val audio = audioGenerator.convertTextToAudio(verseList)
-            narration.importChapterAudioFile(audio).blockingAwait()
-            narration.createChapterTakeWithAudio().blockingGet() // bounce audio
+//            val audio = audioGenerator.convertTextToAudio(verseList)
+            val bookSlug = workbook.source.slug
+            val chapterNumber = chapter.sort
+            val audio = audioGenerator.getExistingAudio(bookSlug, chapterNumber)
+            if (audio != null) {
+                markerGenerator.generate(audio, verseList)
+                val wavAudio = audioFileUtils.convertAudioToWav(audio)
+                narration.importChapterAudioFile(wavAudio).blockingAwait()
+                narration.createChapterTakeWithAudio().blockingGet() // bounce audio
+            }
         } catch(e: NoSuchFileException) {
             errorChapters.add(chapter.sort)
             return
