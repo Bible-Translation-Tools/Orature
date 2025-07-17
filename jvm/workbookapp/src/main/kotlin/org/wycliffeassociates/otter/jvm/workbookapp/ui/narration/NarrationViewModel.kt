@@ -103,6 +103,9 @@ class NarrationViewModel : ViewModel() {
     @Inject
     lateinit var markerGenerator: MarkerGenerator
 
+    @Inject
+    lateinit var audioFileUtils: AudioFileUtils
+
     private lateinit var narration: Narration
     private lateinit var renderer: NarrationWaveformRenderer
     private lateinit var narrationStateMachine: TeleprompterStateMachine
@@ -909,16 +912,21 @@ class NarrationViewModel : ViewModel() {
             .filter { it.label == "verse" }
             .map { it.textItem.text }
 
-        val audio = audioGenerator.convertTextToAudio(verseList)
-        markerGenerator.generate(audio,verseList)
+//        val audio = audioGenerator.convertTextToAudio(verseList)
+//        markerGenerator.generate(audio,verseList)
+        val audio = audioGenerator.getExistingAudio(workbook.source.slug, workbookDataStore.chapter.sort)
+        if (audio != null) {
+            markerGenerator.generate(audio, verseList)
+            val wavAudio = audioFileUtils.convertAudioToWav(audio)
+            narration.importChapterAudioFile(wavAudio)
+                .subscribeOn(Schedulers.io())
+                .observeOnFx()
+                .subscribe {
+                    recordedVerses.setAll(narration.activeVerses)
+                    resetNarratableList()
+                }
+        }
 
-        narration.importChapterAudioFile(audio)
-            .subscribeOn(Schedulers.io())
-            .observeOnFx()
-            .subscribe {
-                recordedVerses.setAll(narration.activeVerses)
-                resetNarratableList()
-            }
     }
 
     fun generateVerseAudio(verseIndex: Int, text: String) {
