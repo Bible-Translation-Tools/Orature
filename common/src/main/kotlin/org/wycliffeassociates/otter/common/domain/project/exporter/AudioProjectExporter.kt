@@ -88,7 +88,7 @@ class AudioProjectExporter @Inject constructor(
             .filter { chapterFilter(it, options) }
             .flatMapCompletable { chapter ->
                 chapter.audio.selected.value!!.value!!.let {
-                    val outputFile = outputProjectDir.resolve("chapter-${chapter.sort}.mp3")
+                    val outputFile = outputProjectDir.resolve("${it.name}")
                     val metadata = AudioExporter.ExportMetadata(license, contributors)
                     audioExporter.exportMp3(it.file, outputFile, metadata)
                 }

@@ -47,14 +47,18 @@ class AudioExporter @Inject constructor() {
         metadata: ExportMetadata
     ): Completable {
         val mp3File = if (outputPath.isDirectory) {
-            File(outputPath, wavAudio.nameWithoutExtension + ".mp3")
+            File(outputPath, wavAudio.nameWithoutExtension + ".wav")
         } else {
             outputPath
         }
 
-        return audioConverter.wavToMp3(wavAudio, mp3File)
+//        return audioConverter.wavToMp3(wavAudio, mp3File)
+//            .subscribeOn(Schedulers.io())
+//            .andThen(updateMetadata(mp3File, metadata))
+        return Completable.fromAction {
+            wavAudio.copyTo(mp3File)
+        }
             .subscribeOn(Schedulers.io())
-            .andThen(updateMetadata(mp3File, metadata))
     }
 
     private fun updateMetadata(
