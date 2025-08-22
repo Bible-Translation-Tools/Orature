@@ -13,6 +13,7 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 import java.net.URI
 import java.net.http.HttpClient
@@ -20,8 +21,13 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 
-class MarkerGenerator @Inject constructor() {
+class MarkerGenerator @Inject constructor(
+    private val directoryProvider: IDirectoryProvider
+) {
 
     fun generate(audioFile: File, verses: List<String>) {
         val markerPositions = parseMarker(audioFile, verses)
@@ -282,6 +288,55 @@ class MarkerGenerator @Inject constructor() {
             println("Request failed with status code: ${response.statusCode()}")
             println("Error response: ${response.body()}")
             throw Exception("ERROR while finding substring matches with OpenAI API!")
+        }
+    }
+
+    fun alignMarkersWithAeneas(audioFile: File, verses: List<String>): File {
+        // Create temporary files
+        val tempDir = directoryProvider.tempDirectory
+        val versesFile = tempDir.resolve("verses.txt")
+        val outputFile = tempDir.resolve("output.json")
+        
+        try {
+            // Write verses to temporary file, each separated by line break
+            versesFile.writeText(verses.joinToString("\n"))
+            
+            // Build the command
+            val command = listOf(
+                "python", "-m", "aeneas.tools.execute_task",
+                audioFile.absolutePath,
+                versesFile.absolutePath,
+                "task_language=eng|os_task_file_format=json|is_text_type=plain",
+                outputFile.absolutePath
+            )
+            
+            // Execute the subprocess
+            val processBuilder = ProcessBuilder(command)
+            processBuilder.redirectErrorStream(true)
+            
+            val process = processBuilder.start()
+            val output = process.inputStream.bufferedReader().readText()
+            val exitCode = process.waitFor()
+            
+            if (exitCode != 0) {
+                throw RuntimeException("Aeneas process failed with exit code $exitCode. Output: $output")
+            }
+            
+            if (!outputFile.exists()) {
+                throw RuntimeException("Output file was not created by aeneas process")
+            }
+            
+            return outputFile
+            
+        } catch (e: Exception) {
+            // Clean up temporary files on error
+            try {
+                versesFile.delete()
+                outputFile.delete()
+            } catch (cleanupException: Exception) {
+                // Ignore cleanup errors
+            }
+            throw e
         }
     }
 
