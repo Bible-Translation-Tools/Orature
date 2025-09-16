@@ -124,6 +124,72 @@ class BurritoToResourceContainerConverter @Inject constructor(
         return Pair(projects, mediaManifest)
     }
 
+    private fun groupAudioIngredientsByChapter(
+        book: String,
+        ingredients: List<Pair<String, IngredientSchema>>
+    ): Map<Int, MutableList<Pair<String, IngredientSchema>>> {
+        val groupedByChapter = hashMapOf<Int, MutableList<Pair<String, IngredientSchema>>>()
+        for (item in ingredients) {
+            val (_, ingredient) = item
+            val scope = ingredient.scope?.get(book.uppercase(Locale.US))!!
+            for (ref in scope) {
+                val chapters = parseChapterRangeFromBibleReferences(ref)
+                for (chapter in chapters) {
+                    groupedByChapter.putIfAbsent(chapter, mutableListOf())
+                    groupedByChapter[chapter]!!.add(item)
+                }
+            }
+        }
+        return groupedByChapter
+    }
+
+    private fun getCompleteBookIngredients(
+        book: String,
+        ingredients: List<Pair<String, IngredientSchema>>
+    ): List<Pair<String, IngredientSchema>> {
+        return ingredients.filter { (_, ingredient) ->
+            ingredient.scope?.get(book.uppercase())?.isEmpty() ?: false
+        }
+    }
+
+    private fun parseChapterRangeFromBibleReferences(reference: String): List<Int> {
+        val regex = Regex("^([1-9][0-9]*)(?:-([1-9][0-9]*))?(?::([1-9][0-9]*))?(?:-([1-9][0-9]*))?$")
+        val matchResult = regex.find(reference) ?: return emptyList()
+
+        val (startChapter, endChapter, _, _) = matchResult.destructured
+
+        return when {
+            endChapter.isNotEmpty() -> {
+                val start = startChapter.toInt()
+                val end = endChapter.toInt()
+                (start..end).toList()
+            }
+            startChapter.isNotEmpty() -> {
+                listOf(startChapter.toInt())
+            }
+            else -> {
+                emptyList()
+            }
+        }
+    }
+
+    private fun handleSingleChapterAudioIngredient(
+        audioFile: String,
+        ingredients: List<Pair<String, IngredientSchema>>,
+        inputAccessor: IContainerAccessor,
+        outputAccessor: IResourceContainerAccessor
+    ) {
+        val timing = findMatchingTimingFile(audioFile, ingredients)
+        timing?.let {
+            convertBurritoTimingToOratureTiming(
+                audioFile,
+                timing.first,
+                inputAccessor,
+                outputAccessor
+            )
+        }
+    }
+
     internal fun createChapterAudioIngredients(
         burrito: MetadataSchema,
         ingredientsByBook: IngredientsByBook,
@@ -133,7 +199,16 @@ class BurritoToResourceContainerConverter @Inject constructor(
         val filtered = filterAcceptedAudioFormats(burrito, ingredientsByBook)
         val reconstructed = hashMapOf<String, MutableList<Pair<String, IngredientSchema>>>()
         for ((book, ingredients) in filtered) {
-            val groupedByChapter = hashMapOf<Int, MutableList<Pair<String, IngredientSchema>>>()
+            val completeBooks = getCompleteBookIngredients(book, ingredients)
+            val groupedByChapter = groupAudioIngredientsByChapter(book, ingredients)
+
+            for ((chapter, ingredients) in groupedByChapter) {
+                when (ingredients.size) {
+                    1 -> handleSingleChapterAudioIngredient(ingredients[0].first, ingredients, inputAccessor, outputAccessor)
+                    else -> handleConstructingChapterAudioIngredient()
+                }
+            }
+
             for (item in ingredients) {
                 if (!AudioFileFormat.isSupported(File(item.first).extension)) {
                     continue
@@ -141,6 +216,8 @@ class BurritoToResourceContainerConverter @Inject constructor(
 
                 val (file, ingredient) = item
                 val scope = ingredient.scope?.get(book.uppercase(Locale.US))!!
+
+
                 when {
                     scope.isEmpty() -> {
                         assert(false)
