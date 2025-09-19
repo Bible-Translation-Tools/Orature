@@ -112,3 +112,22 @@ class FileNamer(
         }
     }
 }
+
+
+class BibleFileNamer(
+    val languageSlug: String,
+    val bookSlug: String,
+    val rcSlug: String
+) {
+    fun chapterFileName(
+        chapter: Int,
+        extension: String = "wav"
+    ): String {
+        return listOfNotNull(
+            languageSlug,
+            rcSlug,
+            bookSlug,
+            chapter
+        ).joinToString("_", postfix = ".${extension}")
+    }
+}
