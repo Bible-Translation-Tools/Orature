@@ -72,7 +72,7 @@ private val usfmFilenamePattern = "./{booknum}-{book}.usfm"
 private val filenamePattern = "{language}_{title}_{book}_c{chapter}.{extension}"
 private val DEFAULT_TITLE_CODE = "reg"
 
-class BurritoToResourceContainerConverter @Inject constructor(
+open class BurritoToResourceContainerConverter @Inject constructor(
     val directoryProvider: IDirectoryProvider
 ) {
 
@@ -137,7 +137,12 @@ class BurritoToResourceContainerConverter @Inject constructor(
         return Pair(projects, mediaManifest)
     }
 
-    private fun groupAudioIngredientsByChapter(
+    /**
+     * Given a book and list of ingredients, this organizes the ingredients into a map keyed
+     * by chapter number. Ingredients that span multiple chapters will be listed under all chapters
+     * in that span.
+     */
+    protected fun groupAudioIngredientsByChapter(
         book: String,
         ingredients: List<Pair<String, IngredientSchema>>
     ): Map<Int, MutableList<Pair<String, IngredientSchema>>> {
@@ -156,7 +161,10 @@ class BurritoToResourceContainerConverter @Inject constructor(
         return groupedByChapter
     }
 
-    private fun getCompleteBookIngredients(
+    /**
+     * Get all ingredients of a book whose scope is the entire book
+     */
+    protected fun getCompleteBookIngredients(
         book: String,
         ingredients: List<Pair<String, IngredientSchema>>
     ): List<Pair<String, IngredientSchema>> {
@@ -165,7 +173,7 @@ class BurritoToResourceContainerConverter @Inject constructor(
         }
     }
 
-    private fun parseChapterRangeFromBibleReferences(reference: String): List<Int> {
+    protected fun parseChapterRangeFromBibleReferences(reference: String): List<Int> {
         val regex =
             Regex("^([1-9][0-9]*)(?:-([1-9][0-9]*))?(?::([1-9][0-9]*))?(?:-([1-9][0-9]*))?$")
         val matchResult = regex.find(reference) ?: return emptyList()
@@ -189,7 +197,11 @@ class BurritoToResourceContainerConverter @Inject constructor(
         }
     }
 
-    private fun handleSingleChapterAudioIngredient(
+    /**
+     * Copies the audio file out of the container into the working temp directory, as well as its
+     * timing file if applicable.
+     */
+    protected fun handleSingleChapterAudioIngredient(
         audioFile: String,
         ingredients: List<Pair<String, IngredientSchema>>,
         inputAccessor: IContainerAccessor
@@ -218,7 +230,7 @@ class BurritoToResourceContainerConverter @Inject constructor(
         return filesToCopy
     }
 
-    private fun extractTempAudioAndTiming(
+    protected fun extractTempAudioAndTiming(
         audioFile: String,
         timingFile: String,
         inputAccessor: IContainerAccessor
@@ -242,7 +254,7 @@ class BurritoToResourceContainerConverter @Inject constructor(
         return Pair(tempAudioFile, tempTimingFile)
     }
 
-    private fun getRelevantAudioSections(audio: File, timing: File): List<MarkerLocation> {
+    protected fun getRelevantAudioSections(audio: File, timing: File): List<MarkerLocation> {
         val metadata = BurritoAlignmentMetadata(timing, audio).parseTimings()
 
         val markers = buildList<AudioMarker> {
@@ -260,14 +272,16 @@ class BurritoToResourceContainerConverter @Inject constructor(
         return relevantSections
     }
 
-    private fun constructChapterAudio(
-        book: String,
+
+    /**
+     * Reads sections from multiple files to assemble a completed chapter audio wav file
+     */
+    protected fun constructChapterAudio(
         chapter: Int,
         fileNamer: BibleFileNamer,
-        relevantSections: Map<File, List<MarkerLocation>>,
-        directoryProvider: IDirectoryProvider
+        relevantSections: Map<File, List<MarkerLocation>>
     ): File {
-        val outputFile = File(directoryProvider.tempDirectory, fileNamer.chapterFileName(chapter))
+        val outputFile = File(tempDir, fileNamer.chapterFileName(chapter))
         val wav =
             WavFile(outputFile, DEFAULT_CHANNELS, DEFAULT_SAMPLE_RATE, DEFAULT_BITS_PER_SAMPLE)
         val byteBuffer = ByteArray(DEFAULT_BUFFER_SIZE)
@@ -297,7 +311,7 @@ class BurritoToResourceContainerConverter @Inject constructor(
         return outputFile
     }
 
-    private fun handleConstructingChapterAudioIngredient(
+    protected fun handleConstructingChapterAudioIngredient(
         book: String,
         chapter: Int,
         ingredients: List<Pair<String, IngredientSchema>>,
@@ -318,11 +332,9 @@ class BurritoToResourceContainerConverter @Inject constructor(
         }
         return listOf(
             constructChapterAudio(
-                book,
                 chapter,
                 fileNamer,
-                relevantSections,
-                directoryProvider
+                relevantSections
             )
         )
     }
@@ -638,7 +650,7 @@ internal fun createMediaManifest(
     return MediaManifest(projects = mediaProjects)
 }
 
-private fun getVersification(
+internal fun getVersification(
     burrito: MetadataSchema,
     usfmFilesByBook: Any,
     chapterAudioByBook: Any
