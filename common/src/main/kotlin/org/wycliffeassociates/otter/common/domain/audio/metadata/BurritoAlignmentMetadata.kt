@@ -23,7 +23,8 @@ private const val BIBLICAL_REFERENCE_VTT_CLASSNAME = "c.u23003"
 
 class BurritoAlignmentMetadata(
     private val burritoTimingFile: File,
-    private val audioFile: File
+    private val audioFile: File,
+    private val chapterToFilter: Int? = null
 ) : CueMetadata {
 
     private val logger = LoggerFactory.getLogger(BurritoAlignmentMetadata::class.java)
@@ -37,13 +38,21 @@ class BurritoAlignmentMetadata(
     }
 
     internal fun parseTimings(timings: BurritoAudioAlignment): OratureMarkers {
-        val references = timings.getVttCues()
+        var references = timings.getVttCues()
+
+        chapterToFilter?.let {
+            references = references.filter {
+                val tag = BiblicalReferencesParser.parseBcv(it.tag)
+                tag?.chapter == chapterToFilter
+            }
+        }
+
         val cues = mutableListOf<AudioCue>()
         for (marker in references) {
             val startMs = (marker.startTimeUs / 1000.0)
             val startFrame = ((startMs * DEFAULT_SAMPLE_RATE) / 1000L).toInt()
 
-            val oratureLabel = BiblicalReferencesParser.parseBiblicalReference(marker.content)
+            val oratureLabel = BiblicalReferencesParser.parseToMarkerLabel(marker.content)
             if (oratureLabel != null) {
                 cues.add(AudioCue(startFrame, oratureLabel))
             }

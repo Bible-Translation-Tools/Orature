@@ -8,6 +8,7 @@ import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.AudioFl
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.AudioFormat
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Compression
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.TrackConfiguration
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
 import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
@@ -16,6 +17,8 @@ import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.audio.mp3.MP3FileReader
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
+import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
+import org.wycliffeassociates.otter.common.data.audio.MarkerType
 import org.wycliffeassociates.otter.common.data.audio.OratureCueType
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
@@ -53,6 +56,9 @@ internal val books = arrayOf(
     "phm", "heb", "jas", "1pe", "2pe", "1jn", "2jn", "3jn", "jud", "rev"
 )
 
+private val SUPPORTED_AUDIO_MIME = setOf("audio/wav", "audio/mpeg")
+private val SUPPORTED_AUDIO_FILES = setOf("mp3", "wav")
+
 internal val ot = books.slice(0 until 40)
 internal val nt = books.slice(40 until 66)
 
@@ -75,6 +81,8 @@ private val DEFAULT_TITLE_CODE = "reg"
 open class BurritoToResourceContainerConverter @Inject constructor(
     val directoryProvider: IDirectoryProvider
 ) {
+
+    private val logger = LoggerFactory.getLogger(BurritoToResourceContainerConverter::class.java)
 
     var tempDir = directoryProvider.tempDirectory
 
@@ -254,19 +262,65 @@ open class BurritoToResourceContainerConverter @Inject constructor(
         return Pair(tempAudioFile, tempTimingFile)
     }
 
-    protected fun getRelevantAudioSections(audio: File, timing: File): List<MarkerLocation> {
-        val metadata = BurritoAlignmentMetadata(timing, audio).parseTimings()
+    protected fun getRelevantAudioSections(
+        chapter: Int,
+        audio: File,
+        timing: File
+    ): List<MarkerLocation> {
+        val metadata = BurritoAlignmentMetadata(
+            timing,
+            audio,
+            chapter
+        ).parseTimings()
 
-        val markers = buildList<AudioMarker> {
+        val extraMetadata = BurritoAlignmentMetadata(
+            timing,
+            audio
+        ).parseTimings()
+
+        var markers = buildList {
             addAll(metadata.getMarkers(OratureCueType.BOOK_TITLE))
             addAll(metadata.getMarkers(OratureCueType.CHAPTER_TITLE))
             addAll(metadata.getMarkers(OratureCueType.VERSE))
         }.sortedBy { it.location }
 
+        var extraMarkers = buildList {
+            addAll(extraMetadata.getMarkers(OratureCueType.BOOK_TITLE))
+            addAll(extraMetadata.getMarkers(OratureCueType.CHAPTER_TITLE))
+            addAll(extraMetadata.getMarkers(OratureCueType.VERSE))
+        }
+            .filter { it !in markers }
+            .sortedBy { it.location }
+
+        val chapterMarkers = markers.filter {
+            it is ChapterMarker
+        }
+
+        var filterBeforeChapter: Int = 0
+        var filterAfterChapter: Int = Int.MAX_VALUE
+        chapterMarkers?.let {
+            val startChapter = chapterMarkers.find { it.sort == chapter }
+            val startIndex = chapterMarkers.indexOf(startChapter)
+            val nextChapter = chapterMarkers.getOrNull(startIndex + 1)
+
+            startChapter?.location?.let { filterBeforeChapter = it }
+            nextChapter?.location?.let { filterAfterChapter = it }
+
+            if (nextChapter == null && extraMarkers.isNotEmpty() && markers.isNotEmpty()) {
+                extraMarkers.firstOrNull { firstUnmatched -> firstUnmatched.location > markers.last().location }?.let {
+                    logger.info("No next chapter marker, but should not read past: ${it.label}")
+                    filterAfterChapter = it.location
+                }
+            }
+        }
+
+        markers = markers.filter { it.location in filterBeforeChapter until filterAfterChapter }
+
+        val absoluteMarkerEnd = filterAfterChapter
         val relevantSections = mutableListOf<MarkerLocation>()
         for (i in markers.indices) {
             val start = markers[i].location
-            val end = if (i == markers.size - 1) Int.MAX_VALUE else markers[i + 1].location
+            val end = if (i == markers.size - 1) absoluteMarkerEnd else markers[i + 1].location
             relevantSections.add(Pair(markers[i], start..end))
         }
         return relevantSections
@@ -281,6 +335,10 @@ open class BurritoToResourceContainerConverter @Inject constructor(
         fileNamer: BibleFileNamer,
         relevantSections: Map<File, List<MarkerLocation>>
     ): File {
+        logger.info("Constructing chapter audio for chapter: ${chapter} from:")
+        relevantSections.forEach { (name, _) ->
+            logger.info(name.name)
+        }
         val outputFile = File(tempDir, fileNamer.chapterFileName(chapter))
         val wav =
             WavFile(outputFile, DEFAULT_CHANNELS, DEFAULT_SAMPLE_RATE, DEFAULT_BITS_PER_SAMPLE)
@@ -292,11 +350,15 @@ open class BurritoToResourceContainerConverter @Inject constructor(
                     .filter { it.first is VerseMarker }
                     .minOf { (it.first as VerseMarker).start }
             }
+
+        val newMarkers = mutableListOf<AudioMarker>()
+        var pos = 0
         for ((file, markers) in listified) {
             val audio = OratureAudioFile(file)
             for (marker in markers) {
+                newMarkers.add(marker.first.clone(pos / wav.frameSizeInBytes))
+                logger.info("Reading ${marker.second} for ${marker.first.label} from $file...")
                 val (type, timing) = marker
-
                 audio.reader(timing.first, timing.last).use {
                     it.open()
                     while (it.hasRemaining()) {
@@ -304,9 +366,15 @@ open class BurritoToResourceContainerConverter @Inject constructor(
                         wav.writer(true).use {
                             it.write(byteBuffer, 0, read)
                         }
+                        pos += read
                     }
                 }
+                logger.info("Section copied: ${marker.first.label}!")
             }
+        }
+        OratureAudioFile(outputFile).apply {
+            newMarkers.forEach { addMarker(it) }
+            this.update()
         }
         return outputFile
     }
@@ -319,7 +387,8 @@ open class BurritoToResourceContainerConverter @Inject constructor(
         inputAccessor: IContainerAccessor,
     ): List<File> {
         val relevantSections = hashMapOf<File, List<MarkerLocation>>()
-        for (item in ingredients) {
+        val audioIngredients = ingredients.filter { it.second.mimeType in SUPPORTED_AUDIO_MIME }
+        for (item in audioIngredients) {
             val (audioFile, _) = item
             val (timingFile, _) = findMatchingTimingFile(audioFile, ingredients) ?: continue
             val (tempAudio, tempTiming) = extractTempAudioAndTiming(
@@ -327,7 +396,7 @@ open class BurritoToResourceContainerConverter @Inject constructor(
                 timingFile,
                 inputAccessor
             )
-            val audioSections = getRelevantAudioSections(tempAudio, tempTiming)
+            val audioSections = getRelevantAudioSections(chapter, tempAudio, tempTiming)
             relevantSections[tempAudio] = audioSections
         }
         return listOf(
@@ -354,9 +423,14 @@ open class BurritoToResourceContainerConverter @Inject constructor(
             val groupedByChapter = groupAudioIngredientsByChapter(book, ingredients)
             for ((chapter, ingredients) in groupedByChapter) {
                 val fileNamer = BibleFileNamer(burrito.meta.defaultLocale, book, resourceAbbr)
-                val files = when (ingredients.size) {
+                val audioFiles = ingredients.filter { (name, ing) -> File(name).extension in SUPPORTED_AUDIO_FILES }
+                logger.info("Chapter $chapter has ${audioFiles.size} audio files comprising it:")
+                audioFiles.forEach {
+                    logger.info("${it.first}")
+                }
+                val files = when (audioFiles.size) {
                     1 -> handleSingleChapterAudioIngredient(
-                        ingredients[0].first,
+                        audioFiles[0].first,
                         ingredients,
                         inputAccessor
                     )
@@ -381,6 +455,8 @@ open class BurritoToResourceContainerConverter @Inject constructor(
         timing: String,
         inputAccessor: IContainerAccessor
     ): File? {
+        if (File(file).extension !in SUPPORTED_AUDIO_FILES) return null
+
         val tempDir = directoryProvider.tempDirectory
         val audioFile = File(tempDir, File(file).name)
         val timingFile = File(tempDir, File(timing).name)

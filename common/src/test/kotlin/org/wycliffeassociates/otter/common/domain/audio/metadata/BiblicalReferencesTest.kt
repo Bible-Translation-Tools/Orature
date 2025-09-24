@@ -31,7 +31,7 @@ class BiblicalReferencesTest {
     fun testReferenceToMarker() {
         biblicalReferences.forEach { (reference, _, marker, _) ->
             Assert.assertEquals(
-                BiblicalReferencesParser.parseBiblicalReference(reference),
+                BiblicalReferencesParser.parseToMarkerLabel(reference),
                 marker
             )
         }
