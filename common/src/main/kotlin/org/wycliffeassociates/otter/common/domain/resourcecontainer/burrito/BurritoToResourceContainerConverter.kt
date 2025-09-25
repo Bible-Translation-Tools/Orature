@@ -457,15 +457,19 @@ open class BurritoToResourceContainerConverter @Inject constructor(
     ): File? {
         if (File(file).extension !in SUPPORTED_AUDIO_FILES) return null
 
-        val tempDir = directoryProvider.tempDirectory
         val audioFile = File(tempDir, File(file).name)
         val timingFile = File(tempDir, File(timing).name)
 
-        audioFile.outputStream().use { output ->
-            inputAccessor.getInputStream(file).transferTo(output)
+        inputAccessor.getInputStream(file).use { ifs ->
+            audioFile.outputStream().use { ofs ->
+                ifs.transferTo(ofs)
+            }
         }
-        timingFile.outputStream().use { output ->
-            inputAccessor.getInputStream(timing).transferTo(output)
+
+        inputAccessor.getInputStream(timing).use { ifs ->
+            timingFile.outputStream().use { ofs ->
+                ifs.transferTo(ofs)
+            }
         }
 
         val audio = OratureAudioFile(audioFile)
@@ -484,17 +488,18 @@ open class BurritoToResourceContainerConverter @Inject constructor(
             }
         }
 
-        if (audio.file.extension == "mp3") {
-            val cueFile = MP3FileReader(audioFile).metadata.cueFile
-
+        if (audio.file.extension == "mp3") { // For Mp3, copy a corresponding cue file out if it exists
             val cuePath = file.replace("mp3", "cue")
+            val cueFile = File(File(cuePath).name)
 
-            File(tempDir, cuePath).outputStream().use { output ->
-                cueFile.inputStream().use { input ->
-                    input.transferTo(output)
+            if (inputAccessor.fileExists(cuePath)) {
+                File(tempDir, cuePath).outputStream().use { output ->
+                    cueFile.inputStream().use { input ->
+                        input.transferTo(output)
+                    }
                 }
+                return cueFile
             }
-            return cueFile
         }
         return null
     }
