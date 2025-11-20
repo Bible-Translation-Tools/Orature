@@ -229,7 +229,7 @@ dependencies {
     // Sentry
     implementation "io.sentry:sentry:$sentryVer"
 
-    implementation "com.github.Dansoftowner:jSystemThemeDetector:$systemThemeDectectorVer"
+    implementation "org.openani.jsystemthemedetector:jSystemThemeDetector:$systemThemeDectectorVer"
     implementation "com.install4j:install4j-runtime:$install4jVer"
 
     implementation "com.mpatric:mp3agic:$mp3TagVer"

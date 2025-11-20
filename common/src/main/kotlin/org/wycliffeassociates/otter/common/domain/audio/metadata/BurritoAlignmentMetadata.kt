@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.common.domain.audio.metadata
 
-import org.bibletranslationtools.kotlinscripturealignment.BurritoAudioAlignment
+import org.bibletranslationtools.kotlinscripturealignment.model.BurritoAudioAlignment
 import org.bibletranslationtools.vtt.Cue
 import org.bibletranslationtools.vtt.WebVttCue
 import org.bibletranslationtools.vtt.WebVttDocument
@@ -38,7 +38,7 @@ class BurritoAlignmentMetadata(
     }
 
     internal fun parseTimings(timings: BurritoAudioAlignment): OratureMarkers {
-        var references = timings.getVttCues()
+        var references = timings.getVttCues(audioFile.name)
 
         chapterToFilter?.let {
             references = references.filter {
@@ -138,7 +138,7 @@ class BurritoAlignmentMetadata(
 
         assignEndTimes(vttCues, audioLengthInFrames)
 
-        alignment.setRecordsFromVttCueContent(vttCues)
+        alignment.setRecordsFromVttCueContent(audioFile.name, vttCues)
         alignment.update()
     }
 

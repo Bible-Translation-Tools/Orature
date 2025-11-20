@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import org.bibletranslationtools.kotlinscripturealignment.BurritoAudioAlignment
+import org.bibletranslationtools.kotlinscripturealignment.model.BurritoAudioAlignment
 import org.bibletranslationtools.scriptureburrito.Checksum
 import org.bibletranslationtools.scriptureburrito.CopyrightSchema
 import org.bibletranslationtools.scriptureburrito.Flavor

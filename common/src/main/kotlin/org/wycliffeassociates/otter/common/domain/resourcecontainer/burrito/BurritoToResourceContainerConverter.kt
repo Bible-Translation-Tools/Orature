@@ -1,7 +1,9 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito
 
+import org.bibletranslationtools.kotlinscripturealignment.model.BurritoAudioAlignment
 import org.bibletranslationtools.scriptureburrito.IngredientSchema
 import org.bibletranslationtools.scriptureburrito.MetadataSchema
+import org.bibletranslationtools.scriptureburrito.Role
 import org.bibletranslationtools.scriptureburrito.container.BurritoContainer
 import org.bibletranslationtools.scriptureburrito.container.accessors.IContainerAccessor
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.AudioFlavorSchema
@@ -122,7 +124,7 @@ open class BurritoToResourceContainerConverter @Inject constructor(
         outputAccessor: IResourceContainerAccessor
     ): Pair<List<Project>, MediaManifest> {
         val ingredientsByBook = getIngredientsByBook(burrito)
-        val usfmFilesByBook = getUSFMIngredients(ingredientsByBook)
+        var usfmFilesByBook = getUSFMIngredients(ingredientsByBook)
         val chapterAudioByBook = createChapterAudioIngredients(
             burrito,
             ingredientsByBook,
@@ -131,14 +133,14 @@ open class BurritoToResourceContainerConverter @Inject constructor(
 
         val versification = getVersification(burrito, usfmFilesByBook, chapterAudioByBook)
 
-        moveUSFMFiles(usfmFilesByBook, inputAccessor, outputAccessor)
+        usfmFilesByBook = moveUSFMFiles(usfmFilesByBook, inputAccessor, outputAccessor)
         moveAudioFiles(burrito, chapterAudioByBook, outputAccessor)
 
         val mediaManifest = createMediaManifest(burrito, chapterAudioByBook)
         val projects = createProjects(
             burrito,
             versification,
-            ingredientsByBook.keys,
+            ingredientsByBook.keys.filter { it in usfmFilesByBook.keys },
             usfmFilenamePattern
         )
 
@@ -215,7 +217,7 @@ open class BurritoToResourceContainerConverter @Inject constructor(
         inputAccessor: IContainerAccessor
     ): List<File> {
         val filesToCopy = mutableListOf<File>()
-        val timing = findMatchingTimingFile(audioFile, ingredients)
+        val timing = findMatchingTimingFile(audioFile, ingredients, inputAccessor)
         timing?.let {
             convertBurritoTimingToOratureTiming(
                 audioFile,
@@ -363,6 +365,10 @@ open class BurritoToResourceContainerConverter @Inject constructor(
                     it.open()
                     while (it.hasRemaining()) {
                         val read = it.getPcmBuffer(byteBuffer)
+                        if (read < 0 ) {
+                            println("ERROR: read is negative, ${file.name}, ${timing}")
+                            println("Position is at: ${it.framePosition}")
+                        }
                         wav.writer(true).use {
                             it.write(byteBuffer, 0, read)
                         }
@@ -390,7 +396,7 @@ open class BurritoToResourceContainerConverter @Inject constructor(
         val audioIngredients = ingredients.filter { it.second.mimeType in SUPPORTED_AUDIO_MIME }
         for (item in audioIngredients) {
             val (audioFile, _) = item
-            val (timingFile, _) = findMatchingTimingFile(audioFile, ingredients) ?: continue
+            val (timingFile, _) = findMatchingTimingFile(audioFile, ingredients, inputAccessor) ?: continue
             val (tempAudio, tempTiming) = extractTempAudioAndTiming(
                 audioFile,
                 timingFile,
@@ -508,23 +514,35 @@ open class BurritoToResourceContainerConverter @Inject constructor(
         usfmFilesByBook: IngredientsByBook,
         inputAccessor: IContainerAccessor,
         outputAccessor: IResourceContainerAccessor
-    ) {
+    ): IngredientsByBook {
+        val newIngredientsByBook = hashMapOf<String, List<Pair<String, IngredientSchema>>>()
         for ((book, usfmFiles) in usfmFilesByBook) {
             if (usfmFiles.isEmpty()) continue
             val bookIndex = books.indexOf(book.lowercase(Locale.US))
             // NT starts at 41
             val bookNumber = if (bookIndex <= ot.size) bookIndex + 1 else bookIndex + 2
             val (usfmFile, ingredient) = usfmFiles.first()
+            val newPath = "$bookNumber-${book.uppercase(Locale.US)}.usfm"
             if (inputAccessor.fileExists(usfmFile)) {
-                val newPath = "$bookNumber-${book.uppercase(Locale.US)}.usfm"
                 inputAccessor.getInputStream(usfmFile).use { ifs ->
                     outputAccessor.write(newPath) {
                         ifs.transferTo(it)
                     }
                 }
+                newIngredientsByBook.put(book, usfmFiles)
             }
         }
+        return newIngredientsByBook
     }
+
+    internal fun createEmptyUsfmTemplate(bookNumber: Int, bookCode: String): String {
+        return """
+            \id ${bookCode.uppercase(Locale.US)}
+            \c 1
+            \p
+        """.trimIndent()
+    }
+
 
     internal fun moveAudioFiles(
         burrito: MetadataSchema,
@@ -568,6 +586,8 @@ internal fun dublinCoreFromBurrito(burrito: MetadataSchema): DublinCore {
         format = "text/usfm",
         identifier = identifier,
         title = title,
+        creator = getCreatorFromBurrito(burrito),
+        version = getVersionFromBurrito(burrito),
         description = getDescriptionFromBurrito(burrito),
         language = getLanguageFromBurrito(burrito),
         rights = getCopyrightFromBurrito(burrito),
@@ -586,6 +606,32 @@ internal fun getCreationDateFromBurrito(burrito: MetadataSchema): String {
         .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         .toString()
 }
+
+internal fun getCreatorFromBurrito(burrito: MetadataSchema): String {
+    val defaultLocale = burrito.meta.defaultLocale
+    val rightsHolder = burrito.agencies.find { it.roles.contains(Role.RIGHTS_HOLDER) }?.name?.short?.getOrDefault(defaultLocale, "")
+    return if (!rightsHolder.isNullOrEmpty()) {
+        rightsHolder
+    } else {
+        "unknown"
+    }
+}
+
+internal fun getVersionFromBurrito(burrito: MetadataSchema): String {
+    try {
+        val version =
+            burrito.identification?.primary?.entries?.first()?.value?.get("revision")?.toString()
+
+        return if (!version.isNullOrEmpty()) {
+            version
+        } else {
+            "latest"
+        }
+    } catch (e: Exception) {
+        return "latest"
+    }
+}
+
 
 internal fun getDescriptionFromBurrito(burrito: MetadataSchema): String {
     val langSlug = burrito.meta.defaultLocale
@@ -637,14 +683,34 @@ internal fun getMarkersFromBurritoTimining(
 
 internal fun findMatchingTimingFile(
     audioFile: String,
-    ingredients: List<Pair<String, IngredientSchema>>
+    ingredients: List<Pair<String, IngredientSchema>>,
+    inputAccessor: IContainerAccessor
 ): Pair<String, IngredientSchema>? {
-    return ingredients.find { (name, ingredient) ->
+    // Begin looking for a timing file that matches the name exactly
+    val matchedNameTiming = ingredients.find { (name, ingredient) ->
         val audioName = File(audioFile).nameWithoutExtension
         val timingName = File(name).nameWithoutExtension
 
         File(name).extension == "json" && audioName == timingName
     }
+
+    if (matchedNameTiming != null) {
+        return matchedNameTiming
+    }
+
+    // Exact match is not found so look for a timing file with the docid matching the audio file name
+    for ((path, schema) in ingredients) {
+        if (File(path).extension != "json") continue
+        if (schema.role != "timing") continue
+
+        inputAccessor.getInputStream(path).use {
+            val timingFile = it.reader().readText()
+            val timing = BurritoAudioAlignment.load(timingFile)
+            if (timing.getAllDocids().contains(File(audioFile).name)) return Pair(path, schema)
+        }
+    }
+
+    return null
 }
 
 internal fun filterAcceptedAudioFormats(
