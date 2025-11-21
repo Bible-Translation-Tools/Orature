@@ -16,11 +16,9 @@ import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
 import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
 import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
-import org.wycliffeassociates.otter.common.audio.mp3.MP3FileReader
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
-import org.wycliffeassociates.otter.common.data.audio.MarkerType
 import org.wycliffeassociates.otter.common.data.audio.OratureCueType
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
@@ -64,8 +62,10 @@ private val SUPPORTED_AUDIO_FILES = setOf("mp3", "wav")
 internal val ot = books.slice(0 until 40)
 internal val nt = books.slice(40 until 66)
 
-internal fun getBookSort(bookSlug: String): Int {
-    return books.indexOf(bookSlug) + 1
+private fun mapBookNumberToUfwBookNumber(bookIndex: Int): Int = if (bookIndex <= ot.size) bookIndex + 1 else bookIndex + 2
+
+internal fun getBookNumber(bookSlug: String): Int {
+    return mapBookNumberToUfwBookNumber(books.indexOf(bookSlug))
 }
 
 internal fun getTestament(bookSlug: String): String {
@@ -520,7 +520,7 @@ open class BurritoToResourceContainerConverter @Inject constructor(
             if (usfmFiles.isEmpty()) continue
             val bookIndex = books.indexOf(book.lowercase(Locale.US))
             // NT starts at 41
-            val bookNumber = if (bookIndex <= ot.size) bookIndex + 1 else bookIndex + 2
+            val bookNumber = mapBookNumberToUfwBookNumber(bookIndex)
             val (usfmFile, ingredient) = usfmFiles.first()
             val newPath = "$bookNumber-${book.uppercase(Locale.US)}.usfm"
             if (inputAccessor.fileExists(usfmFile)) {
@@ -555,7 +555,7 @@ open class BurritoToResourceContainerConverter @Inject constructor(
             if (filesByChapter.isEmpty()) continue
             val bookIndex = books.indexOf(book.lowercase(Locale.US))
             // NT starts at 41
-            val bookNumber = if (bookIndex <= ot.size) bookIndex + 1 else bookIndex + 2
+            val bookNumber = mapBookNumberToUfwBookNumber((bookIndex))
             for ((chapter, audioFiles) in filesByChapter) {
                 for (af in audioFiles) {
                     //val (audioFile, ingredient) = af
@@ -655,7 +655,7 @@ internal fun getTitleFromBurrito(burrito: MetadataSchema): Pair<String, String> 
 
 internal fun getLanguageFromBurrito(burrito: MetadataSchema): Language {
     val slug = burrito.meta.defaultLocale
-    val lang = burrito.languages.first { it.tag == slug }
+    val lang = burrito.languages.first()
     val direction = lang.scriptDirection?.value() ?: ""
     return Language(
         direction,
@@ -825,13 +825,13 @@ internal fun createProjects(
 ): List<Project> {
     return bookSlugs.map { slug ->
         val usfmFile = filenamePattern
-            .replace("{booknum}", "${getBookSort(slug)}")
+            .replace("{booknum}", "${getBookNumber(slug)}")
             .replace("{book}", slug.uppercase(Locale.US))
         Project(
             title = getBookTitle(burrito, slug),
             versification = versification,
             identifier = slug,
-            sort = getBookSort(slug),
+            sort = getBookNumber(slug),
             path = usfmFile,
             categories = listOf(getTestament(slug))
         )
