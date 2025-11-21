@@ -1,5 +1,7 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.bibletranslationtools.kotlinscripturealignment.model.BurritoAudioAlignment
 import org.bibletranslationtools.scriptureburrito.IngredientSchema
 import org.bibletranslationtools.scriptureburrito.MetadataSchema
@@ -24,7 +26,10 @@ import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.audio.metadata.BurritoAlignmentMetadata
 import org.wycliffeassociates.otter.common.domain.content.BibleFileNamer
+import org.wycliffeassociates.otter.common.domain.versification.ParatextVersification
+import org.wycliffeassociates.otter.common.domain.versification.Versification
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 import org.wycliffeassociates.resourcecontainer.IResourceContainerAccessor
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Checking
@@ -81,7 +86,8 @@ private val filenamePattern = "{language}_{title}_{book}_c{chapter}.{extension}"
 private val DEFAULT_TITLE_CODE = "reg"
 
 open class BurritoToResourceContainerConverter @Inject constructor(
-    val directoryProvider: IDirectoryProvider
+    val directoryProvider: IDirectoryProvider,
+    val versificationRepository: IVersificationRepository
 ) {
 
     private val logger = LoggerFactory.getLogger(BurritoToResourceContainerConverter::class.java)
@@ -131,7 +137,14 @@ open class BurritoToResourceContainerConverter @Inject constructor(
             inputAccessor
         )
 
+        val versificationSchema = getVersificationSchema(burrito, inputAccessor)
         val versification = getVersification(burrito, usfmFilesByBook, chapterAudioByBook)
+
+        usfmFilesByBook = generateMissingUsfmFiles(
+            usfmFilesByBook,
+            ingredientsByBook.keys,
+            versificationSchema
+        )
 
         usfmFilesByBook = moveUSFMFiles(usfmFilesByBook, inputAccessor, outputAccessor)
         moveAudioFiles(burrito, chapterAudioByBook, outputAccessor)
@@ -523,7 +536,15 @@ open class BurritoToResourceContainerConverter @Inject constructor(
             val bookNumber = mapBookNumberToUfwBookNumber(bookIndex)
             val (usfmFile, ingredient) = usfmFiles.first()
             val newPath = "$bookNumber-${book.uppercase(Locale.US)}.usfm"
-            if (inputAccessor.fileExists(usfmFile)) {
+            val file = File(usfmFile)
+            if (file.isAbsolute && file.exists()) {
+                file.inputStream().use { ifs ->
+                    outputAccessor.write(newPath) {
+                        ifs.transferTo(it)
+                    }
+                }
+                newIngredientsByBook.put(book, usfmFiles)
+            } else if (inputAccessor.fileExists(usfmFile)) {
                 inputAccessor.getInputStream(usfmFile).use { ifs ->
                     outputAccessor.write(newPath) {
                         ifs.transferTo(it)
@@ -573,6 +594,68 @@ open class BurritoToResourceContainerConverter @Inject constructor(
                 }
             }
         }
+    }
+    internal fun getVersificationSchema(
+        burrito: MetadataSchema,
+        inputAccessor: IContainerAccessor
+    ): Versification? {
+        val versificationIngredient = burrito.ingredients.entries.find { (_, ingredient) ->
+            ingredient.role == "versification" && ingredient.mimeType == "application/json"
+        }
+
+        return if (versificationIngredient != null) {
+            try {
+                inputAccessor.getInputStream(versificationIngredient.key).use { stream ->
+                    val mapper = ObjectMapper().registerKotlinModule()
+                    mapper.readValue(stream, ParatextVersification::class.java)
+                }
+            } catch (e: Exception) {
+                logger.error("Failed to parse versification file from burrito", e)
+                null
+            }
+        } else {
+            versificationRepository.getVersification("ulb").blockingGet()
+        }
+    }
+
+    internal fun generateMissingUsfmFiles(
+        usfmFilesByBook: IngredientsByBook,
+        booksInScope: Set<String>,
+        versification: Versification?
+    ): IngredientsByBook {
+        if (versification == null) return usfmFilesByBook
+        val updatedUsfmFiles = usfmFilesByBook.toMutableMap()
+
+        booksInScope.forEach { bookSlug ->
+            if (!updatedUsfmFiles.containsKey(bookSlug) || updatedUsfmFiles[bookSlug]!!.isEmpty()) {
+                val usfmContent = generateUsfmContent(bookSlug, versification)
+                val tempFile = File(tempDir, "$bookSlug.usfm")
+                tempFile.writeText(usfmContent)
+                
+                // Create a dummy ingredient schema for the generated file
+                val ingredientSchema = IngredientSchema()
+                ingredientSchema.mimeType = "text/usfm"
+                
+                updatedUsfmFiles[bookSlug] = listOf(Pair(tempFile.absolutePath, ingredientSchema))
+            }
+        }
+        return updatedUsfmFiles
+    }
+
+    internal fun generateUsfmContent(bookSlug: String, versification: Versification): String {
+        val sb = StringBuilder()
+        sb.append("\\id ${bookSlug.uppercase(Locale.US)}\n")
+        
+        val chapterCount = versification.getChaptersInBook(bookSlug)
+        for (chapter in 1..chapterCount) {
+            sb.append("\\c $chapter\n")
+            sb.append("\\p\n")
+            val verseCount = versification.getVersesInChapter(bookSlug, chapter)
+            for (verse in 1..verseCount) {
+                sb.append("\\v $verse \n")
+            }
+        }
+        return sb.toString()
     }
 }
 

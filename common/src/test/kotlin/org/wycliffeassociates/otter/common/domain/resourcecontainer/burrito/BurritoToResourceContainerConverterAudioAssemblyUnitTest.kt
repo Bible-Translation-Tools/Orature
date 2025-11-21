@@ -18,7 +18,7 @@ import java.nio.ByteOrder
 
 class BurritoToResourceContainerConverterAudioAssemblyUnitTest {
 
-    private class TestableConverter(directoryProvider: IDirectoryProvider) : BurritoToResourceContainerConverter(directoryProvider) {
+    private class TestableConverter(directoryProvider: IDirectoryProvider) : BurritoToResourceContainerConverter(directoryProvider, mockk()) {
         fun assemble(chapter: Int, namer: BibleFileNamer, sections: Map<File, List<MarkerLocation>>): File {
             return constructChapterAudio(chapter, namer, sections)
         }

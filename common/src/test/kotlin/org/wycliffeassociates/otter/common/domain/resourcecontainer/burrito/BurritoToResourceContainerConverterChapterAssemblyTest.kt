@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito
 
 import io.mockk.every
 import io.mockk.mockk
-import org.bibletranslationtools.kotlinscripturealignment.BurritoAudioAlignment
+import org.bibletranslationtools.kotlinscripturealignment.model.BurritoAudioAlignment
 import org.bibletranslationtools.scriptureburrito.IngredientSchema
 import org.bibletranslationtools.scriptureburrito.IngredientsSchema
 import org.bibletranslationtools.scriptureburrito.MetadataSchema
@@ -25,6 +25,7 @@ import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 import java.io.File
 import java.io.FileInputStream
 import java.nio.ByteBuffer
@@ -84,7 +85,7 @@ class BurritoToResourceContainerConverterChapterAssemblyTest {
     fun testAssembleChapterAudioFromMultipleIngredients() {
         val baseDir = File(createTempDir(), "burrito_audio_test").apply { mkdirs() }
         val dirProvider = tempDirectoryProvider(baseDir)
-        val converter = BurritoToResourceContainerConverter(dirProvider)
+        val converter = BurritoToResourceContainerConverter(dirProvider, mockk())
 
         // Create predictable WAVs and matching alignment JSONs
         val gen1Wav = File(baseDir, "gen_1.wav")

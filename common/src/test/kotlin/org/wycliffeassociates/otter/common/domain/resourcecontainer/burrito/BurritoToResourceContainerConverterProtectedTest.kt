@@ -12,7 +12,7 @@ import java.io.File
 class BurritoToResourceContainerConverterProtectedTest {
 
     private class TestableConverter(directoryProvider: IDirectoryProvider) :
-        BurritoToResourceContainerConverter(directoryProvider) {
+        BurritoToResourceContainerConverter(directoryProvider, mockk()) {
         fun callGroupAudioIngredientsByChapter(
             book: String,
             ingredients: List<Pair<String, IngredientSchema>>
