@@ -140,11 +140,7 @@ open class BurritoToResourceContainerConverter @Inject constructor(
         val versificationSchema = getVersificationSchema(burrito, inputAccessor)
         val versification = getVersification(burrito, usfmFilesByBook, chapterAudioByBook)
 
-        usfmFilesByBook = generateMissingUsfmFiles(
-            usfmFilesByBook,
-            ingredientsByBook.keys,
-            versificationSchema
-        )
+
 
         usfmFilesByBook = moveUSFMFiles(usfmFilesByBook, inputAccessor, outputAccessor)
         moveAudioFiles(burrito, chapterAudioByBook, outputAccessor)
@@ -618,45 +614,8 @@ open class BurritoToResourceContainerConverter @Inject constructor(
         }
     }
 
-    internal fun generateMissingUsfmFiles(
-        usfmFilesByBook: IngredientsByBook,
-        booksInScope: Set<String>,
-        versification: Versification?
-    ): IngredientsByBook {
-        if (versification == null) return usfmFilesByBook
-        val updatedUsfmFiles = usfmFilesByBook.toMutableMap()
 
-        booksInScope.forEach { bookSlug ->
-            if (!updatedUsfmFiles.containsKey(bookSlug) || updatedUsfmFiles[bookSlug]!!.isEmpty()) {
-                val usfmContent = generateUsfmContent(bookSlug, versification)
-                val tempFile = File(tempDir, "$bookSlug.usfm")
-                tempFile.writeText(usfmContent)
-                
-                // Create a dummy ingredient schema for the generated file
-                val ingredientSchema = IngredientSchema()
-                ingredientSchema.mimeType = "text/usfm"
-                
-                updatedUsfmFiles[bookSlug] = listOf(Pair(tempFile.absolutePath, ingredientSchema))
-            }
-        }
-        return updatedUsfmFiles
-    }
 
-    internal fun generateUsfmContent(bookSlug: String, versification: Versification): String {
-        val sb = StringBuilder()
-        sb.append("\\id ${bookSlug.uppercase(Locale.US)}\n")
-        
-        val chapterCount = versification.getChaptersInBook(bookSlug)
-        for (chapter in 1..chapterCount) {
-            sb.append("\\c $chapter\n")
-            sb.append("\\p\n")
-            val verseCount = versification.getVersesInChapter(bookSlug, chapter)
-            for (verse in 1..verseCount) {
-                sb.append("\\v $verse \n")
-            }
-        }
-        return sb.toString()
-    }
 }
 
 typealias MarkerLocation = Pair<AudioMarker, IntRange>
