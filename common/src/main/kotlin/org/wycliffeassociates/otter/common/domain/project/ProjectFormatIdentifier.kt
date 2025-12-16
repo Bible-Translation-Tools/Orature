@@ -19,15 +19,19 @@
 package org.wycliffeassociates.otter.common.domain.project
 
 import org.bibletranslationtools.scriptureburrito.container.BurritoContainer
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito.BurritoToResourceContainerConverter
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.tstudio2rc.Tstudio2RcConverter
 import java.io.File
 import java.lang.Exception
 import java.lang.IllegalArgumentException
+import java.util.logging.Logger
 import kotlin.jvm.Throws
 
 object ProjectFormatIdentifier {
+
+    private val logger = LoggerFactory.getLogger(ProjectFormatIdentifier::class.java)
 
     private val projectFormatIdentifier: IFormatIdentifier
         get() {
@@ -71,6 +75,7 @@ object ProjectFormatIdentifier {
                 ResourceContainer.load(file).close()
                 ProjectFormat.RESOURCE_CONTAINER
             } catch (e: Exception) {
+                logger.info("${file.name} is not a valid Resource Container: ", e)
                 next?.getFormat(file)
             }
         }
@@ -96,6 +101,7 @@ object ProjectFormatIdentifier {
                 BurritoContainer.load(file).close()
                 ProjectFormat.SCRIPTURE_BURRITO
             } catch (e: Exception) {
+                logger.info("${file.name} is not a valid Scripture Burrito: ", e)
                 next?.getFormat(file)
             }
         }
