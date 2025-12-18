@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.bibletranslationtools.kotlinscripturealignment.model.BurritoAudioAlignment
@@ -9,10 +10,12 @@ import org.bibletranslationtools.scriptureburrito.MetadataSchema
 import org.bibletranslationtools.scriptureburrito.Role
 import org.bibletranslationtools.scriptureburrito.container.BurritoContainer
 import org.bibletranslationtools.scriptureburrito.container.accessors.IContainerAccessor
+import org.bibletranslationtools.scriptureburrito.flavor.scripture.ScriptureFlavorSchema
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.AudioFlavorSchema
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.AudioFormat
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Compression
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.TrackConfiguration
+import org.bibletranslationtools.scriptureburrito.flavor.scripture.text.TextTranslationSchema
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
@@ -46,6 +49,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
+import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import javax.inject.Inject
 import kotlin.collections.HashMap
@@ -86,9 +90,18 @@ private val usfmFilenamePattern = "./{booknum}-{book}.usfm"
 private val filenamePattern = "{language}_{title}_{book}_c{chapter}.{extension}"
 private val DEFAULT_TITLE_CODE = "reg"
 
+interface IBurritoLoader {
+    fun load(file: File): BurritoContainer
+}
+
+class BurritoLoader : IBurritoLoader {
+    override fun load(file: File): BurritoContainer = BurritoContainer.load(file)
+}
+
 open class BurritoToResourceContainerConverter @Inject constructor(
     val directoryProvider: IDirectoryProvider,
-    val versificationRepository: IVersificationRepository
+    val versificationRepository: IVersificationRepository,
+    private val burritoLoader: IBurritoLoader = BurritoLoader()
 ) {
 
     private val logger = LoggerFactory.getLogger(BurritoToResourceContainerConverter::class.java)
@@ -106,24 +119,33 @@ open class BurritoToResourceContainerConverter @Inject constructor(
             .use { ZipOutputStream(it).use { } }
 
         // Check format
-        val objectMapper = ObjectMapper().registerKotlinModule()
-        try {
-            val tree = objectMapper.readTree(burrito)
-            if (tree.has("format") && tree.get("format").asText() == "scripture burrito wrapper") {
-                val wrapper = objectMapper.treeToValue(tree, ScriptureBurritoWrapper::class.java)
-                return processWrapper(wrapper, burrito.parentFile, outputFile)
+        val metadataNode = peekMetadata(burrito)
+        if (metadataNode != null && metadataNode.get("format")?.asText() == "scripture burrito wrapper") {
+            try {
+                val workingDir: File = when {
+                    burrito.isDirectory -> burrito
+                    burrito.extension.lowercase() == "zip" || burrito.name.endsWith(".burrito") -> {
+                        extractZip(burrito, tempDir)
+                        tempDir
+                    }
+                    else -> burrito.parentFile
+                }
+                val objectMapper = ObjectMapper().registerKotlinModule()
+                val wrapper = objectMapper.treeToValue(metadataNode, ScriptureBurritoWrapper::class.java)
+                return processWrapper(wrapper, workingDir, outputFile)
+            } catch (e: Exception) {
+                logger.error("Failed to process burrito wrapper", e)
             }
-        } catch (e: Exception) {
-            // Not a JSON file or not a wrapper, proceed as normal burrito
         }
 
-        val burrito = BurritoContainer.load(burrito)
-        burrito.use {
+        // Standard load
+        val loadedBurrito = burritoLoader.load(burrito)
+        loadedBurrito.use {
             val metadata = it.manifest
             ResourceContainer.create(outputFile) {
                 val (projects, media) = processContentInBurrito(
                     metadata,
-                    burrito.accessor,
+                    it.accessor,
                     this.accessor
                 )
                 this.manifest = Manifest(
@@ -136,6 +158,71 @@ open class BurritoToResourceContainerConverter @Inject constructor(
             }
         }
         return true
+    }
+
+    private fun peekMetadata(file: File): JsonNode? {
+        val objectMapper = ObjectMapper().registerKotlinModule()
+        return try {
+            when {
+                file.isDirectory -> {
+                    val metadata = File(file, "metadata.json")
+                    if (metadata.exists()) {
+                        val tree = objectMapper.readTree(metadata)
+                        System.err.println("DEBUG PEEK: Directory metadata found. Format: ${tree.get("format")?.asText()}")
+                        tree
+                    } else {
+                        System.err.println("DEBUG PEEK: Directory metadata NOT found at ${metadata.absolutePath}")
+                        null
+                    }
+                }
+                file.isFile && (file.extension.lowercase() == "zip" || file.name.endsWith(".burrito")) -> {
+                    ZipFile(file).use { zip ->
+                        zip.getEntry("metadata.json")?.let { entry ->
+                            zip.getInputStream(entry).use { inputStream ->
+                                val tree = objectMapper.readTree(inputStream)
+                                System.err.println("DEBUG PEEK: ZIP metadata found. Format: ${tree.get("format")?.asText()}")
+                                tree
+                            }
+                        } ?: run {
+                            System.err.println("DEBUG PEEK: ZIP metadata.json NOT found")
+                            null
+                        }
+                    }
+                }
+                file.isFile -> {
+                    val tree = objectMapper.readTree(file)
+                    System.err.println("DEBUG PEEK: Single file metadata. Format: ${tree.get("format")?.asText()}")
+                    tree
+                }
+                else -> {
+                    System.err.println("DEBUG PEEK: Unknown file type: ${file.absolutePath}")
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            System.err.println("DEBUG PEEK ERROR: ${e.message}")
+            e.printStackTrace()
+            null
+        }
+    }
+
+    private fun extractZip(zipFile: File, outputDir: File) {
+        outputDir.mkdirs()
+        ZipFile(zipFile).use { zip ->
+            zip.entries().asSequence().forEach { entry ->
+                val outFile = File(outputDir, entry.name)
+                if (entry.isDirectory) {
+                    outFile.mkdirs()
+                } else {
+                    outFile.parentFile.mkdirs()
+                    zip.getInputStream(entry).use { input ->
+                        outFile.outputStream().use { output ->
+                            input.copyTo(output)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun processWrapper(
@@ -166,11 +253,11 @@ open class BurritoToResourceContainerConverter @Inject constructor(
                 // The prompt example gives explicit paths "audio" and "text".
                 // Let's load them to be sure of what they are.
                 try {
-                    val container = BurritoContainer.load(f)
-                    val flavor = container.manifest.type?.flavorType?.name?.name
-                    if (flavor == "audioTranslation") {
+                    val container = burritoLoader.load(f)
+                    val flavor = container.manifest.type?.flavorType?.flavor
+                    if (flavor is AudioFlavorSchema) {
                         audioBurritoFile = f
-                    } else if (flavor == "scripture") {
+                    } else if (flavor is TextTranslationSchema || flavor is ScriptureFlavorSchema) {
                         textBurritoFile = f
                     }
                     container.close()
@@ -185,8 +272,8 @@ open class BurritoToResourceContainerConverter @Inject constructor(
             return false
         }
 
-        val audioContainer = BurritoContainer.load(audioBurritoFile)
-        val textContainer = BurritoContainer.load(textBurritoFile)
+        val audioContainer = burritoLoader.load(audioBurritoFile)
+        val textContainer = burritoLoader.load(textBurritoFile)
 
         try {
             ResourceContainer.create(outputFile) {
@@ -928,15 +1015,19 @@ internal fun filterAcceptedAudioFormats(
             val supported = format.compression in arrayOf(Compression.WAV, Compression.MP3)
             val validMp3 = validateMp3Format(format)
             val validWav = validateWavFormat(format)
-            (supported && (validMp3 || validWav))
+            val result = (supported && (validMp3 || validWav))
+
+            result
         }
     val approvedMimeType = approved.map { (name, format) ->
+
         when (format.compression) {
             Compression.MP3 -> "audio/mpeg"
             Compression.WAV -> "audio/wav"
             else -> throw Exception("Audio format ${format} not filtered out.")
         }
     }
+
 
     val accepted = HashMap<String, List<Pair<String, IngredientSchema>>>()
     ingedientsByBook.forEach { (book, ingredients) ->
