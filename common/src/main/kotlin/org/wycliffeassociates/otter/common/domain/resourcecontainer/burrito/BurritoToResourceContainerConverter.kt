@@ -999,6 +999,7 @@ internal fun findMatchingTimingFile(
             val timingFile = it.reader().readText()
             val timing = BurritoAudioAlignment.load(timingFile)
             if (timing.getAllDocids().contains(File(audioFile).name)) return Pair(path, schema)
+            if (timing.getAllDocids().contains(audioFile)) return Pair(path, schema)
         }
     }
 
