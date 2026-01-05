@@ -526,18 +526,23 @@ open class BurritoToResourceContainerConverter @Inject constructor(
     protected fun getRelevantAudioSections(
         chapter: Int,
         audio: File,
+        docid: String,
         timing: File
     ): List<MarkerLocation> {
         val metadata = BurritoAlignmentMetadata(
             timing,
             audio,
             chapter
-        ).parseTimings()
+        ).parseTimings(
+            docid
+        )
 
         val extraMetadata = BurritoAlignmentMetadata(
             timing,
             audio
-        ).parseTimings()
+        ).parseTimings(
+            docid
+        )
 
         var markers = buildList {
             addAll(metadata.getMarkers(OratureCueType.BOOK_TITLE))
@@ -661,7 +666,7 @@ open class BurritoToResourceContainerConverter @Inject constructor(
                 timingFile,
                 inputAccessor
             )
-            val audioSections = getRelevantAudioSections(chapter, tempAudio, tempTiming)
+            val audioSections = getRelevantAudioSections(chapter, tempAudio, audioFile, tempTiming)
             relevantSections[tempAudio] = audioSections
         }
         return listOf(
@@ -740,7 +745,7 @@ open class BurritoToResourceContainerConverter @Inject constructor(
         val audio = OratureAudioFile(audioFile)
         audio.clearMarkers()
 
-        val markers = getMarkersFromBurritoTimining(timingFile, audioFile)
+        val markers = getMarkersFromBurritoTimining(timingFile, File(file))
 
         for (marker in markers) {
             audio.addMarker(marker)
