@@ -32,6 +32,7 @@ import org.wycliffeassociates.otter.common.domain.audio.metadata.BurritoAlignmen
 import org.wycliffeassociates.otter.common.domain.content.BibleFileNamer
 import org.wycliffeassociates.otter.common.domain.versification.ParatextVersification
 import org.wycliffeassociates.otter.common.domain.versification.Versification
+import org.wycliffeassociates.otter.common.io.zip.extractZip
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 import org.wycliffeassociates.resourcecontainer.IResourceContainerAccessor
@@ -160,71 +161,6 @@ open class BurritoToResourceContainerConverter @Inject constructor(
         return true
     }
 
-    private fun peekMetadata(file: File): JsonNode? {
-        val objectMapper = ObjectMapper().registerKotlinModule()
-        return try {
-            when {
-                file.isDirectory -> {
-                    val metadata = File(file, "metadata.json")
-                    if (metadata.exists()) {
-                        val tree = objectMapper.readTree(metadata)
-                        System.err.println("DEBUG PEEK: Directory metadata found. Format: ${tree.get("format")?.asText()}")
-                        tree
-                    } else {
-                        System.err.println("DEBUG PEEK: Directory metadata NOT found at ${metadata.absolutePath}")
-                        null
-                    }
-                }
-                file.isFile && (file.extension.lowercase() == "zip" || file.name.endsWith(".burrito")) -> {
-                    ZipFile(file).use { zip ->
-                        zip.getEntry("metadata.json")?.let { entry ->
-                            zip.getInputStream(entry).use { inputStream ->
-                                val tree = objectMapper.readTree(inputStream)
-                                System.err.println("DEBUG PEEK: ZIP metadata found. Format: ${tree.get("format")?.asText()}")
-                                tree
-                            }
-                        } ?: run {
-                            System.err.println("DEBUG PEEK: ZIP metadata.json NOT found")
-                            null
-                        }
-                    }
-                }
-                file.isFile -> {
-                    val tree = objectMapper.readTree(file)
-                    System.err.println("DEBUG PEEK: Single file metadata. Format: ${tree.get("format")?.asText()}")
-                    tree
-                }
-                else -> {
-                    System.err.println("DEBUG PEEK: Unknown file type: ${file.absolutePath}")
-                    null
-                }
-            }
-        } catch (e: Exception) {
-            System.err.println("DEBUG PEEK ERROR: ${e.message}")
-            e.printStackTrace()
-            null
-        }
-    }
-
-    private fun extractZip(zipFile: File, outputDir: File) {
-        outputDir.mkdirs()
-        ZipFile(zipFile).use { zip ->
-            zip.entries().asSequence().forEach { entry ->
-                val outFile = File(outputDir, entry.name)
-                if (entry.isDirectory) {
-                    outFile.mkdirs()
-                } else {
-                    outFile.parentFile.mkdirs()
-                    zip.getInputStream(entry).use { input ->
-                        outFile.outputStream().use { output ->
-                            input.copyTo(output)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     private fun processWrapper(
         wrapper: ScriptureBurritoWrapper,
         baseDir: File,
@@ -233,23 +169,23 @@ open class BurritoToResourceContainerConverter @Inject constructor(
         val contents = wrapper.contents
         // Assuming 'source' is audio and 'derived' is text, or we can just look for names/roles.
         // The request says: "find the audio burrito and its text source"
-        // Example has roles: "source" (audio) and "derived" (text). 
+        // Example has roles: "source" (audio) and "derived" (text).
         // But let's be more robust if possible.
         // Actually, let's just grab the one with path "audio" as audio and "text" as text if possible,
         // or iterate and check content?
         // The prompt says: "find the audio burrito and its text source."
         // In the example: audio has role "source", text has role "derived".
-        
+
         // Let's try to locate them by iterating the burritos.
         var audioBurritoFile: File? = null
         var textBurritoFile: File? = null
-        
+
         for (b in contents.burritos) {
             val f = File(baseDir, b.path)
             if (f.exists()) {
                 // Heuristic: check if directory name contains audio or text, or load it and check flavor?
                 // Loading is safer but slower.
-                // Let's just trust the paths/ids for now? 
+                // Let's just trust the paths/ids for now?
                 // The prompt example gives explicit paths "audio" and "text".
                 // Let's load them to be sure of what they are.
                 try {
@@ -280,14 +216,14 @@ open class BurritoToResourceContainerConverter @Inject constructor(
                 // We primarily use the audio metadata, but we want text from text container.
                 // Actually prompt says: "The audio burrito is the audio we want... and the usfm files from the text burrito are the usfm files we want"
                 // "Make sure we grab all the localized book names from both of them."
-                
+
                 val audioMetadata = audioContainer.manifest
                 val textMetadata = textContainer.manifest
 
                 // 1. Get USFM ingredients from Text Burrito
                 val textIngredientsByBook = getIngredientsByBook(textMetadata)
                 var usfmFilesByBook = getUSFMIngredients(textIngredientsByBook)
-                
+
                 // 2. Get Audio ingredients from Audio Burrito
                 val audioIngredientsByBook = getIngredientsByBook(audioMetadata)
                 val chapterAudioByBook = createChapterAudioIngredients(
@@ -297,13 +233,13 @@ open class BurritoToResourceContainerConverter @Inject constructor(
                 )
 
                 // 3. Resolve Versification (Try Text first, then Audio)
-                val versificationSchema = getVersificationSchema(textMetadata, textContainer.accessor) 
+                val versificationSchema = getVersificationSchema(textMetadata, textContainer.accessor)
                     ?: getVersificationSchema(audioMetadata, audioContainer.accessor)
-                
+
                 // Note: existing processContentInBurrito calculates 'versification' string (usually "ufw" or "ulb") but getVersificationSchema returns object.
-                // The existing logic for versification *string* seems to be hardcoded to "ufw" in `getVersification` function in this file?? 
+                // The existing logic for versification *string* seems to be hardcoded to "ufw" in `getVersification` function in this file??
                 // Wait, line 847: return "ufw". Yes.
-                val versification = "ufw" 
+                val versification = "ufw"
 
                 // 4. Move Files
                 usfmFilesByBook = moveUSFMFiles(usfmFilesByBook, textContainer.accessor, this.accessor)
@@ -311,24 +247,24 @@ open class BurritoToResourceContainerConverter @Inject constructor(
 
                 // 5. Create Manifests
                 val mediaManifest = createMediaManifest(audioMetadata, chapterAudioByBook)
-                
-                // Merge book names? 
+
+                // Merge book names?
                 // "Make sure we grab all the localized book names from both of them."
                 // createProjects calls `getBookTitle(burrito, slug)`.
                 // We should pass a "Merged Metadata" or handle looking up in both.
-                
+
                 val projects = createMergedProjects(
                     textMetadata,
                     audioMetadata,
                     versification,
                     usfmFilesByBook.keys, // Projects driven by text availability? Or both?
-                    // Usually we want projects for which we have content. 
-                    // If we have USFM, we make a project. 
+                    // Usually we want projects for which we have content.
+                    // If we have USFM, we make a project.
                     usfmFilenamePattern
                 )
 
                 this.manifest = Manifest(
-                    dublinCore = dublinCoreFromBurrito(audioMetadata), // Use Audio as primary metadata source? Or Text? 
+                    dublinCore = dublinCoreFromBurrito(audioMetadata), // Use Audio as primary metadata source? Or Text?
                     // Prompt says "combine... into one". Usually Audio is the 'source' in this context of 'Audio Project Manager'.
                     // Let's use Audio metadata as base.
                     projects = projects,
@@ -341,7 +277,7 @@ open class BurritoToResourceContainerConverter @Inject constructor(
             audioContainer.close()
             textContainer.close()
         }
-        
+
         return true
     }
 
@@ -868,9 +804,52 @@ open class BurritoToResourceContainerConverter @Inject constructor(
             versificationRepository.getVersification("ulb").blockingGet()
         }
     }
+}
 
-
-
+internal fun peekMetadata(file: File): JsonNode? {
+    val objectMapper = ObjectMapper().registerKotlinModule()
+    return try {
+        when {
+            file.isDirectory -> {
+                val metadata = File(file, "metadata.json")
+                if (metadata.exists()) {
+                    val tree = objectMapper.readTree(metadata)
+                    System.err.println("DEBUG PEEK: Directory metadata found. Format: ${tree.get("format")?.asText()}")
+                    tree
+                } else {
+                    System.err.println("DEBUG PEEK: Directory metadata NOT found at ${metadata.absolutePath}")
+                    null
+                }
+            }
+            file.isFile && (file.extension.lowercase() == "zip" || file.name.endsWith(".burrito")) -> {
+                ZipFile(file).use { zip ->
+                    zip.getEntry("metadata.json")?.let { entry ->
+                        zip.getInputStream(entry).use { inputStream ->
+                            val tree = objectMapper.readTree(inputStream)
+                            System.err.println("DEBUG PEEK: ZIP metadata found. Format: ${tree.get("format")?.asText()}")
+                            tree
+                        }
+                    } ?: run {
+                        System.err.println("DEBUG PEEK: ZIP metadata.json NOT found")
+                        null
+                    }
+                }
+            }
+            file.isFile -> {
+                val tree = objectMapper.readTree(file)
+                System.err.println("DEBUG PEEK: Single file metadata. Format: ${tree.get("format")?.asText()}")
+                tree
+            }
+            else -> {
+                System.err.println("DEBUG PEEK: Unknown file type: ${file.absolutePath}")
+                null
+            }
+        }
+    } catch (e: Exception) {
+        System.err.println("DEBUG PEEK ERROR: ${e.message}")
+        e.printStackTrace()
+        null
+    }
 }
 
 typealias MarkerLocation = Pair<AudioMarker, IntRange>
@@ -1183,7 +1162,37 @@ data class ScriptureBurritoWrapper(
     val meta: WrapperMeta,
     val format: String,
     val contents: WrapperContents
-)
+) {
+    companion object {
+        fun load(
+            burrito: File,
+            tempDir: File
+        ): ScriptureBurritoWrapper? {
+            val logger = LoggerFactory.getLogger("ScriptureBurritoWrapper.load")
+            // Check format
+            val metadataNode = peekMetadata(burrito)
+            if (metadataNode != null && metadataNode.get("format")?.asText() == "scripture burrito wrapper") {
+                try {
+                    val workingDir: File = when {
+                        burrito.isDirectory -> burrito
+                        burrito.extension.lowercase() == "zip" || burrito.name.endsWith(".burrito") -> {
+                            extractZip(burrito, tempDir)
+                            tempDir
+                        }
+                        else -> burrito.parentFile
+                    }
+                    val objectMapper = ObjectMapper().registerKotlinModule()
+                    val wrapper = objectMapper.treeToValue(metadataNode, ScriptureBurritoWrapper::class.java)
+                    return wrapper
+                } catch (e: Exception) {
+                    logger.error("Failed to process burrito wrapper", e)
+                }
+            }
+            return null
+        }
+    }
+}
+
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class WrapperMeta(
