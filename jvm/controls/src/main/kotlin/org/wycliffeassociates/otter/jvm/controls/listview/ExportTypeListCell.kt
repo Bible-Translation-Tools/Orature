@@ -35,6 +35,7 @@ class ExportTypeListCell : ListCell<ExportType>() {
         ExportType.LISTEN -> FontIcon(MaterialDesign.MDI_PLAY)
         ExportType.SOURCE_AUDIO -> FontIcon(Material.HEARING)
         ExportType.PUBLISH -> FontIcon(Material.CLOUD_UPLOAD)
+        ExportType.BURRITO_WRAPPER -> FontIcon(MaterialDesign.MDI_PACKAGE_VARIANT)
     }
 
     override fun updateItem(item: ExportType?, empty: Boolean) {

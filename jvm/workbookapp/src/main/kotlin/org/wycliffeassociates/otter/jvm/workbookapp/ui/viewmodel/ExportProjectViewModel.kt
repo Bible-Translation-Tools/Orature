@@ -39,6 +39,7 @@ import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
 import org.wycliffeassociates.otter.common.domain.project.exporter.IProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.ProjectExporterCallback
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BurritoWrapperExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportFinishEvent
@@ -59,6 +60,9 @@ class ExportProjectViewModel : ViewModel() {
 
     @Inject
     lateinit var exportBackupUseCase: BackupProjectExporter
+
+    @Inject
+    lateinit var exportBurritoWrapperUseCase: BurritoWrapperExporter
 
     @Inject
     lateinit var exportAudioUseCase: AudioProjectExporter
@@ -114,6 +118,7 @@ class ExportProjectViewModel : ViewModel() {
             ExportType.LISTEN -> exportAudioUseCase
             ExportType.SOURCE_AUDIO, ExportType.PUBLISH -> exportSourceUseCase
             ExportType.BACKUP -> exportBackupUseCase
+            ExportType.BURRITO_WRAPPER -> exportBurritoWrapperUseCase
         }
         return Observable.create<ProgressStatus> { emitter ->
             val callback = setUpCallback(emitter)
@@ -150,6 +155,7 @@ class ExportProjectViewModel : ViewModel() {
             ExportType.LISTEN -> exportAudioUseCase.estimateExportSize(workbook, chapters)
             ExportType.SOURCE_AUDIO,
             ExportType.PUBLISH -> exportSourceUseCase.estimateExportSize(workbook, chapters)
+            ExportType.BURRITO_WRAPPER -> exportBurritoWrapperUseCase.estimateExportSize(workbook, chapters)
             else -> 0L
         }
     }
