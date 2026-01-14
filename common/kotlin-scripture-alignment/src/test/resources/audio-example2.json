@@ -1,0 +1,432 @@
+{
+  "format": "alignment",
+  "version": "0.3",
+  "type": "audio-reference",
+  "documents": {
+    "timecode": {
+      "scheme": "vtt-timecode",
+      "docid": "ephesians_example_with_footnotes.mp3"
+    },
+    "text-reference": {
+      "scheme": "u23003"
+    }
+  },
+  "records": [
+    {
+      "timecode": [
+        "00:00:00.000 --> 00:00:01.927"
+      ],
+      "text-reference": [
+        "en+ulb.EPH:0"
+      ]
+    },
+    {
+      "timecode": [
+        "00:01.927 --> 00:03.756"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:0"
+      ]
+    },
+    {
+      "timecode": [
+        "00:03.756 --> 04:23.239"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1"
+      ]
+    },
+    {
+      "timecode": [
+        "00:03.756 --> 00:05.604"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:1!s1"
+      ]
+    },
+    {
+      "timecode": [
+        "00:05.604 --> 00:08.289"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:1:0"
+      ]
+    },
+    {
+      "timecode": [
+        "00:08.289 --> 00:16.671"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:1"
+      ]
+    },
+    {
+      "timecode": [
+        "00:16.671 --> 00:28.805"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:1!f"
+      ]
+    },
+    {
+      "timecode": [
+        "00:28.805 --> 00:30.943"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:2:0"
+      ]
+    },
+    {
+      "timecode": [
+        "00:30.943 --> 00:35.558"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:2"
+      ]
+    },
+    {
+      "timecode": [
+        "00:35.558 --> 00:37.799"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:3:0"
+      ]
+    },
+    {
+      "timecode": [
+        "00:37.799 --> 00:46.655"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:3"
+      ]
+    },
+    {
+      "timecode": [
+        "00:46.655 --> 00:48.636"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:4:0"
+      ]
+    },
+    {
+      "timecode": [
+        "00:48.636 --> 00:56.561"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:4"
+      ]
+    },
+    {
+      "timecode": [
+        "00:56.561 --> 00:58.621"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:5:0"
+      ]
+    },
+    {
+      "timecode": [
+        "00:58.621 --> 01:05.592"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:5"
+      ]
+    },
+    {
+      "timecode": [
+        "01:05.592 --> 01:17.325"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:5!f"
+      ]
+    },
+    {
+      "timecode": [
+        "01:17.325 --> 01:19.153"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:6:0"
+      ]
+    },
+    {
+      "timecode": [
+        "01:19.153 --> 01:26.092"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:6"
+      ]
+    },
+    {
+      "timecode": [
+        "01:26.092 --> 01:28.151"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:7:0"
+      ]
+    },
+    {
+      "timecode": [
+        "01:28.151 --> 01:37.075"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:7"
+      ]
+    },
+    {
+      "timecode": [
+        "01:37.075 --> 01:39.046"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:8:0"
+      ]
+    },
+    {
+      "timecode": [
+        "01:39.046 --> 01:43.757"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:8"
+      ]
+    },
+    {
+      "timecode": [
+        "01:43.757 --> 01:45.905"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:9:0"
+      ]
+    },
+    {
+      "timecode": [
+        "01:45.905 --> 01:53.843"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:9"
+      ]
+    },
+    {
+      "timecode": [
+        "01:53.843 --> 01:55.503"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:10:0"
+      ]
+    },
+    {
+      "timecode": [
+        "01:55.503 --> 02:05.788"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:10"
+      ]
+    },
+    {
+      "timecode": [
+        "02:05.788 --> 02:07.860"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:11:0"
+      ]
+    },
+    {
+      "timecode": [
+        "02:07.860 --> 02:17.391"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:11"
+      ]
+    },
+    {
+      "timecode": [
+        "02:17.391 --> 02:19.432"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:12:0"
+      ]
+    },
+    {
+      "timecode": [
+        "02:19.432 --> 02:27.603"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:12"
+      ]
+    },
+    {
+      "timecode": [
+        "02:27.603 --> 02:29.556"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:13:0"
+      ]
+    },
+    {
+      "timecode": [
+        "02:29.556 --> 02:39.847"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:13"
+      ]
+    },
+    {
+      "timecode": [
+        "02:39.847 --> 02:41.902"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:14:0"
+      ]
+    },
+    {
+      "timecode": [
+        "02:41.902 --> 02:49.035"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:14"
+      ]
+    },
+    {
+      "timecode": [
+        "02:49.035 --> 02:51.405"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:15:0"
+      ]
+    },
+    {
+      "timecode": [
+        "02:51.405 --> 02:58.148"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:15"
+      ]
+    },
+    {
+      "timecode": [
+        "02:58.148 --> 03:00.124"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:16:0"
+      ]
+    },
+    {
+      "timecode": [
+        "03:00.124 --> 03:04.704"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:16"
+      ]
+    },
+    {
+      "timecode": [
+        "03:04.704 --> 03:06.773"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:17:0"
+      ]
+    },
+    {
+      "timecode": [
+        "03:06.773 --> 03:16.686"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:17"
+      ]
+    },
+    {
+      "timecode": [
+        "03:16.686 --> 03:19.263"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:18:0"
+      ]
+    },
+    {
+      "timecode": [
+        "03:19.263 --> 03:30.280"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:18"
+      ]
+    },
+    {
+      "timecode": [
+        "03:30.280 --> 03:32.556"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:19:0"
+      ]
+    },
+    {
+      "timecode": [
+        "03:32.556 --> 03:42.409"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:19"
+      ]
+    },
+    {
+      "timecode": [
+        "03:42.409 --> 03:44.516"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:20:0"
+      ]
+    },
+    {
+      "timecode": [
+        "03:44.516 --> 03:53.204"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:20"
+      ]
+    },
+    {
+      "timecode": [
+        "03:53.204 --> 03:55.409"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:21:0"
+      ]
+    },
+    {
+      "timecode": [
+        "03:55.409 --> 04:07.155"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:21"
+      ]
+    },
+    {
+      "timecode": [
+        "04:07.155 --> 04:09.306"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:22:0"
+      ]
+    },
+    {
+      "timecode": [
+        "04:09.306 --> 04:15.901"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:22"
+      ]
+    },
+    {
+      "timecode": [
+        "04:15.901 --> 04:18.014"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:23:0"
+      ]
+    },
+    {
+      "timecode": [
+        "04:18.014 --> 04:23.239"
+      ],
+      "text-reference": [
+        "en+ulb.EPH 1:23"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,269 @@
+{
+  "format": "alignment",
+  "version": "0.4",
+  "type": "audio-reference",
+  "roles": ["timecode", "text-reference"],
+  "groups": [
+    {
+      "documents": [
+        {
+          "scheme": "vtt-timecode",
+          "docid": "42LUK/001/SEHSAM-LUK-1_1-4v1.mp3"
+        },
+        {
+          "scheme": "u23003"
+        }
+      ],
+      "records": [
+        {
+          "references": [["000:00:00.000 --> 000:00:05.860"], ["LUK 1:1"]]
+        },
+        {
+          "references": [["000:00:05.860 --> 000:00:12.268"], ["LUK 1:2"]]
+        },
+        {
+          "references": [["000:00:12.268 --> 000:00:24.129"], ["LUK 1:3"]]
+        },
+        {
+          "references": [["000:00:24.129 --> 000:00:28.328"], ["LUK 1:4"]]
+        }
+      ]
+    },
+    {
+      "documents": [
+        {
+          "scheme": "vtt-timecode",
+          "docid": "42LUK/001/SEHSAM-LUK-1_5-7v1.mp3"
+        },
+        {
+          "scheme": "u23003"
+        }
+      ],
+      "records": [
+        {
+          "references": [["000:00:00.000 --> 000:00:12.952"], ["LUK 1:5"]]
+        },
+        {
+          "references": [["000:00:12.952 --> 000:00:19.211"], ["LUK 1:6"]]
+        },
+        {
+          "references": [["000:00:19.211 --> 000:00:25.428"], ["LUK 1:7"]]
+        }
+      ]
+    },
+    {
+      "documents": [
+        {
+          "scheme": "vtt-timecode",
+          "docid": "42LUK/001/SEHSAM-LUK-1_8-10v1.mp3"
+        },
+        {
+          "scheme": "u23003"
+        }
+      ],
+      "records": [
+        {
+          "references": [["000:00:00.000 --> 000:00:06.240"], ["LUK 1:8"]]
+        },
+        {
+          "references": [["000:00:06.240 --> 000:00:13.531"], ["LUK 1:9"]]
+        },
+        {
+          "references": [["000:00:13.531 --> 000:00:20.426"], ["LUK 1:10"]]
+        }
+      ]
+    },
+    {
+      "documents": [
+        {
+          "scheme": "vtt-timecode",
+          "docid": "42LUK/001/SEHSAM-LUK-1_11-17v1.mp3"
+        },
+        {
+          "scheme": "u23003"
+        }
+      ],
+      "records": [
+        {
+          "references": [["000:00:00.000 --> 000:00:04.440"], ["LUK 1:11"]]
+        },
+        {
+          "references": [["000:00:04.440 --> 000:00:08.411"], ["LUK 1:12"]]
+        },
+        {
+          "references": [["000:00:08.411 --> 000:00:18.301"], ["LUK 1:13"]]
+        },
+        {
+          "references": [["000:00:18.301 --> 000:00:23.189"], ["LUK 1:14"]]
+        },
+        {
+          "references": [["000:00:23.189 --> 000:00:33.549"], ["LUK 1:15"]]
+        },
+        {
+          "references": [["000:00:33.549 --> 000:00:37.827"], ["LUK 1:16"]]
+        },
+        {
+          "references": [["000:00:37.827 --> 000:00:51.482"], ["LUK 1:17"]]
+        }
+      ]
+    },
+    {
+      "documents": [
+        {
+          "scheme": "vtt-timecode",
+          "docid": "42LUK/001/SEHSAM-LUK-1_18-20v1.mp3"
+        },
+        {
+          "scheme": "u23003"
+        }
+      ],
+      "records": [
+        {
+          "references": [["000:00:00.000 --> 000:00:08.661"], ["LUK 1:18"]]
+        },
+        {
+          "references": [["000:00:08.661 --> 000:00:16.101"], ["LUK 1:19"]]
+        },
+        {
+          "references": [["000:00:16.101 --> 000:00:25.220"], ["LUK 1:20"]]
+        }
+      ]
+    },
+    {
+      "documents": [
+        {
+          "scheme": "vtt-timecode",
+          "docid": "42LUK/001/SEHSAM-LUK-1_21-25v1.mp3"
+        },
+        {
+          "scheme": "u23003"
+        }
+      ],
+      "records": [
+        {
+          "references": [["000:00:00.000 --> 000:00:05.811"], ["LUK 1:21"]]
+        },
+        {
+          "references": [["000:00:05.811 --> 000:00:14.611"], ["LUK 1:22"]]
+        },
+        {
+          "references": [["000:00:14.611 --> 000:00:18.571"], ["LUK 1:23"]]
+        },
+        {
+          "references": [["000:00:18.571 --> 000:00:24.261"], ["LUK 1:24"]]
+        },
+        {
+          "references": [["000:00:24.261 --> 000:00:34.182"], ["LUK 1:25"]]
+        }
+      ]
+    },
+    {
+      "documents": [
+        {
+          "scheme": "vtt-timecode",
+          "docid": "42LUK/001/SEHSAM-LUK-1_26-28v1.mp3"
+        },
+        {
+          "scheme": "u23003"
+        }
+      ],
+      "records": []
+    },
+    {
+      "documents": [
+        {
+          "scheme": "vtt-timecode",
+          "docid": "42LUK/001/SEHSAM-LUK-1_29-34v1.mp3"
+        },
+        {
+          "scheme": "u23003"
+        }
+      ],
+      "records": []
+    },
+    {
+      "documents": [
+        {
+          "scheme": "vtt-timecode",
+          "docid": "42LUK/001/SEHSAM-LUK-1_35-38v1.mp3"
+        },
+        {
+          "scheme": "u23003"
+        }
+      ],
+      "records": []
+    },
+    {
+      "documents": [
+        {
+          "scheme": "vtt-timecode",
+          "docid": "42LUK/001/SEHSAM-LUK-1_39-45v1.mp3"
+        },
+        {
+          "scheme": "u23003"
+        }
+      ],
+      "records": []
+    },
+    {
+      "documents": [
+        {
+          "scheme": "vtt-timecode",
+          "docid": "42LUK/001/SEHSAM-LUK-1_46-56v1.mp3"
+        },
+        {
+          "scheme": "u23003"
+        }
+      ],
+      "records": []
+    },
+    {
+      "documents": [
+        {
+          "scheme": "vtt-timecode",
+          "docid": "42LUK/001/SEHSAM-LUK-1_57-58v1.mp3"
+        },
+        {
+          "scheme": "u23003"
+        }
+      ],
+      "records": []
+    },
+    {
+      "documents": [
+        {
+          "scheme": "vtt-timecode",
+          "docid": "42LUK/001/SEHSAM-LUK-1_59-64v1.mp3"
+        },
+        {
+          "scheme": "u23003"
+        }
+      ],
+      "records": []
+    },
+    {
+      "documents": [
+        {
+          "scheme": "vtt-timecode",
+          "docid": "42LUK/001/SEHSAM-LUK-1_65-66v1.mp3"
+        },
+        {
+          "scheme": "u23003"
+        }
+      ],
+      "records": []
+    },
+    {
+      "documents": [
+        {
+          "scheme": "vtt-timecode",
+          "docid": "42LUK/001/SEHSAM-LUK-1_67-80v1.mp3"
+        },
+        {
+          "scheme": "u23003"
+        }
+      ],
+      "records": []
+    }
+  ]
+}
