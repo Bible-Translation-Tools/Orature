@@ -162,7 +162,7 @@ class ImportProjectUseCase @Inject constructor(val identifier: ProjectFormatIden
      */
     private fun getImporter(format: ProjectFormat): IProjectImporter {
         val factory: IProjectImporterFactory = when(format) {
-            ProjectFormat.BURRITO_WRAPPER -> burritoFactoryProvider
+            ProjectFormat.BURRITO_WRAPPER,
             ProjectFormat.SCRIPTURE_BURRITO -> burritoFactoryProvider
             ProjectFormat.RESOURCE_CONTAINER -> rcFactoryProvider
             ProjectFormat.TSTUDIO -> tsFactoryProvider

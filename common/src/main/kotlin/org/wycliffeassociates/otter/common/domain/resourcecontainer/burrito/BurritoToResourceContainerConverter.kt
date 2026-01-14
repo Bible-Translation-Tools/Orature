@@ -91,18 +91,9 @@ private val usfmFilenamePattern = "./{booknum}-{book}.usfm"
 private val filenamePattern = "{language}_{title}_{book}_c{chapter}.{extension}"
 private val DEFAULT_TITLE_CODE = "reg"
 
-interface IBurritoLoader {
-    fun load(file: File): BurritoContainer
-}
-
-class BurritoLoader : IBurritoLoader {
-    override fun load(file: File): BurritoContainer = BurritoContainer.load(file)
-}
-
 open class BurritoToResourceContainerConverter @Inject constructor(
     val directoryProvider: IDirectoryProvider,
     val versificationRepository: IVersificationRepository,
-    private val burritoLoader: IBurritoLoader = BurritoLoader()
 ) {
 
     private val logger = LoggerFactory.getLogger(BurritoToResourceContainerConverter::class.java)
@@ -140,7 +131,7 @@ open class BurritoToResourceContainerConverter @Inject constructor(
         }
 
         // Standard load
-        val loadedBurrito = burritoLoader.load(burrito)
+        val loadedBurrito = BurritoContainer.load(burrito)
         loadedBurrito.use {
             val metadata = it.manifest
             ResourceContainer.create(outputFile) {
@@ -189,7 +180,7 @@ open class BurritoToResourceContainerConverter @Inject constructor(
                 // The prompt example gives explicit paths "audio" and "text".
                 // Let's load them to be sure of what they are.
                 try {
-                    val container = burritoLoader.load(f)
+                    val container = BurritoContainer.load(f)
                     val flavor = container.manifest.type?.flavorType?.flavor
                     if (flavor is AudioFlavorSchema) {
                         audioBurritoFile = f
@@ -208,8 +199,8 @@ open class BurritoToResourceContainerConverter @Inject constructor(
             return false
         }
 
-        val audioContainer = burritoLoader.load(audioBurritoFile)
-        val textContainer = burritoLoader.load(textBurritoFile)
+        val audioContainer = BurritoContainer.load(audioBurritoFile)
+        val textContainer = BurritoContainer.load(textBurritoFile)
 
         try {
             ResourceContainer.create(outputFile) {
