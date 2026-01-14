@@ -122,7 +122,11 @@ class BurritoWrapperExporter @Inject constructor(
             tempWrapperDir.mkdirs()
 
             try {
-                // Get USFM files from source
+                // Create text burrito directory first
+                val textBurritoDir = File(tempWrapperDir, "text")
+                textBurritoDir.mkdirs()
+
+                // Get USFM files from source and copy directly to text burrito
                 val sourceRCFile = workbook.source.resourceMetadata.path
                 val usfmFiles = mutableListOf<Pair<String, File>>()
                 val rcInfo = ResourceContainer.load(sourceRCFile).use { rc ->
@@ -133,15 +137,15 @@ class BurritoWrapperExporter @Inject constructor(
                     projects.forEach { project ->
                         if (project.path.contains(".usfm")) {
                             val path = project.path.removePrefix("./")
-                            val tempUsfmFile = File(tempWrapperDir, "text_burrito/$path")
-                            tempUsfmFile.parentFile.mkdirs()
+                            val targetUsfmFile = File(textBurritoDir, path)
+                            targetUsfmFile.parentFile.mkdirs()
                             
                             rc.accessor.getInputStream(path).use { inputStream ->
-                                tempUsfmFile.outputStream().use { outputStream ->
+                                targetUsfmFile.outputStream().use { outputStream ->
                                     inputStream.transferTo(outputStream)
                                 }
                             }
-                            usfmFiles.add(Pair(path, tempUsfmFile))
+                            usfmFiles.add(Pair(path, targetUsfmFile))
                             
                             // Build localized names
                             val key = "book-${project.identifier}"
@@ -158,12 +162,9 @@ class BurritoWrapperExporter @Inject constructor(
 
                 callback?.onNotifyProgress(30.0, "creatingTextBurrito")
 
-                // Create text burrito
-                val textBurritoDir = File(tempWrapperDir, "text")
-                textBurritoDir.mkdirs()
+                // Create text burrito metadata
                 val textMetadata = createTextBurritoMetadata(workbook, rcInfo, usfmFiles)
                 writeBurritoMetadata(textMetadata, textBurritoDir)
-                copyUsfmFilesToBurrito(usfmFiles, textBurritoDir)
 
                 callback?.onNotifyProgress(50.0, "gatheringAudio")
 
