@@ -534,7 +534,6 @@ class BurritoWrapperExporter @Inject constructor(
                 if (audioFile.extension in listOf(AudioFileFormat.WAV.extension, AudioFileFormat.MP3.extension)) {
                     val oratureAudio = OratureAudioFile(audioFile)
                     val targetTimingFile = File(mediaDir, "${audioFile.nameWithoutExtension}.json")
-                    // BurritoAudioAlignment.create(audioFile, targetTimingFile)
                     BurritoAlignmentMetadata(targetTimingFile, audioFile)
                         .write(oratureAudio.getMarkers(), book, chapterNumber, oratureAudio.totalFrames)
                 }

@@ -21,7 +21,8 @@ class BurritoAudioAlignmentSerializer @JvmOverloads constructor(t: Class<Burrito
         gen.writeStringField("type", value.type)
 
         // Conditionally serialize documents and records based on whether groups is present
-        if (value.groups.isNullOrEmpty() || value?.groups?.size == 1) {
+        if (value.groups.isNullOrEmpty()) {
+            // If no groups, serialize top-level documents and records
             if (value.documents != null) {
                 gen.writeFieldName("documents")
                 gen.writeObject(value.documents) // This will use DocumentsSerializer
@@ -29,15 +30,19 @@ class BurritoAudioAlignmentSerializer @JvmOverloads constructor(t: Class<Burrito
             if (value.records.isNotEmpty()) {
                 gen.writeFieldName("records")
                 gen.writeObject(value.records)
-                if (value.roles != null && value.records?.first()?.references?.isNotEmpty() ?: false) {
+                if (value.roles != null && value.records.firstOrNull()?.references?.isNotEmpty() == true) {
                     gen.writeFieldName("roles")
                     gen.writeObject(value.roles)
                 }
             }
         } else {
-            // If groups is present, omit top-level documents and records
+            // If groups is present (even if just one), serialize groups and omit top-level documents and records
             gen.writeFieldName("groups")
             gen.writeObject(value.groups)
+            if (value.roles != null) {
+                gen.writeFieldName("roles")
+                gen.writeObject(value.roles)
+            }
         }
         gen.writeEndObject()
     }
