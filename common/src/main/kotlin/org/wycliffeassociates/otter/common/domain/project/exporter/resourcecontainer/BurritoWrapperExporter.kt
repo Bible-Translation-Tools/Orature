@@ -49,6 +49,7 @@ import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Compres
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Formats
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Performance
 import org.bibletranslationtools.kotlinscripturealignment.model.BurritoAudioAlignment
+import org.bibletranslationtools.scriptureburrito.flavor.scripture.text.TextTranslationSchema
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
@@ -56,7 +57,10 @@ import org.wycliffeassociates.otter.common.data.IAppInfo
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.audio.AudioConverter
+import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.WAV_TO_MP3_COMPRESSED_RATE
 import org.wycliffeassociates.otter.common.domain.audio.metadata.BurritoAlignmentMetadata
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
@@ -84,6 +88,12 @@ class BurritoWrapperExporter @Inject constructor(
     private val idAuthorityProvider: AuthProvider,
     private val appInfo: IAppInfo
 ) : IProjectExporter {
+
+    @Inject
+    lateinit var audioExporter: AudioExporter
+
+    @Inject
+    lateinit var audioConverter: AudioConverter
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val mapper = ObjectMapper().apply {
@@ -176,9 +186,14 @@ class BurritoWrapperExporter @Inject constructor(
                 // Create audio burrito
                 val audioBurritoDir = File(tempWrapperDir, "audio")
                 audioBurritoDir.mkdirs()
+                
+                // Convert audio files to the desired format (default MP3)
+                val audioFormat = options?.audioFormat ?: AudioFileFormat.MP3
+                val convertedTakes = convertAudioFiles(workbook, takes, audioFormat, callback)
+                
                 // Copy audio files first so timing files can be created
-                copyAudioFilesToBurrito(workbook, takes, audioBurritoDir)
-                val audioMetadata = createAudioBurritoMetadata(workbook, takes, audioBurritoDir)
+                copyAudioFilesToBurrito(workbook, convertedTakes, audioBurritoDir, audioFormat)
+                val audioMetadata = createAudioBurritoMetadata(workbook, convertedTakes, audioBurritoDir)
                 writeBurritoMetadata(audioMetadata, audioBurritoDir)
 
                 callback?.onNotifyProgress(90.0, "creatingWrapper")
@@ -207,7 +222,14 @@ class BurritoWrapperExporter @Inject constructor(
 
     override fun estimateExportSize(workbook: Workbook, chapterFilter: List<Int>): Long {
         val takes = gatherAudioFiles(workbook, chapterFilter)
-        val audioSize = takes.values.flatten().sumOf { it.length() }
+        // Estimate audio size - assume MP3 conversion (default)
+        val audioSize = takes.values.flatten().sumOf { audioFile ->
+            when (AudioFileFormat.of(audioFile.extension)) {
+                AudioFileFormat.MP3 -> audioFile.length()
+                AudioFileFormat.WAV -> audioFile.length() / WAV_TO_MP3_COMPRESSED_RATE
+                else -> audioFile.length()
+            }
+        }
         // Estimate text size (rough approximation)
         val sourceRCFile = workbook.source.resourceMetadata.path
         val rc = ResourceContainer.load(sourceRCFile)
@@ -286,7 +308,7 @@ class BurritoWrapperExporter @Inject constructor(
             type = TypeSchema(
                 FlavorType(
                     name = Flavor.SCRIPTURE,
-                    ScriptureFlavorSchema(),
+                    TextTranslationSchema(),
                     currentScope = ScopeSchema().apply {
                         usfmFiles.forEach { (path, _) ->
                             val bookId = path.substringBefore(".").uppercase(Locale.US)
@@ -467,14 +489,14 @@ class BurritoWrapperExporter @Inject constructor(
         return WrapperMetadata(
             meta = WrapperMeta(
                 name = hashMapOf("en" to resource.title),
-                version = "0.1",
+                version = "0.0.1",
                 generator = hashMapOf(
                     "name" to appName,
                     "version" to appVersion
                 ),
                 dateCreated = java.time.Instant.now().toString(),
                 description = hashMapOf("en" to "Burrito wrapper containing text and audio burritos"),
-                abbreviation = hashMapOf("en" to resource.identifier)
+                abbreviation = hashMapOf("en" to "${language.slug}_${resource.identifier} Burrito Wrapper")
             ),
             format = "scripture burrito wrapper",
             contents = WrapperContents(
@@ -516,10 +538,63 @@ class BurritoWrapperExporter @Inject constructor(
         }
     }
 
+    private fun convertAudioFiles(
+        workbook: Workbook,
+        takes: Map<ChapterNumber, List<File>>,
+        targetFormat: AudioFileFormat,
+        callback: ProjectExporterCallback?
+    ): Map<ChapterNumber, List<File>> {
+        if (targetFormat == AudioFileFormat.WAV) {
+            // No conversion needed, return original files
+            return takes
+        }
+
+        val convertedTakes = mutableMapOf<ChapterNumber, List<File>>()
+        val tempDir = File(directoryProvider.tempDirectory, "audio_conversion_${Date().time}")
+        tempDir.mkdirs()
+
+        try {
+            takes.forEach { (chapterNumber, audioFiles) ->
+                val convertedFiles = mutableListOf<File>()
+                for (audioFile in audioFiles) {
+                    val currentFormat = AudioFileFormat.of(audioFile.extension)
+                    if (currentFormat == targetFormat) {
+                        // Already in target format, use as-is
+                        convertedFiles.add(audioFile)
+                    } else if (currentFormat == AudioFileFormat.WAV && targetFormat == AudioFileFormat.MP3) {
+                        // Convert WAV to MP3
+                        val mp3File = File(tempDir, "${audioFile.nameWithoutExtension}.mp3")
+                        val oratureAudio = OratureAudioFile(audioFile)
+                        val cues = oratureAudio.getCues()
+                        
+                        val metadata = AudioExporter.ExportMetadata(
+                            license = null,
+                            contributors = listOf(),
+                            markers = cues
+                        )
+                        
+                        audioExporter.exportMp3(audioFile, mp3File, metadata).blockingAwait()
+                        convertedFiles.add(mp3File)
+                    } else {
+                        // Unsupported conversion, use original
+                        convertedFiles.add(audioFile)
+                    }
+                }
+                convertedTakes[chapterNumber] = convertedFiles
+            }
+        } finally {
+            // Note: We don't delete tempDir here as the files are still needed
+            // They will be cleaned up when the wrapper temp directory is deleted
+        }
+
+        return convertedTakes
+    }
+
     private fun copyAudioFilesToBurrito(
         workbook: Workbook,
         takes: Map<ChapterNumber, List<File>>,
-        burritoDir: File
+        burritoDir: File,
+        audioFormat: AudioFileFormat
     ) {
         val mediaDir = File(burritoDir, RcConstants.SOURCE_MEDIA_DIR)
         mediaDir.mkdirs()

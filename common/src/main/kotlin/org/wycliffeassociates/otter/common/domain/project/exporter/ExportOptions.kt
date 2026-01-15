@@ -18,4 +18,9 @@
  */
 package org.wycliffeassociates.otter.common.domain.project.exporter
 
-data class ExportOptions(val chapters: List<Int>)
+import org.wycliffeassociates.otter.common.audio.AudioFileFormat
+
+data class ExportOptions(
+    val chapters: List<Int>,
+    val audioFormat: AudioFileFormat = AudioFileFormat.MP3
+)
