@@ -143,7 +143,7 @@ class BurritoAlignmentMetadata(
 
         assignEndTimes(vttCues, audioLengthInFrames)
 
-//        alignment.setRecordsFromVttCueContent(audioFile.name, vttCues)
+        alignment.setRecordsFromVttCueContent(audioFile.name, vttCues)
         alignment.update()
     }
 
