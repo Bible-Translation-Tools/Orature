@@ -1,21 +1,16 @@
-plugins {
-    id 'org.jetbrains.kotlin.jvm'
-}
-
 group = 'org.bibletranslationtools'
-version = 'unspecified'
-
-repositories {
-    mavenCentral()
-}
+version = '1.0.2'
 
 dependencies {
-    testImplementation 'org.jetbrains.kotlin:kotlin-test'
-}
+    api "com.fasterxml.jackson.module:jackson-module-kotlin:2.15.1"
+    api 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.1'
+    api "org.apache.tika:tika-core:2.0.0"
 
-test {
-    useJUnitPlatform()
-}
-kotlin {
-    jvmToolchain(21)
+    implementation "org.slf4j:slf4j-api:2.0.13"
+
+
+    // https://mvnrepository.com/artifact/org.json/json
+    implementation group: 'org.json', name: 'json', version: '20180813'
+
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
 }

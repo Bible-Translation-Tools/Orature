@@ -24,10 +24,6 @@ import org.bibletranslationtools.scriptureburrito.SourceMetadataSchema
 import org.bibletranslationtools.scriptureburrito.TypeSchema
 import org.bibletranslationtools.scriptureburrito.flavor.FlavorType
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.AudioFlavorSchema
-import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.AudioFormat
-import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Compression
-import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Formats
-import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Performance
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
 import org.wycliffeassociates.otter.common.data.IAppInfo
@@ -116,13 +112,7 @@ class ScriptureBurritoUtils @Inject constructor(
             type = TypeSchema(
                 FlavorType(
                     name = Flavor.SCRIPTURE,
-                    AudioFlavorSchema(
-                        mutableSetOf(Performance.READING, Performance.SINGLE_VOICE),
-                        formats = Formats().apply {
-                            put("format-wav", AudioFormat(Compression.WAV))
-                            put("format-mp3", AudioFormat(Compression.MP3))
-                        }
-                    ),
+                    AudioFlavorSchema(),
                     currentScope = ScopeSchema().apply {
                         this[workbook.target.slug.uppercase(Locale.US)] =
                             takes.keys.map { "$it" }.toMutableList()

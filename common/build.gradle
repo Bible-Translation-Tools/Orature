@@ -35,10 +35,11 @@ dependencies {
 
     implementation "org.apache.tika:tika-core:$tikaVer"
 
-    implementation "org.bibletranslationtools:kotlin-scripture-burrito:$kotlinscriptureburritoVer"
+    //implementation "org.bibletranslationtools:kotlin-scripture-burrito:$kotlinscriptureburritoVer"
     //implementation "org.bibletranslationtools:kotlin-vtt:$kotlinVttVer"
     //implementation "org.bibletranslationtools:kotlin-scripture-alignment:$kotlinScriptureAlignmentVer"
 
     implementation project(":common:kotlin-vtt")
     implementation project(":common:kotlin-scripture-alignment")
+    implementation project(":common:kotlin-scripture-burrito")
 }
