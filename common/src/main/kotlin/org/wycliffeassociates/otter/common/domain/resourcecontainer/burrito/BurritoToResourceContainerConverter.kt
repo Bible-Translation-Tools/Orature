@@ -105,10 +105,22 @@ open class BurritoToResourceContainerConverter @Inject constructor(
         outputFile: File
     ): Boolean {
 
-        tempDir = File(directoryProvider.tempDirectory, burrito.name).apply { mkdirs() }
+        tempDir = File(directoryProvider.tempDirectory, burrito.nameWithoutExtension).apply { mkdirs() }
 
-        if (outputFile.extension == "zip") outputFile.outputStream()
-            .use { ZipOutputStream(it).use { } }
+
+        if (outputFile.exists()) {
+            outputFile.deleteRecursively()
+        }
+        // Initialize as a valid empty zip file to prevent "empty zip" or "is a directory" errors
+        try {
+            java.util.zip.ZipOutputStream(java.io.FileOutputStream(outputFile)).use { }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        if (burrito.extension == "zip") {
+            extractZip(burrito, tempDir)
+        }
 
         // Check format
         val metadataNode = peekMetadata(burrito)
@@ -654,8 +666,8 @@ open class BurritoToResourceContainerConverter @Inject constructor(
     ): File? {
         if (File(file).extension !in SUPPORTED_AUDIO_FILES) return null
 
-        val audioFile = File(tempDir, File(file).name)
-        val timingFile = File(tempDir, File(timing).name)
+        val audioFile = File(tempDir, file).apply { parentFile.mkdirs() }
+        val timingFile = File(tempDir, timing).apply { parentFile.mkdirs() }
 
         inputAccessor.getInputStream(file).use { ifs ->
             audioFile.outputStream().use { ofs ->
@@ -723,12 +735,16 @@ open class BurritoToResourceContainerConverter @Inject constructor(
                 }
                 newIngredientsByBook.put(book, usfmFiles)
             } else if (inputAccessor.fileExists(usfmFile)) {
-                inputAccessor.getInputStream(usfmFile).use { ifs ->
-                    outputAccessor.write(newPath) {
-                        ifs.transferTo(it)
+                try {
+                    inputAccessor.getInputStream(usfmFile).use { ifs ->
+                        outputAccessor.write(newPath) {
+                            ifs.transferTo(it)
+                        }
                     }
+                    newIngredientsByBook.put(book, usfmFiles)
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
-                newIngredientsByBook.put(book, usfmFiles)
             }
         }
         return newIngredientsByBook
@@ -764,10 +780,16 @@ open class BurritoToResourceContainerConverter @Inject constructor(
                         getFilename(languageCode, titleCode, book, extension)
                             .replace("{chapter}", "$chapter")
                     }"
-                    af.inputStream().use { ifs ->
-                        outputAccessor.write(newPath) {
-                            ifs.transferTo(it)
+                    try {
+                        af.inputStream().use { ifs ->
+                            outputAccessor.write(newPath) {
+                                ifs.transferTo(it)
+                            }
                         }
+
+                    } catch (e: Exception) {
+                        logger.error("Error transferring audio file!", e)
+                        throw e
                     }
                 }
             }
@@ -984,57 +1006,18 @@ internal fun findMatchingTimingFile(
 internal fun filterAcceptedAudioFormats(
     burrito: MetadataSchema, ingedientsByBook: IngredientsByBook
 ): IngredientsByBook {
-    val audioFlavor = (burrito.type!!.flavorType.flavor as AudioFlavorSchema)
-    val approved = audioFlavor
-        .getFormats()
-        .filter { (formatName, format) ->
-            val supported = format.compression in arrayOf(Compression.WAV, Compression.MP3)
-            val validMp3 = validateMp3Format(format)
-            val validWav = validateWavFormat(format)
-            val result = (supported && (validMp3 || validWav))
-
-            result
-        }
-    val approvedMimeType = approved.map { (name, format) ->
-
-        when (format.compression) {
-            Compression.MP3 -> "audio/mpeg"
-            Compression.WAV -> "audio/wav"
-            else -> throw Exception("Audio format ${format} not filtered out.")
-        }
-    }
-
-
     val accepted = HashMap<String, List<Pair<String, IngredientSchema>>>()
     ingedientsByBook.forEach { (book, ingredients) ->
         accepted[book] = ingredients.filter { (filename, ingredient) ->
             ingredient.mimeType in listOf(
-                *approvedMimeType.toTypedArray(),
+                "audio/mpeg",
+                "audio/wav",
                 "application/x-cue"
             ) ||
                     ingredient.role == "timing"
         }
     }
     return accepted
-}
-
-internal fun validateWavFormat(format: AudioFormat): Boolean {
-    return arrayOf(
-        format.compression == Compression.WAV,
-        // don't fail if sampling rate or configuration are not provided
-        format.samplingRate?.equals(DEFAULT_SAMPLE_RATE) ?: true,
-        format.trackConfiguration?.equals(TrackConfiguration.MONO) ?: true,
-        format.bitDepth?.equals(16) ?: true
-    ).all { it }
-}
-
-internal fun validateMp3Format(format: AudioFormat): Boolean {
-    return arrayOf(
-        format.compression == Compression.MP3,
-        // don't fail if sampling rate or configuration are not provided
-        format.samplingRate?.equals(DEFAULT_SAMPLE_RATE) ?: true,
-        format.trackConfiguration?.equals(TrackConfiguration.MONO) ?: true,
-    ).all { it }
 }
 
 internal fun createMediaManifest(

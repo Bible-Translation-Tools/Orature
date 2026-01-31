@@ -42,19 +42,12 @@ import org.bibletranslationtools.scriptureburrito.SourceMetaSchema
 import org.bibletranslationtools.scriptureburrito.SourceMetadataSchema
 import org.bibletranslationtools.scriptureburrito.TypeSchema
 import org.bibletranslationtools.scriptureburrito.flavor.FlavorType
-import org.bibletranslationtools.scriptureburrito.flavor.scripture.ScriptureFlavorSchema
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.AudioFlavorSchema
-import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.AudioFormat
-import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Compression
-import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Formats
-import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Performance
-import org.bibletranslationtools.kotlinscripturealignment.model.BurritoAudioAlignment
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.text.TextTranslationSchema
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
 import org.wycliffeassociates.otter.common.data.IAppInfo
-import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.AudioConverter
@@ -430,13 +423,7 @@ class BurritoWrapperExporter @Inject constructor(
                 type = TypeSchema(
                     FlavorType(
                         name = Flavor.SCRIPTURE,
-                        AudioFlavorSchema(
-                            mutableSetOf(Performance.READING, Performance.SINGLE_VOICE),
-                            formats = Formats().apply {
-                                put("format-wav", AudioFormat(Compression.WAV))
-                                put("format-mp3", AudioFormat(Compression.MP3))
-                            }
-                        ),
+                        AudioFlavorSchema(),
                         currentScope = ScopeSchema().apply {
                             this[book.uppercase(Locale.US)] =
                                 takes.keys.map { "$it" }.toMutableList()
@@ -639,13 +626,34 @@ class BurritoWrapperExporter @Inject constructor(
 
     private fun createWrapperZip(wrapperDir: File, outputZip: File) {
         ZipOutputStream(outputZip.outputStream()).use { zos ->
+            // Ensure we preserve directory structure by processing files in order
+            // and ensuring parent directories exist
+            val processedPaths = mutableSetOf<String>()
+            
             wrapperDir.walkTopDown().forEach { file ->
                 if (file.isFile) {
                     val relativePath = file.relativeTo(wrapperDir).path.replace("\\", "/")
+                    
+                    // Ensure parent directory entries exist in zip
+                    val pathParts = relativePath.split("/")
+                    if (pathParts.size > 1) {
+                        var currentPath = ""
+                        for (i in 0 until pathParts.size - 1) {
+                            currentPath += pathParts[i] + "/"
+                            if (currentPath !in processedPaths) {
+                                val dirEntry = ZipEntry(currentPath)
+                                zos.putNextEntry(dirEntry)
+                                zos.closeEntry()
+                                processedPaths.add(currentPath)
+                            }
+                        }
+                    }
+                    
                     val entry = ZipEntry(relativePath)
                     zos.putNextEntry(entry)
                     file.inputStream().use { it.transferTo(zos) }
                     zos.closeEntry()
+                    processedPaths.add(relativePath)
                 }
             }
         }

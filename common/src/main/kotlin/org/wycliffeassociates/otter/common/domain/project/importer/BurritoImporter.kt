@@ -26,7 +26,7 @@ class BurritoImporter @Inject constructor(
                     localizeKey = "converting_file",
                     percent = 10.0
                 )
-                val tempRc = directoryProvider.createTempFile("burrito_converted_rc", ".zip")
+                val tempRc = directoryProvider.createTempFile("${burrito.nameWithoutExtension}_converted_rc", ".zip")
                 converter.convert(burrito, tempRc)
                 tempRc
             }
