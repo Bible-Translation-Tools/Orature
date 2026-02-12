@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito
 
 import io.mockk.every
 import io.mockk.mockk
-import org.bibletranslationtools.kotlinscripturealignment.model.BurritoAudioAlignment
 import org.bibletranslationtools.scriptureburrito.IngredientSchema
 import org.bibletranslationtools.scriptureburrito.IngredientsSchema
 import org.bibletranslationtools.scriptureburrito.MetadataSchema
@@ -13,10 +12,6 @@ import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.AudioFo
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Compression
 import org.bibletranslationtools.scriptureburrito.flavor.scripture.audio.Formats
 import org.bibletranslationtools.scriptureburrito.container.accessors.IContainerAccessor
-import org.bibletranslationtools.vtt.Cue
-import org.bibletranslationtools.vtt.WebVttCue
-import org.bibletranslationtools.vtt.WebVttDocument
-import org.bibletranslationtools.vtt.WebvttCueInfo
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -25,12 +20,10 @@ import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 import java.io.File
 import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import java.util.Locale
 
 @org.junit.Ignore("Depends on BurritoAudioAlignment writing JSON for WAV; covered by unit test for assembly")
 class BurritoToResourceContainerConverterChapterAssemblyTest {
@@ -111,7 +104,7 @@ class BurritoToResourceContainerConverterChapterAssemblyTest {
 
         // Build a minimal MetadataSchema with formats and ingredients
         val formats = Formats().apply { put("format-wav", AudioFormat(Compression.WAV)) }
-        val flavor = AudioFlavorSchema(formats = formats)
+        val flavor = AudioFlavorSchema()
         val flavorType = FlavorType(org.bibletranslationtools.scriptureburrito.Flavor.SCRIPTURE, flavor, ScopeSchema().apply { this["GEN"] = mutableListOf() })
         val ingredients = IngredientsSchema().apply {
             put("gen_1.json", IngredientSchema().apply { mimeType = "application/json"; role = "timing"; scope = ScopeSchema().apply { this["GEN"] = mutableListOf("1") } })

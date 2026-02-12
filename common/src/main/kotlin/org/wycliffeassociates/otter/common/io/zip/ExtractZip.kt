@@ -13,10 +13,14 @@ fun extractZip(zipFile: File, outputDir: File) {
                 outFile.mkdirs()
             } else {
                 outFile.parentFile.mkdirs()
-                zip.getInputStream(entry).use { input ->
-                    outFile.outputStream().use { output ->
-                        input.copyTo(output)
+                try {
+                    zip.getInputStream(entry).use { input ->
+                        outFile.outputStream().use { output ->
+                            input.copyTo(output)
+                        }
                     }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             }
         }

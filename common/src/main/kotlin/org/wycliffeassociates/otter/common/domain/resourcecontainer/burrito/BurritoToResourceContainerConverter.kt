@@ -143,7 +143,7 @@ open class BurritoToResourceContainerConverter @Inject constructor(
         }
 
         // Standard load
-        val loadedBurrito = BurritoContainer.load(burrito)
+        val loadedBurrito = BurritoContainer.load(tempDir)
         loadedBurrito.use {
             val metadata = it.manifest
             ResourceContainer.create(outputFile) {
