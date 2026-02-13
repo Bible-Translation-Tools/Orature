@@ -129,7 +129,7 @@ private class BurritoWrapperIdentifier(val directoryProvider: IDirectoryProvider
 
     override fun getFormat(file: File): ProjectFormat? {
         return try {
-            ScriptureBurritoWrapper.load(directoryProvider.tempDirectory, file)
+            ScriptureBurritoWrapper.load(file)
             ProjectFormat.BURRITO_WRAPPER
         } catch (e: Exception) {
             logger.info("${file.name} is not a valid Scripture Burrito: ", e)

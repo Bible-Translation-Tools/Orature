@@ -11,8 +11,22 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.OtterResourceContainerConfig
+import java.io.PrintWriter
+import java.io.StringWriter
 
 class BurritoWrapperTest {
+    private fun assertSuccessfulConversion(
+        converter: BurritoToResourceContainerConverter,
+        result: Boolean
+    ) {
+        if (result) return
+        val detail = converter.lastConversionError?.let { err ->
+            val sw = StringWriter()
+            err.printStackTrace(PrintWriter(sw))
+            sw.toString()
+        } ?: "No error captured"
+        throw AssertionError("Conversion should succeed\n$detail")
+    }
 
     @get:Rule
     val tempDir = TemporaryFolder()
@@ -30,8 +44,8 @@ class BurritoWrapperTest {
             {
               "meta": {
                 "name": { "en": "Wrapper Project" },
-                "version": "0.1",
-                "generator": { "name": "Test", "version": "1.0" },
+                "version": "1.0.0",
+                "generator": { "softwareName": "Test", "softwareVersion": "1.0" },
                 "dateCreated": "2025-01-01",
                 "description": { "en": "Test wrapper" },
                 "abbreviation": { "en": "WRAP" }
@@ -49,11 +63,12 @@ class BurritoWrapperTest {
         // Audio Burrito Metadata
         File(audioDir, "metadata.json").writeText("""
             {
+              "format": "scripture burrito",
               "meta": {
-                "version": "0.1",
+                "version": "1.0.0",
                 "defaultLocale": "en",
                 "dateCreated": "2025-01-01",
-                "generator": { "name": "audio", "version": "1.0" },
+                "generator": { "softwareName": "audio", "softwareVersion": "1.0" },
                 "category": "source"
               },
               "idAuthorities": {},
@@ -90,11 +105,12 @@ class BurritoWrapperTest {
         // Text Burrito Metadata
         File(textDir, "metadata.json").writeText("""
             {
+              "format": "scripture burrito",
                "meta": {
-                "version": "0.1",
+                "version": "1.0.0",
                 "defaultLocale": "en",
                 "dateCreated": "2025-01-01",
-                "generator": { "name": "text", "version": "1.0" },
+                "generator": { "softwareName": "text", "softwareVersion": "1.0" },
                 "category": "source"
               },
               "idAuthorities": {},
@@ -108,7 +124,7 @@ class BurritoWrapperTest {
               "type": {
                 "flavorType": {
                   "name": "scripture",
-                  "flavor": { "name": "scripture" },
+                  "flavor": { "name": "textTranslation" },
                   "currentScope": { "GEN": [] }
                 }
               },
@@ -142,7 +158,7 @@ class BurritoWrapperTest {
         val result = converter.convert(wrapperFile, outputZip)
 
         // Assert
-        assertTrue("Conversion should succeed", result)
+        assertSuccessfulConversion(converter, result)
         assertTrue("Output zip exists", outputZip.exists())
         
         ResourceContainer.load(outputZip, OtterResourceContainerConfig()).use { rc ->

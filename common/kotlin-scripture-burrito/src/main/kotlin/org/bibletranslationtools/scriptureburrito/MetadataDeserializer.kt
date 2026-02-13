@@ -20,19 +20,20 @@ class MetadataDeserializer : JsonDeserializer<MetadataSchema>() {
     override fun deserialize(jp: JsonParser, ctx: DeserializationContext?): MetadataSchema {
         val node: JsonNode = jp.readValueAsTree() // Get the complete JSON structure
 
-        val category = node["meta"]["category"].asText()
+        val category = node["meta"]?.get("category")?.asText()
+            ?: throw JsonMappingException(jp, "Missing required field: meta.category")
 
         val meta: Meta = mapper.readValue(node["meta"].toString(), Meta::class.java)
 
-        val type: TypeSchema = mapper.readValue(node["type"].toString(), TypeSchema::class.java)
-        val format = mapper.readValue(node["format"].toString(), Format::class.java)
-        val idAuthorities = mapper.readValue(node["idAuthorities"].toString(), IdAuthoritiesSchema::class.java)
-        val identification = mapper.readValue(node["identification"].toString(), IdentificationSchema::class.java)
-        val confidential = mapper.readValue(node["confidential"].toString(), Boolean::class.java)
-        val copyright = mapper.readValue(node["copyright"].toString(), CopyrightSchema::class.java)
-        val languages = mapper.readValue(node["languages"].toString(), Languages::class.java)
-        val ingredients = mapper.readValue(node["ingredients"].toString(), IngredientsSchema::class.java)
-        val localizedNames = mapper.readValue(node["localizedNames"].toString(), LocalizedNamesSchema::class.java)
+        val type: TypeSchema = readRequired(node, "type", TypeSchema::class.java, jp)
+        val format: Format = readRequired(node, "format", Format::class.java, jp)
+        val idAuthorities = readOptional(node, "idAuthorities", IdAuthoritiesSchema::class.java)
+        val identification = readOptional(node, "identification", IdentificationSchema::class.java)
+        val confidential = readOptional(node, "confidential", Boolean::class.java)
+        val copyright = readOptional(node, "copyright", CopyrightSchema::class.java) ?: CopyrightSchema()
+        val languages = readOptional(node, "languages", Languages::class.java) ?: Languages()
+        val ingredients = readOptional(node, "ingredients", IngredientsSchema::class.java) ?: IngredientsSchema()
+        val localizedNames = readOptional(node, "localizedNames", LocalizedNamesSchema::class.java) ?: LocalizedNamesSchema()
 
         val metadata: MetadataSchema = when (category) {
             "source" -> {
@@ -84,5 +85,16 @@ class MetadataDeserializer : JsonDeserializer<MetadataSchema>() {
             else -> throw JsonMappingException("Unsupported format string: $category")
         }
         return metadata
+    }
+
+    private fun <T> readOptional(node: JsonNode, field: String, clazz: Class<T>): T? {
+        val child = node[field] ?: return null
+        if (child.isNull) return null
+        return mapper.readValue(child.toString(), clazz)
+    }
+
+    private fun <T> readRequired(node: JsonNode, field: String, clazz: Class<T>, jp: JsonParser): T {
+        return readOptional(node, field, clazz)
+            ?: throw JsonMappingException(jp, "Missing required field: $field")
     }
 }
