@@ -200,10 +200,16 @@ open class BurritoToResourceContainerConverter @Inject constructor(
                         || flavorText.contains("texttranslation")
                         || flavorText == "scriptureflavorschema()"
 
-                    if (isAudioFlavor || (role == "source" && audioBurritoAccessor == null)) {
+                    if (isAudioFlavor) {
                         audioBurritoAccessor = burritoAccessor
                         audioMetadata = metadata
-                    } else if (isTextFlavor || (role == "derived" && textBurritoAccessor == null)) {
+                    } else if (isTextFlavor) {
+                        textBurritoAccessor = burritoAccessor
+                        textMetadata = metadata
+                    } else if (role == "source" && audioBurritoAccessor == null) {
+                        audioBurritoAccessor = burritoAccessor
+                        audioMetadata = metadata
+                    } else if (role == "derived" && textBurritoAccessor == null) {
                         textBurritoAccessor = burritoAccessor
                         textMetadata = metadata
                     }

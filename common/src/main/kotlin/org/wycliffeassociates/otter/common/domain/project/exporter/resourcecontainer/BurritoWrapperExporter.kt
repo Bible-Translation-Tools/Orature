@@ -63,15 +63,15 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito.auth.AuthProvider
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import org.wycliffeassociates.resourcecontainer.ZipAccessor
 import java.io.File
 import java.io.IOException
+import java.io.OutputStream
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.*
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
 import javax.inject.Inject
 
 typealias ChapterNumber = Int
@@ -258,10 +258,15 @@ class BurritoWrapperExporter @Inject constructor(
     ): MetadataSchema {
         val language = workbook.target.language
         val langCode = language.slug
-        val (_, dublinCore, localizedNames) = rcInfo
+        val (projects, dublinCore, localizedNames) = rcInfo
+        val defaultBookSlug = workbook.target.slug.uppercase(Locale.US)
+        val bookSlugByPath = projects.associate { project ->
+            project.path.removePrefix("./") to project.identifier.uppercase(Locale.US)
+        }
 
         val ingredients = IngredientsSchema()
         usfmFiles.forEach { (path, file) ->
+            val bookId = bookSlugByPath[path] ?: defaultBookSlug
             val ingredient = IngredientSchema().apply {
                 this.mimeType = "text/usfm"
                 this.size = file.length().toInt()
@@ -269,8 +274,6 @@ class BurritoWrapperExporter @Inject constructor(
                     this.md5 = calculateMD5(file)
                 }
                 this.scope = ScopeSchema().apply {
-                    // Extract book identifier from path
-                    val bookId = path.substringBefore(".").uppercase(Locale.US)
                     put(bookId, mutableListOf())
                 }
             }
@@ -304,7 +307,7 @@ class BurritoWrapperExporter @Inject constructor(
                     TextTranslationSchema(),
                     currentScope = ScopeSchema().apply {
                         usfmFiles.forEach { (path, _) ->
-                            val bookId = path.substringBefore(".").uppercase(Locale.US)
+                            val bookId = bookSlugByPath[path] ?: defaultBookSlug
                             if (!containsKey(bookId)) {
                                 put(bookId, mutableListOf())
                             }
@@ -625,37 +628,20 @@ class BurritoWrapperExporter @Inject constructor(
     }
 
     private fun createWrapperZip(wrapperDir: File, outputZip: File) {
-        ZipOutputStream(outputZip.outputStream()).use { zos ->
-            // Ensure we preserve directory structure by processing files in order
-            // and ensuring parent directories exist
-            val processedPaths = mutableSetOf<String>()
-            
-            wrapperDir.walkTopDown().forEach { file ->
-                if (file.isFile) {
-                    val relativePath = file.relativeTo(wrapperDir).path.replace("\\", "/")
-                    
-                    // Ensure parent directory entries exist in zip
-                    val pathParts = relativePath.split("/")
-                    if (pathParts.size > 1) {
-                        var currentPath = ""
-                        for (i in 0 until pathParts.size - 1) {
-                            currentPath += pathParts[i] + "/"
-                            if (currentPath !in processedPaths) {
-                                val dirEntry = ZipEntry(currentPath)
-                                zos.putNextEntry(dirEntry)
-                                zos.closeEntry()
-                                processedPaths.add(currentPath)
-                            }
-                        }
+        val zipAccessor = ZipAccessor(outputZip)
+        val filesToWrite = wrapperDir.walkTopDown()
+            .filter { it.isFile }
+            .associate { file ->
+                val relativePath = file.relativeTo(wrapperDir).path.replace("\\", "/")
+                relativePath to { output: OutputStream ->
+                    file.inputStream().use { input ->
+                        input.copyTo(output)
                     }
-                    
-                    val entry = ZipEntry(relativePath)
-                    zos.putNextEntry(entry)
-                    file.inputStream().use { it.transferTo(zos) }
-                    zos.closeEntry()
-                    processedPaths.add(relativePath)
+                    Unit
                 }
             }
+        zipAccessor.use {
+            it.write(filesToWrite)
         }
     }
 
