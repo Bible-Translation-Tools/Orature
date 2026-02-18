@@ -248,7 +248,7 @@ class BurritoWrapperExporter @Inject constructor(
         val project = workbook.target.slug
         val timestamp = java.time.LocalDateTime.now()
             .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))
-        return "$lang-$resource-$project-$timestamp.burrito"
+        return "$lang-$resource-$project-$timestamp.orature"
     }
 
     private fun createTextBurritoMetadata(
