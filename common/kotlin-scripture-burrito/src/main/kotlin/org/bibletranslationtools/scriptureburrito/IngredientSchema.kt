@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder(
-    "size", "lang", "mimeType", "checksum", "scope", "role"
+    "size", "lang", "mimeType", "checksum", "scope", "role", "properties"
 )
 class IngredientSchema {
     
@@ -46,6 +46,14 @@ class IngredientSchema {
     @JsonProperty("role")
     @JsonPropertyDescription("Roles which may be optionally attached to an ingredient.")
     var role: String? = null
+
+    @get:JsonProperty("properties")
+    @set:JsonProperty("properties")
+    @JsonProperty("properties")
+    @JsonPropertyDescription("Properties which may be optionally attached to an ingredient.")
+    var properties: Map<String, Any>? = null
+
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
