@@ -34,7 +34,7 @@ class BurritoWrapperAccessor(
     // Delegate to the underlying container accessor (zip or directory)
     private val delegateAccessor: IContainerAccessor = when {
         wrapperRoot.isDirectory -> org.bibletranslationtools.scriptureburrito.container.accessors.DirectoryAccessor(wrapperRoot)
-        file.extension.lowercase() == "zip" || file.name.endsWith(".burrito") -> {
+        file.extension.lowercase() in listOf("zip", "burrito", "orature") -> {
             org.bibletranslationtools.scriptureburrito.container.accessors.ZipAccessor(file)
         }
         else -> throw IllegalArgumentException("Unsupported burrito wrapper format: ${file.absolutePath}")
