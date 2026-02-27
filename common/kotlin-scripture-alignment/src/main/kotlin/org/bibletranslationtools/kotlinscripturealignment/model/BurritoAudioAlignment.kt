@@ -107,7 +107,7 @@ data class BurritoAudioAlignment(
             val targetGroup = groups!!.firstOrNull { group ->
                 val groupDocs = group.documents
                 val foundInGroup = when (groupDocs) {
-                    is DocumentsList -> groupDocs.list.any { it.scheme == "vtt-timecode" && it.docid == docid }
+                    is DocumentsList -> groupDocs.list.any { it.scheme == "vtt-timecode" && ( it.docid == docid || File(it.docid).name == docid) }
                     is DocumentsMap -> groupDocs.map.any { (key, docRef) -> docRef.scheme == "vtt-timecode" && docRef.docid == docid }
                     else -> false
                 }
@@ -124,7 +124,7 @@ data class BurritoAudioAlignment(
             // Use top-level documents and records (implicit single group)
             val topLevelDocs = this.documents
             val docidFound: Boolean = when (topLevelDocs) {
-                is DocumentsList -> topLevelDocs.list.any { it.scheme == "vtt-timecode" && it.docid == docid }
+                is DocumentsList -> topLevelDocs.list.any { it.scheme == "vtt-timecode" && ( it.docid == docid || File(it.docid).name == docid) }
                 is DocumentsMap -> topLevelDocs.map.any { (key, docRef) -> docRef.scheme == "vtt-timecode" && docRef.docid == docid }
                 else -> false
             }

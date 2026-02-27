@@ -1023,7 +1023,9 @@ internal fun getMarkersFromBurritoTimining(
     audioFile: File
 ): List<AudioMarker> {
     return BurritoAlignmentMetadata(timingFile, audioFile)
-        .parseTimings()
+        .parseTimings(
+            docid = audioFile.path
+        )
         .getMarkers()
 }
 
