@@ -120,6 +120,9 @@ class SourceAudioAccessor(
 
                 val oratureAudioFile = OratureAudioFile(file)
                 val size = oratureAudioFile.totalFrames
+
+                if (size == 0) return null
+
                 SourceAudio(file, 0, size)
             } else {
                 null
@@ -142,6 +145,9 @@ class SourceAudioAccessor(
                 val nextMarker = if (chunks.lastIndex > markerIndex) chunks[markerIndex + 1] else null
                 val start = marker.location
                 val end = nextMarker?.location ?: oratureAudioFile.totalFrames
+
+                if (end - start == 0) return null
+
                 return SourceAudio(file, start, end)
             }
         }
@@ -161,6 +167,9 @@ class SourceAudioAccessor(
                 val nextMarker = if (verses.lastIndex > markerIndex) verses[markerIndex + 1] else null
                 val start = marker.location
                 val end = nextMarker?.location ?: oratureAudioFile.totalFrames
+
+                if (end - start == 0) return null
+
                 return SourceAudio(file, start, end)
             }
         }
