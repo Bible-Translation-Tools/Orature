@@ -49,7 +49,7 @@ class VersificationRepository @Inject constructor(
         return Maybe
             .fromCallable {
                 directoryProvider.versificationDirectory.mkdirs()
-                val vrsFileName = versificationDao.fetchVersificationFile(slug)
+                val vrsFileName = versificationDao.fetchVersificationFile(slug) ?: return@fromCallable Maybe.empty()
                 val vrsFile = File(directoryProvider.versificationDirectory, vrsFileName)
                 val mapper = ObjectMapper(JsonFactory())
                 mapper.registerKotlinModule()
