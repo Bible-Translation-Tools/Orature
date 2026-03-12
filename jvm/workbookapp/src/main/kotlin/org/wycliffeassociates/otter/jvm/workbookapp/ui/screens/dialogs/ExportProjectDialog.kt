@@ -127,6 +127,15 @@ class ExportProjectDialog : OtterDialog() {
                             }
                         }
                         cardRadioButton(tg) {
+                            titleProperty.set(messages["brightcove"])
+                            selectedProperty().onChange {
+                                if (it) {
+                                    exportTypeProperty.set(ExportType.BRIGHTCOVE)
+                                    onSelectExportType(ExportType.BRIGHTCOVE)
+                                }
+                            }
+                        }
+                        cardRadioButton(tg) {
                             titleProperty.set(messages["burritoWrapper"])
                             selectedProperty().onChange {
                                 if (it) {

@@ -16,13 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.domain.project.exporter
+package org.wycliffeassociates.otter.common.domain.brightcove
 
-enum class ExportType(val titleKey: String) {
-    LISTEN("listen"),
-    SOURCE_AUDIO("sourceAudio"),
-    BACKUP("backup"),
-    PUBLISH("publish"),
-    BURRITO_WRAPPER("burritoWrapper"),
-    BRIGHTCOVE("brightcove")
+import io.reactivex.Single
+import org.wycliffeassociates.otter.common.data.primitives.Language
+import javax.inject.Inject
+
+interface CountryInfoResolver {
+    fun resolve(language: Language): Single<CountryInfo>
+}
+
+class NullCountryInfoResolver @Inject constructor() : CountryInfoResolver {
+    override fun resolve(language: Language): Single<CountryInfo> {
+        return Single.just(CountryInfo(null, null))
+    }
 }

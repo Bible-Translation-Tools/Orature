@@ -27,6 +27,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppDatabaseModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppPreferencesModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppRepositoriesModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AudioModule
+import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.BrightcoveModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.DirectoryProviderModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.ZipEntryTreeBuilderModule
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
@@ -51,7 +52,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.*
         AppRepositoriesModule::class,
         ZipEntryTreeBuilderModule::class,
         MetadataModule::class,
-        AuthModule::class
+        AuthModule::class,
+        BrightcoveModule::class
     ]
 )
 @Singleton

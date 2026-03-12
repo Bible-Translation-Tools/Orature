@@ -16,13 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.domain.project.exporter
+package org.wycliffeassociates.otter.common.domain.brightcove
 
-enum class ExportType(val titleKey: String) {
-    LISTEN("listen"),
-    SOURCE_AUDIO("sourceAudio"),
-    BACKUP("backup"),
-    PUBLISH("publish"),
-    BURRITO_WRAPPER("burritoWrapper"),
-    BRIGHTCOVE("brightcove")
+import io.reactivex.Single
+import java.io.File
+
+interface BrightcoveClient {
+    fun createVideo(config: BrightcoveConfig, request: BrightcoveVideoRequest): Single<String>
+
+    fun uploadSource(config: BrightcoveConfig, videoId: String, sourceFile: File): Single<BrightcoveUploadResult>
+
+    fun ingest(config: BrightcoveConfig, videoId: String, masterUrl: String): Single<BrightcoveIngestResult>
 }
