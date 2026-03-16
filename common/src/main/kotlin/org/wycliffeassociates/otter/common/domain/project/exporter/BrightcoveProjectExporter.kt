@@ -196,6 +196,7 @@ class BrightcoveProjectExporter @Inject constructor(
     ): BrightcoveVideoRequest {
         return metadataBuilder.buildVideoRequest(
             languageCode = workbook.target.language.slug,
+            resourceType = workbook.target.resourceMetadata.identifier,
             canonicalOrder = workbook.target.sort,
             bookCode = workbook.target.slug,
             localizedBookName = workbook.target.title,
