@@ -18,21 +18,25 @@
  */
 package org.wycliffeassociates.otter.common.domain.brightcove
 
-import io.reactivex.Maybe
-import io.reactivex.Single
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import java.io.File
+import javax.inject.Inject
 
-interface BrightcoveClient {
-    fun findVideoIdByReferenceId(config: BrightcoveConfig, referenceId: String): Maybe<String>
+data class VerseTiming(
+    val markers: List<VerseMarker>,
+    val totalFrames: Int
+)
 
-    fun createVideo(config: BrightcoveConfig, request: BrightcoveVideoRequest): Single<String>
+interface VerseTimingProvider {
+    fun getTiming(audioFile: File): VerseTiming
+}
 
-    fun uploadSource(config: BrightcoveConfig, videoId: String, sourceFile: File): Single<BrightcoveUploadResult>
-
-    fun ingest(
-        config: BrightcoveConfig,
-        videoId: String,
-        masterUrl: String,
-        textTracks: List<BrightcoveTextTrack> = emptyList()
-    ): Single<BrightcoveIngestResult>
+class OratureVerseTimingProvider @Inject constructor() : VerseTimingProvider {
+    override fun getTiming(audioFile: File): VerseTiming {
+        val oratureAudio = OratureAudioFile(audioFile)
+        val markers = oratureAudio.getMarker<VerseMarker>()
+            .sortedBy { it.location }
+        return VerseTiming(markers, oratureAudio.totalFrames)
+    }
 }

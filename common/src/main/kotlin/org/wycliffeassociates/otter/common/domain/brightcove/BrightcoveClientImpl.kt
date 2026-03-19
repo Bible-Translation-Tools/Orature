@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import io.reactivex.Maybe
 import io.reactivex.Single
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
@@ -33,15 +34,19 @@ import org.slf4j.LoggerFactory
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.jackson.JacksonConverterFactory
+import retrofit2.HttpException
 import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.Header
+import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 import javax.inject.Inject
 import java.io.File
 import java.util.Base64
+import java.net.URLEncoder
 
 class BrightcoveClientImpl @Inject constructor() : BrightcoveClient {
 
@@ -73,6 +78,36 @@ class BrightcoveClientImpl @Inject constructor() : BrightcoveClient {
 
     private val uploadClient = OkHttpClient()
 
+    override fun findVideoIdByReferenceId(
+        config: BrightcoveConfig,
+        referenceId: String
+    ): Maybe<String> {
+        val trimmedReference = referenceId.trim()
+        if (trimmedReference.isEmpty()) {
+            return Maybe.empty()
+        }
+        return getAccessToken(config)
+            .flatMap { token ->
+                cmsApi.listVideos(
+                    bearer(token),
+                    config.accountId,
+                    limit = 1,
+                    query = "reference_id:$trimmedReference"
+                )
+            }
+            .doOnError { error ->
+                logHttpError("list videos", error)
+            }
+            .flatMapMaybe { items ->
+                val id = items.firstOrNull()?.id
+                if (id.isNullOrBlank()) {
+                    Maybe.empty()
+                } else {
+                    Maybe.just(id)
+                }
+            }
+    }
+
     override fun createVideo(
         config: BrightcoveConfig,
         request: BrightcoveVideoRequest
@@ -84,12 +119,25 @@ class BrightcoveClientImpl @Inject constructor() : BrightcoveClient {
                     config.accountId,
                     CmsCreateVideoRequest(
                         name = request.name,
+                        referenceId = request.referenceId,
                         tags = request.tags,
                         customFields = request.customFields
                     )
                 )
             }
             .map { it.id }
+            .onErrorResumeNext { error ->
+                logHttpError("create video", error)
+                val httpError = error as? HttpException
+
+                if (httpError?.code() == 422) {
+                    return@onErrorResumeNext findVideoIdByReferenceId(config, request.referenceId)
+                        .switchIfEmpty(Maybe.error(error))
+                        .toSingle()
+                }
+
+                Single.error(error)
+            }
     }
 
     override fun uploadSource(
@@ -97,13 +145,18 @@ class BrightcoveClientImpl @Inject constructor() : BrightcoveClient {
         videoId: String,
         sourceFile: File
     ): Single<BrightcoveUploadResult> {
+        val sourceName = encodeSourceName(sourceFile.name)
         return getAccessToken(config)
             .flatMap { token ->
                 ingestApi.requestUploadUrl(
                     bearer(token),
                     config.accountId,
-                    videoId
+                    videoId,
+                    sourceName
                 )
+            }
+            .doOnError { error ->
+                logHttpError("request upload url", error)
             }
             .flatMap { uploadInfo ->
                 Single.fromCallable {
@@ -116,7 +169,8 @@ class BrightcoveClientImpl @Inject constructor() : BrightcoveClient {
     override fun ingest(
         config: BrightcoveConfig,
         videoId: String,
-        masterUrl: String
+        masterUrl: String,
+        textTracks: List<BrightcoveTextTrack>
     ): Single<BrightcoveIngestResult> {
         return getAccessToken(config)
             .flatMap { token ->
@@ -127,9 +181,13 @@ class BrightcoveClientImpl @Inject constructor() : BrightcoveClient {
                     BrightcoveIngestRequest(
                         master = BrightcoveIngestMaster(url = masterUrl),
                         profile = config.ingestProfile,
-                        callbacks = config.callbacks
+                        callbacks = config.callbacks,
+                        textTracks = textTracks.takeIf { it.isNotEmpty() }
                     )
                 )
+            }
+            .doOnError { error ->
+                logHttpError("ingest", error)
             }
             .map { response ->
                 BrightcoveIngestResult(
@@ -144,11 +202,14 @@ class BrightcoveClientImpl @Inject constructor() : BrightcoveClient {
         val authHeader = "Basic $encoded"
 
         return oauthApi.getAccessToken(authHeader)
+            .doOnError { error ->
+                logHttpError("oauth token", error)
+            }
             .map { it.accessToken }
     }
 
     private fun uploadToSignedUrl(uploadInfo: BrightcoveUploadUrlResponse, file: File) {
-        val mediaType = MediaType.parse("audio/mpeg")
+        val mediaType = MediaType.parse(contentTypeFor(file))
         val requestBody = RequestBody.create(mediaType, file)
         val requestBuilder = Request.Builder()
             .url(uploadInfo.signedUrl)
@@ -170,6 +231,33 @@ class BrightcoveClientImpl @Inject constructor() : BrightcoveClient {
 
     private fun bearer(token: String) = "Bearer $token"
 
+    private fun contentTypeFor(file: File): String {
+        return when (file.extension.lowercase()) {
+            "mp3" -> "audio/mpeg"
+            "vtt" -> "text/vtt"
+            else -> "application/octet-stream"
+        }
+    }
+
+    private fun encodeSourceName(sourceName: String): String {
+        return URLEncoder.encode(sourceName, Charsets.UTF_8.name())
+            .replace("+", "%20")
+    }
+
+    private fun logHttpError(action: String, error: Throwable) {
+        val httpError = error as? HttpException ?: return
+        val body = try {
+            httpError.response()?.errorBody()?.string()
+        } catch (e: Exception) {
+            null
+        }
+        if (!body.isNullOrBlank()) {
+            logger.error("Brightcove $action failed: HTTP ${httpError.code()} $body")
+        } else {
+            logger.error("Brightcove $action failed: HTTP ${httpError.code()}", httpError)
+        }
+    }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     private data class OAuthTokenResponse(
         @JsonProperty("access_token")
@@ -190,6 +278,8 @@ class BrightcoveClientImpl @Inject constructor() : BrightcoveClient {
     private data class CmsCreateVideoRequest(
         @JsonProperty("name")
         val name: String,
+        @JsonProperty("reference_id")
+        val referenceId: String,
         @JsonProperty("tags")
         val tags: List<String>,
         @JsonProperty("custom_fields")
@@ -209,6 +299,14 @@ class BrightcoveClientImpl @Inject constructor() : BrightcoveClient {
             @Path("accountId") accountId: String,
             @Body body: CmsCreateVideoRequest
         ): Single<CmsVideoResponse>
+
+        @GET("/v1/accounts/{accountId}/videos")
+        fun listVideos(
+            @Header("Authorization") bearer: String,
+            @Path("accountId") accountId: String,
+            @Query("limit") limit: Int,
+            @Query("q") query: String
+        ): Single<List<CmsVideoResponse>>
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -234,7 +332,9 @@ class BrightcoveClientImpl @Inject constructor() : BrightcoveClient {
         @JsonProperty("profile")
         val profile: String? = null,
         @JsonProperty("callbacks")
-        val callbacks: List<String>? = null
+        val callbacks: List<String>? = null,
+        @JsonProperty("text_tracks")
+        val textTracks: List<BrightcoveTextTrack>? = null
     )
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -246,11 +346,12 @@ class BrightcoveClientImpl @Inject constructor() : BrightcoveClient {
     )
 
     private interface BrightcoveDynamicIngestApi {
-        @POST("/v1/accounts/{accountId}/videos/{videoId}/upload-urls")
+        @GET("/v1/accounts/{accountId}/videos/{videoId}/upload-urls/{sourceName}")
         fun requestUploadUrl(
             @Header("Authorization") bearer: String,
             @Path("accountId") accountId: String,
-            @Path("videoId") videoId: String
+            @Path("videoId") videoId: String,
+            @Path("sourceName", encoded = true) sourceName: String
         ): Single<BrightcoveUploadUrlResponse>
 
         @POST("/v1/accounts/{accountId}/videos/{videoId}/ingest-requests")

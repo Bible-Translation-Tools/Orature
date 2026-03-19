@@ -8,6 +8,8 @@ import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveConfigPro
 import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveConfigProviderImpl
 import org.wycliffeassociates.otter.common.domain.brightcove.CountryInfoResolver
 import org.wycliffeassociates.otter.common.domain.brightcove.NullCountryInfoResolver
+import org.wycliffeassociates.otter.common.domain.brightcove.OratureVerseTimingProvider
+import org.wycliffeassociates.otter.common.domain.brightcove.VerseTimingProvider
 
 @Module
 abstract class BrightcoveModule {
@@ -19,4 +21,7 @@ abstract class BrightcoveModule {
 
     @Binds
     abstract fun bindCountryInfoResolver(impl: NullCountryInfoResolver): CountryInfoResolver
+
+    @Binds
+    abstract fun bindVerseTimingProvider(impl: OratureVerseTimingProvider): VerseTimingProvider
 }

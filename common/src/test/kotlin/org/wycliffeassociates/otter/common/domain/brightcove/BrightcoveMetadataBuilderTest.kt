@@ -30,6 +30,7 @@ class BrightcoveMetadataBuilderTest {
         val builder = BrightcoveMetadataBuilder()
         val request = builder.buildVideoRequest(
             languageCode = "bzs",
+            resourceType = "ulb",
             canonicalOrder = 41,
             bookCode = "mat",
             localizedBookName = "Mateus",
@@ -38,6 +39,7 @@ class BrightcoveMetadataBuilderTest {
         )
 
         assertEquals("bzs_41-mat_05", request.name)
+        assertEquals("bzs_ulb_mat_005", request.referenceId)
         assertEquals(
             mapOf(
                 "book" to "mat",
@@ -64,6 +66,7 @@ class BrightcoveMetadataBuilderTest {
         val builder = BrightcoveMetadataBuilder()
         val request = builder.buildVideoRequest(
             languageCode = "bzs",
+            resourceType = "ulb",
             canonicalOrder = 41,
             bookCode = "mat",
             localizedBookName = "Mateus",

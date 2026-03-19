@@ -34,21 +34,20 @@ class BrightcoveMetadataBuilder {
 
         val normalizedBookCode = bookCode.lowercase()
         val normalizedLanguage = languageCode.lowercase()
-        val videoName = "${normalizedLanguage}_${resourceType}_${canonicalOrder}-${normalizedBookCode}_${chapterLabel2}"
+        val normalizedResourceType = resourceType.trim().lowercase()
+        val videoName = "${normalizedLanguage}_${canonicalOrder}-${normalizedBookCode}_${chapterLabel2}"
+        val referenceId = "${normalizedLanguage}_${normalizedResourceType}_${normalizedBookCode}_${chapterLabel3}"
 
         val customFields = linkedMapOf(
             "book" to normalizedBookCode,
             "canonical_order" to canonicalOrder.toString(),
             "chapter" to chapterLabel3,
-            "resource_type" to "${languageCode}_${resourceType}",
             "language_code" to normalizedLanguage,
             "localized_book_name" to localizedBookName
         )
 
-        countryInfo.code?.let { code ->
-            if (code.isNotBlank()) {
-                customFields["country"] = code
-            }
+        countryInfo.code?.trim()?.takeIf { it.isNotEmpty() }?.let { code ->
+            customFields["country"] = code
         }
 
         val tags = mutableListOf<String>()
@@ -57,7 +56,6 @@ class BrightcoveMetadataBuilder {
         tags.add("language:${normalizedLanguage}")
         tags.add("book:${normalizedBookCode}")
         tags.add("chapter:${chapter}")
-        tags.add("${languageCode}_${resourceType}")
 
         countryInfo.code?.trim()?.takeIf { it.isNotEmpty() }?.let { code ->
             tags.add("country:${code.lowercase()}")
@@ -68,6 +66,7 @@ class BrightcoveMetadataBuilder {
 
         return BrightcoveVideoRequest(
             name = videoName,
+            referenceId = referenceId,
             tags = tags.distinct(),
             customFields = customFields
         )

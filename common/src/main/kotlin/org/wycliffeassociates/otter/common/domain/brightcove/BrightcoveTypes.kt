@@ -18,8 +18,11 @@
  */
 package org.wycliffeassociates.otter.common.domain.brightcove
 
+import com.fasterxml.jackson.annotation.JsonProperty
+
 data class BrightcoveVideoRequest(
     val name: String,
+    val referenceId: String,
     val tags: List<String>,
     val customFields: Map<String, String>
 )
@@ -35,6 +38,19 @@ data class BrightcoveUploadResult(
 
 data class BrightcoveIngestResult(
     val jobId: String?
+)
+
+data class BrightcoveTextTrack(
+    @JsonProperty("url")
+    val url: String,
+    @JsonProperty("srclang")
+    val srclang: String,
+    @JsonProperty("kind")
+    val kind: String,
+    @JsonProperty("label")
+    val label: String,
+    @JsonProperty("default")
+    val isDefault: Boolean = true
 )
 
 data class BrightcoveExportReport(
@@ -54,6 +70,8 @@ data class BrightcoveExportEntry(
     val takeName: String?,
     val videoName: String,
     val videoId: String?,
+    val vttFile: String?,
+    val textTrackUrl: String?,
     val ingestJobId: String?,
     val status: String,
     val error: String?
