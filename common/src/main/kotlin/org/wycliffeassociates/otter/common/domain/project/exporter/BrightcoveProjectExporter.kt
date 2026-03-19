@@ -26,6 +26,7 @@ import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.License
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
@@ -89,6 +90,8 @@ class BrightcoveProjectExporter @Inject constructor(
                     }
                     val license = License.get(workbook.target.resourceMetadata.license)
                     val countryInfo = resolveCountryInfo(workbook)
+                    val projectMode = projectAccessor.getProjectMode()
+                    val includeVtt = projectMode == ProjectMode.NARRATION
 
                     callback?.onNotifyProgress(0.0, messageKey = "exportingTakes")
 
@@ -112,7 +115,11 @@ class BrightcoveProjectExporter @Inject constructor(
                         }
 
                         val mp3File = tempDir.resolve("chapter-${chapter.sort}.mp3")
-                        val vttFile = tempDir.resolve("${mp3File.nameWithoutExtension}.vtt")
+                        val vttFile = if (includeVtt) {
+                            tempDir.resolve("${mp3File.nameWithoutExtension}.vtt")
+                        } else {
+                            null
+                        }
                         val videoRequest = buildVideoRequest(workbook, chapter, countryInfo)
 
                         try {
@@ -120,25 +127,27 @@ class BrightcoveProjectExporter @Inject constructor(
                             audioExporter.exportMp3(take.file, mp3File, metadata).blockingAwait()
                             updateMp3Progress(callback, index + 1, total)
 
-                            val timing = verseTimingProvider.getTiming(take.file)
-                            val chapterContent = try {
-                                projectAccessor.getChapterContent(
-                                    workbook.source.slug,
-                                    chapter.sort,
-                                    showVerseNumber = false
+                            if (includeVtt) {
+                                val timing = verseTimingProvider.getTiming(take.file)
+                                val chapterContent = try {
+                                    projectAccessor.getChapterContent(
+                                        workbook.source.slug,
+                                        chapter.sort,
+                                        showVerseNumber = false
+                                    )
+                                } catch (e: Exception) {
+                                    logger.warn("Failed to read source text; continuing with empty VTT cues", e)
+                                    emptyList()
+                                }
+                                val vttCues = vttBuilder.buildCues(
+                                    bookCode = workbook.target.slug,
+                                    chapterNumber = chapter.sort,
+                                    verseMarkers = timing.markers,
+                                    totalFrames = timing.totalFrames,
+                                    chapterContent = chapterContent
                                 )
-                            } catch (e: Exception) {
-                                logger.warn("Failed to read source text; continuing with empty VTT cues", e)
-                                emptyList()
+                                vttBuilder.writeVtt(requireNotNull(vttFile), vttCues)
                             }
-                            val vttCues = vttBuilder.buildCues(
-                                bookCode = workbook.target.slug,
-                                chapterNumber = chapter.sort,
-                                verseMarkers = timing.markers,
-                                totalFrames = timing.totalFrames,
-                                chapterContent = chapterContent
-                            )
-                            vttBuilder.writeVtt(vttFile, vttCues)
 
                             val existingVideoId = brightcoveClient
                                 .findVideoIdByReferenceId(config, videoRequest.referenceId)
@@ -152,20 +161,26 @@ class BrightcoveProjectExporter @Inject constructor(
                                 .uploadSource(config, videoId, mp3File)
                                 .blockingGet()
 
-                            val vttUpload = brightcoveClient
-                                .uploadSource(config, videoId, vttFile)
-                                .blockingGet()
+                            val textTracks = if (includeVtt) {
+                                val vttUpload = brightcoveClient
+                                    .uploadSource(config, videoId, requireNotNull(vttFile))
+                                    .blockingGet()
 
-                            val textTrack = BrightcoveTextTrack(
-                                url = vttUpload.masterUrl,
-                                srclang = workbook.target.language.slug,
-                                kind = "subtitles",
-                                label = vttFile.name,
-                                isDefault = true
-                            )
+                                listOf(
+                                    BrightcoveTextTrack(
+                                        url = vttUpload.masterUrl,
+                                        srclang = workbook.target.language.slug,
+                                        kind = "subtitles",
+                                        label = requireNotNull(vttFile).name,
+                                        isDefault = true
+                                    )
+                                )
+                            } else {
+                                emptyList()
+                            }
 
                             val ingestResult = brightcoveClient
-                                .ingest(config, videoId, audioUpload.masterUrl, listOf(textTrack))
+                                .ingest(config, videoId, audioUpload.masterUrl, textTracks)
                                 .blockingGet()
 
                             reportEntries.add(
@@ -175,7 +190,7 @@ class BrightcoveProjectExporter @Inject constructor(
                                     videoRequest,
                                     videoId,
                                     vttFile,
-                                    vttUpload.masterUrl,
+                                    textTracks.firstOrNull()?.url,
                                     ingestResult
                                 )
                             )
@@ -187,7 +202,7 @@ class BrightcoveProjectExporter @Inject constructor(
                             )
                         } finally {
                             mp3File.delete()
-                            vttFile.delete()
+                            vttFile?.delete()
                             updateIngestProgress(callback, index + 1, total)
                         }
                     }
@@ -292,7 +307,7 @@ class BrightcoveProjectExporter @Inject constructor(
         takeName: String?,
         request: BrightcoveVideoRequest,
         videoId: String,
-        vttFile: File,
+        vttFile: File?,
         textTrackUrl: String?,
         ingest: BrightcoveIngestResult
     ): BrightcoveExportEntry {
@@ -301,7 +316,7 @@ class BrightcoveProjectExporter @Inject constructor(
             takeName = takeName,
             videoName = request.name,
             videoId = videoId,
-            vttFile = vttFile.absolutePath,
+            vttFile = vttFile?.absolutePath,
             textTrackUrl = textTrackUrl,
             ingestJobId = ingest.jobId,
             status = "SUCCESS",
@@ -313,7 +328,7 @@ class BrightcoveProjectExporter @Inject constructor(
         chapter: Chapter,
         takeName: String?,
         request: BrightcoveVideoRequest,
-        vttFile: File,
+        vttFile: File?,
         error: Exception
     ): BrightcoveExportEntry {
         return BrightcoveExportEntry(
@@ -321,7 +336,7 @@ class BrightcoveProjectExporter @Inject constructor(
             takeName = takeName,
             videoName = request.name,
             videoId = null,
-            vttFile = vttFile.absolutePath,
+            vttFile = vttFile?.absolutePath,
             textTrackUrl = null,
             ingestJobId = null,
             status = "FAILURE",

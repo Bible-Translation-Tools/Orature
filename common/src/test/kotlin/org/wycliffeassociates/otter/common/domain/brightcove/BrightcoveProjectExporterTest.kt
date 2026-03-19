@@ -41,6 +41,7 @@ import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedTranslation
@@ -53,6 +54,7 @@ import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.BrightcoveProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 import java.time.LocalDate
@@ -126,6 +128,7 @@ class BrightcoveProjectExporterTest {
         }
 
         val workbook = buildWorkbook(directoryProvider, mapOf(1 to true, 2 to true, 3 to true))
+        setProjectMode(directoryProvider, workbook, ProjectMode.NARRATION)
         val result = exporter.export(
             outputDir,
             workbook,
@@ -193,6 +196,7 @@ class BrightcoveProjectExporterTest {
         }
 
         val workbook = buildWorkbook(directoryProvider, mapOf(1 to true))
+        setProjectMode(directoryProvider, workbook, ProjectMode.NARRATION)
         val result = exporter.export(
             outputDir,
             workbook,
@@ -258,6 +262,7 @@ class BrightcoveProjectExporterTest {
         }
 
         val workbook = buildWorkbook(directoryProvider, mapOf(1 to true, 2 to true))
+        setProjectMode(directoryProvider, workbook, ProjectMode.NARRATION)
         val result = exporter.export(
             outputDir,
             workbook,
@@ -321,6 +326,7 @@ class BrightcoveProjectExporterTest {
         }
 
         val workbook = buildWorkbook(directoryProvider, mapOf(1 to true))
+        setProjectMode(directoryProvider, workbook, ProjectMode.NARRATION)
         val result = exporter.export(
             outputDir,
             workbook,
@@ -333,6 +339,60 @@ class BrightcoveProjectExporterTest {
         verify(exactly = 0) { brightcoveClient.createVideo(any(), any()) }
         verify(exactly = 2) { brightcoveClient.uploadSource(any(), "existing", any()) }
         verify(exactly = 1) { brightcoveClient.ingest(any(), "existing", any(), any()) }
+    }
+
+    @Test
+    fun skipsVttForNonNarrationProjects() {
+        val directoryProvider = mockDirectoryProvider(tempDir)
+        val configProvider = mockk<BrightcoveConfigProvider> {
+            every { load() } returns Single.just(
+                BrightcoveConfig("acct", "client", "secret")
+            )
+        }
+        val textTracksSlot = slot<List<BrightcoveTextTrack>>()
+        val brightcoveClient = mockk<BrightcoveClient> {
+            every { findVideoIdByReferenceId(any(), any()) } returns Maybe.empty()
+            every { createVideo(any(), any()) } returns Single.just("v1")
+            every { uploadSource(any(), any(), any()) } returns Single.just(BrightcoveUploadResult("m1"))
+            every { ingest(any(), any(), any(), capture(textTracksSlot)) } returns Single.just(
+                BrightcoveIngestResult("j1")
+            )
+        }
+        val countryResolver = mockk<CountryInfoResolver> {
+            every { resolve(any()) } returns Single.just(CountryInfo(null, null))
+        }
+        val verseTimingProvider = mockk<VerseTimingProvider> {
+            every { getTiming(any()) } returns VerseTiming(
+                markers = listOf(VerseMarker(1, 1, 0)),
+                totalFrames = 44100
+            )
+        }
+        val audioExporter = mockk<AudioExporter> {
+            every { exportMp3(any(), any(), any()) } returns Completable.complete()
+        }
+
+        val exporter = BrightcoveProjectExporter(
+            directoryProvider,
+            configProvider,
+            brightcoveClient,
+            countryResolver,
+            verseTimingProvider
+        ).apply {
+            this.audioExporter = audioExporter
+        }
+
+        val workbook = buildWorkbook(directoryProvider, mapOf(1 to true))
+        setProjectMode(directoryProvider, workbook, ProjectMode.TRANSLATION)
+        val result = exporter.export(
+            outputDir,
+            workbook,
+            callback = null,
+            options = ExportOptions(listOf(1))
+        ).blockingGet()
+
+        assertEquals(ExportResult.SUCCESS, result)
+        verify(exactly = 1) { brightcoveClient.uploadSource(any(), any(), any()) }
+        assertTrue(textTracksSlot.captured.isEmpty())
     }
 
     private fun buildWorkbook(
@@ -433,5 +493,21 @@ class BrightcoveProjectExporterTest {
         every { provider.tempDirectory } returns temp
 
         return provider
+    }
+
+    private fun setProjectMode(directoryProvider: IDirectoryProvider, workbook: Workbook, mode: ProjectMode) {
+        val projectDir = directoryProvider.getProjectDirectory(
+            workbook.source.resourceMetadata,
+            workbook.target.resourceMetadata,
+            workbook.target.toCollection()
+        )
+        projectDir.resolve(".apps/orature").mkdirs()
+        val accessor = ProjectFilesAccessor(
+            directoryProvider,
+            workbook.source.resourceMetadata,
+            workbook.target.resourceMetadata,
+            workbook.target.toCollection()
+        )
+        accessor.setProjectMode(mode)
     }
 }
