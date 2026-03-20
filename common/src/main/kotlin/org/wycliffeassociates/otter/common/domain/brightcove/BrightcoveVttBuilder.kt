@@ -27,7 +27,7 @@ data class BrightcoveVttCue(
     val id: String,
     val startTimeUs: Long,
     val endTimeUs: Long,
-    val text: String
+    val text: String,
 )
 
 class BrightcoveVttBuilder {
@@ -52,7 +52,7 @@ class BrightcoveVttBuilder {
                 framesToUs(sorted[index + 1].location)
             }
 
-            val id = buildCueId(bookCode, chapterNumber, marker.start, marker.end)
+            val id = formatVerseReference(bookCode, chapterNumber, marker.start, marker.end)
             val text = buildVerseText(chapterContent, marker.start, marker.end)
             BrightcoveVttCue(id, startUs, endUs, text)
         }
@@ -72,15 +72,6 @@ class BrightcoveVttBuilder {
                 writer.write("\n")
             }
         }
-    }
-
-    private fun buildCueId(bookCode: String, chapterNumber: Int, start: Int, end: Int): String {
-        val reference = if (start == end) {
-            "$start"
-        } else {
-            "$start-$end"
-        }
-        return "${bookCode}_${chapterNumber}:${reference}"
     }
 
     private fun buildVerseText(contents: List<Content>, start: Int, end: Int): String {

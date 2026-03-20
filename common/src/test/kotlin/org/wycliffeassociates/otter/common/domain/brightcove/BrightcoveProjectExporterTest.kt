@@ -99,6 +99,7 @@ class BrightcoveProjectExporterTest {
                 Single.just(BrightcoveUploadResult("m2")),
                 Single.just(BrightcoveUploadResult("t2"))
             )
+            every { updateCuePoints(any(), any(), any()) } returns Completable.complete()
             every { ingest(any(), any(), any(), any()) } returnsMany listOf(
                 Single.just(BrightcoveIngestResult("j1")),
                 Single.just(BrightcoveIngestResult("j2"))
@@ -161,6 +162,7 @@ class BrightcoveProjectExporterTest {
             )
         }
         val textTracksSlot = slot<List<BrightcoveTextTrack>>()
+        val cuePointsSlot = slot<List<BrightcoveCuePoint>>()
         val brightcoveClient = mockk<BrightcoveClient> {
             every { findVideoIdByReferenceId(any(), any()) } returns Maybe.empty()
             every { createVideo(any(), any()) } returns Single.just("v1")
@@ -168,6 +170,7 @@ class BrightcoveProjectExporterTest {
                 Single.just(BrightcoveUploadResult("m1")),
                 Single.just(BrightcoveUploadResult("t1"))
             )
+            every { updateCuePoints(any(), any(), capture(cuePointsSlot)) } returns Completable.complete()
             every { ingest(any(), any(), any(), capture(textTracksSlot)) } returns Single.just(
                 BrightcoveIngestResult("j1")
             )
@@ -211,6 +214,11 @@ class BrightcoveProjectExporterTest {
         assertEquals("subtitles", track.kind)
         assertEquals("chapter-1.vtt", track.label)
         assertTrue(track.isDefault)
+        val cuePoint = cuePointsSlot.captured.single()
+        assertEquals("MAT 1:1", cuePoint.name)
+        assertEquals(0.0, cuePoint.time, 0.0001)
+        assertEquals("CODE", cuePoint.type)
+        assertEquals(false, cuePoint.forceStop)
     }
 
     @Test
@@ -233,6 +241,7 @@ class BrightcoveProjectExporterTest {
                 Single.just(BrightcoveUploadResult("m2")),
                 Single.just(BrightcoveUploadResult("t2"))
             )
+            every { updateCuePoints(any(), any(), any()) } returns Completable.complete()
             every { ingest(any(), any(), any(), any()) } returnsMany listOf(
                 Single.error(RuntimeException("fail")),
                 Single.just(BrightcoveIngestResult("j2"))
@@ -298,6 +307,7 @@ class BrightcoveProjectExporterTest {
                 Single.just(BrightcoveUploadResult("m1")),
                 Single.just(BrightcoveUploadResult("t1"))
             )
+            every { updateCuePoints(any(), any(), any()) } returns Completable.complete()
             every { ingest(any(), any(), any(), any()) } returns Single.just(
                 BrightcoveIngestResult("j1")
             )
@@ -354,6 +364,7 @@ class BrightcoveProjectExporterTest {
             every { findVideoIdByReferenceId(any(), any()) } returns Maybe.empty()
             every { createVideo(any(), any()) } returns Single.just("v1")
             every { uploadSource(any(), any(), any()) } returns Single.just(BrightcoveUploadResult("m1"))
+            every { updateCuePoints(any(), any(), any()) } returns Completable.complete()
             every { ingest(any(), any(), any(), capture(textTracksSlot)) } returns Single.just(
                 BrightcoveIngestResult("j1")
             )

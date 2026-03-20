@@ -27,7 +27,8 @@ class BrightcoveMetadataBuilder {
         bookCode: String,
         localizedBookName: String,
         chapter: Int,
-        countryInfo: CountryInfo
+        countryInfo: CountryInfo,
+        cuePoints: List<BrightcoveCuePoint> = emptyList()
     ): BrightcoveVideoRequest {
         val chapterLabel2 = chapter.toString().padStart(2, '0')
         val chapterLabel3 = chapter.toString().padStart(3, '0')
@@ -68,7 +69,8 @@ class BrightcoveMetadataBuilder {
             name = videoName,
             referenceId = referenceId,
             tags = tags.distinct(),
-            customFields = customFields
+            customFields = customFields,
+            cuePoints = cuePoints
         )
     }
 }

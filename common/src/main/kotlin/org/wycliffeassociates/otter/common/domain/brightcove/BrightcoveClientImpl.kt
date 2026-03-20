@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import okhttp3.MediaType
@@ -40,6 +41,7 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.Header
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -121,7 +123,8 @@ class BrightcoveClientImpl @Inject constructor() : BrightcoveClient {
                         name = request.name,
                         referenceId = request.referenceId,
                         tags = request.tags,
-                        customFields = request.customFields
+                        customFields = request.customFields,
+                        cuePoints = request.cuePoints.takeIf { it.isNotEmpty() }
                     )
                 )
             }
@@ -163,6 +166,28 @@ class BrightcoveClientImpl @Inject constructor() : BrightcoveClient {
                     uploadToSignedUrl(uploadInfo, sourceFile)
                     BrightcoveUploadResult(masterUrl = uploadInfo.apiRequestUrl)
                 }
+            }
+    }
+
+    override fun updateCuePoints(
+        config: BrightcoveConfig,
+        videoId: String,
+        cuePoints: List<BrightcoveCuePoint>
+    ): Completable {
+        if (cuePoints.isEmpty()) {
+            return Completable.complete()
+        }
+        return getAccessToken(config)
+            .flatMapCompletable { token ->
+                cmsApi.updateVideo(
+                    bearer(token),
+                    config.accountId,
+                    videoId,
+                    CmsUpdateVideoRequest(cuePoints = cuePoints)
+                )
+            }
+            .doOnError { error ->
+                logHttpError("update cue points", error)
             }
     }
 
@@ -283,7 +308,14 @@ class BrightcoveClientImpl @Inject constructor() : BrightcoveClient {
         @JsonProperty("tags")
         val tags: List<String>,
         @JsonProperty("custom_fields")
-        val customFields: Map<String, String>
+        val customFields: Map<String, String>,
+        @JsonProperty("cue_points")
+        val cuePoints: List<BrightcoveCuePoint>? = null
+    )
+
+    private data class CmsUpdateVideoRequest(
+        @JsonProperty("cue_points")
+        val cuePoints: List<BrightcoveCuePoint>
     )
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -299,6 +331,14 @@ class BrightcoveClientImpl @Inject constructor() : BrightcoveClient {
             @Path("accountId") accountId: String,
             @Body body: CmsCreateVideoRequest
         ): Single<CmsVideoResponse>
+
+        @PATCH("/v1/accounts/{accountId}/videos/{videoId}")
+        fun updateVideo(
+            @Header("Authorization") bearer: String,
+            @Path("accountId") accountId: String,
+            @Path("videoId") videoId: String,
+            @Body body: CmsUpdateVideoRequest
+        ): Completable
 
         @GET("/v1/accounts/{accountId}/videos")
         fun listVideos(

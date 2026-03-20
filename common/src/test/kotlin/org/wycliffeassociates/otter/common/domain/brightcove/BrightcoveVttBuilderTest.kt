@@ -51,11 +51,11 @@ class BrightcoveVttBuilderTest {
         )
 
         assertEquals(2, cues.size)
-        assertEquals("gen_1:1-3", cues[0].id)
+        assertEquals("GEN 1:1-3", cues[0].id)
         assertEquals("In the beginning God created", cues[0].text)
         assertEquals(0, cues[0].startTimeUs)
         assertEquals(1_000_000, cues[0].endTimeUs)
-        assertEquals("gen_1:4", cues[1].id)
+        assertEquals("GEN 1:4", cues[1].id)
         assertEquals("the heavens", cues[1].text)
         assertEquals(1_000_000, cues[1].startTimeUs)
         assertEquals(2_000_000, cues[1].endTimeUs)
@@ -66,7 +66,7 @@ class BrightcoveVttBuilderTest {
         val builder = BrightcoveVttBuilder()
         val cues = listOf(
             BrightcoveVttCue(
-                id = "mat_1:1",
+                id = "MAT 1:1",
                 startTimeUs = 0,
                 endTimeUs = 1_000_000,
                 text = "Verse one"
@@ -78,7 +78,7 @@ class BrightcoveVttBuilderTest {
             builder.writeVtt(tempFile, cues)
             val output = tempFile.readText()
             assertTrue(output.contains("00:00:00.000 --> 00:00:01.000"))
-            assertTrue(output.contains("mat_1:1"))
+            assertTrue(output.contains("MAT 1:1"))
             assertTrue(output.contains("Verse one"))
         } finally {
             tempFile.delete()

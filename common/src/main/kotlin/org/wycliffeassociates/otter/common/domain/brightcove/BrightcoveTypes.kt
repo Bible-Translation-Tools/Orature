@@ -24,7 +24,8 @@ data class BrightcoveVideoRequest(
     val name: String,
     val referenceId: String,
     val tags: List<String>,
-    val customFields: Map<String, String>
+    val customFields: Map<String, String>,
+    val cuePoints: List<BrightcoveCuePoint> = emptyList()
 )
 
 data class CountryInfo(
@@ -51,6 +52,17 @@ data class BrightcoveTextTrack(
     val label: String,
     @JsonProperty("default")
     val isDefault: Boolean = true
+)
+
+data class BrightcoveCuePoint(
+    @JsonProperty("name")
+    val name: String,
+    @JsonProperty("type")
+    val type: String = "CODE",
+    @JsonProperty("time")
+    val time: Double,
+    @JsonProperty("force_stop")
+    val forceStop: Boolean = false
 )
 
 data class BrightcoveExportReport(

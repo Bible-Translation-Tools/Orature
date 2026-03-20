@@ -18,28 +18,11 @@
  */
 package org.wycliffeassociates.otter.common.domain.brightcove
 
-import io.reactivex.Maybe
-import io.reactivex.Completable
-import io.reactivex.Single
-import java.io.File
-
-interface BrightcoveClient {
-    fun findVideoIdByReferenceId(config: BrightcoveConfig, referenceId: String): Maybe<String>
-
-    fun createVideo(config: BrightcoveConfig, request: BrightcoveVideoRequest): Single<String>
-
-    fun uploadSource(config: BrightcoveConfig, videoId: String, sourceFile: File): Single<BrightcoveUploadResult>
-
-    fun updateCuePoints(
-        config: BrightcoveConfig,
-        videoId: String,
-        cuePoints: List<BrightcoveCuePoint>
-    ): Completable
-
-    fun ingest(
-        config: BrightcoveConfig,
-        videoId: String,
-        masterUrl: String,
-        textTracks: List<BrightcoveTextTrack> = emptyList()
-    ): Single<BrightcoveIngestResult>
+internal fun formatVerseReference(bookCode: String, chapterNumber: Int, start: Int, end: Int): String {
+    val reference = if (start == end) {
+        "$start"
+    } else {
+        "$start-$end"
+    }
+    return "${bookCode.trim().uppercase()} $chapterNumber:$reference"
 }
