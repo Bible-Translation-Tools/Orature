@@ -29,7 +29,6 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import io.reactivex.Completable
-import io.reactivex.Maybe
 import io.reactivex.Single
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -82,28 +81,25 @@ class BrightcoveProjectExporterTest {
     @Test
     fun exportSelectedTakesOnly() {
         val directoryProvider = mockDirectoryProvider(tempDir)
-        val configProvider = mockk<BrightcoveConfigProvider> {
+        val configProvider = mockk<BrightcoveWorkerConfigProvider> {
             every { load() } returns Single.just(
-                BrightcoveConfig("acct", "client", "secret")
+                BrightcoveWorkerConfig("https://worker.example")
             )
         }
-        val brightcoveClient = mockk<BrightcoveClient> {
-            every { findVideoIdByReferenceId(any(), any()) } returns Maybe.empty()
-            every { createVideo(any(), any()) } returnsMany listOf(
-                Single.just("v1"),
-                Single.just("v2")
+        val workerClient = mockk<BrightcoveWorkerClient> {
+            every { upload(any(), any(), any(), any()) } returnsMany listOf(
+                Single.just(BrightcoveWorkerUploadResult("audio1")),
+                Single.just(BrightcoveWorkerUploadResult("vtt1")),
+                Single.just(BrightcoveWorkerUploadResult("audio2")),
+                Single.just(BrightcoveWorkerUploadResult("vtt2"))
             )
-            every { uploadSource(any(), any(), any()) } returnsMany listOf(
-                Single.just(BrightcoveUploadResult("m1")),
-                Single.just(BrightcoveUploadResult("t1")),
-                Single.just(BrightcoveUploadResult("m2")),
-                Single.just(BrightcoveUploadResult("t2"))
+            every { ingest(any(), any(), any()) } returnsMany listOf(
+                Single.just(BrightcoveWorkerIngestResult("v1", "j1")),
+                Single.just(BrightcoveWorkerIngestResult("v2", "j2"))
             )
-            every { updateCuePoints(any(), any(), any()) } returns Completable.complete()
-            every { ingest(any(), any(), any(), any()) } returnsMany listOf(
-                Single.just(BrightcoveIngestResult("j1")),
-                Single.just(BrightcoveIngestResult("j2"))
-            )
+        }
+        val authService = mockk<BrightcoveWorkerAuthService> {
+            every { getAccessToken(any()) } returns Single.just("token")
         }
         val countryResolver = mockk<CountryInfoResolver> {
             every { resolve(any()) } returns Single.just(CountryInfo(null, null))
@@ -121,7 +117,8 @@ class BrightcoveProjectExporterTest {
         val exporter = BrightcoveProjectExporter(
             directoryProvider,
             configProvider,
-            brightcoveClient,
+            workerClient,
+            authService,
             countryResolver,
             verseTimingProvider
         ).apply {
@@ -139,10 +136,8 @@ class BrightcoveProjectExporterTest {
 
         assertEquals(ExportResult.SUCCESS, result)
         verify(exactly = 2) { audioExporter.exportMp3(any(), any(), any()) }
-        verify(exactly = 2) { brightcoveClient.findVideoIdByReferenceId(any(), any()) }
-        verify(exactly = 2) { brightcoveClient.createVideo(any(), any()) }
-        verify(exactly = 4) { brightcoveClient.uploadSource(any(), any(), any()) }
-        verify(exactly = 2) { brightcoveClient.ingest(any(), any(), any(), any()) }
+        verify(exactly = 4) { workerClient.upload(any(), any(), any(), any()) }
+        verify(exactly = 2) { workerClient.ingest(any(), any(), any()) }
 
         val reportFile = outputDir.listFiles()?.firstOrNull { it.name.startsWith("brightcove-export-") }
         assertNotNull(reportFile)
@@ -156,24 +151,23 @@ class BrightcoveProjectExporterTest {
     @Test
     fun ingestIncludesTextTrack() {
         val directoryProvider = mockDirectoryProvider(tempDir)
-        val configProvider = mockk<BrightcoveConfigProvider> {
+        val configProvider = mockk<BrightcoveWorkerConfigProvider> {
             every { load() } returns Single.just(
-                BrightcoveConfig("acct", "client", "secret")
+                BrightcoveWorkerConfig("https://worker.example")
             )
         }
-        val textTracksSlot = slot<List<BrightcoveTextTrack>>()
-        val cuePointsSlot = slot<List<BrightcoveCuePoint>>()
-        val brightcoveClient = mockk<BrightcoveClient> {
-            every { findVideoIdByReferenceId(any(), any()) } returns Maybe.empty()
-            every { createVideo(any(), any()) } returns Single.just("v1")
-            every { uploadSource(any(), any(), any()) } returnsMany listOf(
-                Single.just(BrightcoveUploadResult("m1")),
-                Single.just(BrightcoveUploadResult("t1"))
+        val ingestSlot = slot<BrightcoveWorkerIngestRequest>()
+        val workerClient = mockk<BrightcoveWorkerClient> {
+            every { upload(any(), any(), any(), any()) } returnsMany listOf(
+                Single.just(BrightcoveWorkerUploadResult("audio1")),
+                Single.just(BrightcoveWorkerUploadResult("vtt1"))
             )
-            every { updateCuePoints(any(), any(), capture(cuePointsSlot)) } returns Completable.complete()
-            every { ingest(any(), any(), any(), capture(textTracksSlot)) } returns Single.just(
-                BrightcoveIngestResult("j1")
+            every { ingest(any(), any(), capture(ingestSlot)) } returns Single.just(
+                BrightcoveWorkerIngestResult("v1", "j1")
             )
+        }
+        val authService = mockk<BrightcoveWorkerAuthService> {
+            every { getAccessToken(any()) } returns Single.just("token")
         }
         val countryResolver = mockk<CountryInfoResolver> {
             every { resolve(any()) } returns Single.just(CountryInfo(null, null))
@@ -191,7 +185,8 @@ class BrightcoveProjectExporterTest {
         val exporter = BrightcoveProjectExporter(
             directoryProvider,
             configProvider,
-            brightcoveClient,
+            workerClient,
+            authService,
             countryResolver,
             verseTimingProvider
         ).apply {
@@ -208,13 +203,14 @@ class BrightcoveProjectExporterTest {
         ).blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)
-        val track = textTracksSlot.captured.single()
-        assertEquals("t1", track.url)
-        assertEquals("bzs", track.srclang)
+        val ingestRequest = ingestSlot.captured
+        val track = ingestRequest.textTrack
+        assertNotNull(track)
+        assertEquals("bzs", track!!.srclang)
         assertEquals("subtitles", track.kind)
         assertEquals("chapter-1.vtt", track.label)
         assertTrue(track.isDefault)
-        val cuePoint = cuePointsSlot.captured.single()
+        val cuePoint = ingestRequest.video.cuePoints.single()
         assertEquals("MAT 1:1", cuePoint.name)
         assertEquals(0.0, cuePoint.time, 0.0001)
         assertEquals("CODE", cuePoint.type)
@@ -224,28 +220,25 @@ class BrightcoveProjectExporterTest {
     @Test
     fun continuesOnFailureAndReturnsFailure() {
         val directoryProvider = mockDirectoryProvider(tempDir)
-        val configProvider = mockk<BrightcoveConfigProvider> {
+        val configProvider = mockk<BrightcoveWorkerConfigProvider> {
             every { load() } returns Single.just(
-                BrightcoveConfig("acct", "client", "secret")
+                BrightcoveWorkerConfig("https://worker.example")
             )
         }
-        val brightcoveClient = mockk<BrightcoveClient> {
-            every { findVideoIdByReferenceId(any(), any()) } returns Maybe.empty()
-            every { createVideo(any(), any()) } returnsMany listOf(
-                Single.just("v1"),
-                Single.just("v2")
+        val workerClient = mockk<BrightcoveWorkerClient> {
+            every { upload(any(), any(), any(), any()) } returnsMany listOf(
+                Single.just(BrightcoveWorkerUploadResult("audio1")),
+                Single.just(BrightcoveWorkerUploadResult("vtt1")),
+                Single.just(BrightcoveWorkerUploadResult("audio2")),
+                Single.just(BrightcoveWorkerUploadResult("vtt2"))
             )
-            every { uploadSource(any(), any(), any()) } returnsMany listOf(
-                Single.just(BrightcoveUploadResult("m1")),
-                Single.just(BrightcoveUploadResult("t1")),
-                Single.just(BrightcoveUploadResult("m2")),
-                Single.just(BrightcoveUploadResult("t2"))
-            )
-            every { updateCuePoints(any(), any(), any()) } returns Completable.complete()
-            every { ingest(any(), any(), any(), any()) } returnsMany listOf(
+            every { ingest(any(), any(), any()) } returnsMany listOf(
                 Single.error(RuntimeException("fail")),
-                Single.just(BrightcoveIngestResult("j2"))
+                Single.just(BrightcoveWorkerIngestResult("v2", "j2"))
             )
+        }
+        val authService = mockk<BrightcoveWorkerAuthService> {
+            every { getAccessToken(any()) } returns Single.just("token")
         }
         val countryResolver = mockk<CountryInfoResolver> {
             every { resolve(any()) } returns Single.just(CountryInfo(null, null))
@@ -263,7 +256,8 @@ class BrightcoveProjectExporterTest {
         val exporter = BrightcoveProjectExporter(
             directoryProvider,
             configProvider,
-            brightcoveClient,
+            workerClient,
+            authService,
             countryResolver,
             verseTimingProvider
         ).apply {
@@ -280,8 +274,8 @@ class BrightcoveProjectExporterTest {
         ).blockingGet()
 
         assertEquals(ExportResult.FAILURE, result)
-        verify(exactly = 2) { brightcoveClient.findVideoIdByReferenceId(any(), any()) }
-        verify(exactly = 2) { brightcoveClient.createVideo(any(), any()) }
+        verify(exactly = 4) { workerClient.upload(any(), any(), any(), any()) }
+        verify(exactly = 2) { workerClient.ingest(any(), any(), any()) }
 
         val reportFile = outputDir.listFiles()?.firstOrNull { it.name.startsWith("brightcove-export-") }
         assertNotNull(reportFile)
@@ -293,24 +287,25 @@ class BrightcoveProjectExporterTest {
     }
 
     @Test
-    fun usesExistingVideoWhenReferenceIdMatches() {
+    fun passesReferenceIdToWorker() {
         val directoryProvider = mockDirectoryProvider(tempDir)
-        val configProvider = mockk<BrightcoveConfigProvider> {
+        val configProvider = mockk<BrightcoveWorkerConfigProvider> {
             every { load() } returns Single.just(
-                BrightcoveConfig("acct", "client", "secret")
+                BrightcoveWorkerConfig("https://worker.example")
             )
         }
-        val brightcoveClient = mockk<BrightcoveClient> {
-            every { findVideoIdByReferenceId(any(), any()) } returns Maybe.just("existing")
-            every { createVideo(any(), any()) } returns Single.just("new")
-            every { uploadSource(any(), any(), any()) } returnsMany listOf(
-                Single.just(BrightcoveUploadResult("m1")),
-                Single.just(BrightcoveUploadResult("t1"))
+        val ingestSlot = slot<BrightcoveWorkerIngestRequest>()
+        val workerClient = mockk<BrightcoveWorkerClient> {
+            every { upload(any(), any(), any(), any()) } returnsMany listOf(
+                Single.just(BrightcoveWorkerUploadResult("audio1")),
+                Single.just(BrightcoveWorkerUploadResult("vtt1"))
             )
-            every { updateCuePoints(any(), any(), any()) } returns Completable.complete()
-            every { ingest(any(), any(), any(), any()) } returns Single.just(
-                BrightcoveIngestResult("j1")
+            every { ingest(any(), any(), capture(ingestSlot)) } returns Single.just(
+                BrightcoveWorkerIngestResult("v1", "j1")
             )
+        }
+        val authService = mockk<BrightcoveWorkerAuthService> {
+            every { getAccessToken(any()) } returns Single.just("token")
         }
         val countryResolver = mockk<CountryInfoResolver> {
             every { resolve(any()) } returns Single.just(CountryInfo(null, null))
@@ -328,7 +323,8 @@ class BrightcoveProjectExporterTest {
         val exporter = BrightcoveProjectExporter(
             directoryProvider,
             configProvider,
-            brightcoveClient,
+            workerClient,
+            authService,
             countryResolver,
             verseTimingProvider
         ).apply {
@@ -345,29 +341,26 @@ class BrightcoveProjectExporterTest {
         ).blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)
-        verify(exactly = 1) { brightcoveClient.findVideoIdByReferenceId(any(), any()) }
-        verify(exactly = 0) { brightcoveClient.createVideo(any(), any()) }
-        verify(exactly = 2) { brightcoveClient.uploadSource(any(), "existing", any()) }
-        verify(exactly = 1) { brightcoveClient.ingest(any(), "existing", any(), any()) }
+        assertEquals("bzs_ulb_mat_001", ingestSlot.captured.video.referenceId)
     }
 
     @Test
     fun skipsVttForNonNarrationProjects() {
         val directoryProvider = mockDirectoryProvider(tempDir)
-        val configProvider = mockk<BrightcoveConfigProvider> {
+        val configProvider = mockk<BrightcoveWorkerConfigProvider> {
             every { load() } returns Single.just(
-                BrightcoveConfig("acct", "client", "secret")
+                BrightcoveWorkerConfig("https://worker.example")
             )
         }
-        val textTracksSlot = slot<List<BrightcoveTextTrack>>()
-        val brightcoveClient = mockk<BrightcoveClient> {
-            every { findVideoIdByReferenceId(any(), any()) } returns Maybe.empty()
-            every { createVideo(any(), any()) } returns Single.just("v1")
-            every { uploadSource(any(), any(), any()) } returns Single.just(BrightcoveUploadResult("m1"))
-            every { updateCuePoints(any(), any(), any()) } returns Completable.complete()
-            every { ingest(any(), any(), any(), capture(textTracksSlot)) } returns Single.just(
-                BrightcoveIngestResult("j1")
+        val ingestSlot = slot<BrightcoveWorkerIngestRequest>()
+        val workerClient = mockk<BrightcoveWorkerClient> {
+            every { upload(any(), any(), any(), any()) } returns Single.just(BrightcoveWorkerUploadResult("audio1"))
+            every { ingest(any(), any(), capture(ingestSlot)) } returns Single.just(
+                BrightcoveWorkerIngestResult("v1", "j1")
             )
+        }
+        val authService = mockk<BrightcoveWorkerAuthService> {
+            every { getAccessToken(any()) } returns Single.just("token")
         }
         val countryResolver = mockk<CountryInfoResolver> {
             every { resolve(any()) } returns Single.just(CountryInfo(null, null))
@@ -385,7 +378,8 @@ class BrightcoveProjectExporterTest {
         val exporter = BrightcoveProjectExporter(
             directoryProvider,
             configProvider,
-            brightcoveClient,
+            workerClient,
+            authService,
             countryResolver,
             verseTimingProvider
         ).apply {
@@ -402,8 +396,9 @@ class BrightcoveProjectExporterTest {
         ).blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)
-        verify(exactly = 1) { brightcoveClient.uploadSource(any(), any(), any()) }
-        assertTrue(textTracksSlot.captured.isEmpty())
+        verify(exactly = 1) { workerClient.upload(any(), any(), any(), any()) }
+        assertTrue(ingestSlot.captured.textTrack == null)
+        assertTrue(ingestSlot.captured.vttKey == null)
     }
 
     private fun buildWorkbook(

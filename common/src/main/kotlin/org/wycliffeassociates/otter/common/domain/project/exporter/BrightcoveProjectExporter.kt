@@ -31,18 +31,20 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
 import org.wycliffeassociates.otter.common.domain.audio.WAV_TO_MP3_COMPRESSED_RATE
-import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveClient
-import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveConfigProvider
 import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveCuePoint
 import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveCuePointBuilder
 import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveExportEntry
 import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveExportProject
 import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveExportReport
-import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveIngestResult
 import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveMetadataBuilder
-import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveTextTrack
 import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveVttBuilder
 import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveVideoRequest
+import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveWorkerAuthService
+import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveWorkerClient
+import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveWorkerConfigProvider
+import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveWorkerIngestRequest
+import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveWorkerIngestResult
+import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveWorkerTextTrack
 import org.wycliffeassociates.otter.common.domain.brightcove.CountryInfo
 import org.wycliffeassociates.otter.common.domain.brightcove.CountryInfoResolver
 import org.wycliffeassociates.otter.common.domain.brightcove.VerseTimingProvider
@@ -55,8 +57,9 @@ import javax.inject.Inject
 
 class BrightcoveProjectExporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
-    private val configProvider: BrightcoveConfigProvider,
-    private val brightcoveClient: BrightcoveClient,
+    private val configProvider: BrightcoveWorkerConfigProvider,
+    private val workerClient: BrightcoveWorkerClient,
+    private val authService: BrightcoveWorkerAuthService,
     private val countryInfoResolver: CountryInfoResolver,
     private val verseTimingProvider: VerseTimingProvider
 ) : IProjectExporter {
@@ -78,7 +81,8 @@ class BrightcoveProjectExporter @Inject constructor(
     ): Single<ExportResult> {
         return configProvider.load()
             .flatMap { config ->
-                Single.fromCallable {
+                authService.getAccessToken(config).flatMap { token ->
+                    Single.fromCallable {
                     val projectAccessor = ProjectFilesAccessor(
                         directoryProvider,
                         workbook.source.resourceMetadata,
@@ -94,7 +98,7 @@ class BrightcoveProjectExporter @Inject constructor(
                     val license = License.get(workbook.target.resourceMetadata.license)
                     val countryInfo = resolveCountryInfo(workbook)
                     val projectMode = projectAccessor.getProjectMode()
-                    val includeVtt = projectMode == ProjectMode.NARRATION
+                    val includeVtt = true //projectMode == ProjectMode.NARRATION
 
                     callback?.onNotifyProgress(0.0, messageKey = "exportingTakes")
 
@@ -137,6 +141,7 @@ class BrightcoveProjectExporter @Inject constructor(
                                 verseMarkers = timing.markers
                             )
                             videoRequest = buildVideoRequest(workbook, chapter, countryInfo, cuePoints)
+                            val uploadId = videoRequest.referenceId
 
                             if (includeVtt) {
                                 val chapterContent = try {
@@ -159,42 +164,41 @@ class BrightcoveProjectExporter @Inject constructor(
                                 vttBuilder.writeVtt(requireNotNull(vttFile), vttCues)
                             }
 
-                            val existingVideoId = brightcoveClient
-                                .findVideoIdByReferenceId(config, requireNotNull(videoRequest).referenceId)
+                            val audioUpload = workerClient
+                                .upload(config, token, uploadId, mp3File)
                                 .blockingGet()
 
-                            val videoId = existingVideoId ?: brightcoveClient
-                                .createVideo(config, requireNotNull(videoRequest))
-                                .blockingGet()
-
-                            val audioUpload = brightcoveClient
-                                .uploadSource(config, videoId, mp3File)
-                                .blockingGet()
-
-                            brightcoveClient
-                                .updateCuePoints(config, videoId, cuePoints)
-                                .blockingAwait()
-
-                            val textTracks = if (includeVtt) {
-                                val vttUpload = brightcoveClient
-                                    .uploadSource(config, videoId, requireNotNull(vttFile))
-                                    .blockingGet()
-
-                                listOf(
-                                    BrightcoveTextTrack(
-                                        url = vttUpload.masterUrl,
-                                        srclang = workbook.target.language.slug,
-                                        kind = "subtitles",
-                                        label = requireNotNull(vttFile).name,
-                                        isDefault = true
-                                    )
-                                )
+                            val vttUpload = if (includeVtt) {
+                                workerClient.upload(config, token, uploadId, requireNotNull(vttFile)).blockingGet()
                             } else {
-                                emptyList()
+                                null
                             }
 
-                            val ingestResult = brightcoveClient
-                                .ingest(config, videoId, audioUpload.masterUrl, textTracks)
+                            val textTrack = if (includeVtt) {
+                                BrightcoveWorkerTextTrack(
+                                    srclang = workbook.target.language.slug,
+                                    kind = "subtitles",
+                                    label = requireNotNull(vttFile).name,
+                                    isDefault = true
+                                )
+                            } else {
+                                null
+                            }
+
+                            val ingestResult = workerClient
+                                .ingest(
+                                    config,
+                                    token,
+                                    BrightcoveWorkerIngestRequest(
+                                        uploadId = uploadId,
+                                        audioKey = audioUpload.key,
+                                        vttKey = vttUpload?.key,
+                                        video = requireNotNull(videoRequest),
+                                        textTrack = textTrack,
+                                        ingestProfile = config.ingestProfile,
+                                        callbacks = config.callbacks
+                                    )
+                                )
                                 .blockingGet()
 
                             reportEntries.add(
@@ -202,9 +206,9 @@ class BrightcoveProjectExporter @Inject constructor(
                                     chapter,
                                     take.name,
                                     requireNotNull(videoRequest),
-                                    videoId,
+                                    ingestResult.videoId,
                                     vttFile,
-                                    textTracks.firstOrNull()?.url,
+                                    vttUpload?.key,
                                     ingestResult
                                 )
                             )
@@ -240,6 +244,7 @@ class BrightcoveProjectExporter @Inject constructor(
                     } else {
                         callback?.onNotifyProgress(100.0)
                         ExportResult.FAILURE
+                    }
                     }
                 }
             }
@@ -328,10 +333,10 @@ class BrightcoveProjectExporter @Inject constructor(
         chapter: Chapter,
         takeName: String?,
         request: BrightcoveVideoRequest,
-        videoId: String,
+        videoId: String?,
         vttFile: File?,
         textTrackUrl: String?,
-        ingest: BrightcoveIngestResult
+        ingest: BrightcoveWorkerIngestResult
     ): BrightcoveExportEntry {
         return BrightcoveExportEntry(
             chapter = chapter.sort,
@@ -340,7 +345,7 @@ class BrightcoveProjectExporter @Inject constructor(
             videoId = videoId,
             vttFile = vttFile?.absolutePath,
             textTrackUrl = textTrackUrl,
-            ingestJobId = ingest.jobId,
+            ingestJobId = ingest.ingestJobId,
             status = "SUCCESS",
             error = null
         )
