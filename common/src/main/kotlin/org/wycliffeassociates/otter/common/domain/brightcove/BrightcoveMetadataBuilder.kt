@@ -43,7 +43,7 @@ class BrightcoveMetadataBuilder {
             "book" to normalizedBookCode,
             "canonical_order" to canonicalOrder.toString(),
             "chapter" to chapterLabel3,
-            "language_code" to normalizedLanguage,
+            "language" to normalizedLanguage,
             "localized_book_name" to localizedBookName
         )
 

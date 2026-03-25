@@ -98,7 +98,7 @@ class BrightcoveProjectExporter @Inject constructor(
                     val license = License.get(workbook.target.resourceMetadata.license)
                     val countryInfo = resolveCountryInfo(workbook)
                     val projectMode = projectAccessor.getProjectMode()
-                    val includeVtt = true //projectMode == ProjectMode.NARRATION
+                    val includeVtt = projectMode == ProjectMode.NARRATION
 
                     callback?.onNotifyProgress(0.0, messageKey = "exportingTakes")
 

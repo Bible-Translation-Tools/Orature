@@ -39,6 +39,7 @@ import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
 import org.wycliffeassociates.otter.common.domain.project.exporter.IProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.ProjectExporterCallback
 import org.wycliffeassociates.otter.common.domain.project.exporter.BrightcoveProjectExporter
+import org.wycliffeassociates.otter.common.domain.brightcove.BrightcoveWorkerConfigProvider
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BurritoWrapperExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.SourceProjectExporter
@@ -70,6 +71,9 @@ class ExportProjectViewModel : ViewModel() {
 
     @Inject
     lateinit var exportBrightcoveUseCase: BrightcoveProjectExporter
+
+    @Inject
+    lateinit var brightcoveWorkerConfigProvider: BrightcoveWorkerConfigProvider
 
     @Inject
     lateinit var narrationFactory: NarrationFactory
@@ -162,6 +166,15 @@ class ExportProjectViewModel : ViewModel() {
             ExportType.PUBLISH -> exportSourceUseCase.estimateExportSize(workbook, chapters)
             ExportType.BURRITO_WRAPPER -> exportBurritoWrapperUseCase.estimateExportSize(workbook, chapters)
             ExportType.BRIGHTCOVE -> exportBrightcoveUseCase.estimateExportSize(workbook, chapters)
+        }
+    }
+
+    fun isBrightcoveExportAvailable(): Boolean {
+        return try {
+            brightcoveWorkerConfigProvider.isAvailable()
+        } catch (e: Exception) {
+            logger.warn("Failed to check Brightcove export availability", e)
+            false
         }
     }
 

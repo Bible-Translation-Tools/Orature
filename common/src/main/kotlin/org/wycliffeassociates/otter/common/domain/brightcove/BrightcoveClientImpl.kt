@@ -49,6 +49,7 @@ import javax.inject.Inject
 import java.io.File
 import java.util.Base64
 import java.net.URLEncoder
+import java.util.concurrent.TimeUnit
 
 class BrightcoveClientImpl @Inject constructor() : BrightcoveClient {
 
@@ -78,7 +79,12 @@ class BrightcoveClientImpl @Inject constructor() : BrightcoveClient {
     private val cmsApi = retrofitCms.create(BrightcoveCmsApi::class.java)
     private val ingestApi = retrofitIngest.create(BrightcoveDynamicIngestApi::class.java)
 
-    private val uploadClient = OkHttpClient()
+    private val uploadClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(5, TimeUnit.MINUTES)
+        .writeTimeout(5, TimeUnit.MINUTES)
+        .callTimeout(5, TimeUnit.MINUTES)
+        .build()
 
     override fun findVideoIdByReferenceId(
         config: BrightcoveConfig,

@@ -22,6 +22,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Before
@@ -47,11 +48,11 @@ class BrightcoveWorkerConfigProviderTest {
     @Test
     fun loadValidConfig() {
         val configDir = tempDir.resolve("config").apply { mkdirs() }
-        val configFile = configDir.resolve("brightcove-worker.json")
+        val configFile = configDir.resolve("brightcove_proxy.json")
         configFile.writeText(
             """
             {
-              "worker_url": "https://worker.example",
+              "brightcove_proxy_url": "https://worker.example",
               "ingest_profile": "audio-profile",
               "callbacks": ["https://example.com/callback"]
             }
@@ -67,6 +68,26 @@ class BrightcoveWorkerConfigProviderTest {
         assertEquals("https://worker.example", config.workerBaseUrl)
         assertEquals("audio-profile", config.ingestProfile)
         assertEquals(listOf("https://example.com/callback"), config.callbacks)
+    }
+
+    @Test
+    fun envVarOverridesMissingFile() {
+        val configDir = tempDir.resolve("config").apply { mkdirs() }
+        val directoryProvider = mockk<IDirectoryProvider>()
+        every { directoryProvider.getAppDataDirectory("config") } returns configDir
+
+        val provider = BrightcoveWorkerConfigProviderImpl(directoryProvider)
+        provider.envLookup = { key ->
+            when (key) {
+                "BRIGHTCOVE_PROXY_URL" -> "https://proxy.example"
+                else -> null
+            }
+        }
+
+        assertTrue(provider.isAvailable())
+        val config = provider.load().blockingGet()
+
+        assertEquals("https://proxy.example", config.workerBaseUrl)
     }
 
     @Test
@@ -88,7 +109,7 @@ class BrightcoveWorkerConfigProviderTest {
     @Test
     fun missingWorkerUrlFails() {
         val configDir = tempDir.resolve("config").apply { mkdirs() }
-        val configFile = configDir.resolve("brightcove-worker.json")
+        val configFile = configDir.resolve("brightcove_proxy.json")
         configFile.writeText("{}")
 
         val directoryProvider = mockk<IDirectoryProvider>()
@@ -101,6 +122,65 @@ class BrightcoveWorkerConfigProviderTest {
             fail("Expected config load to fail")
         } catch (e: Exception) {
             assertTrue(e is IllegalArgumentException || e.cause is IllegalArgumentException)
+        }
+    }
+
+    @Test
+    fun availabilityChecksConfigFile() {
+        val configDir = tempDir.resolve("config").apply { mkdirs() }
+        val configFile = configDir.resolve("brightcove_proxy.json")
+        configFile.writeText("""{"brightcove_proxy_url": "https://worker.example"}""")
+
+        val directoryProvider = mockk<IDirectoryProvider>()
+        every { directoryProvider.getAppDataDirectory("config") } returns configDir
+
+        val provider = BrightcoveWorkerConfigProviderImpl(directoryProvider)
+        assertTrue(provider.isAvailable())
+    }
+
+    @Test
+    fun legacyEnvVarIsIgnored() {
+        val configDir = tempDir.resolve("config").apply { mkdirs() }
+        val directoryProvider = mockk<IDirectoryProvider>()
+        every { directoryProvider.getAppDataDirectory("config") } returns configDir
+
+        val provider = BrightcoveWorkerConfigProviderImpl(directoryProvider)
+        provider.envLookup = { key ->
+            when (key) {
+                "BRIGHTCOVE_WORKER_URL" -> "https://legacy.example"
+                else -> null
+            }
+        }
+
+        assertFalse(provider.isAvailable())
+
+        try {
+            provider.load().blockingGet()
+            fail("Expected config load to fail")
+        } catch (e: Exception) {
+            assertTrue(e.cause is java.io.FileNotFoundException)
+        }
+    }
+
+    @Test
+    fun legacyConfigFileIsIgnored() {
+        val configDir = tempDir.resolve("config").apply { mkdirs() }
+        configDir.resolve("brightcove-worker.json").writeText(
+            """{"worker_url": "https://legacy.example"}"""
+        )
+
+        val directoryProvider = mockk<IDirectoryProvider>()
+        every { directoryProvider.getAppDataDirectory("config") } returns configDir
+
+        val provider = BrightcoveWorkerConfigProviderImpl(directoryProvider)
+
+        assertFalse(provider.isAvailable())
+
+        try {
+            provider.load().blockingGet()
+            fail("Expected config load to fail")
+        } catch (e: Exception) {
+            assertTrue(e.cause is java.io.FileNotFoundException)
         }
     }
 }

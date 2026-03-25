@@ -29,22 +29,44 @@ import okhttp3.RequestBody
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.net.URLEncoder
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-class BrightcoveWorkerClientImpl @Inject constructor() : BrightcoveWorkerClient {
+class BrightcoveWorkerClientImpl @Inject constructor(
+    private val authStore: BrightcoveWorkerAuthStore
+) : BrightcoveWorkerClient {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
-    private val httpClient = OkHttpClient()
+    private val httpClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(5, TimeUnit.MINUTES)
+        .writeTimeout(5, TimeUnit.MINUTES)
+        .callTimeout(5, TimeUnit.MINUTES)
+        .build()
 
-    override fun login(config: BrightcoveWorkerConfig): Single<BrightcoveWorkerAuthLoginResponse> {
+    override fun startAuth(config: BrightcoveWorkerConfig): Single<BrightcoveWorkerAuthStartResponse> {
         return Single.fromCallable {
-            val url = "${config.workerBaseUrl}/auth/login"
+            val url = "${config.workerBaseUrl}/auth/start"
+            val request = Request.Builder()
+                .url(url)
+                .post(RequestBody.create(JSON, "{}"))
+                .build()
+            executeJson(request, BrightcoveWorkerAuthStartResponse::class.java)
+        }
+    }
+
+    override fun pollAuth(
+        config: BrightcoveWorkerConfig,
+        state: String
+    ): Single<BrightcoveWorkerAuthPollResponse> {
+        return Single.fromCallable {
+            val url = "${config.workerBaseUrl}/auth/poll?state=${encode(state)}"
             val request = Request.Builder()
                 .url(url)
                 .get()
                 .build()
-            executeJson(request, BrightcoveWorkerAuthLoginResponse::class.java)
+            executeJson(request, BrightcoveWorkerAuthPollResponse::class.java)
         }
     }
 
@@ -55,12 +77,14 @@ class BrightcoveWorkerClientImpl @Inject constructor() : BrightcoveWorkerClient 
         sourceFile: File
     ): Single<BrightcoveWorkerUploadResult> {
         return Single.fromCallable {
-            val url = "${config.workerBaseUrl}/upload/${encode(uploadId)}/${encode(sourceFile.name)}"
+            val url = "${config.workerBaseUrl}/api/upload/${encode(uploadId)}/${encode(sourceFile.name)}"
             val mediaType = MediaType.parse(guessContentType(sourceFile))
             val body = RequestBody.create(mediaType, sourceFile)
+            val sessionId = requireSessionId()
             val request = Request.Builder()
                 .url(url)
-                .header("Authorization", "Bearer $token")
+                .header("Cookie", "CF_Authorization=$token")
+                .header(SESSION_ID_HEADER, sessionId)
                 .put(body)
                 .build()
             executeJson(request, BrightcoveWorkerUploadResult::class.java)
@@ -75,11 +99,13 @@ class BrightcoveWorkerClientImpl @Inject constructor() : BrightcoveWorkerClient 
         request: BrightcoveWorkerIngestRequest
     ): Single<BrightcoveWorkerIngestResult> {
         return Single.fromCallable {
-            val url = "${config.workerBaseUrl}/ingest"
+            val url = "${config.workerBaseUrl}/api/ingest"
             val body = RequestBody.create(JSON, mapper.writeValueAsBytes(request))
+            val sessionId = requireSessionId()
             val httpRequest = Request.Builder()
                 .url(url)
-                .header("Authorization", "Bearer $token")
+                .header("Cookie", "CF_Authorization=$token")
+                .header(SESSION_ID_HEADER, sessionId)
                 .post(body)
                 .build()
             executeJson(httpRequest, BrightcoveWorkerIngestResult::class.java)
@@ -109,11 +135,18 @@ class BrightcoveWorkerClientImpl @Inject constructor() : BrightcoveWorkerClient 
         }
     }
 
+    private fun requireSessionId(): String {
+        val sessionId = authStore.load()?.sessionId?.trim().orEmpty()
+        require(sessionId.isNotEmpty()) { "Missing Brightcove worker session id" }
+        return sessionId
+    }
+
     private fun encode(value: String): String {
         return URLEncoder.encode(value, Charsets.UTF_8.name())
     }
 
     companion object {
         private val JSON = MediaType.parse("application/json; charset=utf-8")
+        private const val SESSION_ID_HEADER = "X-Brightcove-Session-Id"
     }
 }

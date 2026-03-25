@@ -45,7 +45,7 @@ class BrightcoveMetadataBuilderTest {
                 "book" to "mat",
                 "canonical_order" to "41",
                 "chapter" to "005",
-                "language_code" to "bzs",
+                "language" to "bzs",
                 "localized_book_name" to "Mateus",
                 "country" to "BR"
             ),

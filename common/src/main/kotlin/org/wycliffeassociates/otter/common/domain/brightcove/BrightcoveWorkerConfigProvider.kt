@@ -22,4 +22,6 @@ import io.reactivex.Single
 
 interface BrightcoveWorkerConfigProvider {
     fun load(): Single<BrightcoveWorkerConfig>
+
+    fun isAvailable(): Boolean
 }

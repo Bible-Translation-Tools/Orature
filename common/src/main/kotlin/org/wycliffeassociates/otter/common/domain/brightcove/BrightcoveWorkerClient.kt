@@ -22,7 +22,9 @@ import io.reactivex.Single
 import java.io.File
 
 interface BrightcoveWorkerClient {
-    fun login(config: BrightcoveWorkerConfig): Single<BrightcoveWorkerAuthLoginResponse>
+    fun startAuth(config: BrightcoveWorkerConfig): Single<BrightcoveWorkerAuthStartResponse>
+
+    fun pollAuth(config: BrightcoveWorkerConfig, state: String): Single<BrightcoveWorkerAuthPollResponse>
 
     fun upload(
         config: BrightcoveWorkerConfig,

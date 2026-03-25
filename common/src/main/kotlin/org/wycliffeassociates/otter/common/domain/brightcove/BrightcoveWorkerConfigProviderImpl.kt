@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.common.domain.brightcove
 
-import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.core.JsonFactory
@@ -35,24 +34,29 @@ class BrightcoveWorkerConfigProviderImpl @Inject constructor(
 ) : BrightcoveWorkerConfigProvider {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+    internal var envLookup: (String) -> String? = System::getenv
 
     override fun load(): Single<BrightcoveWorkerConfig> {
         return Single.fromCallable {
             val configDir = directoryProvider.getAppDataDirectory("config")
-            val configFile = configDir.resolve("brightcove-worker.json")
+            val configFile = resolveConfigFile(configDir)
+            val fileExists = configFile.exists()
+            val raw = if (fileExists) {
+                val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
+                mapper.readValue(configFile, BrightcoveWorkerConfigFile::class.java)
+            } else {
+                BrightcoveWorkerConfigFile()
+            }
 
-            if (!configFile.exists()) {
+            val proxyUrl = envOr(raw.proxyUrl, ENV_PROXY_URL)
+            if (!fileExists && proxyUrl.isNullOrBlank()) {
                 throw FileNotFoundException("Brightcove worker config file not found: ${configFile.absolutePath}")
             }
 
-            val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
-            val raw = mapper.readValue(configFile, BrightcoveWorkerConfigFile::class.java)
-
-            val workerUrl = envOr(raw.workerUrl, ENV_WORKER_URL)
-            validateRequired("worker_url", workerUrl)
+            validateRequired("brightcove_proxy_url", proxyUrl)
 
             BrightcoveWorkerConfig(
-                workerBaseUrl = workerUrl!!.trimEnd('/'),
+                workerBaseUrl = proxyUrl!!.trimEnd('/'),
                 ingestProfile = raw.ingestProfile,
                 callbacks = raw.callbacks
             )
@@ -61,8 +65,16 @@ class BrightcoveWorkerConfigProviderImpl @Inject constructor(
         }
     }
 
-    private fun envOr(value: String?, key: String): String? {
-        val envValue = System.getenv(key)?.trim()?.takeIf { it.isNotEmpty() }
+    override fun isAvailable(): Boolean {
+        val configDir = directoryProvider.getAppDataDirectory("config")
+        return !envLookup(ENV_PROXY_URL).isNullOrBlank() || resolveConfigFile(configDir).exists()
+    }
+
+    private fun envOr(value: String?, vararg keys: String): String? {
+        val envValue = keys
+            .asSequence()
+            .mapNotNull { envLookup(it)?.trim()?.takeIf { candidate -> candidate.isNotEmpty() } }
+            .firstOrNull()
         return envValue ?: value
     }
 
@@ -72,19 +84,22 @@ class BrightcoveWorkerConfigProviderImpl @Inject constructor(
         }
     }
 
+    private fun resolveConfigFile(configDir: java.io.File): java.io.File {
+        return configDir.resolve(CONFIG_FILE)
+    }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     private data class BrightcoveWorkerConfigFile(
-        @JsonProperty("worker_url")
-        @JsonAlias("workerUrl", "worker_base_url", "workerBaseUrl")
-        val workerUrl: String? = null,
+        @JsonProperty("brightcove_proxy_url")
+        val proxyUrl: String? = null,
         @JsonProperty("ingest_profile")
-        @JsonAlias("ingestProfile")
         val ingestProfile: String? = null,
         @JsonProperty("callbacks")
         val callbacks: List<String>? = null
     )
 
     companion object {
-        private const val ENV_WORKER_URL = "BRIGHTCOVE_WORKER_URL"
+        private const val CONFIG_FILE = "brightcove_proxy.json"
+        private const val ENV_PROXY_URL = "BRIGHTCOVE_PROXY_URL"
     }
 }

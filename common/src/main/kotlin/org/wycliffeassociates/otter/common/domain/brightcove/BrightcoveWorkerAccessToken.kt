@@ -20,5 +20,6 @@ package org.wycliffeassociates.otter.common.domain.brightcove
 
 data class BrightcoveWorkerAccessToken(
     val token: String,
+    val sessionId: String? = null,
     val expiresAtEpochSeconds: Long?
 )

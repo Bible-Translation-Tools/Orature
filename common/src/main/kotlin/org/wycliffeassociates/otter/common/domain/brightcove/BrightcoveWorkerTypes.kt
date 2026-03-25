@@ -20,9 +20,24 @@ package org.wycliffeassociates.otter.common.domain.brightcove
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class BrightcoveWorkerAuthLoginResponse(
+data class BrightcoveWorkerAuthStartResponse(
+    @JsonProperty("state")
+    val state: String,
+    @JsonProperty("login_url")
+    val loginUrl: String,
+    @JsonProperty("poll_url")
+    val pollUrl: String,
+    @JsonProperty("expires_in_seconds")
+    val expiresInSeconds: Long?
+)
+
+data class BrightcoveWorkerAuthPollResponse(
+    @JsonProperty("status")
+    val status: String,
     @JsonProperty("token")
-    val token: String
+    val token: String? = null,
+    @JsonProperty("expires_at_epoch_seconds")
+    val expiresAtEpochSeconds: Long? = null
 )
 
 data class BrightcoveWorkerUploadResult(
