@@ -37,7 +37,7 @@ class BrightcoveMetadataBuilder {
         val normalizedLanguage = languageCode.lowercase()
         val normalizedResourceType = resourceType.trim().lowercase()
         val videoName = "${normalizedLanguage}_${canonicalOrder}-${normalizedBookCode}_${chapterLabel2}"
-        val referenceId = "${normalizedLanguage}_${normalizedResourceType}_${normalizedBookCode}_${chapterLabel3}"
+        val referenceId = "${normalizedLanguage}_${normalizedResourceType}_audio_${normalizedBookCode}_${chapterLabel3}"
 
         val customFields = linkedMapOf(
             "book" to normalizedBookCode,
