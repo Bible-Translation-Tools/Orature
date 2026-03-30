@@ -341,7 +341,7 @@ class BrightcoveProjectExporterTest {
         ).blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)
-        assertEquals("bzs_ulb_mat_001", ingestSlot.captured.video.referenceId)
+        assertEquals("bzs_ulb_audio_mat_001", ingestSlot.captured.video.referenceId)
     }
 
     @Test

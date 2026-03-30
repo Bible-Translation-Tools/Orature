@@ -39,7 +39,7 @@ class BrightcoveMetadataBuilderTest {
         )
 
         assertEquals("bzs_41-mat_05", request.name)
-        assertEquals("bzs_ulb_mat_005", request.referenceId)
+        assertEquals("bzs_ulb_audio_mat_005", request.referenceId)
         assertEquals(
             mapOf(
                 "book" to "mat",
