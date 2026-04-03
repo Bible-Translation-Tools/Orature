@@ -2,6 +2,9 @@ plugins {
     id 'org.openjfx.javafxplugin' version "$javafxPluginVer"
 }
 
+ext.jpmsModuleName = 'org.wycliffeassociates.otter.jvm.workbookplugin'
+apply from: rootProject.file('gradle/jpms-kotlin.gradle')
+
 javafx {
     version = "$javafxVer"
     modules = ['javafx.controls', 'javafx.fxml']

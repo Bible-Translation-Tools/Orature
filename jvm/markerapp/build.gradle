@@ -2,6 +2,12 @@ plugins {
     id 'org.openjfx.javafxplugin' version "$javafxPluginVer"
 }
 
+tasks.named('jar', Jar) {
+    manifest {
+        attributes('Automatic-Module-Name': 'org.wycliffeassociates.otter.jvm.markerapp')
+    }
+}
+
 javafx {
     version = "$javafxVer"
     modules = ['javafx.controls', 'javafx.fxml']

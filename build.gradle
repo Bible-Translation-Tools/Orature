@@ -84,6 +84,9 @@ subprojects {
         toolchain {
             languageVersion = JavaLanguageVersion.of(javaVer)
         }
+        // Kotlin compilation stays on the classpath so optional JDK modules (e.g. TornadoFX -> java.json)
+        // do not break the graph. Java compilation uses an explicit module path via gradle/jpms-kotlin.gradle.
+        modularity.inferModulePath = false
     }
 
     compileKotlin {
@@ -95,4 +98,35 @@ subprojects {
     }
 
     gradleLint.rules = ['deprecated-dependency-configuration']
+
+    configurations.configureEach { Configuration cfg ->
+        cfg.withDependencies { DependencySet ds ->
+            def torn = ds.findAll { d -> d instanceof ExternalDependency && d.group == 'no.tornado' && d.name == 'tornadofx2' }
+            if (!torn.isEmpty()) {
+                ds.removeAll(torn)
+                ds.add(project.dependencies.create(project.files(rootProject.tasks.named('patchTornadofxJar').get().outputs.files.singleFile) {
+                    builtBy rootProject.tasks.named('patchTornadofxJar')
+                }))
+            }
+        }
+    }
+}
+
+configurations {
+    tornadofxUnpatched
+}
+
+dependencies {
+    tornadofxUnpatched "no.tornado:tornadofx2:$tornadofxVer"
+}
+
+tasks.register('patchTornadofxJar', Jar) {
+    dependsOn configurations.tornadofxUnpatched
+    from { zipTree(configurations.tornadofxUnpatched.singleFile) }
+    exclude '**/module-info.class'
+    exclude 'META-INF/versions/**/module-info.class'
+    duplicatesStrategy = DuplicatesStrategy.WARN
+    archiveFileName = 'tornadofx2-patched.jar'
+    destinationDirectory = layout.buildDirectory.dir('patched-modules').get().asFile
+    manifest { attributes('Automatic-Module-Name': 'tornadofx') }
 }

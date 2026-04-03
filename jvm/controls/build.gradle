@@ -2,6 +2,14 @@ plugins {
     id 'org.openjfx.javafxplugin' version "$javafxPluginVer"
 }
 
+apply plugin: 'java-library'
+
+tasks.named('jar', Jar) {
+    manifest {
+        attributes('Automatic-Module-Name': 'org.wycliffeassociates.otter.jvm.controls')
+    }
+}
+
 javafx {
     version = "$javafxVer"
     modules = ['javafx.controls', 'javafx.fxml']
@@ -28,8 +36,8 @@ dependencies {
     implementation "com.github.bkenn:kfoenix:$kfoenixVer"
     implementation "io.github.palexdev:materialfx:$materialFxVer"
 
-    // ControlsFX
-    implementation "org.controlsfx:controlsfx:$controlsfxVer"
+    // ControlsFX — api so :jvm:workbookapp and other UIs share one controlsfx edge (no duplicate JPMS module for jlink).
+    api "org.controlsfx:controlsfx:$controlsfxVer"
 
     implementation "org.slf4j:slf4j-api:$slf4jApiVer"
 

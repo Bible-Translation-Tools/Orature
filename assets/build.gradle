@@ -7,6 +7,9 @@ plugins {
 group 'org.wycliffeassociates.otter'
 version '0.0.1'
 
+ext.jpmsModuleName = 'org.wycliffeassociates.otter.assets'
+apply from: rootProject.file('gradle/jpms-kotlin.gradle')
+
 repositories {
     ivy {
         url 'https://content.bibletranslationtools.org'

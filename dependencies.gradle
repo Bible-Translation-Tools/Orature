@@ -1,6 +1,6 @@
 ext {
     // Plugins
-    javafxPluginVer = '0.0.13'
+    javafxPluginVer = '0.1.0'
     jooqPluginVer = '7.2'
     install4jPluginVer = '9.0.2'
     nebulaLintPluginVer = '16.23.0' // Gradle Linter
@@ -8,6 +8,8 @@ ext {
     detektPluginVer = '1.17.0'
     ktlintPluginVer = '8.2.0'
     shadowPluginVer = '7.1.2'
+    /** Badass JLink for custom runtime + jpackage; 3.2.x matches Gradle 8.5. */
+    jlinkPluginVer = '3.2.1'
     sonarcloudPluginVer = '3.0'
     licensePluginVer = "0.16.1"
     jacocoToolVer = "0.8.11"
@@ -30,7 +32,7 @@ ext {
     retrofitVer = '2.9.0'
     retrofitJacksonVer = '2.9.0'
     retrofitRxJava2Ver = '2.9.0'
-    jacksonVer = '2.15.1'
+    jacksonVer = '2.15.2' // 2.15.1 MR-JAR breaks module resolution (wrong module-info in versions/19)
     daggerVer = '2.47'
     junitVer = '4.12'
     mockkVer = '1.13.5'

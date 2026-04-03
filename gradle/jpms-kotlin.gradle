@@ -1,0 +1,32 @@
+import org.gradle.api.tasks.compile.JavaCompile
+
+/**
+ * Kotlin + module-info.java: Gradle places most compile classpath entries on the unnamed module path.
+ * Force dependency modules (JARs and other Gradle project outputs) onto --module-path and patch in
+ * Kotlin classes compiled to classes/java/main.
+ */
+String jpmsName = project.ext.jpmsModuleName
+
+tasks.named('compileKotlin').configure {
+    destinationDirectory.set(layout.buildDirectory.dir('classes/java/main'))
+}
+
+tasks.named('compileJava', JavaCompile).configure {
+    dependsOn tasks.named('compileKotlin')
+    modularity.inferModulePath = false
+    doFirst {
+        JavaCompile jc = it as JavaCompile
+        File outDir = layout.buildDirectory.dir('classes/java/main').get().asFile
+        String modulePath = configurations.compileClasspath.files
+                .findAll { File f -> f.isDirectory() || f.name.endsWith('.jar') }
+                .collect { it.absolutePath }
+                .join(File.pathSeparator)
+
+        jc.options.compilerArgs.addAll('--module-path', modulePath, '--patch-module', "$jpmsName=${outDir.absolutePath}")
+        jc.classpath = files()
+    }
+}
+
+tasks.named('jar', Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

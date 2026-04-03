@@ -7,6 +7,12 @@ javafx {
     modules = ['javafx.controls', 'javafx.fxml']
 }
 
+tasks.named('jar', Jar) {
+    manifest {
+        attributes('Automatic-Module-Name': 'org.wycliffeassociates.otter.jvm.utils')
+    }
+}
+
 repositories {
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots' } // TornadoFX 2.0 Snapshot
 }
