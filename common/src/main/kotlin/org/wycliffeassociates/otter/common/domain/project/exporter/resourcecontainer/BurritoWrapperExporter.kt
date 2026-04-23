@@ -513,7 +513,7 @@ class BurritoWrapperExporter @Inject constructor(
     }
 
     private fun writeWrapperMetadata(metadata: WrapperMetadata, wrapperDir: File) {
-        val metadataFile = File(wrapperDir, "metadata.json")
+        val metadataFile = File(wrapperDir, "wrapper.json")
         mapper.writeValue(metadataFile, metadata)
     }
 
