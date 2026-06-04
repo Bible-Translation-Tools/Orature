@@ -484,6 +484,7 @@ class BurritoWrapperExporter @Inject constructor(
                     "name" to appName,
                     "version" to appVersion
                 ),
+                defaultLocale = "en",
                 dateCreated = java.time.Instant.now().toString(),
                 description = hashMapOf("en" to "Burrito wrapper containing text and audio burritos"),
                 abbreviation = hashMapOf("en" to "${language.slug}_${resource.identifier} Burrito Wrapper")
@@ -669,6 +670,7 @@ class BurritoWrapperExporter @Inject constructor(
         val name: Map<String, String>,
         val version: String,
         val generator: Map<String, String>,
+        val defaultLocale: String = "en",
         val dateCreated: String,
         val description: Map<String, String>,
         val abbreviation: Map<String, String>

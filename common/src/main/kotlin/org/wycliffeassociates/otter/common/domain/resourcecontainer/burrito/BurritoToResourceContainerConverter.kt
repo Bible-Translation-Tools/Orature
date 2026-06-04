@@ -1221,6 +1221,7 @@ data class WrapperMeta(
     val name: Map<String, String>,
     val version: String,
     val generator: Map<String, String>,
+    val defaultLocale: String = "en",
     val dateCreated: String,
     val description: Map<String, String> = emptyMap(),
     val abbreviation: Map<String, String> = emptyMap()

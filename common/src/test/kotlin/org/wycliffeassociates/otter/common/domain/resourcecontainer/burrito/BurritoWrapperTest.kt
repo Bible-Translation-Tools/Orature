@@ -46,6 +46,7 @@ class BurritoWrapperTest {
                 "name": { "en": "Wrapper Project" },
                 "version": "1.0.0",
                 "generator": { "softwareName": "Test", "softwareVersion": "1.0" },
+                "defaultLocale": "en",
                 "dateCreated": "2025-01-01",
                 "description": { "en": "Test wrapper" },
                 "abbreviation": { "en": "WRAP" }
@@ -59,6 +60,9 @@ class BurritoWrapperTest {
               }
             }
         """.trimIndent())
+
+        val wrapperMetadata = ScriptureBurritoWrapper.load(wrapperFile)
+        assertEquals("en", wrapperMetadata?.meta?.defaultLocale)
 
         // Audio Burrito Metadata
         File(audioDir, "metadata.json").writeText("""
