@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs
 
 import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.SetChangeListener
 import javafx.event.ActionEvent
@@ -49,9 +50,11 @@ class ExportProjectDialog : OtterDialog() {
     val selectedChapters = observableSetOf<ChapterDescriptor>()
     val workbookDescriptorProperty = SimpleObjectProperty<WorkbookDescriptor>()
     val onEstimateSizeAction = SimpleObjectProperty<(WorkbookDescriptor, List<Int>, ExportType) -> Long>()
+    val brightcoveExportAvailableProperty = SimpleBooleanProperty(false)
     private val exportTypeProperty = SimpleObjectProperty<ExportType>(ExportType.BACKUP)
     private val estimatedSizeProperty = SimpleDoubleProperty(0.0)
     private val onCloseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    private lateinit var exportOptionsBox: VBox
     private lateinit var tableView: ExportProjectTableView
 
     private val content = VBox().apply {
@@ -87,54 +90,7 @@ class ExportProjectDialog : OtterDialog() {
                     hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
 
                     vbox {
-                        val tg = ToggleGroup()
-
-                        cardRadioButton(tg) {
-                            titleProperty.set(messages["backup"])
-                            selectedProperty().onChange {
-                                if (it) {
-                                    exportTypeProperty.set(ExportType.BACKUP)
-                                    onSelectExportType(ExportType.BACKUP)
-                                }
-                            }
-                            isSelected = true
-                        }
-                        cardRadioButton(tg) {
-                            titleProperty.set(messages["sourceAudio"])
-                            selectedProperty().onChange {
-                                if (it) {
-                                    exportTypeProperty.set(ExportType.SOURCE_AUDIO)
-                                    onSelectExportType(ExportType.SOURCE_AUDIO)
-                                }
-                            }
-                        }
-                        cardRadioButton(tg) {
-                            titleProperty.set(messages["listen"])
-                            selectedProperty().onChange {
-                                if (it) {
-                                    exportTypeProperty.set(ExportType.LISTEN)
-                                    onSelectExportType(ExportType.LISTEN)
-                                }
-                            }
-                        }
-                        cardRadioButton(tg) {
-                            titleProperty.set(messages["publish"])
-                            selectedProperty().onChange {
-                                if (it) {
-                                    exportTypeProperty.set(ExportType.PUBLISH)
-                                    onSelectExportType(ExportType.PUBLISH)
-                                }
-                            }
-                        }
-                        cardRadioButton(tg) {
-                            titleProperty.set(messages["burritoWrapper"])
-                            selectedProperty().onChange {
-                                if (it) {
-                                    exportTypeProperty.set(ExportType.BURRITO_WRAPPER)
-                                    onSelectExportType(ExportType.BURRITO_WRAPPER)
-                                }
-                            }
-                        }
+                        exportOptionsBox = this
                     }
                 }
 
@@ -179,6 +135,10 @@ class ExportProjectDialog : OtterDialog() {
 
     init {
         setContent(content)
+        brightcoveExportAvailableProperty.onChange {
+            renderExportOptions()
+        }
+        renderExportOptions()
     }
 
     private val selectionListener = SetChangeListener<ChapterDescriptor> {
@@ -200,6 +160,39 @@ class ExportProjectDialog : OtterDialog() {
 
     fun setOnCloseAction(op: () -> Unit) {
         onCloseActionProperty.set(EventHandler { op() })
+    }
+
+    private fun renderExportOptions() {
+        if (!this::exportOptionsBox.isInitialized) {
+            return
+        }
+
+        val tg = ToggleGroup()
+        exportOptionsBox.children.setAll(
+            createExportOption(tg, "backup", ExportType.BACKUP),
+            createExportOption(tg, "sourceAudio", ExportType.SOURCE_AUDIO),
+            createExportOption(tg, "listen", ExportType.LISTEN),
+            createExportOption(tg, "publish", ExportType.PUBLISH)
+        )
+
+        if (brightcoveExportAvailableProperty.value) {
+            exportOptionsBox.children.add(createExportOption(tg, "brightcove", ExportType.BRIGHTCOVE))
+        }
+
+        exportOptionsBox.children.add(createExportOption(tg, "burritoWrapper", ExportType.BURRITO_WRAPPER))
+    }
+
+    private fun createExportOption(tg: ToggleGroup, messageKey: String, type: ExportType) = cardRadioButton(tg) {
+        titleProperty.set(messages[messageKey])
+        selectedProperty().onChange {
+            if (it) {
+                exportTypeProperty.set(type)
+                onSelectExportType(type)
+            }
+        }
+        if (type == ExportType.BACKUP) {
+            isSelected = true
+        }
     }
 
     private fun onSelectExportType(type: ExportType) {

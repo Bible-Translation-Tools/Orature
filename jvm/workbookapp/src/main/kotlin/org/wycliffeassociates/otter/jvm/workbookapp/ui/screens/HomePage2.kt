@@ -324,6 +324,7 @@ class HomePage2 : View() {
                 themeProperty.set(settingsViewModel.appColorMode.value)
                 workbookDescriptorProperty.set(workbookDescriptor)
                 onEstimateSizeAction.set(exportProjectViewModel::getEstimateExportSize)
+                brightcoveExportAvailableProperty.set(exportProjectViewModel.isBrightcoveExportAvailable())
 
                 open()
 

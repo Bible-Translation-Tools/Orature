@@ -16,13 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.domain.project.exporter
+package org.wycliffeassociates.otter.common.domain.brightcove
 
-enum class ExportType(val titleKey: String) {
-    LISTEN("listen"),
-    SOURCE_AUDIO("sourceAudio"),
-    BACKUP("backup"),
-    PUBLISH("publish"),
-    BURRITO_WRAPPER("burritoWrapper"),
-    BRIGHTCOVE("brightcove")
-}
+data class BrightcoveConfig(
+    val accountId: String,
+    val clientId: String,
+    val clientSecret: String,
+    val ingestProfile: String? = null,
+    val callbacks: List<String>? = null
+)
