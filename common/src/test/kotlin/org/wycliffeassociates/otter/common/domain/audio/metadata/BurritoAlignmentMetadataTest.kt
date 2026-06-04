@@ -4,7 +4,7 @@ import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.whenever
 import io.mockk.every
 import io.mockk.mockk
-import org.bibletranslationtools.kotlinscripturealignment.BurritoAudioAlignment
+import org.bibletranslationtools.kotlinscripturealignment.model.BurritoAudioAlignment
 import org.bibletranslationtools.vtt.WebVttDocument
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -85,7 +85,7 @@ class BurritoAlignmentMetadataTest {
         )
 
         val timing = mockk<BurritoAudioAlignment>(relaxed = true) {
-            every { getVttCues() } returns vttCues
+            every { getVttCues(any()) } returns vttCues
         }
 
         val outputMarkers = testMetadata.parseTimings(timing).getMarkers().sortedBy { it.location }

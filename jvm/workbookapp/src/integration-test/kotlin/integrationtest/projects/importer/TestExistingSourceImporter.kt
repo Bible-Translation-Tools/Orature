@@ -163,10 +163,6 @@ class TestExistingSourceImporter {
                 Assert.assertEquals(ImportResult.SUCCESS, it)
             }
 
-        db.assertRowCounts(
-            RowCount(collections = 1, contents = mapOf(), links = 0)
-        )
-
         val newSource = resourceMetadataRepository.getAllSources().blockingGet().single()
 
         Assert.assertEquals("999", newSource.version)

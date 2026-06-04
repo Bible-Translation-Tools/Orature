@@ -169,11 +169,12 @@ class DirectoryProvider(
     override fun getSourceContainerDirectory(container: ResourceContainer): File {
         val dublinCore = container.manifest.dublinCore
         container.close()
-        val appendedPath = listOf(
+        var appendedPath = listOf(
             dublinCore.creator,
             "${dublinCore.language.identifier}_${dublinCore.identifier}",
             "v${dublinCore.version}"
         ).joinToString(pathSeparator)
+        appendedPath = appendedPath.removePrefix("/")
         val path = internalSourceRCDirectory.resolve(appendedPath)
         path.mkdirs()
         return path

@@ -48,7 +48,7 @@ import javax.inject.Provider
 const val SOURCES_JSON_FILE = "gl_sources.json"
 const val SOURCE_PATH_TEMPLATE = "content/%s.zip"
 
-class ImportProjectUseCase @Inject constructor() {
+class ImportProjectUseCase @Inject constructor(val identifier: ProjectFormatIdentifier) {
 
     @Inject
     lateinit var burritoFactoryProvider: BurritoImporterFactory
@@ -75,7 +75,7 @@ class ImportProjectUseCase @Inject constructor() {
     ): Single<ImportResult> {
         return Single
             .fromCallable {
-                val format = ProjectFormatIdentifier.getProjectFormat(file)
+                val format = identifier.getProjectFormat(file)
                 getImporter(format)
             }
             .flatMap {
@@ -148,7 +148,7 @@ class ImportProjectUseCase @Inject constructor() {
     }
 
     fun getSourceMetadata(file: File): Maybe<ResourceMetadata> {
-        return when (ProjectFormatIdentifier.getProjectFormat(file)) {
+        return when (identifier.getProjectFormat(file)) {
             ProjectFormat.RESOURCE_CONTAINER -> {
                 rcImporterProvider.get().getSourceMetadata(file)
             }
@@ -162,6 +162,7 @@ class ImportProjectUseCase @Inject constructor() {
      */
     private fun getImporter(format: ProjectFormat): IProjectImporter {
         val factory: IProjectImporterFactory = when(format) {
+            ProjectFormat.BURRITO_WRAPPER,
             ProjectFormat.SCRIPTURE_BURRITO -> burritoFactoryProvider
             ProjectFormat.RESOURCE_CONTAINER -> rcFactoryProvider
             ProjectFormat.TSTUDIO -> tsFactoryProvider

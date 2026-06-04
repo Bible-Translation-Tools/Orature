@@ -52,13 +52,15 @@ class SourceAudioAccessor(
         ResourceContainer.load(metadata.path).use { rc ->
             if (rc.media != null) {
                 val mediaProject = rc.media!!.projects.find { it.identifier == project }
+                val mediaOptions = mutableListOf<Media>()
+                mediaProject?.media?.find { it.identifier == "wav" }?.let { mediaOptions.add(it) }
                 var media = mediaProject?.media?.find { it.identifier == "mp3" }
                 val cue = mediaProject?.media?.find { it.identifier == "cue" }
-                if (media == null || cue == null) {
-                    media = mediaProject?.media?.find { it.identifier == "wav" }
+                if (media != null && cue != null) {
+                    mediaOptions.add(media)
                 }
-                if (media != null) {
-                    return getChapter(media, chapter, rc)
+                for (media in mediaOptions) {
+                    getChapter(media, chapter, rc)?.let { return it }
                 }
             }
         }
@@ -101,9 +103,11 @@ class SourceAudioAccessor(
                                 .apply { createNewFile() }
                             cueFile.deleteOnExit()
                             val cuePath = path.replace(".mp3", ".cue")
-                            rc.accessor.getInputStream(cuePath).use { input ->
-                                cueFile.outputStream().use { output ->
-                                    input.copyTo(output)
+                            if (rc.accessor.fileExists(cuePath)) {
+                                rc.accessor.getInputStream(cuePath).use { input ->
+                                    cueFile.outputStream().use { output ->
+                                        input.copyTo(output)
+                                    }
                                 }
                             }
                         }
