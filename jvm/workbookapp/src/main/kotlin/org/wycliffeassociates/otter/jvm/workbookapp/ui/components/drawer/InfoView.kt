@@ -167,7 +167,7 @@ class InfoView : View() {
     }
 
     init {
-        tryImportStylesheet(resources["/css/app-drawer.css"])
+        tryImportStylesheet("/css/app-drawer.css")
 
         subscribe<DrawerEvent<UIComponent>> {
             if (it.action == DrawerEventAction.OPEN) {

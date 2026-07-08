@@ -40,9 +40,9 @@ class RootView : View() {
         workspace.header.removeFromParent()
         workspace.root.vgrow = Priority.ALWAYS
 
-        tryImportStylesheet(resources["/css/theme/light-theme.css"])
-        tryImportStylesheet(resources["/css/theme/dark-theme.css"])
-        tryImportStylesheet(resources["/css/control.css"])
+        tryImportStylesheet("/controls/css/theme/light-theme.css")
+        tryImportStylesheet("/controls/css/theme/dark-theme.css")
+        tryImportStylesheet("/controls/css/control.css")
 
         bindThemeClassToRoot()
 

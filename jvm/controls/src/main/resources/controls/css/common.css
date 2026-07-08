@@ -1,0 +1,86 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
+/* The @font-face declarations live in /css/fonts.css (workbookapp), next to the font files:
+   a JPMS module can only resolve url() references against resources it owns. */
+
+.root {
+    -fx-font-family: 'Noto Sans';
+    -fx-font-weight: normal;
+    -fx-font-size: 10pt;
+}
+
+.centered {
+    -fx-alignment: center;
+}
+
+.text-centered {
+    -fx-text-alignment: center;
+}
+
+/* by default, scroll pane always has a gray background */
+.scroll-pane,
+.scroll-pane > .viewport{
+    -fx-background-color: transparent;
+}
+
+.jfx-snackbar-content {
+    -fx-background-color: #1a1a1a;
+    -fx-background-radius: 6px;
+}
+
+.jfx-snackbar-content .label {
+    -fx-text-fill: -wa-regular-text;
+    -fx-font-size: 14pt;
+}
+
+.h3 {
+    -fx-font-size: 1.6em;
+    -fx-font-weight: 700;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.h4 {
+    -fx-font-size: 1.4em;
+    -fx-font-weight: 700;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.h5 {
+    -fx-font-size: 1.2em;
+    -fx-font-weight: 600;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.h3--80,
+.h4--80 {
+    -fx-text-fill: -wa-regular-text-80;
+}
+
+.h5--60 {
+    -fx-text-fill: -wa-note-text;
+}
+
+.normal-text {
+    -fx-font-size: 1.4em;
+    -fx-text-fill: -wa-regular-text-80;
+}
+
+.wa-icon {
+    -fx-icon-color: -wa-regular-text-80;
+}

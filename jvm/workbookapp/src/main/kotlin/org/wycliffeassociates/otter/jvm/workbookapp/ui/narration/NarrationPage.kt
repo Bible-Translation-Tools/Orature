@@ -82,10 +82,10 @@ class NarrationPage : View() {
     private lateinit var teleprompterView: TeleprompterView
 
     init {
-        tryImportStylesheet(resources["/css/narration.css"])
-        tryImportStylesheet(resources["/css/chapter-selector.css"])
-        tryImportStylesheet("/css/chapter-grid.css")
-        tryImportStylesheet("/css/add-plugin-dialog.css")
+        tryImportStylesheet("/controls/css/narration.css")
+        tryImportStylesheet("/controls/css/chapter-selector.css")
+        tryImportStylesheet("/controls/css/chapter-grid.css")
+        tryImportStylesheet("/controls/css/add-plugin-dialog.css")
 
         pluginOpenedPage = createPluginOpenedPage()
     }

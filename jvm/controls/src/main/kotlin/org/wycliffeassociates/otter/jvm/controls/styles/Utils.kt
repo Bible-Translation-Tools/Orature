@@ -32,8 +32,11 @@ fun tryImportStylesheet(stylesheet: String) : Boolean {
     try {
         URL(css).toExternalForm()
     } catch (ex: MalformedURLException) {
-        // Fallback to loading classpath resource
+        // Class.getResource is scoped to a single module under JPMS, so it cannot see
+        // stylesheets owned by other modules; the class loader search covers every open
+        // module on the module path as well as the class path.
         FX::class.java.getResource(css)?.toExternalForm()
+            ?: object {}.javaClass.classLoader.getResource(css.trimStart('/'))?.toExternalForm()
     }?.let { resourcePath ->
         if (!FX.stylesheets.contains(resourcePath)) {
             importStylesheet(resourcePath)

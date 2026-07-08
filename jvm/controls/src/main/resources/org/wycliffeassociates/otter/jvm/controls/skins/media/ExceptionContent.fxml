@@ -31,7 +31,7 @@
     <children>
         <ImageView fitHeight="217.0" fitWidth="604.0" pickOnBounds="true" preserveRatio="true">
             <image>
-                <Image url="@/images/exception_header.png" />
+                <Image url="@exception_header.png" />
             </image>
         </ImageView>
         <Label fx:id="titleLabel">

@@ -33,7 +33,7 @@ class WorkbookDemoApp : App(RootView::class), IDependencyGraphProvider {
         super.start(stage)
         stage.isMaximized = true
 
-        tryImportStylesheet("/css/common.css")
+        tryImportStylesheet("/controls/css/common.css")
     }
 
     override fun onBeforeShow(view: UIComponent) {

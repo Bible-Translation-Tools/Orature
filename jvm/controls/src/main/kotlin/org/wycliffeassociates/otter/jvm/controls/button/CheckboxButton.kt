@@ -27,7 +27,7 @@ import tornadofx.*
 class CheckboxButton : CheckBox() {
 
     init {
-        tryImportStylesheet(javaClass.getResource("/css/checkbox-button.css").toExternalForm())
+        tryImportStylesheet(javaClass.getResource("/controls/css/checkbox-button.css").toExternalForm())
         styleClass.setAll("checkbox-button")
     }
 

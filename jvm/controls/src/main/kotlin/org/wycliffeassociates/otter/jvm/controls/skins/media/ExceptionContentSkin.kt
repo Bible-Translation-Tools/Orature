@@ -60,7 +60,7 @@ class ExceptionContentSkin(private var content: ExceptionContent) : SkinBase<Exc
     private val showLessIcon = FontIcon("gmi-expand-less").apply { styleClass.add("btn__icon") }
 
     init {
-        tryImportStylesheet("/css/exception-content.css")
+        tryImportStylesheet("/controls/css/exception-content.css")
 
         loadFXML()
         bindText()

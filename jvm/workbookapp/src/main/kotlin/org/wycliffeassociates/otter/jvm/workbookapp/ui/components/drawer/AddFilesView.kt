@@ -158,10 +158,10 @@ class AddFilesView : View() {
     }
 
     init {
-        tryImportStylesheet(resources["/css/app-drawer.css"])
-        tryImportStylesheet(resources["/css/confirm-dialog.css"])
-        tryImportStylesheet(resources["/css/import-export-dialogs.css"])
-        tryImportStylesheet(resources["/css/card-radio-btn.css"])
+        tryImportStylesheet("/css/app-drawer.css")
+        tryImportStylesheet("/controls/css/confirm-dialog.css")
+        tryImportStylesheet("/controls/css/import-export-dialogs.css")
+        tryImportStylesheet("/controls/css/card-radio-btn.css")
 
         initSuccessDialog()
         initErrorDialog()

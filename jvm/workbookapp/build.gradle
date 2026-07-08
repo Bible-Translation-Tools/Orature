@@ -1,5 +1,6 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.gradle.api.tasks.compile.JavaCompile
 
 plugins {
     id 'nu.studer.jooq' version "$jooqPluginVer"
@@ -10,15 +11,16 @@ plugins {
 }
 apply plugin: 'idea'
 
-tasks.named('jar', Jar) {
-    manifest {
-        attributes('Automatic-Module-Name': 'org.wycliffeassociates.otter.workbookapp')
-    }
-}
+ext.jpmsModuleName = 'org.wycliffeassociates.otter.workbookapp'
+ext.jpmsCompileJavaTaskName = 'compileJpmsJava'
+ext.jpmsModulePathConfigurationName = 'runtimeClasspath'
+ext.jpmsModulePathExcludeTokens = ['mockk', 'activation', 'batik-', 'xml-apis']
+ext.jpmsPatchModuleDir = 'classes/java/main'
+ext.jpmsCompileOutputDir = 'classes/jpms/main'
 
 javafx {
     version = "$javafxVer"
-    modules = ['javafx.controls', 'javafx.fxml']
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.media']
 }
 
 repositories {
@@ -27,6 +29,12 @@ repositories {
 }
 
 sourceSets {
+    jpms {
+        java {
+            srcDir 'src/jpms/java'
+        }
+        compileClasspath += sourceSets.main.compileClasspath
+    }
     assets {
         resources {
             srcDir "${project(':assets').projectDir}/src/main/resource"
@@ -51,6 +59,27 @@ sourceSets {
         resources {
             srcDirs += [assets.resources]
         }
+    }
+}
+
+apply from: rootProject.file('gradle/jpms-kotlin.gradle')
+
+tasks.named('classes') {
+    dependsOn tasks.named('compileJpmsJava')
+}
+tasks.named('jar', Jar) {
+    dependsOn tasks.named('compileJpmsJava')
+    from(layout.buildDirectory.dir('classes/jpms/main')) {
+        include 'module-info.class'
+    }
+}
+tasks.named('compileJava', JavaCompile) {
+    // Keep main Java compile non-modular; JPMS descriptor is compiled by compileJpmsJava.
+    source = sourceSets.main.java
+    // If a previous build wrote module-info.class into main output, javac switches to module mode.
+    // Keep main compile classpath-based; module-info.class is provided later from classes/jpms/main.
+    doFirst {
+        delete(layout.buildDirectory.file('classes/java/main/module-info.class'))
     }
 }
 
@@ -91,37 +120,42 @@ tasks.register('patchJavafxGridviewJar', Jar) {
 application {
     mainModule = "org.wycliffeassociates.otter.workbookapp"
     mainClass = "org.wycliffeassociates.otter.jvm.workbookapp.MainKt"
+    // The app's own modules (plus the jlink merged module holding TornadoFX and the other
+    // automatic modules) use JavaFX internals; ALL-UNNAMED keeps class-path runs working.
+    def internalsConsumers = 'org.wycliffeassociates.otter.workbookapp,' +
+            'org.wycliffeassociates.otter.jvm.controls,' +
+            'org.wycliffeassociates.merged.module,' +
+            'ALL-UNNAMED'
     applicationDefaultJvmArgs = [
             '--add-modules=ALL-MODULE-PATH',
-            '--add-exports=javafx.base/com.sun.javafx.logging=ALL-UNNAMED',
-            '--add-exports=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED',
-            '--add-exports=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED',
-            '--add-exports=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED',
-            '--add-exports=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED',
-            '--add-exports=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED',
-            '--add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED',
-            '--add-exports=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED',
-            '--add-exports=javafx.base/com.sun.javafx.binding=ALL-UNNAMED',
-            '--add-exports=javafx.graphics/com.sun.javafx.css=ALL-UNNAMED',
-            '--add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED',
-            '--add-opens=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED',
-            '--add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED',
-            '--add-opens=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED',
-            '--add-opens=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED',
-            '--add-opens=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED',
-            '--add-opens=javafx.controls/javafx.scene.control.skin=ALL-UNNAMED',
-            '--add-opens=javafx.base/com.sun.javafx.binding=ALL-UNNAMED',
-            '--add-opens=javafx.graphics/com.sun.javafx.css=ALL-UNNAMED'
+            "--add-exports=javafx.base/com.sun.javafx.logging=$internalsConsumers",
+            "--add-exports=javafx.graphics/com.sun.javafx.application=$internalsConsumers",
+            "--add-exports=javafx.graphics/com.sun.javafx.scene=$internalsConsumers",
+            "--add-exports=javafx.graphics/com.sun.glass.ui=$internalsConsumers",
+            "--add-exports=javafx.graphics/com.sun.javafx.scene.traversal=$internalsConsumers",
+            "--add-exports=javafx.graphics/com.sun.javafx.util=$internalsConsumers",
+            "--add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=$internalsConsumers",
+            "--add-exports=javafx.controls/com.sun.javafx.scene.control=$internalsConsumers",
+            "--add-exports=javafx.base/com.sun.javafx.binding=$internalsConsumers",
+            "--add-exports=javafx.graphics/com.sun.javafx.css=$internalsConsumers",
+            "--add-opens=javafx.graphics/com.sun.javafx.scene=$internalsConsumers",
+            "--add-opens=javafx.graphics/com.sun.glass.ui=$internalsConsumers",
+            "--add-opens=javafx.graphics/com.sun.javafx.scene.traversal=$internalsConsumers",
+            "--add-opens=javafx.graphics/com.sun.javafx.util=$internalsConsumers",
+            "--add-opens=javafx.controls/com.sun.javafx.scene.control.behavior=$internalsConsumers",
+            "--add-opens=javafx.controls/com.sun.javafx.scene.control=$internalsConsumers",
+            "--add-opens=javafx.controls/javafx.scene.control.skin=$internalsConsumers",
+            "--add-opens=javafx.base/com.sun.javafx.binding=$internalsConsumers",
+            "--add-opens=javafx.graphics/com.sun.javafx.css=$internalsConsumers"
     ]
 }
 
-// jlink requires a named application module (module-info.java on the module path, e.g. with gradle/jpms-kotlin.gradle).
-// Until that exists, :jvm:workbookapp:jlink fails with "automatic module cannot be used with jlink" on workbookapp.jar.
 jlink {
     jvmVersion = javaVer as int
     moduleName = 'org.wycliffeassociates.otter.workbookapp'
     mainClass = 'org.wycliffeassociates.otter.jvm.workbookapp.MainKt'
-    addExtraDependencies('javafx')
+    jarExclude('batik-ext', 'org/w3c/dom/**')
+    addExtraDependencies('javafx', 'jfoenix')
     addOptions('--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages')
 
     launcher {
@@ -146,17 +180,6 @@ tasks.register('buildWorkbookInstaller') {
     group = 'distribution'
     description = 'Runs jpackage to produce a native application installer (requires a JDK with jpackage).'
     dependsOn tasks.named('jpackage')
-}
-
-// JNA is an automatic module merged into org.wycliffeassociates.merged.module; leaving copies in nonmodjars makes the
-// plugin generate com.sun.jna delegating stubs and a javac module cycle. Remove them before delegating module creation.
-tasks.named('createDelegatingModules') {
-    doFirst {
-        def dir = layout.buildDirectory.dir('jlinkbase/nonmodjars').get().asFile
-        if (dir.directory) {
-            dir.listFiles()?.findAll { it.file && (it.name.startsWith('jna-') || it.name.startsWith('jna-platform-')) }?.each { it.delete() }
-        }
-    }
 }
 
 test {
@@ -339,6 +362,13 @@ shadowJar {
 kapt {
     correctErrorTypes true // https://stackoverflow.com/questions/45099688/error-error-nonexistentclass-kotlin-in-multi-module-dagger-project
 }
+
+// :jvm:controls compiles module-info in a dedicated jpms source set.
+// KAPT reads controls classes output, so declare task ordering explicitly for Gradle 8 validation.
+tasks.matching { it.name in ['kaptGenerateStubsKotlin', 'kaptKotlin', 'kaptGenerateStubsJpmsKotlin', 'kaptJpmsKotlin', 'kaptGenerateStubsIntegrationTestKotlin', 'kaptIntegrationTestKotlin'] }
+        .configureEach {
+            dependsOn(project(':jvm:controls').tasks.named('compileJpmsJava'))
+        }
 
 task integrationTest(type: Test) {
     testClassesDirs = sourceSets.integrationTest.output.classesDirs

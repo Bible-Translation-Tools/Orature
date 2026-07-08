@@ -83,6 +83,10 @@ subprojects {
     java {
         toolchain {
             languageVersion = JavaLanguageVersion.of(javaVer)
+            // JavaFX must come from the Maven jars, not the JDK: an FX-bundled JDK (Liberica Full,
+            // Zulu FX) shadows the javafx-* dependencies as platform modules, breaking both Kotlin
+            // compilation against com.sun.javafx internals and the jlink module graph.
+            vendor = JvmVendorSpec.AZUL
         }
         // Kotlin compilation stays on the classpath so optional JDK modules (e.g. TornadoFX -> java.json)
         // do not break the graph. Java compilation uses an explicit module path via gradle/jpms-kotlin.gradle.

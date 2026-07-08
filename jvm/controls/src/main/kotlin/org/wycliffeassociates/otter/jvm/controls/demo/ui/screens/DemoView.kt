@@ -32,6 +32,6 @@ class DemoView : View() {
     }
 
     init {
-        tryImportStylesheet(resources["/css/demo.css"])
+        tryImportStylesheet("/controls/css/demo.css")
     }
 }

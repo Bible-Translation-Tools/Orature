@@ -102,7 +102,7 @@ class SourceContent : StackPane() {
     }
 
     init {
-        tryImportStylesheet(javaClass.getResource("/css/source-content.css").toExternalForm())
+        tryImportStylesheet(javaClass.getResource("/controls/css/source-content.css").toExternalForm())
 
         addClass("source-content")
 

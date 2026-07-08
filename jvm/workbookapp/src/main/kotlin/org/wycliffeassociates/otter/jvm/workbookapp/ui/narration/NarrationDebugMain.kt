@@ -90,11 +90,11 @@ class NarrationDebugApp : App(NarrationRootView::class), IDependencyGraphProvide
         directoryProvider.cleanTempDirectory()
         configureAudioSystem.configure()
 
-        tryImportStylesheet(resources["/css/theme/dark-theme.css"])
-        tryImportStylesheet(resources["/css/theme/light-theme.css"])
-        tryImportStylesheet(resources["/css/common.css"])
-        tryImportStylesheet(resources["/css/control.css"])
-        tryImportStylesheet(resources["/css/app-bar.css"])
+        tryImportStylesheet("/controls/css/theme/dark-theme.css")
+        tryImportStylesheet("/controls/css/theme/light-theme.css")
+        tryImportStylesheet("/controls/css/common.css")
+        tryImportStylesheet("/controls/css/control.css")
+        tryImportStylesheet("/css/app-bar.css")
     }
 
     override fun start(stage: Stage) {

@@ -103,7 +103,7 @@ class AppBar : Fragment() {
     }
 
     init {
-        tryImportStylesheet(resources["/css/app-bar.css"])
+        tryImportStylesheet("/css/app-bar.css")
 
         root.apply {
             styleClass.setAll("app-bar")

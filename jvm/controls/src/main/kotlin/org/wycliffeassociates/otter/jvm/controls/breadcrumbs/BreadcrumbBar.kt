@@ -32,7 +32,7 @@ class BreadcrumbBar : HBox() {
     val orientationScaleProperty = SimpleDoubleProperty()
 
     init {
-        tryImportStylesheet(javaClass.getResource("/css/breadcrumb-bar.css").toExternalForm())
+        tryImportStylesheet(javaClass.getResource("/controls/css/breadcrumb-bar.css").toExternalForm())
         styleClass.setAll("breadcrumb-bar")
 
         bindChildren(items) { breadcrumb ->

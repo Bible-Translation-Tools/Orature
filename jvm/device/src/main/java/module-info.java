@@ -2,6 +2,7 @@ open module org.wycliffeassociates.otter.jvm.device {
     requires org.wycliffeassociates.otter.common;
     requires org.wycliffeassociates.otter.common.audio;
 
+    requires java.compiler;
     requires java.desktop;
 
     requires kotlin.stdlib;

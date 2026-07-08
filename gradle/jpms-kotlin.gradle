@@ -6,18 +6,25 @@ import org.gradle.api.tasks.compile.JavaCompile
  * Kotlin classes compiled to classes/java/main.
  */
 String jpmsName = project.ext.jpmsModuleName
+String javaCompileTaskName = project.ext.has('jpmsCompileJavaTaskName') ? project.ext.jpmsCompileJavaTaskName : 'compileJava'
+String modulePathConfigurationName = project.ext.has('jpmsModulePathConfigurationName') ? project.ext.jpmsModulePathConfigurationName : 'compileClasspath'
+List<String> modulePathExcludeTokens = project.ext.has('jpmsModulePathExcludeTokens') ? project.ext.jpmsModulePathExcludeTokens : []
+String patchModuleDir = project.ext.has('jpmsPatchModuleDir') ? project.ext.jpmsPatchModuleDir : 'classes/java/main'
+String jpmsCompileOutputDir = project.ext.has('jpmsCompileOutputDir') ? project.ext.jpmsCompileOutputDir : patchModuleDir
 
 tasks.named('compileKotlin').configure {
-    destinationDirectory.set(layout.buildDirectory.dir('classes/java/main'))
+    destinationDirectory.set(layout.buildDirectory.dir(patchModuleDir))
 }
 
-tasks.named('compileJava', JavaCompile).configure {
+tasks.named(javaCompileTaskName, JavaCompile).configure {
     dependsOn tasks.named('compileKotlin')
     modularity.inferModulePath = false
+    destinationDirectory.set(layout.buildDirectory.dir(jpmsCompileOutputDir))
     doFirst {
         JavaCompile jc = it as JavaCompile
-        File outDir = layout.buildDirectory.dir('classes/java/main').get().asFile
-        String modulePath = configurations.compileClasspath.files
+        File outDir = layout.buildDirectory.dir(patchModuleDir).get().asFile
+        String modulePath = configurations.getByName(modulePathConfigurationName).files
+                .findAll { File f -> modulePathExcludeTokens.every { token -> !f.name.contains(token) } }
                 .findAll { File f -> f.isDirectory() || f.name.endsWith('.jar') }
                 .collect { it.absolutePath }
                 .join(File.pathSeparator)

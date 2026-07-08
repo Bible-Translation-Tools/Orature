@@ -4,15 +4,30 @@ plugins {
 
 apply plugin: 'java-library'
 
-tasks.named('jar', Jar) {
-    manifest {
-        attributes('Automatic-Module-Name': 'org.wycliffeassociates.otter.jvm.controls')
+// module-info lives outside main/java so compileKotlin does not enable strict JavaFX JPMS checks on Kotlin sources.
+sourceSets {
+    jpms {
+        java {
+            srcDir 'src/jpms/java'
+        }
+        compileClasspath += sourceSets.main.compileClasspath
     }
+}
+
+ext.jpmsModuleName = 'org.wycliffeassociates.otter.jvm.controls'
+ext.jpmsCompileJavaTaskName = 'compileJpmsJava'
+apply from: rootProject.file('gradle/jpms-kotlin.gradle')
+
+tasks.named('classes') {
+    dependsOn tasks.named('compileJpmsJava')
+}
+tasks.named('jar', Jar) {
+    dependsOn tasks.named('compileJpmsJava')
 }
 
 javafx {
     version = "$javafxVer"
-    modules = ['javafx.controls', 'javafx.fxml']
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.graphics']
 }
 
 repositories {

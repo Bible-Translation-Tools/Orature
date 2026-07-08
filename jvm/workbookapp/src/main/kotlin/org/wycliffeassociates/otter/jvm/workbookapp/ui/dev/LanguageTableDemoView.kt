@@ -32,9 +32,9 @@ class LanguageTableDemoView : View() {
     )
 
     init {
-        tryImportStylesheet("/css/popup-menu.css")
-        tryImportStylesheet("/css/filtered-search-bar.css")
-        tryImportStylesheet("/css/table-view.css")
+        tryImportStylesheet("/controls/css/popup-menu.css")
+        tryImportStylesheet("/controls/css/filtered-search-bar.css")
+        tryImportStylesheet("/controls/css/table-view.css")
 
         workspace.subscribe<LanguageSelectedEvent> {
             println("selected: ${it.item}")

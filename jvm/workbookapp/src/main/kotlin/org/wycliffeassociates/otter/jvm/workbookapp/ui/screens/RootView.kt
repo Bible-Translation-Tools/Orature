@@ -59,7 +59,7 @@ class RootView : View() {
         workspace.header.removeFromParent()
         workspace.root.vgrow = Priority.ALWAYS
 
-        tryImportStylesheet(resources.get("/css/audio-error-dialog.css"))
+        tryImportStylesheet("/css/audio-error-dialog.css")
         initThemeStylesheets()
         bindThemeClassToRoot()
 
@@ -79,8 +79,8 @@ class RootView : View() {
     }
 
     private fun initThemeStylesheets() {
-        tryImportStylesheet(resources["/css/theme/light-theme.css"])
-        tryImportStylesheet(resources["/css/theme/dark-theme.css"])
+        tryImportStylesheet("/controls/css/theme/light-theme.css")
+        tryImportStylesheet("/controls/css/theme/dark-theme.css")
     }
 
     private fun initAudioErrorDialog() {

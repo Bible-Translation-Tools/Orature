@@ -92,7 +92,7 @@ class BlindDraft : View() {
 
     init {
         tryImportStylesheet("/css/recording-screen.css")
-        tryImportStylesheet("/css/popup-menu.css")
+        tryImportStylesheet("/controls/css/popup-menu.css")
     }
 
     private fun buildTakesArea(): VBox {

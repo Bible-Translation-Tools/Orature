@@ -58,8 +58,8 @@ class SplashScreen : View() {
     }
 
     init {
-        tryImportStylesheet(resources["/css/common.css"])
-        tryImportStylesheet(resources["/css/splash-screen.css"])
+        tryImportStylesheet("/controls/css/common.css")
+        tryImportStylesheet("/css/splash-screen.css")
 
         viewModel
             .initApp()

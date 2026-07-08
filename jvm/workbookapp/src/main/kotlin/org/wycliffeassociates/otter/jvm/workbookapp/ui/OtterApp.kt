@@ -34,6 +34,7 @@ import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.NOTIFICATION_DURATION_SEC
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
@@ -47,6 +48,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RootView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.SplashScreen
 import tornadofx.*
 import tornadofx.FX.Companion.messages
+import java.util.ResourceBundle
 import javax.inject.Inject
 
 class OtterApp : App(RootView::class), IDependencyGraphProvider {
@@ -71,6 +73,9 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
         Thread.setDefaultUncaughtExceptionHandler(OtterExceptionHandler(directoryProvider, localeLanguage))
         initializeLogger(directoryProvider)
         initializeAppLocale()
+        // The font files live in this module; @font-face can only resolve url() against
+        // resources of the module that owns the stylesheet.
+        tryImportStylesheet("/css/fonts.css")
         DatabaseInitializer(
             DirectoryProvider(OratureInfo.SUITE_NAME)
         ).initialize()
@@ -86,6 +91,9 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
 
     fun initializeAppLocale() {
         FX.locale = localeLanguage.preferredLocale()
+        // TornadoFX resolves the global bundle against its own module, which cannot see this
+        // module's Messages bundle under JPMS; resolve it from this module instead.
+        FX.messages = ResourceBundle.getBundle("Messages", FX.locale, OtterApp::class.java.module)
     }
 
     override fun start(stage: Stage) {

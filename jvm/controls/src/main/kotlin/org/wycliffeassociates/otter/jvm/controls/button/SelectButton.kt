@@ -25,7 +25,7 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 
 class SelectButton : ToggleButton() {
     init {
-        tryImportStylesheet(javaClass.getResource("/css/select-button.css").toExternalForm())
+        tryImportStylesheet(javaClass.getResource("/controls/css/select-button.css").toExternalForm())
         styleClass.setAll("select-button")
     }
 

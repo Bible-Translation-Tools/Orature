@@ -435,9 +435,9 @@ class SettingsView : View() {
     }
 
     init {
-        tryImportStylesheet(resources["/css/app-drawer.css"])
-        tryImportStylesheet(resources["/css/add-plugin-dialog.css"])
-        tryImportStylesheet(resources["/css/confirm-dialog.css"])
+        tryImportStylesheet("/css/app-drawer.css")
+        tryImportStylesheet("/controls/css/add-plugin-dialog.css")
+        tryImportStylesheet("/controls/css/confirm-dialog.css")
         initChangeLanguageDialog()
 
         // Devices are refreshed on dock and on drawer event otherwise it is not loaded the first time.

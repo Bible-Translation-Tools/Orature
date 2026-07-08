@@ -60,7 +60,7 @@ class PluginOpenedPage : View() {
     private val listeners = mutableListOf<ListenerDisposer>()
 
     init {
-        tryImportStylesheet(resources["/css/plugin-opened-page.css"])
+        tryImportStylesheet("/controls/css/plugin-opened-page.css")
     }
 
     override val root = vbox {

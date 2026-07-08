@@ -24,8 +24,8 @@ import tornadofx.*
 
 class TextFieldFragment : Fragment() {
     init {
-        tryImportStylesheet("/css/popup-menu.css")
-        tryImportStylesheet("/css/filtered-search-bar.css")
+        tryImportStylesheet("/controls/css/popup-menu.css")
+        tryImportStylesheet("/controls/css/filtered-search-bar.css")
     }
 
     override val root = vbox {

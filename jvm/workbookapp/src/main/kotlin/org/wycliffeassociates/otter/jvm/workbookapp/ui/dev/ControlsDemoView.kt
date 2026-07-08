@@ -41,6 +41,6 @@ class ControlsDemoView : View() {
     }
 
     init {
-        tryImportStylesheet("/css/source-content.css")
+        tryImportStylesheet("/controls/css/source-content.css")
     }
 }

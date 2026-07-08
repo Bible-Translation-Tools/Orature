@@ -9,6 +9,7 @@ dependencies {
     implementation "org.slf4j:slf4j-api:$slf4jApiVer"
 
     implementation "com.google.dagger:dagger:$daggerVer"
+    kapt "com.google.dagger:dagger-compiler:$daggerVer"
 
     implementation "be.tarsos:tarsosdsp:$tarsosDspVer"
 

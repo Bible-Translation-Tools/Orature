@@ -126,18 +126,18 @@ class ChunkingTranslationPage : View() {
     }
 
     init {
-        tryImportStylesheet("/css/chapter-selector.css")
-        tryImportStylesheet("/css/chapter-grid.css")
+        tryImportStylesheet("/controls/css/chapter-selector.css")
+        tryImportStylesheet("/controls/css/chapter-grid.css")
         tryImportStylesheet("/css/translation-page.css")
         tryImportStylesheet("/css/consume-page.css")
         tryImportStylesheet("/css/blind-draft-page.css")
-        tryImportStylesheet("/css/audio-player.css")
-        tryImportStylesheet("/css/source-content.css")
+        tryImportStylesheet("/controls/css/audio-player.css")
+        tryImportStylesheet("/controls/css/source-content.css")
         tryImportStylesheet("/css/chunk-item.css")
-        tryImportStylesheet("/css/marker-node.css")
-        tryImportStylesheet("/css/scrolling-waveform.css")
+        tryImportStylesheet("/controls/css/marker-node.css")
+        tryImportStylesheet("/controls/css/scrolling-waveform.css")
         tryImportStylesheet("/css/source-audio-missing.css")
-        tryImportStylesheet("/css/add-plugin-dialog.css")
+        tryImportStylesheet("/controls/css/add-plugin-dialog.css")
 
         subscribe<ChunkingStepTransitionEvent> {
             viewModel.navigateStep(it.step)

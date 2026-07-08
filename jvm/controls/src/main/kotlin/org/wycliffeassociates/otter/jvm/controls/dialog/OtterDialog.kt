@@ -54,13 +54,13 @@ abstract class OtterDialog : Fragment() {
     }
 
     init {
-        tryImportStylesheet(resources.get("/css/otter-dialog.css"))
+        tryImportStylesheet("/controls/css/otter-dialog.css")
         /*
          * The dialog does not inherit style class from root view;
          * it needs its own theme configuration
          */
-        tryImportStylesheet(resources["/css/theme/light-theme.css"])
-        tryImportStylesheet(resources["/css/theme/dark-theme.css"])
+        tryImportStylesheet("/controls/css/theme/light-theme.css")
+        tryImportStylesheet("/controls/css/theme/dark-theme.css")
         bindTheme()
     }
 

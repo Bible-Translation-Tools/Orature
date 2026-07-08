@@ -27,7 +27,7 @@ import tornadofx.*
 class TranslationWizardDemoView : View() {
 
     init {
-        tryImportStylesheet("/css/translation-card-2.css")
+        tryImportStylesheet("/controls/css/translation-card-2.css")
     }
 
     override val root = vbox {

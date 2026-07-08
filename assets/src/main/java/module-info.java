@@ -1,6 +1,8 @@
 open module org.wycliffeassociates.otter.assets {
     requires org.wycliffeassociates.otter.common;
 
+    requires java.compiler;
+
     requires kotlin.stdlib;
     requires org.slf4j;
     requires io.reactivex.rxjava2;

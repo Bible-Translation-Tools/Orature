@@ -30,7 +30,7 @@ class SourceFormatToggle : Control() {
         TEXT
     }
 
-    private val USER_AGENT_STYLESHEET = javaClass.getResource("/css/source-format-toggle.css").toExternalForm()
+    private val USER_AGENT_STYLESHEET = javaClass.getResource("/controls/css/source-format-toggle.css").toExternalForm()
 
     val activeSourceProperty = SimpleObjectProperty<SourceFormat>(SourceFormat.AUDIO)
 

@@ -54,6 +54,6 @@ class ChunkingDemoView : View() {
     init {
         tryImportStylesheet("/css/chunk-item.css")
         tryImportStylesheet("/css/chunking-page.css")
-        tryImportStylesheet("/css/source-content.css")
+        tryImportStylesheet("/controls/css/source-content.css")
     }
 }
