@@ -126,6 +126,15 @@ class ExportProjectDialog : OtterDialog() {
                                 }
                             }
                         }
+                        cardRadioButton(tg) {
+                            titleProperty.set(messages["burritoWrapper"])
+                            selectedProperty().onChange {
+                                if (it) {
+                                    exportTypeProperty.set(ExportType.BURRITO_WRAPPER)
+                                    onSelectExportType(ExportType.BURRITO_WRAPPER)
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -196,6 +205,7 @@ class ExportProjectDialog : OtterDialog() {
     private fun onSelectExportType(type: ExportType) {
         val newList = when (type) {
             ExportType.BACKUP -> chapters.map { it.copy(selectable = it.progress > 0.0) }
+            ExportType.BURRITO_WRAPPER -> chapters.map { it.copy(selectable = it.progress == 1.0) }
             else -> chapters.map { it.copy(selectable = it.progress == 1.0) }
         }
         chapters.setAll(newList)

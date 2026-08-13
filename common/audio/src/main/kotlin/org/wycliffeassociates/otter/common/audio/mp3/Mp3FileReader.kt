@@ -44,7 +44,10 @@ class MP3FileReader(
     private var decoder: RandomAccessDecoder? = RandomAccessDecoder(file.absolutePath)
 
     val start = start ?: 0
-    val end = end ?: decoder?.sampleCount ?: 0
+    val decodedMax = decoder?.sampleCount
+    val end = if (decodedMax != null && end != null) {
+        min(decodedMax, end)
+    } else decodedMax ?: 0
     private var pos = min(max(0, this.start), this.end)
 
     override val sampleRate: Int = DEFAULT_SAMPLE_RATE
@@ -136,6 +139,8 @@ class MP3FileReader(
     override fun open() {
         decoder?.let { release() }
         decoder = RandomAccessDecoder(file.absolutePath)
+
+        pos = min(max(0, this.start), this.end)
     }
 
     override fun release() {

@@ -19,25 +19,36 @@
 package org.wycliffeassociates.otter.common.domain.project
 
 import org.bibletranslationtools.scriptureburrito.container.BurritoContainer
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito.BurritoToResourceContainerConverter
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.burrito.ScriptureBurritoWrapper
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.tstudio2rc.Tstudio2RcConverter
 import java.io.File
 import java.lang.Exception
 import java.lang.IllegalArgumentException
+import java.util.logging.Logger
+import javax.inject.Inject
 import kotlin.jvm.Throws
 
-object ProjectFormatIdentifier {
+class ProjectFormatIdentifier @Inject constructor(
+    private val directoryProvider: IDirectoryProvider
+) {
+
+    private val logger = LoggerFactory.getLogger(ProjectFormatIdentifier::class.java)
 
     private val projectFormatIdentifier: IFormatIdentifier
         get() {
             // set up the chains for identifying the project format
             val orature = OratureFileIdentifier()
             val tstudio = TstudioFileIdentifier()
+            val wrapper = BurritoWrapperIdentifier(directoryProvider)
             val burrito = ScriptureBurritoFileIdentifier()
 
             orature.next = tstudio
-            tstudio.next = burrito
+            tstudio.next = wrapper
+            wrapper.next = burrito
 
             return orature
         }
@@ -50,54 +61,79 @@ object ProjectFormatIdentifier {
             ?: throw IllegalArgumentException("The following file is not supported: $file")
     }
 
+
+}
+
+/**
+ * Chains of Responsibility - getting the corresponding format of a given project file
+ */
+private interface IFormatIdentifier {
+    var next: IFormatIdentifier?
+
     /**
-     * Chains of Responsibility - getting the corresponding format of a given project file
+     * Returns the project format of the given file
      */
-    private interface IFormatIdentifier {
-        var next: IFormatIdentifier?
+    fun getFormat(file: File): ProjectFormat?
+}
 
-        /**
-         * Returns the project format of the given file
-         */
-        fun getFormat(file: File): ProjectFormat?
-    }
+private class OratureFileIdentifier : IFormatIdentifier {
+    private val logger = LoggerFactory.getLogger(OratureFileIdentifier::class.java)
 
-    private class OratureFileIdentifier : IFormatIdentifier {
+    override var next: IFormatIdentifier? = null
 
-        override var next: IFormatIdentifier? = null
-
-        override fun getFormat(file: File): ProjectFormat? {
-            return try {
-                ResourceContainer.load(file).close()
-                ProjectFormat.RESOURCE_CONTAINER
-            } catch (e: Exception) {
-                next?.getFormat(file)
-            }
+    override fun getFormat(file: File): ProjectFormat? {
+        return try {
+            ResourceContainer.load(file).close()
+            ProjectFormat.RESOURCE_CONTAINER
+        } catch (e: Exception) {
+            logger.info("${file.name} is not a valid Resource Container: ", e)
+            next?.getFormat(file)
         }
     }
-    private class TstudioFileIdentifier : IFormatIdentifier {
+}
+private class TstudioFileIdentifier : IFormatIdentifier {
+    private val logger = LoggerFactory.getLogger(TstudioFileIdentifier::class.java)
 
-        override var next: IFormatIdentifier? = null
+    override var next: IFormatIdentifier? = null
 
-        override fun getFormat(file: File): ProjectFormat? {
-            return if (Tstudio2RcConverter.isValidFormat(file)) {
-                ProjectFormat.TSTUDIO
-            } else {
-                next?.getFormat(file)
-            }
+    override fun getFormat(file: File): ProjectFormat? {
+        return if (Tstudio2RcConverter.isValidFormat(file)) {
+            ProjectFormat.TSTUDIO
+        } else {
+            next?.getFormat(file)
         }
     }
+}
 
-    private class ScriptureBurritoFileIdentifier : IFormatIdentifier {
-        override var next: IFormatIdentifier? = null
+private class ScriptureBurritoFileIdentifier : IFormatIdentifier {
+    private val logger = LoggerFactory.getLogger(ScriptureBurritoFileIdentifier::class.java)
 
-        override fun getFormat(file: File): ProjectFormat? {
-            return try {
-                BurritoContainer.load(file).close()
-                ProjectFormat.SCRIPTURE_BURRITO
-            } catch (e: Exception) {
-                next?.getFormat(file)
-            }
+    override var next: IFormatIdentifier? = null
+
+    override fun getFormat(file: File): ProjectFormat? {
+        return try {
+            BurritoContainer.load(file).close()
+            ProjectFormat.SCRIPTURE_BURRITO
+        } catch (e: Exception) {
+            logger.info("${file.name} is not a valid Scripture Burrito: ", e)
+            next?.getFormat(file)
+        }
+    }
+}
+
+
+private class BurritoWrapperIdentifier(val directoryProvider: IDirectoryProvider) : IFormatIdentifier {
+    private val logger = LoggerFactory.getLogger(BurritoWrapperIdentifier::class.java)
+
+    override var next: IFormatIdentifier? = null
+
+    override fun getFormat(file: File): ProjectFormat? {
+        return try {
+            ScriptureBurritoWrapper.load(file)
+            ProjectFormat.BURRITO_WRAPPER
+        } catch (e: Exception) {
+            logger.info("${file.name} is not a valid Scripture Burrito: ", e)
+            next?.getFormat(file)
         }
     }
 }

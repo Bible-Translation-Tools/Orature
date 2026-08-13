@@ -1,0 +1,40 @@
+{
+    "format": "alignment",
+    "version": "0.3",
+    "type": "audio-reference",
+    "documents": {
+        "timecode": {
+            "scheme": "vtt-timecode",
+            "docid": "en_ulb_psa_c117.mp3"
+        },
+        "text-reference": {
+            "scheme": "u23003"
+        }
+    },
+    "records": [
+        {
+            "timecode": [
+                "000:00:00.000 --> 000:00:02.706"
+            ],
+            "text-reference": [
+                "PSA 117:0"
+            ]
+        },
+        {
+            "timecode": [
+                "000:00:02.706 --> 000:00:07.626"
+            ],
+            "text-reference": [
+                "PSA 117:1"
+            ]
+        },
+        {
+            "timecode": [
+                "000:00:07.626 --> 000:00:16.431"
+            ],
+            "text-reference": [
+                "PSA 117:2"
+            ]
+        }
+    ]
+}

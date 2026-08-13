@@ -52,12 +52,12 @@ ext {
     cuelibVer = '2.0.0'
     install4jVer = '9.0.4'
     jump3rVer='1.0.5'
-    systemThemeDectectorVer='3.8'
+    systemThemeDectectorVer='3.9'
     tarsosDspVer = '2.4.1'
     mp3TagVer = '0.9.3'
     tikaVer = '2.0.0'
     materialFxVer = '11.16.0' // higher versions require JavaFX 21
     tstudio2rcVer = '1.0.3'
     kotlinVttVer = '1.0.0'
-    kotlinScriptureAlignmentVer = '1.0.0'
+    kotlinScriptureAlignmentVer = '1.2.0-demo'
 }

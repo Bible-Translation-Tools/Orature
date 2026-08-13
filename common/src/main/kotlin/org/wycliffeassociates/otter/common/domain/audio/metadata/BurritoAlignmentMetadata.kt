@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.common.domain.audio.metadata
 
-import org.bibletranslationtools.kotlinscripturealignment.BurritoAudioAlignment
+import org.bibletranslationtools.kotlinscripturealignment.model.BurritoAudioAlignment
 import org.bibletranslationtools.vtt.Cue
 import org.bibletranslationtools.vtt.WebVttCue
 import org.bibletranslationtools.vtt.WebVttDocument
@@ -23,7 +23,8 @@ private const val BIBLICAL_REFERENCE_VTT_CLASSNAME = "c.u23003"
 
 class BurritoAlignmentMetadata(
     private val burritoTimingFile: File,
-    private val audioFile: File
+    private val audioFile: File,
+    private val chapterToFilter: Int? = null
 ) : CueMetadata {
 
     private val logger = LoggerFactory.getLogger(BurritoAlignmentMetadata::class.java)
@@ -31,19 +32,32 @@ class BurritoAlignmentMetadata(
     private val _cues = mutableListOf<AudioMarker>()
     private val markers = OratureMarkers()
 
-    fun parseTimings(): OratureMarkers {
-        val timings = BurritoAudioAlignment.load(burritoTimingFile)
-        return parseTimings(timings)
+    fun parseTimings(docid: String = audioFile.name): OratureMarkers {
+        try {
+            val timings = BurritoAudioAlignment.load(burritoTimingFile)
+            return parseTimings(timings, docid)
+        } catch (e: Exception) {
+            val timings = BurritoAudioAlignment.load(burritoTimingFile)
+            return parseTimings(timings, audioFile.name)
+        }
     }
 
-    internal fun parseTimings(timings: BurritoAudioAlignment): OratureMarkers {
-        val references = timings.getVttCues()
+    internal fun parseTimings(timings: BurritoAudioAlignment, docid: String = audioFile.name): OratureMarkers {
+        var references = timings.getVttCues(docid)
+
+        chapterToFilter?.let {
+            references = references.filter {
+                val tag = BiblicalReferencesParser.parseBcv(it.tag)
+                tag?.chapter == chapterToFilter
+            }
+        }
+
         val cues = mutableListOf<AudioCue>()
         for (marker in references) {
             val startMs = (marker.startTimeUs / 1000.0)
             val startFrame = ((startMs * DEFAULT_SAMPLE_RATE) / 1000L).toInt()
 
-            val oratureLabel = BiblicalReferencesParser.parseBiblicalReference(marker.content)
+            val oratureLabel = BiblicalReferencesParser.parseToMarkerLabel(marker.content)
             if (oratureLabel != null) {
                 cues.add(AudioCue(startFrame, oratureLabel))
             }
@@ -129,7 +143,7 @@ class BurritoAlignmentMetadata(
 
         assignEndTimes(vttCues, audioLengthInFrames)
 
-        alignment.setRecordsFromVttCueContent(vttCues)
+        alignment.setRecordsFromVttCueContent(audioFile.name, vttCues)
         alignment.update()
     }
 

@@ -209,8 +209,10 @@ dependencies {
     implementation project(':jvm:utils')
     implementation project(':jvm:workbookplugin')
     implementation "org.wycliffeassociates:kotlin-resource-container:$kotlinresourcecontainerVer"
-    implementation "org.bibletranslationtools:kotlin-scripture-burrito:$kotlinscriptureburritoVer"
-    implementation "org.bibletranslationtools:kotlin-scripture-alignment:$kotlinScriptureAlignmentVer"
+    //implementation "org.bibletranslationtools:kotlin-scripture-burrito:$kotlinscriptureburritoVer"
+    // implementation "org.bibletranslationtools:kotlin-scripture-alignment:$kotlinScriptureAlignmentVer"
+    implementation project(":common:kotlin-scripture-burrito")
+    implementation project(":common:kotlin-scripture-alignment")
     implementation "org.wycliffeassociates:usfmtools:$usfmToolsVer"
     testImplementation project(':common').sourceSets.test.output
     integrationTestImplementation project(':common').sourceSets.test.output // dependent on another project's test source
@@ -229,7 +231,7 @@ dependencies {
     // Sentry
     implementation "io.sentry:sentry:$sentryVer"
 
-    implementation "com.github.Dansoftowner:jSystemThemeDetector:$systemThemeDectectorVer"
+    implementation "org.openani.jsystemthemedetector:jSystemThemeDetector:$systemThemeDectectorVer"
     implementation "com.install4j:install4j-runtime:$install4jVer"
 
     implementation "com.mpatric:mp3agic:$mp3TagVer"

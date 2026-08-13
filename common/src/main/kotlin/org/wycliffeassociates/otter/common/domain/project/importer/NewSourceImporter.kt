@@ -72,12 +72,39 @@ class NewSourceImporter @Inject constructor(
             val fileToImport = prepareFileToImport(file)
 
             val container = try {
-                ResourceContainer
-                    .load(fileToImport, OtterResourceContainerConfig())
-                    .also {
-                        sourceLanguageName = it.manifest.dublinCore.language.title
-                        projectSlug = it.media?.projects?.singleOrNull()?.identifier
+                val rc = ResourceContainer.load(fileToImport, OtterResourceContainerConfig())
+                rc.also {
+                    sourceLanguageName = it.manifest.dublinCore.language.title
+                    projectSlug = it.media?.projects?.singleOrNull()?.identifier
+                }
+                
+                if (rc.manifest.projects.isEmpty()) {
+                    val booksInMedia = rc.media?.projects?.map { it.identifier } ?: emptyList()
+                    if (booksInMedia.isNotEmpty()) {
+                        val versification = getVersification(fileToImport)
+                        if (versification != null) {
+                            booksInMedia.forEach { bookSlug ->
+                                val usfmContent = generateUsfmContent(bookSlug, versification)
+                                val usfmFile = File(fileToImport, "$bookSlug.usfm")
+                                usfmFile.writeText(usfmContent)
+                                
+                                (rc.manifest.projects as MutableList).add(
+                                    org.wycliffeassociates.resourcecontainer.entity.Project(
+                                        title = bookSlug,
+                                        versification = "ulb",
+                                        identifier = bookSlug,
+                                        sort = 0,
+                                        path = "./${usfmFile.name}",
+                                        categories = listOf()
+                                    )
+                                )
+                            }
+                            // Re-write manifest to include new projects
+                            rc.writeManifest()
+                        }
                     }
+                }
+                rc
             } catch (e: Exception) {
                 logger.error("Error loading rc in importFromInternalDir, file: $fileToImport", e)
                 cleanUp(fileToImport, ImportResult.LOAD_RC_ERROR).subscribe(emitter::onSuccess)
@@ -255,5 +282,36 @@ class NewSourceImporter @Inject constructor(
         }
 
         return targetDir
+    }
+
+    private fun getVersification(rcDir: File): org.wycliffeassociates.otter.common.domain.versification.Versification? {
+        // Try to find versification.json in the container
+        val versificationFile = File(rcDir, "ingredients/versification.json")
+        if (versificationFile.exists()) {
+            try {
+                val mapper = com.fasterxml.jackson.databind.ObjectMapper().registerModule(com.fasterxml.jackson.module.kotlin.KotlinModule())
+                return mapper.readValue(versificationFile, org.wycliffeassociates.otter.common.domain.versification.ParatextVersification::class.java)
+            } catch (e: Exception) {
+                logger.error("Failed to parse versification.json", e)
+            }
+        }
+        // Fallback to default
+        return versificationRepository.getVersification("ulb").blockingGet()
+    }
+
+    private fun generateUsfmContent(bookSlug: String, versification: org.wycliffeassociates.otter.common.domain.versification.Versification): String {
+        val sb = StringBuilder()
+        sb.append("\\id ${bookSlug.uppercase(java.util.Locale.US)}\n")
+        
+        val chapterCount = versification.getChaptersInBook(bookSlug)
+        for (chapter in 1..chapterCount) {
+            sb.append("\\c $chapter\n")
+            sb.append("\\p\n")
+            val verseCount = versification.getVersesInChapter(bookSlug, chapter)
+            for (verse in 1..verseCount) {
+                sb.append("\\v $verse \n")
+            }
+        }
+        return sb.toString()
     }
 }

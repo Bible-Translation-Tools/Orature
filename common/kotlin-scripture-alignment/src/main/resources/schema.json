@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Audio reference data",
+  "description": "Schema for audio reference data with timecode and text references",
+  "type": "object",
+  "required": [
+    "format",
+    "version",
+    "type",
+    "documents",
+    "records"
+  ],
+  "properties": {
+    "format": {
+      "type": "string",
+      "description": "Data format (e.g., alignment)",
+      "enum": ["alignment"]
+    },
+    "version": {
+      "type": "string",
+      "description": "Version of the data format"
+    },
+    "type": {
+      "type": "string",
+      "description": "Type of the data (e.g., audio-reference)",
+      "enum": ["audio-reference"]
+    },
+    "documents": {
+      "type": "object",
+      "description": "Document information",
+      "additionalProperties": {
+        "type": "string",
+        "description": "Document scheme or reference"
+      },
+      "required": [
+        "timecode",
+        "text-reference:"
+      ]
+    },
+    "records": {
+      "type": "array",
+      "description": "List of timecode and text reference pairs",
+      "items": {
+        "type": "object",
+        "required": [
+          "timecode",
+          "text-reference"
+        ],
+        "properties": {
+          "timecode": {
+            "type": "array",
+            "description": "List of timecode strings",
+            "items": {
+              "type": "string",
+              "format": "time"
+            }
+          },
+          "text-reference": {
+            "type": "array",
+            "description": "List of text reference strings",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+group = 'org.bibletranslationtools'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // 1. Use Guava in your implementation only:
+    implementation("com.google.guava:guava:33.1.0-jre")
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+}
