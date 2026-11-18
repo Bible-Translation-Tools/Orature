@@ -82,6 +82,14 @@ class TranslationViewModel2 : ViewModel() {
 
     private val compositeDisposable = CompositeDisposable()
 
+    /**
+     * True from loading a chapter until the user navigates to a step. While true, changes to the chapter's chunks
+     * move the selected step to the furthest reachable one (the chunk list starts empty and fills in from the
+     * database, so the first pick may need correcting). Once the user has chosen a step, chunk changes must not move
+     * them, since chunks are saved while the user is still on the chunking step.
+     */
+    private var isPickingInitialStep = false
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
     }
@@ -133,6 +141,7 @@ class TranslationViewModel2 : ViewModel() {
 
     fun navigateStep(target: ChunkingStep) {
         FX.eventbus.fire(TranslationNavigationEvent())
+        isPickingInitialStep = false
 
         if (!loadingStepProperty.value) {
             loadingStepProperty.set(true)
@@ -250,6 +259,7 @@ class TranslationViewModel2 : ViewModel() {
     fun openInFilesManager(path: String) = directoryProvider.openInFileManager(path)
 
     private fun loadChapter(chapter: Chapter) {
+        isPickingInitialStep = true
         workbookDataStore.activeChapterProperty.set(chapter)
         resetUndoRedo()
         updateSourceText().subscribe()
@@ -274,6 +284,7 @@ class TranslationViewModel2 : ViewModel() {
             .doOnSuccess {
                 noSourceAudioProperty.set(false)
                 updateStep {
+                    if (!isPickingInitialStep) return@updateStep
                     if (reachableStepProperty.value == ChunkingStep.CHUNKING) {
                         selectedStepProperty.set(ChunkingStep.CONSUME_AND_VERBALIZE)
                     } else {
@@ -296,7 +307,9 @@ class TranslationViewModel2 : ViewModel() {
                 if (chunks.isNotEmpty()) {
                     noSourceAudioProperty.set(true)
                     updateStep {
-                        selectedStepProperty.set(reachableStepProperty.value)
+                        if (isPickingInitialStep) {
+                            selectedStepProperty.set(reachableStepProperty.value)
+                        }
                     }
                 } else {
                     reachableStepProperty.set(null)
