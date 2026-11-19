@@ -142,6 +142,10 @@ jobs:
           path: ${{ github.workspace }}/binaries
 
       - name: Sign files with Azure Code Signing
+        id: sign
+        # If signing fails (e.g. while the signing certificate is being renewed), still upload the build,
+        # unsigned, instead of failing the job and skipping the upload.
+        continue-on-error: true
         uses: azure/trusted-signing-action@v0.4.0
         # op doesn't work windows. Have to stick with secrets
         with:
@@ -156,6 +160,16 @@ jobs:
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
+      - name: Warn that Windows binaries are unsigned
+        if: steps.sign.outcome == 'failure'
+        shell: bash
+        run: |
+          echo "::warning title=Windows binaries are unsigned::Azure code signing failed, so this build's Windows installers are uploaded unsigned. See the 'Sign files with Azure Code Signing' step."
+          {
+            echo "### :warning: Windows binaries are unsigned"
+            echo "Azure code signing failed, so this build's Windows installers were uploaded **unsigned**."
+            echo "See the *Sign files with Azure Code Signing* step in the \`sign-windows\` job for the error."
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: cache binaries
         uses: actions/upload-artifact@v4
         with:

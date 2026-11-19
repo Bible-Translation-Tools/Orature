@@ -67,14 +67,18 @@ class CreateChunks @Inject constructor(
      * The range of verses will be determined by comparing the cues to the verse markers in the source audio corresponding
      * to the workbook.
      *
-     * @param projectSlug The slug of the project to create chunks for
-     * @param cues The list of audio cues to use to create chunks
-     * @param draftNumber The draft number to create chunks form
+     * @param workbook The workbook to create chunks for
+     * @param chapter The chapter to create chunks for
+     * @param chunks The list of audio cues to use to create chunks
+     * @param verseMarkers The verse markers of the chapter's source audio. When null, they are read from the source
+     * audio. Callers that create chunks repeatedly for the same chapter can load them once with
+     * [getSourceVerseMarkers] and pass them in to avoid re-reading the source audio each time.
      */
     fun createUserDefinedChunks(
         workbook: Workbook,
         chapter: Chapter,
-        chunks: List<AudioCue>
+        chunks: List<AudioCue>,
+        verseMarkers: List<AudioCue>? = null
     ): Completable {
         val projectSlug = workbook.target.slug
         val chapterNumber = chapter.sort
@@ -82,7 +86,12 @@ class CreateChunks @Inject constructor(
         logger.info("Creating ${chunks.size} user defined chunks for project: $projectSlug chapter: $chapterNumber")
         return Single
             .fromCallable {
-                buildChunkContent(workbook, chapterNumber, chunks)
+                buildChunkContent(
+                    workbook,
+                    chapterNumber,
+                    chunks,
+                    verseMarkers ?: getSourceVerseMarkers(workbook, chapterNumber)
+                )
             }
             .flatMapCompletable { chunksToAdd ->
                 writeChunkFile(workbook, chapterNumber, chunksToAdd)
@@ -124,24 +133,32 @@ class CreateChunks @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
+    /**
+     * Reads the verse markers from the chapter's source audio.
+     */
+    fun getSourceVerseMarkers(workbook: Workbook, chapter: Int): List<AudioCue> {
+        val chapAudio = workbook.sourceAudioAccessor.getChapter(chapter, workbook.target)
+        val sa = OratureAudioFile(chapAudio!!.file)
+        return sa.getMarker<VerseMarker>().map { it.toCue() }
+    }
+
     private fun buildChunkContent(
         workbook: Workbook,
         chapter: Int,
-        chunks: List<AudioCue>
+        chunks: List<AudioCue>,
+        verseMarkers: List<AudioCue>
     ): List<Content> {
         val projectSlug = workbook.target.slug
-        val chapAudio = workbook.sourceAudioAccessor.getChapter(chapter, workbook.target)
-        val sa = OratureAudioFile(chapAudio!!.file)
-        val verseMarkers = sa.getMarker<VerseMarker>().map { it.toCue() }
         val chunkRanges = mapCuesToRanges(chunks)
         val verseRanges = mapCuesToRanges(verseMarkers)
         val chunkContents = mutableListOf<Content>()
 
+        // use the chapter range and text if there are no verse markers (which would make the verse range empty)
+        val chapterText by lazy { workbook.projectFilesAccessor.getChapterText(projectSlug, chapter) }
+
         for ((idx, chunk) in chunkRanges.withIndex()) {
             val verses = findVerseRange(verseRanges, chunk)
 
-            // use the chapter range and text if there are no verse markers (which would make the verse range empty)
-            val chapterText = workbook.projectFilesAccessor.getChapterText(projectSlug, chapter)
             var start = 1
             var end = chapterText.size
             var text = ""
@@ -364,8 +381,8 @@ class CreateChunks @Inject constructor(
         return verses
     }
 
-    private fun mapCuesToRanges(cues: List<AudioCue>): List<VerseRange> {
-        cues.sortedBy { it.location }
+    private fun mapCuesToRanges(unsortedCues: List<AudioCue>): List<VerseRange> {
+        val cues = unsortedCues.sortedBy { it.location }
         val ranges = mutableListOf<VerseRange>()
         cues.forEachIndexed { idx, cue ->
             val end = if (cues.size > idx + 1) cues[idx + 1].location else Int.MAX_VALUE

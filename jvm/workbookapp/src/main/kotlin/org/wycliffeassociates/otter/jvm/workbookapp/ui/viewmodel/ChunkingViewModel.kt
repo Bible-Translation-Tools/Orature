@@ -23,16 +23,26 @@ import com.sun.glass.ui.Screen
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.PublishSubject
 import java.io.File
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
+import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.getWaveformColors
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -48,6 +58,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
 import org.wycliffeassociates.otter.jvm.controls.dialog.ConfirmDialog
+import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepTransitionEvent
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
@@ -57,7 +68,14 @@ import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
 import tornadofx.*
 
+/**
+ * How long to wait after the last marker change before saving the chunks.
+ */
+private const val AUTO_SAVE_DEBOUNCE_MS = 750L
+
 class ChunkingViewModel : ViewModel(), IMarkerViewModel {
+    private val logger = LoggerFactory.getLogger(ChunkingViewModel::class.java)
+
     val settingsViewModel: SettingsViewModel by inject()
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
@@ -107,35 +125,90 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     val isPlayingProperty = SimpleBooleanProperty(false)
     val compositeDisposable = CompositeDisposable()
 
+    /**
+     * Everything a save needs to know about the chapter being chunked, captured when chunking opens so that a save
+     * that finishes after the user has moved on still writes to the chapter it was made for.
+     */
+    private data class ChunkingSession(
+        val workbook: Workbook,
+        val chapter: Chapter,
+        /** The chapter source audio in the project; chunk markers are saved here. */
+        val projectSourceAudio: File,
+        /** A temp copy of [projectSourceAudio] that the player and waveform read, so saves can write the original. */
+        val workingCopy: File,
+        val sourceVerseMarkers: List<AudioCue>?,
+        /**
+         * Saving chunks deletes the chapter's recordings, so chunks are only saved automatically while the chapter
+         * has none. Otherwise, saving waits until the user confirms moving on to the next step.
+         */
+        val autoSave: Boolean
+    )
+
+    private data class PendingSave(val session: ChunkingSession, val cues: List<AudioCue>)
+
+    private var session: ChunkingSession? = null
+
+    /**
+     * Saves run one at a time on this thread. Since each save replaces all of the chapter's chunks, only the newest
+     * snapshot matters: it waits in [pendingSave], and a snapshot that arrives while a save is running replaces it.
+     */
+    private val saveExecutor: ExecutorService = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "chunk-auto-save").apply { isDaemon = true }
+    }
+    private val pendingSave = AtomicReference<PendingSave?>(null)
+    private val saveRequests = PublishSubject.create<Unit>()
+    private val autoSaveDisposable = CompositeDisposable()
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+
+        subscribe<AppCloseRequestEvent> {
+            logger.info("Received close event request, saving any pending chunks")
+            flushPendingSave()
+        }
     }
 
     fun dock() {
-        initializeSourceAudio(workbookDataStore.chapter.sort)
+        val workbook = workbookDataStore.workbook
+        val chapter = workbookDataStore.chapter
+
+        initializeSourceAudio(chapter.sort)
+            .map { sa -> sa to startSession(workbook, chapter, sa.file) }
             .subscribeOn(Schedulers.io())
             .observeOnFx()
             .doFinally {
                 translationViewModel.loadingStepProperty.set(false)
             }
-            .subscribe { sa ->
+            .subscribe({ (sa, newSession) ->
                 audioDataStore.sourceAudioProperty.set(sa)
-                audio = loadAudio(sa.file)
+                session = newSession
+                audio = loadAudio(newSession.workingCopy)
                 audio?.let {
                     createWaveformImages(it)
                     loadChunkMarkers(it)
                     subscribeOnWaveformImages()
                 }
-            }
+                if (newSession.autoSave) {
+                    startAutoSave()
+                }
+            }, { error ->
+                logger.error("Error loading source audio for chunking chapter ${chapter.sort}", error)
+            })
     }
 
     fun undock() {
         pause()
-        translationViewModel.selectedStepProperty.value?.let {
-            // handle when navigating to the next step
-            if (hasUnsavedChanges() && it.ordinal > ChunkingStep.CHUNKING.ordinal) {
-                saveChanges()
-            }
+        stopAutoSave()
+
+        val step = translationViewModel.selectedStepProperty.value
+        val autoSave = session?.autoSave == true
+        // When chunks aren't saved automatically, they are saved only when moving on to a later step
+        if (!autoSave && step != null && hasUnsavedChanges() && step.ordinal > ChunkingStep.CHUNKING.ordinal) {
+            requestSave()
+        }
+        flushPendingSave()
+
+        step?.let {
             translationViewModel.updateStep()
         }
 
@@ -156,6 +229,34 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
                     workbook.sourceAudioAccessor.getUserMarkedChapter(chapter, workbook.target)
                 }
         }
+    }
+
+    /**
+     * Runs on a background thread: copies the source audio for playback and loads what saves need.
+     */
+    private fun startSession(workbook: Workbook, chapter: Chapter, projectSourceAudio: File): ChunkingSession {
+        val workingCopy = ChunkAudioUseCase(directoryProvider, workbook.projectFilesAccessor)
+            .createWorkingCopy(projectSourceAudio)
+
+        val sourceVerseMarkers = try {
+            createChunks.getSourceVerseMarkers(workbook, chapter.sort)
+        } catch (e: Exception) {
+            logger.error("Could not load source verse markers for chapter ${chapter.sort}", e)
+            null // createUserDefinedChunks will try loading them again when saving
+        }
+
+        val hasRecordings = chapter.chunks.blockingGet().any { chunk ->
+            chunk.audio.getAllTakes().any { take -> take.deletedTimestamp.value?.value == null }
+        }
+
+        return ChunkingSession(
+            workbook = workbook,
+            chapter = chapter,
+            projectSourceAudio = projectSourceAudio,
+            workingCopy = workingCopy,
+            sourceVerseMarkers = sourceVerseMarkers,
+            autoSave = !hasRecordings
+        )
     }
 
     fun onThemeChange() {
@@ -180,16 +281,19 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     override fun placeMarker() {
         super.placeMarker()
         onUndoableAction()
+        onMarkersChanged()
     }
 
     override fun deleteMarker(id: Int) {
         super.deleteMarker(id)
         onUndoableAction()
+        onMarkersChanged()
     }
 
     override fun moveMarker(id: Int, start: Int, end: Int) {
         super.moveMarker(id, start, end)
         onUndoableAction()
+        onMarkersChanged()
     }
 
     override fun undoMarker() {
@@ -200,6 +304,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         if (!dirty) {
             translationViewModel.updateStep()
         }
+        onMarkersChanged()
     }
 
     override fun redoMarker() {
@@ -207,6 +312,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         translationViewModel.canUndoProperty.set(true)
         translationViewModel.canRedoProperty.set(markerModel?.canRedo() == true)
         translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
+        onMarkersChanged()
     }
 
     private fun loadAudio(audioFile: File): OratureAudioFile {
@@ -249,6 +355,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         compositeDisposable.clear()
         markerModel = null
         cleanupWaveform()
+        closeWorkingCopy()
     }
 
     fun pause() {
@@ -265,7 +372,9 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     fun requestToNavigate(targetStep: ChunkingStep) {
         val chunkCount = workbookDataStore.chapter.chunkCount.blockingGet()
-        if (hasUnsavedChanges() && chunkCount > 0 && targetStep.ordinal > ChunkingStep.CHUNKING.ordinal) {
+        // Chunks that are saved automatically have no recordings to lose, so there is nothing to warn about
+        val wouldLoseRecordings = session?.autoSave != true && hasUnsavedChanges() && chunkCount > 0
+        if (wouldLoseRecordings && targetStep.ordinal > ChunkingStep.CHUNKING.ordinal) {
             val dialog = find<ConfirmDialog> {
                 titleTextProperty.set(messages["warning"])
                 messageTextProperty.set(messages["rechunk_data_loss_warning"])
@@ -287,29 +396,92 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             FX.eventbus.fire(ChunkingStepTransitionEvent(targetStep))
         }
     }
-    
-    private fun saveChanges() {
-        compositeDisposable.clear()
-        audioConnectionFactory.clearPlayerConnections()
-        waveformAudioPlayerProperty.value.close()
-        audioController = null
 
-        val accessor = workbookDataStore.workbook.projectFilesAccessor
-        val wb = workbookDataStore.activeWorkbookProperty.value
-        val chapter = workbookDataStore.activeChapterProperty.value
-        val cues = markers.filter { it.placed }.map { it.toAudioCue() }
+    private fun onMarkersChanged() {
+        if (session?.autoSave == true) {
+            requestSave()
+            saveRequests.onNext(Unit)
+        }
+    }
 
-        resetChunks.resetChapter(accessor, chapter)
-            .andThen(
-                createChunks.createUserDefinedChunks(wb, chapter, cues)
-            )
-            .andThen { completable ->
-                ChunkAudioUseCase(directoryProvider, accessor)
-                    .createChunkedSourceAudio(sourceAudio.file, cues)
+    /**
+     * Records the current markers as the next save. Must be called on the FX thread, where the markers are changed.
+     */
+    private fun requestSave() {
+        val currentSession = session ?: return
+        val model = markerModel ?: return
+        // The marker model is the source of truth; the observable list can hold copies of its items
+        val cues = model.markerItems.filter { it.placed }.map { it.toAudioCue() }
+        pendingSave.set(PendingSave(currentSession, cues))
+    }
 
-                completable.onComplete()
+    private fun startAutoSave() {
+        autoSaveDisposable.clear()
+        saveRequests
+            .debounce(AUTO_SAVE_DEBOUNCE_MS, TimeUnit.MILLISECONDS)
+            .subscribe {
+                saveExecutor.execute(::savePending)
             }
-            .blockingAwait() // ensures chunks are written before going to next step
+            .addTo(autoSaveDisposable)
+    }
+
+    private fun stopAutoSave() {
+        autoSaveDisposable.clear()
+    }
+
+    /**
+     * Waits for any save that is running, then saves the pending markers, if any. Blocks the calling thread.
+     */
+    private fun flushPendingSave() {
+        try {
+            saveExecutor.submit(::savePending).get()
+        } catch (e: Exception) {
+            logger.error("Error while waiting for chunks to save", e)
+        }
+    }
+
+    /**
+     * Runs on [saveExecutor]. Never cancelled part way, since stopping between clearing and recreating the chunks
+     * would leave the chapter without chunks.
+     */
+    private fun savePending() {
+        val save = pendingSave.getAndSet(null) ?: return
+        val session = save.session
+        val accessor = session.workbook.projectFilesAccessor
+
+        logger.info("Saving ${save.cues.size} chunks for chapter ${session.chapter.sort}")
+        try {
+            resetChunks.resetChapter(accessor, session.chapter)
+                .andThen(
+                    createChunks.createUserDefinedChunks(
+                        session.workbook,
+                        session.chapter,
+                        save.cues,
+                        session.sourceVerseMarkers
+                    )
+                )
+                .blockingAwait()
+
+            ChunkAudioUseCase(directoryProvider, accessor)
+                .updateChunkMarkers(session.projectSourceAudio, save.cues)
+        } catch (e: Exception) {
+            logger.error("Error saving chunks for chapter ${session.chapter.sort}", e)
+        }
+    }
+
+    /**
+     * Closes the player and waveform reading the working copy, then deletes it.
+     */
+    private fun closeWorkingCopy() {
+        val closingSession = session ?: return
+        session = null
+
+        waveformAudioPlayerProperty.value?.close()
+        audioController = null
+        audio = null
+
+        ChunkAudioUseCase(directoryProvider, closingSession.workbook.projectFilesAccessor)
+            .deleteWorkingCopy(closingSession.workingCopy)
     }
 
     private fun createWaveformImages(audio: OratureAudioFile) {

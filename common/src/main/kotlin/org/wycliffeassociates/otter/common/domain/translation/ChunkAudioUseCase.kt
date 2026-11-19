@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.common.domain.translation
 
 import java.io.File
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
@@ -28,30 +29,54 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 
 class ChunkAudioUseCase(val directoryProvider: IDirectoryProvider, val projectFilesAccessor: ProjectFilesAccessor) {
-    fun createChunkedSourceAudio(source: File, cues: List<AudioCue>) {
-        val temp = File(directoryProvider.tempDirectory, source.name).apply { createNewFile() }
-        val tempCue = File(temp.parent, "${temp.nameWithoutExtension}.cue").apply { createNewFile() }
 
-        try {
-            source.copyTo(temp, true)
-            val audio = OratureAudioFile(temp)
-            audio.clearChunkMarkers()
-            cues.sortedBy { it.location }.forEachIndexed { index, cue ->
-                audio.addMarker(ChunkMarker(index + 1, cue.location))
-            }
-            audio.update()
-            val path = projectFilesAccessor.projectDir
-            ResourceContainer.load(path).use {
-                it.addFileToContainer(temp, "${SOURCE_AUDIO_DIR}/${temp.name}")
-                if (tempCue.exists()) {
-                    it.addFileToContainer(tempCue, "${SOURCE_AUDIO_DIR}/${tempCue.name}")
-                }
-                it.write()
-            }
-        } finally {
-            temp.delete()
-            if (tempCue.exists()) {
-                tempCue.delete()
+    private val logger = LoggerFactory.getLogger(ChunkAudioUseCase::class.java)
+
+    /**
+     * Replaces the chunk markers of the project's copy of the chapter source audio, in place.
+     *
+     * For wav, this only rewrites the metadata that follows the audio data and the header.
+     * For mp3, this only rewrites the cue file that sits next to the mp3.
+     *
+     * The file must not be held open (memory mapped) by a player while this runs; on Windows the wav update
+     * truncates the file, which fails while a mapping is open. Use [createWorkingCopy] for playback instead.
+     *
+     * @param projectSourceAudio the chapter source audio inside the project's source audio directory
+     * @param cues the chunk boundaries, in any order
+     */
+    fun updateChunkMarkers(projectSourceAudio: File, cues: List<AudioCue>) {
+        val audio = OratureAudioFile(projectSourceAudio)
+        audio.clearChunkMarkers()
+        cues.sortedBy { it.location }.forEachIndexed { index, cue ->
+            audio.addMarker(ChunkMarker(index + 1, cue.location))
+        }
+        audio.update()
+    }
+
+    /**
+     * Copies the given audio file (and its cue file, for mp3) to a uniquely named file in the app's temp directory,
+     * so that it can be played while the original is being written to.
+     *
+     * Delete the copy with [deleteWorkingCopy] once nothing is reading from it anymore.
+     */
+    fun createWorkingCopy(source: File): File {
+        val tempDir = directoryProvider.tempDirectory.apply { mkdirs() }
+        val copy = File.createTempFile("chunking-${source.nameWithoutExtension}-", ".${source.extension}", tempDir)
+        source.copyTo(copy, overwrite = true)
+
+        // mp3 markers are read from a cue file with the same name next to the mp3
+        val sourceCue = cueFileFor(source)
+        if (sourceCue.exists()) {
+            sourceCue.copyTo(cueFileFor(copy), overwrite = true)
+        }
+        return copy
+    }
+
+    fun deleteWorkingCopy(copy: File) {
+        listOf(copy, cueFileFor(copy)).forEach { file ->
+            if (file.exists() && !file.delete()) {
+                // anything left over is removed when the app's temp directory is cleaned on exit
+                logger.warn("Could not delete chunking working copy: ${file.path}")
             }
         }
     }
@@ -65,4 +90,6 @@ class ChunkAudioUseCase(val directoryProvider: IDirectoryProvider, val projectFi
             }
         }
     }
+
+    private fun cueFileFor(audio: File) = File(audio.parentFile, "${audio.nameWithoutExtension}.cue")
 }

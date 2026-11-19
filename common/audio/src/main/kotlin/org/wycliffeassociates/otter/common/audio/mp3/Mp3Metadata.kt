@@ -52,6 +52,12 @@ class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata {
     private var title = cueFile.nameWithoutExtension
     private val id3Metadata = Mp3File(mp3File.path)
 
+    /**
+     * Rewriting the ID3 tag means rewriting the entire mp3, so only do it when a tag field was actually changed.
+     * Marker-only updates (such as saving chunk markers) then only rewrite the cue file.
+     */
+    private var id3TagChanged = false
+
     init {
         if (!id3Metadata.hasId3v2Tag()) {
             id3Metadata.id3v2Tag = ID3v24Tag()
@@ -92,7 +98,10 @@ class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata {
     }
 
     fun write() {
-        writeID3Tag()
+        if (id3TagChanged) {
+            writeID3Tag()
+            id3TagChanged = false
+        }
         cueFile.delete()
         if (_cues.isEmpty()) {
             return
@@ -122,6 +131,7 @@ class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata {
 
     override fun setArtists(artists: List<String>) {
         id3Metadata.id3v2Tag.artist = artists.joinToString("/")
+        id3TagChanged = true
     }
 
     override fun artists(): List<String> = id3Metadata.id3v2Tag.artist.split("/")
@@ -130,6 +140,7 @@ class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata {
 
     override fun setLegalInformationUrl(url: String) {
         id3Metadata.id3v2Tag.copyrightUrl = url
+        id3TagChanged = true
     }
 
     private fun writeID3Tag() {
